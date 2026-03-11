@@ -18,9 +18,20 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'nom',
+        'prenom',
         'email',
-        'password',
+        'password_hash',
+        'telephone',
+        'avatar_url',
+        'email_verified',
+        'two_factor_enabled',
+        'two_factor_secret',
+        'derniere_connexion',
+        'date_inscription',
+        'updated_at',
+        'est_actif',
+        'devise_preferee',
     ];
 
     /**
@@ -29,8 +40,8 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password_hash',
+        'two_factor_secret',
     ];
 
     /**
@@ -41,8 +52,49 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'email_verified' => 'boolean',
+            'two_factor_enabled' => 'boolean',
+            'est_actif' => 'boolean',
+            'derniere_connexion' => 'datetime',
+            'date_inscription' => 'datetime',
+            'updated_at' => 'datetime',
+            'password_hash' => 'hashed',
         ];
+    }
+
+    /**
+     * Get the password for the user.
+     *
+     * @return string
+     */
+    public function getAuthPassword()
+    {
+        return $this->password_hash;
+    }
+
+    /**
+     * The roles that belong to the user.
+     */
+    public function roles(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'user_roles')
+            ->withPivot(['id', 'assigned_by', 'assigned_at', 'expires_at', 'est_actif'])
+            ->withTimestamps('assigned_at', null);
+    }
+
+    /**
+     * Get the authentication providers for the user.
+     */
+    public function authProviders(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(AuthProvider::class);
+    }
+
+    /**
+     * Get the roles that this user has assigned to others.
+     */
+    public function assignedRoles(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(UserRole::class, 'assigned_by');
     }
 }
