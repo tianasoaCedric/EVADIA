@@ -6,11 +6,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
+
+    const CREATED_AT = 'date_inscription';
+    const UPDATED_AT = 'updated_at';
 
     /**
      * The attributes that are mass assignable.
@@ -78,8 +82,7 @@ class User extends Authenticatable
     public function roles(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'user_roles')
-            ->withPivot(['id', 'assigned_by', 'assigned_at', 'expires_at', 'est_actif'])
-            ->withTimestamps('assigned_at', null);
+            ->withPivot(['id', 'assigned_by', 'assigned_at', 'expires_at', 'est_actif']);
     }
 
     /**
@@ -96,5 +99,19 @@ class User extends Authenticatable
     public function assignedRoles(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(UserRole::class, 'assigned_by');
+    }
+
+    public function hasRole(string $code): bool
+    {
+        return $this->roles
+            ->where('pivot.est_actif', true)
+            ->contains('code', $code);
+    }
+
+    public function hasMinLevel(int $level): bool
+    {
+        $min = $this->roles->where('pivot.est_actif', true)->min('niveau');
+
+        return $min !== null && $min <= $level;
     }
 }

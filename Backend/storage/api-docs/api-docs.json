@@ -1,0 +1,486 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "EVADIA API",
+        "description": "API de la plateforme de reservation EVADIA",
+        "contact": {
+            "name": "EVADIA",
+            "email": "contact@evadia.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Serveur local"
+        }
+    ],
+    "paths": {
+        "/api/auth/login": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Connexion",
+                "description": "Authentifie un utilisateur et retourne un token Bearer",
+                "operationId": "7b9026fc5982d72a0a0978e3c868fc33",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "cedric@test.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Connexion reussie",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "user": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "nom": {
+                                                    "type": "string",
+                                                    "example": "Dupont"
+                                                },
+                                                "prenom": {
+                                                    "type": "string",
+                                                    "example": "Cedric"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "cedric@test.com"
+                                                },
+                                                "est_actif": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "roles": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 4
+                                                            },
+                                                            "code": {
+                                                                "type": "string",
+                                                                "example": "clients"
+                                                            },
+                                                            "nom": {
+                                                                "type": "string",
+                                                                "example": "Client"
+                                                            },
+                                                            "niveau": {
+                                                                "type": "integer",
+                                                                "example": 4
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|evadia_abc123..."
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Identifiants incorrects",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Les identifiants sont incorrects."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Trop de tentatives (rate limit)"
+                    }
+                }
+            }
+        },
+        "/api/auth/logout": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Deconnexion",
+                "description": "Revoque le token courant",
+                "operationId": "d4127fb36e01f115013ba59cd3676ec9",
+                "responses": {
+                    "200": {
+                        "description": "Deconnexion reussie",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Deconnexion reussie."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifie"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/logout-all": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Deconnexion de toutes les sessions",
+                "description": "Revoque tous les tokens de l'utilisateur",
+                "operationId": "2e844018745cadbc5beb431578037797",
+                "responses": {
+                    "200": {
+                        "description": "Toutes les sessions fermees",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Toutes les sessions ont ete fermees."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifie"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/me": {
+            "get": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Profil utilisateur",
+                "description": "Retourne les informations de l'utilisateur connecte avec ses roles",
+                "operationId": "feab6468f3a3c0a1d206893c9d1bff9c",
+                "responses": {
+                    "200": {
+                        "description": "Profil utilisateur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "user": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "nom": {
+                                                    "type": "string",
+                                                    "example": "Dupont"
+                                                },
+                                                "prenom": {
+                                                    "type": "string",
+                                                    "example": "Cedric"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "cedric@test.com"
+                                                },
+                                                "telephone": {
+                                                    "type": "string",
+                                                    "example": "+33612345678",
+                                                    "nullable": true
+                                                },
+                                                "avatar_url": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "email_verified": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "two_factor_enabled": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "est_actif": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "devise_preferee": {
+                                                    "type": "string",
+                                                    "example": "EUR"
+                                                },
+                                                "derniere_connexion": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "date_inscription": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "roles": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 4
+                                                            },
+                                                            "code": {
+                                                                "type": "string",
+                                                                "example": "clients"
+                                                            },
+                                                            "nom": {
+                                                                "type": "string",
+                                                                "example": "Client"
+                                                            },
+                                                            "niveau": {
+                                                                "type": "integer",
+                                                                "example": 4
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifie"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/register": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Inscription",
+                "description": "Cree un nouveau compte utilisateur avec le role \"clients\" par defaut",
+                "operationId": "e21b8a4b1ab50f18b1b4b84cf83daf8f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nom",
+                                    "prenom",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "nom": {
+                                        "type": "string",
+                                        "example": "Dupont",
+                                        "maxLength": 100
+                                    },
+                                    "prenom": {
+                                        "type": "string",
+                                        "example": "Cedric",
+                                        "maxLength": 100
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "cedric@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123",
+                                        "minLength": 8
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    },
+                                    "telephone": {
+                                        "type": "string",
+                                        "example": "+33612345678",
+                                        "nullable": true,
+                                        "maxLength": 20
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Inscription reussie",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "user": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "nom": {
+                                                    "type": "string",
+                                                    "example": "Dupont"
+                                                },
+                                                "prenom": {
+                                                    "type": "string",
+                                                    "example": "Cedric"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "cedric@example.com"
+                                                },
+                                                "roles": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "code": {
+                                                                "type": "string",
+                                                                "example": "clients"
+                                                            },
+                                                            "nom": {
+                                                                "type": "string",
+                                                                "example": "Client"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|evadia_abc123..."
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The email has already been taken."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Trop de tentatives (rate limit)"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "description": "Token obtenu via /api/auth/login ou /api/auth/register",
+                "bearerFormat": "Sanctum Token",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Authentification",
+            "description": "Authentification"
+        }
+    ]
+}
