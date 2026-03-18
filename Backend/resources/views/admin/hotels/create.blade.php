@@ -135,7 +135,8 @@
                         <option value="">Sélectionner une destination</option>
                         @foreach($destinations as $dest)
                             <option value="{{ $dest->id }}" {{ old('destination_id') == $dest->id ? 'selected' : '' }}>
-                                {{ $dest->nom }}</option>
+                                {{ $dest->nom }}
+                            </option>
                         @endforeach
                     </select>
                 </div>
@@ -171,49 +172,44 @@
             <!-- Step 4: Admin -->
             <div x-show="step === 4" x-cloak class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 space-y-4">
                 <h3 class="text-lg font-semibold text-gray-900">Administrateur de l'hôtel</h3>
-                <div x-data="{ mode: 'existing' }">
-                    <div class="flex gap-2 mb-4">
-                        <button type="button" @click="mode = 'existing'"
-                            :class="mode === 'existing' ? 'bg-evadia-600 text-white' : 'bg-gray-100 text-gray-600'"
-                            class="rounded-lg px-4 py-2 text-sm font-medium transition-colors">Utilisateur existant</button>
-                        <button type="button" @click="mode = 'new'"
-                            :class="mode === 'new' ? 'bg-evadia-600 text-white' : 'bg-gray-100 text-gray-600'"
-                            class="rounded-lg px-4 py-2 text-sm font-medium transition-colors">Créer un nouveau</button>
-                    </div>
+                <p class="text-sm text-gray-500">Un compte sera créé avec le mot de passe temporaire <strong>0000</strong>.
+                    L'administrateur devra le changer à sa première connexion.</p>
 
-                    <div x-show="mode === 'existing'">
-                        <select name="admin_user_id"
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
+                        <input type="text" name="admin_prenom" value="{{ old('admin_prenom') }}" required
                             class="w-full rounded-xl border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20">
-                            <option value="">Sélectionner un utilisateur</option>
-                            @foreach($users as $u)
-                                <option value="{{ $u->id }}">{{ $u->prenom }} {{ $u->nom }} ({{ $u->email }})</option>
-                            @endforeach
-                        </select>
+                        @error('admin_prenom') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
+                        <input type="text" name="admin_nom" value="{{ old('admin_nom') }}" required
+                            class="w-full rounded-xl border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20">
+                        @error('admin_nom') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                    <input type="email" name="admin_email" value="{{ old('admin_email') }}" required
+                        class="w-full rounded-xl border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20">
+                    @error('admin_email') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+                    <input type="tel" name="admin_telephone" value="{{ old('admin_telephone') }}"
+                        class="w-full rounded-xl border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20">
+                </div>
 
-                    <div x-show="mode === 'new'" x-cloak class="space-y-3">
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-500 mb-1">Prénom</label>
-                                <input type="text" name="new_admin[prenom]"
-                                    class="w-full rounded-xl border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-500 mb-1">Nom</label>
-                                <input type="text" name="new_admin[nom]"
-                                    class="w-full rounded-xl border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Email</label>
-                            <input type="email" name="new_admin[email]"
-                                class="w-full rounded-xl border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Téléphone</label>
-                            <input type="tel" name="new_admin[telephone]"
-                                class="w-full rounded-xl border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20">
-                        </div>
+                <div class="rounded-lg bg-blue-50 border border-blue-200 p-4 text-sm text-blue-800">
+                    <div class="flex gap-2">
+                        <svg class="h-5 w-5 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                        </svg>
+                        <p>Un email contenant les identifiants de connexion sera automatiquement envoyé à l'administrateur.
+                        </p>
                     </div>
                 </div>
             </div>

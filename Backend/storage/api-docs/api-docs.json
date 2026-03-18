@@ -16,6 +16,339 @@
         }
     ],
     "paths": {
+        "/api/admin/hotels": {
+            "get": {
+                "tags": [
+                    "Admin - Hôtels"
+                ],
+                "summary": "Liste des hôtels",
+                "description": "Récupère la liste de tous les hôtels existants.",
+                "operationId": "ea75fd66997b10eeca784cd96341a2fa",
+                "responses": {
+                    "200": {
+                        "description": "Liste des hôtels récupérée avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "nom": {
+                                                        "type": "string",
+                                                        "example": "Hôtel Renaissance"
+                                                    },
+                                                    "email_contact": {
+                                                        "type": "string",
+                                                        "example": "contact@renaissance.com"
+                                                    },
+                                                    "telephone": {
+                                                        "type": "string",
+                                                        "example": "+33102030405"
+                                                    },
+                                                    "etoiles": {
+                                                        "type": "integer",
+                                                        "example": 5
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    },
+                    "403": {
+                        "description": "Non autorisé (niveau admin requis)"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Hôtels"
+                ],
+                "summary": "Créer un hôtel",
+                "description": "Ajoute un nouvel hôtel dans la base de données.",
+                "operationId": "44d578896f7d2bbdcc51eb600cbdab08",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nom",
+                                    "email_contact"
+                                ],
+                                "properties": {
+                                    "nom": {
+                                        "type": "string",
+                                        "example": "Hôtel Paris"
+                                    },
+                                    "email_contact": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "contact@hotel-paris.com"
+                                    },
+                                    "telephone": {
+                                        "type": "string",
+                                        "example": "+33111222333"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Un bel hôtel au coeur de Paris."
+                                    },
+                                    "etoiles": {
+                                        "type": "integer",
+                                        "example": 4
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Hôtel créé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Hôtel créé avec succès"
+                                        },
+                                        "hotel": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Données invalides"
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    },
+                    "403": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/hotels/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Hôtels"
+                ],
+                "summary": "Détails d'un hôtel",
+                "description": "Récupère les informations complètes d'un hôtel spécifique",
+                "operationId": "833bd6182e677d442a1e3aa951c075e1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de l'hôtel",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Informations de l'hôtel",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Hôtel non trouvé"
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    },
+                    "403": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin - Hôtels"
+                ],
+                "summary": "Mettre à jour un hôtel",
+                "description": "Modifie les données d'un hôtel existant.",
+                "operationId": "c7bf9929424688ed031a0f9fdc69eb63",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de l'hôtel",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nom": {
+                                        "type": "string",
+                                        "example": "Hôtel Paris Modifié"
+                                    },
+                                    "email_contact": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "contact@hotel-paris.com"
+                                    },
+                                    "telephone": {
+                                        "type": "string",
+                                        "example": "+33111222333"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Description de l'hôtel modifiée"
+                                    },
+                                    "etoiles": {
+                                        "type": "integer",
+                                        "example": 5
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Hôtel mis à jour avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Hôtel mis à jour avec succès"
+                                        },
+                                        "hotel": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Hôtel non trouvé"
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    },
+                    "403": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Hôtels"
+                ],
+                "summary": "Supprimer un hôtel",
+                "description": "Supprime un hôtel de la base de données.",
+                "operationId": "0f225a99b3e6492358b109932339d719",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de l'hôtel",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Hôtel supprimé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Hôtel supprimé avec succès"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Hôtel non trouvé"
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    },
+                    "403": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/auth/login": {
             "post": {
                 "tags": [
@@ -478,6 +811,10 @@
         }
     },
     "tags": [
+        {
+            "name": "Admin - Hôtels",
+            "description": "Admin - Hôtels"
+        },
         {
             "name": "Authentification",
             "description": "Authentification"

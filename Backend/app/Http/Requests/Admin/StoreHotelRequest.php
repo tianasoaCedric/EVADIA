@@ -37,15 +37,13 @@ class StoreHotelRequest extends FormRequest
 
             // Step 3 - Photos
             'photos' => 'nullable|array',
-            'photos.*' => 'image|max:5120',
+            'photos.*' => 'image|max:5120', // 5MB max per photo
 
-            // Step 4 - Admin
-            'admin_user_id' => 'required_without:new_admin|nullable|exists:users,id',
-            'new_admin' => 'required_without:admin_user_id|nullable|array',
-            'new_admin.nom' => 'required_with:new_admin|string|max:100',
-            'new_admin.prenom' => 'required_with:new_admin|string|max:100',
-            'new_admin.email' => 'required_with:new_admin|email|unique:users,email',
-            'new_admin.telephone' => 'nullable|string|max:20',
+            // Step 4 - Admin hôtel (création obligatoire)
+            'admin_nom' => 'required|string|max:100',
+            'admin_prenom' => 'required|string|max:100',
+            'admin_email' => 'required|email|unique:users,email',
+            'admin_telephone' => 'nullable|string|max:20',
         ];
     }
 
@@ -53,8 +51,13 @@ class StoreHotelRequest extends FormRequest
     {
         return [
             'types.required' => 'Veuillez sélectionner au moins un type d\'hôtel.',
+            'types.min' => 'Veuillez sélectionner au moins un type d\'hôtel.',
             'destination_id.required' => 'Veuillez sélectionner une destination.',
             'photos.*.max' => 'Chaque photo ne doit pas dépasser 5 Mo.',
+            'admin_nom.required' => 'Le nom de l\'administrateur de l\'hôtel est obligatoire.',
+            'admin_prenom.required' => 'Le prénom de l\'administrateur de l\'hôtel est obligatoire.',
+            'admin_email.required' => 'L\'email de l\'administrateur de l\'hôtel est obligatoire.',
+            'admin_email.unique' => 'Cet email est déjà utilisé par un autre utilisateur.',
         ];
     }
 }

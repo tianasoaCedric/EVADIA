@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\HotelController;
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\Auth\RegisterController;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +26,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Routes admin Evadia (niveau <= 2)
     Route::middleware('level:2')->prefix('admin')->group(function () {
         // Routes de gestion de la plateforme
+        Route::apiResource('hotels', HotelController::class);
     });
 
     // Routes admin hôtel (niveau <= 3)

@@ -5,11 +5,15 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreHotelRequest;
 use App\Http\Requests\Admin\UpdateHotelRequest;
+use App\Jobs\SendHotelAdminCredentials;
+use App\Models\Avis;
 use App\Models\Destination;
 use App\Models\Hotel;
 use App\Models\HotelAdmin;
 use App\Models\HotelPhoto;
 use App\Models\HotelStatut;
+use App\Models\LogAdmin;
+use App\Models\Reservation;
 use App\Models\Role;
 use App\Models\TypesHotel;
 use App\Models\User;
@@ -44,15 +48,14 @@ class HotelController extends Controller
     {
         $types = TypesHotel::all();
         $destinations = Destination::all();
-        $users = User::orderBy('nom')->get(['id', 'nom', 'prenom', 'email']);
 
-        return view('admin.hotels.create', compact('types', 'destinations', 'users'));
+        return view('admin.hotels.create', compact('types', 'destinations'));
     }
 
     public function store(StoreHotelRequest $request)
     {
         DB::transaction(function () use ($request) {
-            // Create hotel
+            // 1. Create hotel
             $hotel = Hotel::create([
                 'nom' => $request->nom,
                 'description' => $request->description,
@@ -64,10 +67,10 @@ class HotelController extends Controller
                 'created_by' => auth()->id(),
             ]);
 
-            // Attach types
+            // 2. Attach types
             $hotel->types()->attach($request->types);
 
-            // Create address
+            // 3. Create address
             $hotel->adresse()->create([
                 'adresse_ligne1' => $request->adresse_ligne1,
                 'adresse_ligne2' => $request->adresse_ligne2,
@@ -78,10 +81,10 @@ class HotelController extends Controller
                 'longitude' => $request->longitude,
             ]);
 
-            // Attach destination
+            // 4. Attach destination
             $hotel->destinations()->attach($request->destination_id);
 
-            // Upload photos
+            // 5. Upload photos
             if ($request->hasFile('photos')) {
                 foreach ($request->file('photos') as $index => $photo) {
                     $path = $photo->store("hotels/{$hotel->id}", 's3');
@@ -95,7 +98,7 @@ class HotelController extends Controller
                 }
             }
 
-            // Create initial status
+            // 6. Create initial status
             HotelStatut::create([
                 'hotel_id' => $hotel->id,
                 'statut' => 'en_attente',
@@ -103,56 +106,45 @@ class HotelController extends Controller
                 'changed_by' => auth()->id(),
             ]);
 
-            // Assign hotel admin
-            $adminUserId = $request->admin_user_id;
+            // 7. Create hotel admin user with temporary password
+            $adminUser = User::create([
+                'nom' => $request->admin_nom,
+                'prenom' => $request->admin_prenom,
+                'email' => $request->admin_email,
+                'telephone' => $request->admin_telephone,
+                'password_hash' => Hash::make('0000'),
+                'force_password_change' => true,
+                'email_verified' => true,
+                'est_actif' => true,
+            ]);
 
-            if ($request->has('new_admin') && $request->new_admin) {
-                $newAdmin = User::create([
-                    'nom' => $request->input('new_admin.nom'),
-                    'prenom' => $request->input('new_admin.prenom'),
-                    'email' => $request->input('new_admin.email'),
-                    'password_hash' => Hash::make('Evadia2026!'),
-                    'telephone' => $request->input('new_admin.telephone'),
-                    'email_verified' => true,
+            // 8. Assign admin_hotel role
+            $adminRole = Role::where('code', 'admin_hotel')->first();
+            if ($adminRole) {
+                $adminUser->roles()->attach($adminRole->id, [
+                    'assigned_by' => auth()->id(),
+                    'assigned_at' => now(),
+                    'est_actif' => true,
                 ]);
-
-                $adminRole = Role::where('code', 'admin_hotel')->first();
-                if ($adminRole) {
-                    $newAdmin->roles()->attach($adminRole->id, [
-                        'assigned_by' => auth()->id(),
-                        'assigned_at' => now(),
-                        'est_actif' => true,
-                    ]);
-                }
-
-                $adminUserId = $newAdmin->id;
             }
 
-            if ($adminUserId) {
-                HotelAdmin::create([
-                    'user_id' => $adminUserId,
-                    'hotel_id' => $hotel->id,
-                    'est_principal' => true,
-                    'date_debut' => now(),
-                ]);
+            // 9. Link admin to hotel
+            HotelAdmin::create([
+                'user_id' => $adminUser->id,
+                'hotel_id' => $hotel->id,
+                'est_principal' => true,
+                'date_debut' => now(),
+            ]);
 
-                // Ensure admin_hotel role
-                $adminRole = Role::where('code', 'admin_hotel')->first();
-                $existingUser = User::find($adminUserId);
-                if ($adminRole && $existingUser && !$existingUser->hasRole('admin_hotel')) {
-                    $existingUser->roles()->attach($adminRole->id, [
-                        'assigned_by' => auth()->id(),
-                        'assigned_at' => now(),
-                        'est_actif' => true,
-                    ]);
-                }
-            }
+            // 10. Send credentials email via queue
+            SendHotelAdminCredentials::dispatch($adminUser, $hotel);
 
-            $this->logAction('hotel_created', "Hôtel {$hotel->nom} créé (ID: {$hotel->id})");
+            // 11. Log action
+            $this->logAction('hotel_created', "Hôtel {$hotel->nom} créé (ID: {$hotel->id}). Admin: {$adminUser->email}");
         });
 
         return redirect()->route('admin.hotels.index')
-            ->with('success', 'Hôtel créé avec succès.');
+            ->with('success', 'Hôtel créé avec succès. Un email avec les identifiants a été envoyé à l\'administrateur.');
     }
 
     public function show(Hotel $hotel)
@@ -171,7 +163,7 @@ class HotelController extends Controller
         // Stats
         $stats = [
             'nb_reservations' => Reservation::whereHas('propriete', fn($q) => $q->where('hotel_id', $hotel->id))->count(),
-            'note_moyenne' => \App\Models\Avis::whereHas('propriete', fn($q) => $q->where('hotel_id', $hotel->id))->avg('note'),
+            'note_moyenne' => Avis::whereHas('propriete', fn($q) => $q->where('hotel_id', $hotel->id))->avg('note'),
         ];
 
         return view('admin.hotels.show', compact('hotel', 'stats'));

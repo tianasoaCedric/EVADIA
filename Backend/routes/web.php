@@ -8,21 +8,30 @@ use App\Http\Controllers\Admin\HotelPhotoController;
 use App\Http\Controllers\Admin\AbonnementController;
 use App\Http\Controllers\Admin\OffreController;
 use App\Http\Controllers\Admin\MessageController;
+use App\Http\Controllers\Hotel\PasswordController;
+use App\Http\Controllers\Hotel\AuthController as HotelAuthController;
+use App\Http\Controllers\Hotel\DashboardController as HotelDashboardController;
+use App\Http\Controllers\Hotel\ProfileController as HotelProfileController;
+use App\Http\Controllers\Hotel\HotelContentController;
+use App\Http\Controllers\Hotel\RoomController;
+use App\Http\Controllers\Hotel\RoomPhotoController;
+use App\Http\Controllers\Hotel\ReservationController;
+use App\Http\Controllers\Hotel\CalendarController;
+use App\Http\Controllers\Hotel\PricingController;
+use App\Http\Controllers\Hotel\HotelOffreController;
+use App\Http\Controllers\Hotel\MessageController as HotelMessageController;
+use App\Http\Controllers\Hotel\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 // ────────────────────────────────────────────────────────
 // Public / Home
 // ────────────────────────────────────────────────────────
-Route::get('/', function () {
-    return view('welcome');
-});
-
 // ────────────────────────────────────────────────────────
 // Auth Routes (hors groupe admin)
 // ────────────────────────────────────────────────────────
 Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::get('/', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/', [AuthController::class, 'login']);
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
     Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
@@ -75,4 +84,81 @@ Route::middleware(['auth', 'role:super_admin,admin_evadia'])
         Route::post('messages', [MessageController::class, 'store'])->name('messages.store');
         Route::get('messages/conversation/{user}', [MessageController::class, 'conversation'])->name('messages.conversation');
         Route::patch('messages/{message}/read', [MessageController::class, 'markAsRead'])->name('messages.mark-read');
+    });
+
+// ────────────────────────────────────────────────────────
+// Hotel Auth Routes (hors middleware groupe)
+// ────────────────────────────────────────────────────────
+Route::prefix('hotel')->name('hotel.')->group(function () {
+    Route::get('login', [HotelAuthController::class, 'showLogin'])->name('login');
+    Route::post('login', [HotelAuthController::class, 'login']);
+    Route::post('logout', [HotelAuthController::class, 'logout'])->name('logout');
+    Route::get('forgot-password', [HotelAuthController::class, 'showForgotPassword'])->name('password.request');
+    Route::post('forgot-password', [HotelAuthController::class, 'sendResetLink'])->name('password.email');
+    Route::get('reset-password/{token}', [HotelAuthController::class, 'showResetPassword'])->name('password.reset');
+    Route::post('reset-password', [HotelAuthController::class, 'resetPassword'])->name('password.update.reset');
+});
+
+// ────────────────────────────────────────────────────────
+// Hotel Routes (back-office hôtelier protégé)
+// ────────────────────────────────────────────────────────
+Route::middleware(['auth', 'role:admin_hotel,gestionnaire_hotel', 'password.change'])
+    ->prefix('hotel')->name('hotel.')->group(function () {
+
+        // Password change (exempt from ForcePasswordChange middleware)
+        Route::get('password/change', [PasswordController::class, 'showChangeForm'])->name('password.change')->withoutMiddleware('password.change');
+        Route::post('password/change', [PasswordController::class, 'change'])->name('password.update')->withoutMiddleware('password.change');
+
+        // Dashboard
+        Route::get('dashboard', [HotelDashboardController::class, 'index'])->name('dashboard');
+
+        // Profile
+        Route::get('profile', [HotelProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('profile', [HotelProfileController::class, 'update'])->name('profile.update');
+        Route::put('profile/password', [HotelProfileController::class, 'updatePassword'])->name('profile.password');
+
+        // Hotel Content
+        Route::get('content', [HotelContentController::class, 'edit'])->name('content.edit');
+        Route::put('content', [HotelContentController::class, 'update'])->name('content.update');
+        Route::post('content/photos', [HotelContentController::class, 'uploadPhotos'])->name('content.photos.store');
+        Route::delete('content/photos/{photo}', [HotelContentController::class, 'deletePhoto'])->name('content.photos.destroy');
+        Route::patch('content/photos/reorder', [HotelContentController::class, 'reorderPhotos'])->name('content.photos.reorder');
+        Route::post('content/services', [HotelContentController::class, 'storeService'])->name('content.services.store');
+        Route::put('content/services/{service}', [HotelContentController::class, 'updateService'])->name('content.services.update');
+        Route::delete('content/services/{service}', [HotelContentController::class, 'deleteService'])->name('content.services.destroy');
+
+        // Rooms (Chambres)
+        Route::resource('rooms', RoomController::class);
+        Route::patch('rooms/{propriete}/status', [RoomController::class, 'updateStatus'])->name('rooms.update-status');
+        Route::post('rooms/{propriete}/photos', [RoomPhotoController::class, 'store'])->name('rooms.photos.store');
+        Route::delete('rooms/{propriete}/photos/{photo}', [RoomPhotoController::class, 'destroy'])->name('rooms.photos.destroy');
+        Route::patch('rooms/{propriete}/photos/reorder', [RoomPhotoController::class, 'reorder'])->name('rooms.photos.reorder');
+
+        // Reservations
+        Route::get('reservations', [ReservationController::class, 'index'])->name('reservations.index');
+        Route::get('reservations/{reservation}', [ReservationController::class, 'show'])->name('reservations.show');
+        Route::patch('reservations/{reservation}/status', [ReservationController::class, 'updateStatus'])->name('reservations.update-status');
+
+        // Calendar
+        Route::get('calendar', [CalendarController::class, 'index'])->name('calendar.index');
+        Route::get('calendar/data', [CalendarController::class, 'getData'])->name('calendar.data');
+        Route::post('calendar/disponibilite', [CalendarController::class, 'updateDisponibilite'])->name('calendar.update');
+        Route::post('calendar/bulk', [CalendarController::class, 'bulkUpdate'])->name('calendar.bulk');
+
+        // Pricing & Offers
+        Route::get('pricing', [PricingController::class, 'index'])->name('pricing.index');
+        Route::post('pricing/{propriete}/price', [PricingController::class, 'updatePrice'])->name('pricing.update');
+        Route::resource('offers', HotelOffreController::class)->except(['show', 'destroy']);
+        Route::patch('offers/{offre}/toggle', [HotelOffreController::class, 'toggle'])->name('offers.toggle');
+
+        // Messaging
+        Route::get('messages', [HotelMessageController::class, 'index'])->name('messages.index');
+        Route::get('messages/conversation/{user}', [HotelMessageController::class, 'conversation'])->name('messages.conversation');
+        Route::post('messages', [HotelMessageController::class, 'store'])->name('messages.store');
+        Route::post('messages/reply', [HotelMessageController::class, 'reply'])->name('messages.reply');
+
+        // Payments
+        Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
+        Route::get('payments/export', [PaymentController::class, 'export'])->name('payments.export');
+        Route::get('payments/{paiement}', [PaymentController::class, 'show'])->name('payments.show');
     });

@@ -35,6 +35,7 @@ class User extends Authenticatable
         'date_inscription',
         'updated_at',
         'est_actif',
+        'force_password_change',
         'devise_preferee',
         'langue_preferee',
     ];
@@ -56,6 +57,7 @@ class User extends Authenticatable
             'email_verified' => 'boolean',
             'two_factor_enabled' => 'boolean',
             'est_actif' => 'boolean',
+            'force_password_change' => 'boolean',
             'derniere_connexion' => 'datetime',
             'date_inscription' => 'datetime',
             'updated_at' => 'datetime',

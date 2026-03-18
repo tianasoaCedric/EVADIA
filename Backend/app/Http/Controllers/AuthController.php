@@ -197,8 +197,8 @@ class AuthController extends Controller
         return match ($topRole->code) {
             'super_admin', 'admin_evadia' => redirect()->route('admin.dashboard'),
             'admin_hotel', 'gestionnaire_hotel' => redirect('/hotel/dashboard'),
-            'client' => redirect('/'),
-            default => redirect('/'),
+            'client' => redirect('/client/dashboard'),
+            default => redirect('/client/dashboard'),
         };
     }
 }
