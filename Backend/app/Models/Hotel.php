@@ -65,14 +65,19 @@ class Hotel extends Model
         return $this->hasOne(HotelStatut::class)->whereNull('date_fin');
     }
 
+    /**
+     * Retourne une collection vide pour l'instant.
+     * Sera remplacé par la relation polymorphique après migration.
+     */
     public function photos(): HasMany
     {
-        return $this->hasMany(HotelPhoto::class)->orderBy('ordre');
+        return $this->hasMany(Photo::class, 'propriete_id')
+            ->whereRaw('1 = 0');
     }
 
-    public function photoPrincipale(): HasOne
+    public function offres(): HasMany
     {
-        return $this->hasOne(HotelPhoto::class)->where('est_principale', true);
+        return $this->hasMany(Offre::class);
     }
 
     public function abonnement(): HasOne

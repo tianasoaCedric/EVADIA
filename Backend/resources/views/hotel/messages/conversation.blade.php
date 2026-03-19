@@ -71,10 +71,40 @@
 @endsection
 
 @push('scripts')
+@vite(['resources/js/app.js'])
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById('messages-container');
     if (container) container.scrollTop = container.scrollHeight;
+
+    // Real-time message receiving via Echo/Reverb
+    if (window.Echo) {
+        window.Echo.private('messages.{{ auth()->id() }}')
+            .listen('.message.sent', (e) => {
+                // Only add if from the current interlocutor
+                if (e.expediteur_id == {{ $interlocuteur->id }}) {
+                    const msgHtml = `
+                        <div class="flex justify-start">
+                            <div class="max-w-[70%]">
+                                <div class="rounded-2xl px-4 py-2.5 bg-gray-100 text-gray-800 rounded-bl-md">
+                                    <p class="text-sm whitespace-pre-wrap">${e.contenu}</p>
+                                </div>
+                                <p class="text-[10px] text-gray-400 mt-1">
+                                    ${new Date(e.date_envoi).toLocaleString('fr-FR', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'})}
+                                </p>
+                            </div>
+                        </div>`;
+                    container.insertAdjacentHTML('beforeend', msgHtml);
+                    container.scrollTop = container.scrollHeight;
+
+                    // Mark as read via AJAX
+                    fetch(`/hotel/messages/${e.id}/read`, {
+                        method: 'PATCH',
+                        headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json'}
+                    });
+                }
+            });
+    }
 });
 </script>
 @endpush

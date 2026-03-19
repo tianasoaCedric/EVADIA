@@ -1,11 +1,30 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\AbonnementController;
+use App\Http\Controllers\Api\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Api\Admin\HotelController;
+use App\Http\Controllers\Api\Admin\MessageController as AdminMessageController;
+use App\Http\Controllers\Api\Admin\OffreController as AdminOffreController;
+use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\Auth\RegisterController;
+use App\Http\Controllers\Api\Client\AvisController;
+use App\Http\Controllers\Api\Client\FavoriController;
+use App\Http\Controllers\Api\Client\HotelController as ClientHotelController;
+use App\Http\Controllers\Api\Client\ProfileController;
+use App\Http\Controllers\Api\Client\ReservationController as ClientReservationController;
+use App\Http\Controllers\Api\Hotel\CalendarController;
+use App\Http\Controllers\Api\Hotel\DashboardController as HotelDashboardController;
+use App\Http\Controllers\Api\Hotel\MessageController as HotelMessageController;
+use App\Http\Controllers\Api\Hotel\OffreController as HotelOffreController;
+use App\Http\Controllers\Api\Hotel\PaymentController;
+use App\Http\Controllers\Api\Hotel\ReservationController as HotelReservationController;
+use App\Http\Controllers\Api\Hotel\RoomController;
 use Illuminate\Support\Facades\Route;
 
-// Routes publiques
+// ============================================================
+// Routes publiques (pas d'authentification requise)
+// ============================================================
 Route::prefix('auth')->group(function () {
     Route::post('/register', [RegisterController::class, 'register'])
         ->middleware('throttle:register');
@@ -13,29 +32,123 @@ Route::prefix('auth')->group(function () {
         ->middleware('throttle:login');
 });
 
-// Routes authentifiées
+// ============================================================
+// Routes authentifiées (token Sanctum requis)
+// ============================================================
 Route::middleware('auth:sanctum')->group(function () {
 
-    // Gestion de l'authentification
+    // ----------------------------------------------------------
+    // Auth : gestion de session
+    // ----------------------------------------------------------
     Route::prefix('auth')->group(function () {
         Route::post('/logout', [LoginController::class, 'logout']);
         Route::post('/logout-all', [LoginController::class, 'logoutAll']);
         Route::get('/me', [LoginController::class, 'me']);
     });
 
-    // Routes admin Evadia (niveau <= 2)
+    // ----------------------------------------------------------
+    // Admin EVADIA (niveau <= 2 : super_admin, admin_evadia)
+    // ----------------------------------------------------------
     Route::middleware('level:2')->prefix('admin')->group(function () {
-        // Routes de gestion de la plateforme
+        // Dashboard
+        Route::get('dashboard', [AdminDashboardController::class, 'index']);
+
+        // Hôtels
         Route::apiResource('hotels', HotelController::class);
+
+        // Utilisateurs
+        Route::get('users', [UserController::class, 'index']);
+        Route::get('users/{id}', [UserController::class, 'show']);
+        Route::patch('users/{id}/toggle-status', [UserController::class, 'toggleStatus']);
+
+        // Abonnements
+        Route::get('subscriptions', [AbonnementController::class, 'index']);
+        Route::post('subscriptions', [AbonnementController::class, 'store']);
+        Route::get('subscriptions/{id}', [AbonnementController::class, 'show']);
+
+        // Offres
+        Route::get('offers', [AdminOffreController::class, 'index']);
+        Route::post('offers', [AdminOffreController::class, 'store']);
+        Route::patch('offers/{id}/toggle', [AdminOffreController::class, 'toggle']);
+
+        // Messagerie
+        Route::get('messages', [AdminMessageController::class, 'index']);
+        Route::get('messages/conversation/{userId}', [AdminMessageController::class, 'conversation']);
+        Route::post('messages', [AdminMessageController::class, 'store']);
     });
 
-    // Routes admin hôtel (niveau <= 3)
+    // ----------------------------------------------------------
+    // Back-Office Hôtel (niveau <= 3 : admin_hotel, gestionnaire_hotel)
+    // ----------------------------------------------------------
     Route::middleware('level:3')->prefix('hotel')->group(function () {
-        // Routes de gestion hôtelière
+        // Dashboard
+        Route::get('dashboard', [HotelDashboardController::class, 'index']);
+
+        // Chambres
+        Route::get('rooms', [RoomController::class, 'index']);
+        Route::post('rooms', [RoomController::class, 'store']);
+        Route::get('rooms/{id}', [RoomController::class, 'show']);
+        Route::put('rooms/{id}', [RoomController::class, 'update']);
+        Route::delete('rooms/{id}', [RoomController::class, 'destroy']);
+
+        // Réservations
+        Route::get('reservations', [HotelReservationController::class, 'index']);
+        Route::get('reservations/{id}', [HotelReservationController::class, 'show']);
+        Route::patch('reservations/{id}/status', [HotelReservationController::class, 'updateStatus']);
+
+        // Calendrier & Disponibilités
+        Route::get('calendar', [CalendarController::class, 'index']);
+        Route::post('calendar/disponibilite', [CalendarController::class, 'update']);
+        Route::post('calendar/bulk', [CalendarController::class, 'bulk']);
+
+        // Offres
+        Route::get('offers', [HotelOffreController::class, 'index']);
+        Route::post('offers', [HotelOffreController::class, 'store']);
+        Route::patch('offers/{id}/toggle', [HotelOffreController::class, 'toggle']);
+
+        // Messagerie
+        Route::get('messages', [HotelMessageController::class, 'index']);
+        Route::get('messages/conversation/{userId}', [HotelMessageController::class, 'conversation']);
+        Route::post('messages', [HotelMessageController::class, 'store']);
+
+        // Paiements
+        Route::get('payments', [PaymentController::class, 'index']);
+        Route::get('payments/{id}', [PaymentController::class, 'show']);
     });
 
-    // Routes super admin uniquement
+    // ----------------------------------------------------------
+    // Client (tout utilisateur authentifié)
+    // ----------------------------------------------------------
+    Route::prefix('client')->group(function () {
+        // Recherche hôtels
+        Route::get('hotels', [ClientHotelController::class, 'index']);
+        Route::get('hotels/{id}', [ClientHotelController::class, 'show']);
+
+        // Réservations
+        Route::get('reservations', [ClientReservationController::class, 'index']);
+        Route::post('reservations', [ClientReservationController::class, 'store']);
+        Route::get('reservations/{id}', [ClientReservationController::class, 'show']);
+        Route::patch('reservations/{id}/cancel', [ClientReservationController::class, 'cancel']);
+
+        // Favoris
+        Route::get('favorites', [FavoriController::class, 'index']);
+        Route::post('favorites', [FavoriController::class, 'store']);
+        Route::delete('favorites/{hotelId}', [FavoriController::class, 'destroy']);
+
+        // Avis
+        Route::get('reviews', [AvisController::class, 'index']);
+        Route::post('reviews', [AvisController::class, 'store']);
+
+        // Profil
+        Route::get('profile', [ProfileController::class, 'show']);
+        Route::put('profile', [ProfileController::class, 'update']);
+        Route::put('profile/password', [ProfileController::class, 'updatePassword']);
+    });
+
+    // ----------------------------------------------------------
+    // Super Admin (réservé aux opérations système)
+    // ----------------------------------------------------------
     Route::middleware('role:super_admin')->prefix('super')->group(function () {
-        // Routes système
+        // Routes système à définir
     });
 });

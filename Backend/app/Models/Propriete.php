@@ -74,7 +74,14 @@ class Propriete extends Model
 
     public function photos(): HasMany
     {
-        return $this->hasMany(Photo::class)->orderBy('ordre');
+        return $this->hasMany(Photo::class, 'propriete_id')
+            ->orderBy('ordre');
+    }
+
+    public function photoPrincipale(): HasOne
+    {
+        return $this->hasOne(Photo::class, 'propriete_id')
+            ->where('est_principale', true);
     }
 
     public function equipements(): BelongsToMany

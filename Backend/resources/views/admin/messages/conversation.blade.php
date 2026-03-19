@@ -63,9 +63,31 @@
 @endsection
 
 @push('scripts')
+    @vite(['resources/js/app.js'])
     <script>
-        // Scroll to bottom of messages
-        const container = document.getElementById('messagesContainer');
-        if (container) container.scrollTop = container.scrollHeight;
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('messagesContainer');
+            if (container) container.scrollTop = container.scrollHeight;
+
+            // Real-time message receiving via Echo/Reverb
+            if (window.Echo) {
+                window.Echo.private('messages.{{ auth()->id() }}')
+                    .listen('.message.sent', (e) => {
+                        if (e.expediteur_id == {{ $user->id }}) {
+                            const msgHtml = `
+                                <div class="flex justify-start">
+                                    <div class="max-w-[70%] rounded-2xl px-4 py-3 bg-gray-100 text-gray-900">
+                                        <p class="text-sm whitespace-pre-line">${e.contenu}</p>
+                                        <p class="text-[10px] text-gray-400 mt-1 text-right">
+                                            ${new Date(e.date_envoi).toLocaleString('fr-FR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'})}
+                                        </p>
+                                    </div>
+                                </div>`;
+                            container.insertAdjacentHTML('beforeend', msgHtml);
+                            container.scrollTop = container.scrollHeight;
+                        }
+                    });
+            }
+        });
     </script>
 @endpush

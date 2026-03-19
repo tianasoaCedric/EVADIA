@@ -90,7 +90,9 @@ class RoomController extends Controller
             if ($request->hasFile('photos')) {
                 foreach ($request->file('photos') as $i => $photo) {
                     $path = $photo->store("proprietes/{$propriete->id}", 's3');
-                    $propriete->photos()->create([
+                    Photo::create([
+                        'entite_type' => 'propriete',
+                        'entite_id' => $propriete->id,
                         'url_photo' => $path,
                         'ordre' => $i,
                         'est_principale' => $i === 0,

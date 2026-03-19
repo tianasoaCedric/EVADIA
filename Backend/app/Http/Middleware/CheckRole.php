@@ -26,7 +26,7 @@ class CheckRole
         }
 
         $userRoles = $user->roles
-            ->where('pivot.est_actif', true)
+            ->filter(fn ($role) => (bool) $role->pivot->est_actif)
             ->pluck('code')
             ->toArray();
 

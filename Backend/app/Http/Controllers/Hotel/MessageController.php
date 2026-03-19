@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Hotel;
 
+use App\Events\NewMessageSent;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Hotel\Traits\BelongsToHotel;
 use App\Models\Message;
@@ -95,7 +96,7 @@ class MessageController extends Controller
 
         $hotel = $this->getHotel();
 
-        Message::create([
+        $message = Message::create([
             'expediteur_id' => auth()->id(),
             'destinataire_id' => $request->destinataire_id,
             'sujet' => $request->sujet,
@@ -112,6 +113,8 @@ class MessageController extends Controller
             'canal' => 'in_app',
             'date_envoi' => now(),
         ]);
+
+        broadcast(new NewMessageSent($message->load('expediteur')))->toOthers();
 
         return redirect()->route('hotel.messages.conversation', $request->destinataire_id)
             ->with('success', 'Message envoyé.');
@@ -133,7 +136,7 @@ class MessageController extends Controller
             $q->where('expediteur_id', $request->destinataire_id)->where('destinataire_id', auth()->id());
         })->latest('date_envoi')->first();
 
-        Message::create([
+        $message = Message::create([
             'expediteur_id' => auth()->id(),
             'destinataire_id' => $request->destinataire_id,
             'sujet' => $dernierMessage?->sujet,
@@ -151,6 +154,19 @@ class MessageController extends Controller
             'date_envoi' => now(),
         ]);
 
+        broadcast(new NewMessageSent($message->load('expediteur')))->toOthers();
+
         return back()->with('success', 'Réponse envoyée.');
+    }
+
+    public function markAsRead(Message $message)
+    {
+        if ($message->destinataire_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $message->update(['lu' => true]);
+
+        return response()->json(['success' => true]);
     }
 }

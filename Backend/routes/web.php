@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\HotelPhotoController;
 use App\Http\Controllers\Admin\AbonnementController;
 use App\Http\Controllers\Admin\OffreController;
 use App\Http\Controllers\Admin\MessageController;
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Hotel\PasswordController;
 use App\Http\Controllers\Hotel\AuthController as HotelAuthController;
 use App\Http\Controllers\Hotel\DashboardController as HotelDashboardController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\Hotel\CalendarController;
 use App\Http\Controllers\Hotel\PricingController;
 use App\Http\Controllers\Hotel\HotelOffreController;
 use App\Http\Controllers\Hotel\MessageController as HotelMessageController;
+use App\Http\Controllers\Hotel\NotificationController as HotelNotificationController;
 use App\Http\Controllers\Hotel\PaymentController;
 use Illuminate\Support\Facades\Route;
 
@@ -84,6 +86,12 @@ Route::middleware(['auth', 'role:super_admin,admin_evadia'])
         Route::post('messages', [MessageController::class, 'store'])->name('messages.store');
         Route::get('messages/conversation/{user}', [MessageController::class, 'conversation'])->name('messages.conversation');
         Route::patch('messages/{message}/read', [MessageController::class, 'markAsRead'])->name('messages.mark-read');
+
+        // Notifications
+        Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::get('notifications/recent', [NotificationController::class, 'recent'])->name('notifications.recent');
+        Route::patch('notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
+        Route::post('notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
     });
 
 // ────────────────────────────────────────────────────────
@@ -156,9 +164,16 @@ Route::middleware(['auth', 'role:admin_hotel,gestionnaire_hotel', 'password.chan
         Route::get('messages/conversation/{user}', [HotelMessageController::class, 'conversation'])->name('messages.conversation');
         Route::post('messages', [HotelMessageController::class, 'store'])->name('messages.store');
         Route::post('messages/reply', [HotelMessageController::class, 'reply'])->name('messages.reply');
+        Route::patch('messages/{message}/read', [HotelMessageController::class, 'markAsRead'])->name('messages.mark-read');
 
         // Payments
         Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
         Route::get('payments/export', [PaymentController::class, 'export'])->name('payments.export');
         Route::get('payments/{paiement}', [PaymentController::class, 'show'])->name('payments.show');
+
+        // Notifications
+        Route::get('notifications', [HotelNotificationController::class, 'index'])->name('notifications.index');
+        Route::get('notifications/recent', [HotelNotificationController::class, 'recent'])->name('notifications.recent');
+        Route::patch('notifications/{notification}/read', [HotelNotificationController::class, 'markAsRead'])->name('notifications.mark-read');
+        Route::post('notifications/mark-all-read', [HotelNotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
     });

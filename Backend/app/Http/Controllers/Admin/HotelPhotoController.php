@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Hotel;
-use App\Models\HotelPhoto;
+use App\Models\Photo;
 use App\Traits\LogsAdminAction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -24,8 +24,9 @@ class HotelPhotoController extends Controller
 
         foreach ($request->file('photos') as $index => $photo) {
             $path = $photo->store("hotels/{$hotel->id}", 's3');
-            HotelPhoto::create([
-                'hotel_id' => $hotel->id,
+            Photo::create([
+                'entite_type' => 'hotel',
+                'entite_id' => $hotel->id,
                 'url_photo' => Storage::disk('s3')->url($path),
                 'ordre' => $maxOrdre + $index + 1,
                 'est_principale' => false,
@@ -38,8 +39,10 @@ class HotelPhotoController extends Controller
         return back()->with('success', 'Photos ajoutées avec succès.');
     }
 
-    public function destroy(Hotel $hotel, HotelPhoto $photo)
+    public function destroy(Hotel $hotel, $photoId)
     {
+        $photo = Photo::forHotel($hotel->id)->where('id', $photoId)->firstOrFail();
+
         // Delete from S3
         $urlPath = parse_url($photo->url_photo, PHP_URL_PATH);
         if ($urlPath) {

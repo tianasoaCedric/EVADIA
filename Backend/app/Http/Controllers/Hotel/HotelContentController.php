@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Hotel;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Hotel\Traits\BelongsToHotel;
 use App\Models\Destination;
-use App\Models\HotelPhoto;
+use App\Models\Photo;
 use App\Models\Service;
 use App\Models\TypesHotel;
 use App\Traits\LogsAdminAction;
@@ -84,7 +84,9 @@ class HotelContentController extends Controller
 
         foreach ($request->file('photos') as $i => $photo) {
             $path = $photo->store("hotels/{$hotel->id}", 's3');
-            $hotel->photos()->create([
+            Photo::create([
+                'entite_type' => 'hotel',
+                'entite_id' => $hotel->id,
                 'url_photo' => $path,
                 'ordre' => $maxOrdre + $i + 1,
                 'est_principale' => $isFirst && $i === 0,
@@ -100,7 +102,7 @@ class HotelContentController extends Controller
     public function deletePhoto($photo)
     {
         $hotel = $this->getHotel();
-        $hotelPhoto = HotelPhoto::where('id', $photo)->where('hotel_id', $hotel->id)->firstOrFail();
+        $hotelPhoto = Photo::forHotel($hotel->id)->where('id', $photo)->firstOrFail();
 
         Storage::disk('s3')->delete($hotelPhoto->url_photo);
         $hotelPhoto->delete();
@@ -114,12 +116,12 @@ class HotelContentController extends Controller
     {
         $request->validate([
             'order' => 'required|array',
-            'order.*' => 'integer|exists:hotel_photos,id',
+            'order.*' => 'integer|exists:photos,id',
         ]);
 
         $hotel = $this->getHotel();
         foreach ($request->order as $index => $photoId) {
-            HotelPhoto::where('id', $photoId)->where('hotel_id', $hotel->id)->update(['ordre' => $index]);
+            Photo::forHotel($hotel->id)->where('id', $photoId)->update(['ordre' => $index]);
         }
 
         return response()->json(['success' => true]);

@@ -21,7 +21,7 @@ class HotelOffreController extends Controller
         $hotel = $this->getHotel();
 
         // Hotel's own offers
-        $mesOffres = Offre::where('created_by', auth()->id())
+        $mesOffres = Offre::where('hotel_id', $hotel->id)
             ->withCount('utilisations')
             ->latest()->paginate(10, ['*'], 'mes_offres_page');
 
@@ -34,7 +34,7 @@ class HotelOffreController extends Controller
                     ->whereIn('entite_id', $hotel->proprietes->pluck('id'));
             });
         })
-            ->where('created_by', '!=', auth()->id())
+            ->where(fn($q) => $q->whereNull('hotel_id')->orWhere('hotel_id', '!=', $hotel->id))
             ->latest()->paginate(10, ['*'], 'offres_evadia_page');
 
         return view('hotel.offers.index', compact('mesOffres', 'offresEvadia', 'hotel'));
@@ -69,6 +69,7 @@ class HotelOffreController extends Controller
 
         DB::transaction(function () use ($request, $hotel) {
             $offre = Offre::create([
+                'hotel_id' => $hotel->id,
                 'titre' => $request->titre,
                 'description' => $request->description,
                 'date_debut' => $request->date_debut,
@@ -103,7 +104,7 @@ class HotelOffreController extends Controller
 
     public function edit($id)
     {
-        $offre = Offre::where('id', $id)->where('created_by', auth()->id())->with('avantages.applications')->firstOrFail();
+        $offre = Offre::where('id', $id)->where('hotel_id', $this->getHotel()->id)->with('avantages.applications')->firstOrFail();
         $hotel = $this->getHotel();
         $proprietes = $hotel->proprietes()->select('id', 'nom')->get();
         $services = $hotel->services()->select('id', 'nom')->get();
@@ -114,7 +115,7 @@ class HotelOffreController extends Controller
 
     public function update(Request $request, $id)
     {
-        $offre = Offre::where('id', $id)->where('created_by', auth()->id())->firstOrFail();
+        $offre = Offre::where('id', $id)->where('hotel_id', $this->getHotel()->id)->firstOrFail();
 
         $request->validate([
             'titre' => 'required|max:200',
@@ -133,7 +134,7 @@ class HotelOffreController extends Controller
 
     public function toggle($id)
     {
-        $offre = Offre::where('id', $id)->where('created_by', auth()->id())->firstOrFail();
+        $offre = Offre::where('id', $id)->where('hotel_id', $this->getHotel()->id)->firstOrFail();
         $offre->update(['statut' => $offre->statut === 'active' ? 'inactive' : 'active']);
 
         $this->logAction('offer_toggled', "Offre {$offre->titre} → {$offre->statut}");

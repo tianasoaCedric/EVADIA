@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\NewMessageSent;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreMessageRequest;
 use App\Models\HotelAdmin;
@@ -83,6 +84,8 @@ class MessageController extends Controller
             'lien' => "/hotel/messages/conversation/" . auth()->id(),
             'canal' => 'in_app',
         ]);
+
+        broadcast(new NewMessageSent($message->load('expediteur')))->toOthers();
 
         return redirect()->route('admin.messages.conversation', $request->destinataire_id)
             ->with('success', 'Message envoyé avec succès.');

@@ -17,7 +17,7 @@ class CheckRoleLevel
         }
 
         $minNiveau = $user->roles
-            ->where('pivot.est_actif', true)
+            ->filter(fn ($role) => (bool) $role->pivot->est_actif)
             ->min('niveau');
 
         if ($minNiveau === null || $minNiveau > $maxLevel) {

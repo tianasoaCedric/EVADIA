@@ -249,22 +249,68 @@
                 <!-- Right: Notifications + Profile -->
                 <div class="flex items-center gap-3">
                     <!-- Notifications -->
-                    <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open"
+                    <div class="relative" x-data="{ open: false, notifications: [], unread: 0, loading: false }"
+                        x-init="
+                            fetch('{{ route('hotel.notifications.recent') }}')
+                                .then(r => r.json())
+                                .then(d => { notifications = d.notifications; unread = d.unread_count; });
+                        ">
+                        <button @click="open = !open; if(open && !loading) { loading = true; fetch('{{ route('hotel.notifications.recent') }}').then(r => r.json()).then(d => { notifications = d.notifications; unread = d.unread_count; loading = false; }); }"
                             class="relative rounded-lg p-2 hover:bg-gray-100 transition-colors">
                             <svg class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                             </svg>
-                            @php $unreadCount = auth()->user()->unreadNotificationsCount() @endphp
-                            @if($unreadCount > 0)
-                                <span
-                                    class="absolute -top-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
-                                    {{ $unreadCount > 99 ? '99+' : $unreadCount }}
-                                </span>
-                            @endif
+                            <span x-show="unread > 0" x-text="unread > 99 ? '99+' : unread"
+                                class="absolute -top-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white"></span>
                         </button>
+
+                        <!-- Dropdown -->
+                        <div x-show="open" x-cloak @click.away="open = false"
+                            x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                            class="absolute right-0 mt-2 w-96 rounded-xl bg-white shadow-xl ring-1 ring-gray-200 z-50">
+                            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                                <h3 class="text-sm font-semibold text-gray-900">Notifications</h3>
+                                <button x-show="unread > 0" @click.prevent="
+                                    fetch('{{ route('hotel.notifications.mark-all-read') }}', { method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json'} })
+                                        .then(() => { unread = 0; notifications = notifications.map(n => ({...n, lu: true})); });
+                                " class="text-xs text-hotel-600 hover:text-hotel-700 font-medium">Tout marquer lu</button>
+                            </div>
+                            <div class="max-h-80 overflow-y-auto divide-y divide-gray-50">
+                                <template x-for="notif in notifications" :key="notif.id">
+                                    <a :href="notif.lien || '#'" @click="
+                                        if(!notif.lu) {
+                                            fetch('/hotel/notifications/' + notif.id + '/read', { method: 'PATCH', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json'} });
+                                            notif.lu = true; unread = Math.max(0, unread - 1);
+                                        }
+                                    " class="flex gap-3 px-4 py-3 hover:bg-gray-50 transition-colors" :class="!notif.lu ? 'bg-hotel-50/40' : ''">
+                                        <div class="shrink-0 mt-0.5">
+                                            <div class="h-8 w-8 rounded-full flex items-center justify-center" :class="!notif.lu ? 'bg-hotel-100 text-hotel-600' : 'bg-gray-100 text-gray-400'">
+                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-sm text-gray-900 truncate" :class="!notif.lu ? 'font-semibold' : 'font-medium'" x-text="notif.titre"></p>
+                                            <p class="text-xs text-gray-500 truncate mt-0.5" x-text="notif.contenu"></p>
+                                            <p class="text-[10px] text-gray-400 mt-1" x-text="notif.date_envoi ? new Date(notif.date_envoi).toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'}) : ''"></p>
+                                        </div>
+                                        <div x-show="!notif.lu" class="shrink-0 mt-2">
+                                            <span class="h-2 w-2 rounded-full bg-hotel-500 block"></span>
+                                        </div>
+                                    </a>
+                                </template>
+                                <div x-show="notifications.length === 0" class="px-4 py-8 text-center">
+                                    <p class="text-sm text-gray-400">Aucune notification</p>
+                                </div>
+                            </div>
+                            <div class="border-t border-gray-100 px-4 py-2.5">
+                                <a href="{{ route('hotel.notifications.index') }}" class="block text-center text-xs text-hotel-600 hover:text-hotel-700 font-medium">Voir toutes les notifications</a>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Profile Dropdown -->

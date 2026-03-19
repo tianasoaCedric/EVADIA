@@ -28,7 +28,9 @@ class RoomPhotoController extends Controller
 
         foreach ($request->file('photos') as $i => $photo) {
             $path = $photo->store("proprietes/{$propriete->id}", 's3');
-            $propriete->photos()->create([
+            Photo::create([
+                'entite_type' => 'propriete',
+                'entite_id' => $propriete->id,
                 'url_photo' => $path,
                 'ordre' => $maxOrdre + $i + 1,
                 'est_principale' => $isFirst && $i === 0,
@@ -42,7 +44,7 @@ class RoomPhotoController extends Controller
     public function destroy($proprieteId, $photoId)
     {
         $propriete = $this->scopePropriete($proprieteId);
-        $photo = Photo::where('id', $photoId)->where('propriete_id', $propriete->id)->firstOrFail();
+        $photo = Photo::forPropriete($propriete->id)->where('id', $photoId)->firstOrFail();
 
         Storage::disk('s3')->delete($photo->url_photo);
         $photo->delete();
@@ -60,7 +62,7 @@ class RoomPhotoController extends Controller
         ]);
 
         foreach ($request->order as $index => $photoId) {
-            Photo::where('id', $photoId)->where('propriete_id', $propriete->id)->update(['ordre' => $index]);
+            Photo::forPropriete($propriete->id)->where('id', $photoId)->update(['ordre' => $index]);
         }
 
         return response()->json(['success' => true]);

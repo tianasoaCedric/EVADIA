@@ -10,7 +10,7 @@ use App\Models\Avis;
 use App\Models\Destination;
 use App\Models\Hotel;
 use App\Models\HotelAdmin;
-use App\Models\HotelPhoto;
+use App\Models\Photo;
 use App\Models\HotelStatut;
 use App\Models\LogAdmin;
 use App\Models\Reservation;
@@ -88,8 +88,9 @@ class HotelController extends Controller
             if ($request->hasFile('photos')) {
                 foreach ($request->file('photos') as $index => $photo) {
                     $path = $photo->store("hotels/{$hotel->id}", 's3');
-                    HotelPhoto::create([
-                        'hotel_id' => $hotel->id,
+                    Photo::create([
+                        'entite_type' => 'hotel',
+                        'entite_id' => $hotel->id,
                         'url_photo' => Storage::disk('s3')->url($path),
                         'ordre' => $index,
                         'est_principale' => $index === 0,

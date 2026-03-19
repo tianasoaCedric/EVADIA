@@ -16,6 +16,7 @@ class Offre extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'hotel_id',
         'titre',
         'description',
         'date_debut',
@@ -33,6 +34,11 @@ class Offre extends Model
             'date_fin' => 'date',
             'created_at' => 'datetime',
         ];
+    }
+
+    public function hotel(): BelongsTo
+    {
+        return $this->belongsTo(Hotel::class);
     }
 
     public function createdBy(): BelongsTo
