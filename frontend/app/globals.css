@@ -1,26 +1,78 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Définition de la police Outfit avec Tailwind */
+@theme {
+  --font-sans: 'Outfit', sans-serif;
+  --color-primary: #01BDA5;
+  --color-primary-dark: #01A38E;
+  --color-primary-light: #33CAb7;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Appliquer Outfit à tout le body */
+body {
+  font-family: 'Outfit', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* S'assurer que tous les éléments héritent de la police */
+* {
+  font-family: inherit;
+}
+
+/* Optionnel : définir des classes utilitaires pour les différentes graisses */
+.font-outfit-light {
+  font-weight: 300;
+}
+
+.font-outfit-regular {
+  font-weight: 400;
+}
+
+.font-outfit-medium {
+  font-weight: 500;
+}
+
+.font-outfit-semibold {
+  font-weight: 600;
+}
+
+.font-outfit-bold {
+  font-weight: 700;
+}
+
+.font-outfit-extrabold {
+  font-weight: 800;
+}
+
+.font-outfit-black {
+  font-weight: 900;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out forwards;
 }
