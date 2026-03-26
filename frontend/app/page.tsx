@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Header from './components/molecules/Header'
 import Footer from './components/molecules/Footer'
+import Bouton from './components/ui/Bouton'
 
 export default function Home() {
   const [language, setLanguage] = useState<'FR' | 'EN'>('FR')
