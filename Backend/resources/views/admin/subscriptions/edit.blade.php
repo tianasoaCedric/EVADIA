@@ -14,7 +14,10 @@
             @csrf @method('PUT')
             <h3 class="text-lg font-semibold text-gray-900">Modifier l'abonnement</h3>
             <div class="p-3 rounded-lg bg-gray-50 border border-gray-200">
-                <p class="text-sm text-gray-600">🏨 <strong>{{ $subscription->hotel?->nom }}</strong></p>
+                <p class="text-sm text-gray-600 inline-flex items-center gap-1.5">
+                    <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5M3.75 3v18m16.5-18v18M5.25 3h13.5M5.25 21V10.5m0 0h3v3h-3v-3zm0-4.5h3v3h-3V6zm6 4.5h3v3h-3v-3zm0-4.5h3v3h-3V6zm6 4.5h3v3h-3v-3zm0-4.5h3v3h-3V6z" /></svg>
+                    <strong>{{ $subscription->hotel?->nom }}</strong>
+                </p>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Type *</label>

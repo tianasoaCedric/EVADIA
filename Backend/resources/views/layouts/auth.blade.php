@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'EVADIA - Connexion')</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/Evadia_Logo BW 4.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
@@ -18,9 +19,9 @@
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
                         evadia: {
-                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
-                            400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
-                            800: '#1e40af', 900: '#1e3a8a', 950: '#172554',
+                            50: '#ecfdf8', 100: '#d1faf0', 200: '#a7f3e2', 300: '#6ee7cc',
+                            400: '#34d4b3', 500: '#01BDA5', 600: '#019985', 700: '#017a6b',
+                            800: '#016156', 900: '#015047', 950: '#002f2b',
                         }
                     }
                 }
@@ -39,15 +40,8 @@
                 class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2240%22%20height%3D%2240%22%20viewBox%3D%220%200%2040%2040%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.03%22%3E%3Cpath%20d%3D%22M0%200h20v20H0V0zm20%2020h20v20H20V20z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E')]">
             </div>
             <div class="relative z-10 flex flex-col justify-center px-16">
-                <div class="flex items-center gap-3 mb-8">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
-                        <svg class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 0-.75 3.75m0 0-.75 3.75M17.25 7.5l-.75 3.75" />
-                        </svg>
-                    </div>
-                    <span class="text-3xl font-bold text-white tracking-tight">EVADIA</span>
+                <div class="mb-8">
+                    <img src="{{ asset('images/Evadia_Logo BW 1.png') }}" alt="EVADIA" class="h-12">
                 </div>
                 <h2 class="text-4xl font-bold text-white leading-tight mb-4">
                     Plateforme de<br>réservation d'hôtels
@@ -66,15 +60,8 @@
         <div class="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:px-20 xl:px-24 bg-white">
             <div class="mx-auto w-full max-w-sm">
                 <!-- Mobile logo -->
-                <div class="lg:hidden flex items-center gap-2 mb-8">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-evadia-600">
-                        <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 0-.75 3.75m0 0-.75 3.75M17.25 7.5l-.75 3.75" />
-                        </svg>
-                    </div>
-                    <span class="text-xl font-bold text-gray-900">EVADIA</span>
+                <div class="lg:hidden mb-8">
+                    <img src="{{ asset('images/Evadia_Logo BW 2.png') }}" alt="EVADIA" class="h-10" style="filter: brightness(0) saturate(100%) invert(18%) sepia(80%) saturate(2000%) hue-rotate(215deg) brightness(95%) contrast(95%);">
                 </div>
 
                 @if(session('success'))

@@ -17,16 +17,32 @@ class AbonnementController extends Controller
 
     public function index(Request $request)
     {
-        $abonnements = Abonnement::with('hotel')
-            ->when($request->type, fn($q, $t) => $q->where('type_abonnement', $t))
-            ->when($request->statut === 'actif', fn($q) => $q->where(fn($sq) => $sq->whereNull('date_fin')->orWhere('date_fin', '>=', now())))
-            ->when($request->statut === 'expire', fn($q) => $q->where('date_fin', '<', now()))
-            ->when($request->hotel, fn($q, $h) => $q->where('hotel_id', $h))
-            ->latest('created_at')
-            ->paginate(20)
+        $year = (int) ($request->year ?: now()->year);
+        $search = $request->search;
+
+        $hotels = Hotel::query()
+            ->when($search, fn($q) => $q->where('nom', 'ilike', "%{$search}%"))
+            ->orderBy('nom')
+            ->paginate(10)
             ->withQueryString();
 
-        return view('admin.subscriptions.index', compact('abonnements'));
+        // Subscriptions overlapping the selected year
+        $yearStart = "{$year}-01-01";
+        $yearEnd = "{$year}-12-31";
+
+        $abonnements = Abonnement::whereIn('hotel_id', $hotels->pluck('id'))
+            ->where('date_debut', '<=', $yearEnd)
+            ->where(fn($q) => $q->whereNull('date_fin')->orWhere('date_fin', '>=', $yearStart))
+            ->get()
+            ->groupBy('hotel_id');
+
+        $months = [
+            1 => 'Jan', 2 => 'Fév', 3 => 'Mar', 4 => 'Avr',
+            5 => 'Mai', 6 => 'Juin', 7 => 'Juil', 8 => 'Août',
+            9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Déc',
+        ];
+
+        return view('admin.subscriptions.index', compact('hotels', 'abonnements', 'year', 'months', 'search'));
     }
 
     public function create()

@@ -9,7 +9,9 @@
         <div class="bg-gradient-to-r from-hotel-600 to-hotel-800 rounded-2xl p-6 text-white relative overflow-hidden">
             <div class="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-white/10 blur-2xl"></div>
             <div class="relative">
-                <h2 class="text-2xl font-bold">Bienvenue, {{ auth()->user()->prenom }} 👋</h2>
+                <h2 class="text-2xl font-bold inline-flex items-center gap-2">Bienvenue, {{ auth()->user()->prenom }}
+                    <svg class="h-7 w-7 text-white/80" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.05 4.575a1.575 1.575 0 10-3.15 0v3m3.15-3v-1.5a1.575 1.575 0 013.15 0v1.5m-3.15 0l-.075 5.925m3.075-5.925v-1.5a1.575 1.575 0 013.15 0v1.5m-3.15 0l.075 5.925M9.975 10.5H7.5a1.575 1.575 0 01-1.575-1.575V4.575m0 0A1.575 1.575 0 017.5 3h.075m6.75 12.75a1.575 1.575 0 01-1.575 1.575h-6.75A1.575 1.575 0 014.5 15.75v-3.375" /></svg>
+                </h2>
                 <p class="text-hotel-200 mt-1">{{ $hotel->nom }} — Voici un aperçu de votre activité</p>
             </div>
         </div>
