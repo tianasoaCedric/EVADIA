@@ -17,6 +17,14 @@ class HotelContentController extends Controller
 {
     use BelongsToHotel, LogsAdminAction;
 
+    public function show()
+    {
+        $hotel = $this->getHotel();
+        $hotel->load(['adresse', 'types', 'photos', 'services']);
+
+        return view('hotel.content.show', compact('hotel'));
+    }
+
     public function edit()
     {
         $hotel = $this->getHotel();

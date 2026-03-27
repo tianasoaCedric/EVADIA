@@ -23,6 +23,7 @@ use App\Http\Controllers\Hotel\HotelOffreController;
 use App\Http\Controllers\Hotel\MessageController as HotelMessageController;
 use App\Http\Controllers\Hotel\NotificationController as HotelNotificationController;
 use App\Http\Controllers\Hotel\PaymentController;
+use App\Http\Controllers\Hotel\SubscriptionController as HotelSubscriptionController;
 use Illuminate\Support\Facades\Route;
 
 // ────────────────────────────────────────────────────────
@@ -126,7 +127,8 @@ Route::middleware(['auth', 'role:admin_hotel,gestionnaire_hotel', 'password.chan
         Route::put('profile/password', [HotelProfileController::class, 'updatePassword'])->name('profile.password');
 
         // Hotel Content
-        Route::get('content', [HotelContentController::class, 'edit'])->name('content.edit');
+        Route::get('content', [HotelContentController::class, 'show'])->name('content.show');
+        Route::get('content/edit', [HotelContentController::class, 'edit'])->name('content.edit');
         Route::put('content', [HotelContentController::class, 'update'])->name('content.update');
         Route::post('content/photos', [HotelContentController::class, 'uploadPhotos'])->name('content.photos.store');
         Route::delete('content/photos/{photo}', [HotelContentController::class, 'deletePhoto'])->name('content.photos.destroy');
@@ -170,6 +172,9 @@ Route::middleware(['auth', 'role:admin_hotel,gestionnaire_hotel', 'password.chan
         Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
         Route::get('payments/export', [PaymentController::class, 'export'])->name('payments.export');
         Route::get('payments/{paiement}', [PaymentController::class, 'show'])->name('payments.show');
+
+        // Subscription
+        Route::get('subscription', [HotelSubscriptionController::class, 'index'])->name('subscription.index');
 
         // Notifications
         Route::get('notifications', [HotelNotificationController::class, 'index'])->name('notifications.index');
