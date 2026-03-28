@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Header from './components/molecules/Header'
 import RoomCard from './components/ui/RoomCard'
 import OfferCard from './components/ui/OfferCard'
+import DiscoverCard from './components/ui/DiscoverCard'
 
 export default function Home() {
   const [language, setLanguage] = useState<'FR' | 'EN'>('FR')
@@ -69,30 +70,11 @@ export default function Home() {
         }}
       >
         <div className='flex items-center justify-center h-screen gap-4'>
-          <div className="flex items-center justify-center gap-4">
-            <OfferCard
-              imageUrl="/photos/test.jpg"
-              discount={25}
-              startDay={1}
-              endDay={15}
-              month="juin"
-              hotelName="IBIS Ankorondrano"
-              city="Antananarivo"
-              destination="Le centre ville"
-            />
-          </div>
-          <div className="flex items-center justify-center gap-4">
-            <OfferCard
-              imageUrl="/photos/test.jpg"
-              discount={25}
-              startDay={1}
-              endDay={15}
-              month="juin"
-              hotelName="IBIS Ankorondrano"
-              city="Antananarivo"
-              destination="Le centre ville"
-            />
-          </div>
+          <DiscoverCard
+            imageUrl="/images/decouverte-maldives.jpg"
+            title="Parc National de Madagascar"
+            href="/decouvertes/maldives"
+          />
         </div>
         {/* <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] text-center">
           <h1 className="text-3xl md:text-5xl font-bold mb-4">
