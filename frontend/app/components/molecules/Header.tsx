@@ -42,7 +42,7 @@ const Header = ({
     onSearchClick,
     onAvatarClick,
     showSearchInput = false,
-    theme = 'default'
+    theme = 'default'  // Thème initial
 }: HeaderProps) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [isSearchOpen, setIsSearchOpen] = useState(false)
@@ -50,6 +50,8 @@ const Header = ({
     const [isMobile, setIsMobile] = useState(false)
     const [isAnimating, setIsAnimating] = useState(false)
     const [isSliding, setIsSliding] = useState(false)
+
+    const activeTheme = isMenuOpen ? 'default' : theme
 
     // Détecter la taille de l'écran pour le responsive
     useEffect(() => {
@@ -95,7 +97,7 @@ const Header = ({
      */
     const themeStyles = {
         default: {
-            header: "bg-transparent",  // Changé : fond transparent
+            header: "bg-transparent",
             menuButton: "text-white hover:text-gray-300",
             logoText: "text-gray-800",
             searchButton: "text-white hover:text-gray-300 hover:bg-white/10",
@@ -107,12 +109,12 @@ const Header = ({
             menuButton: "text-gray-800 hover:text-gray-300",
             logoText: "text-white",
             searchButton: "text-gray-800 hover:text-gray-300 hover:bg-gray-800",
-            searchInput: "default",
+            searchInput: "dark",
             iconColor: "black"
         }
     }
 
-    const currentTheme = themeStyles[theme]
+    const currentTheme = themeStyles[activeTheme]
 
     return (
         <>
@@ -120,9 +122,10 @@ const Header = ({
             <MenuFullscreen
                 isOpen={isMenuOpen}
                 onClose={handleMenuClose}
-                theme={theme === 'default' ? 'light' : 'dark'}
+                theme={theme === 'default' ? 'light' : 'light'}
             />
-            <header className={`fixed top-0 left-0 right-0 z-50 w-full ${currentTheme.header}`}>
+
+            <header className={`fixed top-0 left-0 right-0 z-50 w-full`}>
                 {/* Conteneur qui glisse de bas en haut */}
                 <div className={`
                     transition-transform duration-300 ease-out
@@ -177,13 +180,13 @@ const Header = ({
 
                                 {/* Toggle Langue - caché sur mobile */}
                                 {!isMobile && (
-                                    <ToggleLangue
-                                        variant={theme === 'default' ? 'default' : 'dark'}
-                                        currentLang={currentLang}
-                                        onToggle={onLanguageChange}
-                                        size={isMenuOpen ? 'sm' : 'md'}
-                                    />
-                                )}
+                                <ToggleLangue
+                                    variant={activeTheme === 'default' ? 'default' : 'dark'}
+                                    currentLang={currentLang}
+                                    onToggle={onLanguageChange}
+                                    size={isMenuOpen ? 'sm' : 'md'}
+                                />
+                            )}
                             </div>
 
                             {/* Partie centrale : Logo */}
@@ -194,7 +197,7 @@ const Header = ({
                                 <div className="flex items-center justify-center">
                                     {/* Logo pour mobile */}
                                     <img
-                                        src={`/Evadia_Logo 4${theme === 'dark' ? '_dark' : ''}.png`}
+                                        src={`/Evadia_Logo 4${activeTheme === 'dark' ? '_dark' : ''}.png`}
                                         alt="Evadia"
                                         className="block md:hidden"
                                         width={40}
@@ -202,7 +205,7 @@ const Header = ({
                                     />
                                     {/* Logo pour desktop */}
                                     <img
-                                        src={`/Evadia_Logo 2${theme === 'dark' ? '_dark' : ''}.png`}
+                                        src={`/Evadia_Logo 2${activeTheme === 'dark' ? '_dark' : ''}.png`}
                                         alt="Evadia"
                                         className="hidden md:block"
                                         width={180}
@@ -217,7 +220,7 @@ const Header = ({
                                 {/* Icône de recherche */}
                                 <button
                                     onClick={handleSearchToggle}
-                                    className={`p-2 transition-colors duration-200 rounded-full cursor-pointer ${currentTheme.searchButton}`}
+                                    className={`p-2 transition-colors duration-200 rounded-full cursor-pointer ${currentTheme.searchButton} hover:bg-white`}
                                     aria-label="Rechercher"
                                 >
                                     <svg
@@ -236,8 +239,8 @@ const Header = ({
                                 </button>
 
                                 {/* Avatar utilisateur */}
-                                <Avatar
-                                    variant={theme === 'default' ? 'default' : 'dark'}
+                                 <Avatar
+                                    variant={activeTheme === 'default' ? 'default' : 'dark'}
                                     photoUrl={userPhoto}
                                     userName={isLoggedIn ? userName : null}
                                     size={isMenuOpen ? 'sm' : 'md'}
@@ -248,7 +251,13 @@ const Header = ({
 
                         {/* Champ de recherche expansible */}
                         {showSearchInput && isSearchOpen && (
-                            <div className="py-3 border-t border-white/20 animate-in slide-in-from-top-2 duration-200 ">
+                            <div className={`
+                                    py-3 border-t border-white/20 
+                                    transition-all duration-300 ease-out
+                                    animate-fade-in
+                                    animate-in slide-in-from-top-2 fade-in
+                                    ${showSearchInput ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}
+                                `}>
                                 <form onSubmit={handleSearchSubmit} className="relative">
                                     <Input
                                         type="text"
@@ -261,7 +270,7 @@ const Header = ({
                                             </svg>
                                         }
                                         fullWidth
-                                        variant={currentTheme.searchInput === 'light' ? 'light' : 'default'}
+                                        variant={currentTheme.searchInput === 'dark' ? 'light' : 'default'}
                                         placeholderPosition="left"
                                     />
                                 </form>

@@ -26,7 +26,7 @@ export default function RootLayout({
     <html lang="fr" className={outfit.variable}>
       <body className="font-outfit">
         {children}
-        <Footer/>
+        {/* <Footer/> */}
       </body>
     </html>
   )

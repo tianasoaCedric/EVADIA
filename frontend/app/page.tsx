@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import Header from './components/molecules/Header'
-import Footer from './components/molecules/Footer'
-import Bouton from './components/ui/Bouton'
+import RoomCard from './components/ui/RoomCard'
+import OfferCard from './components/ui/OfferCard'
 
 export default function Home() {
   const [language, setLanguage] = useState<'FR' | 'EN'>('FR')
@@ -56,18 +56,44 @@ export default function Home() {
         onSearchClick={handleSearchClick}
         onAvatarClick={handleAvatarClick}
         showSearchInput={true}
-        theme='default'
+        theme='dark'
       />
 
       <main className="min-h-screen transition-colors duration-300 top-0 left-0 w-full h-full"
         style={{
-          backgroundImage: 'url("/photos/bc.png")',
+          // backgroundImage: 'url("/photos/bc.png")',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           // backgroundAttachment: 'fixed', // Effet parallaxe optionnel
           backgroundRepeat: 'no-repeat'
         }}
       >
+        <div className='flex items-center justify-center h-screen gap-4'>
+          <div className="flex items-center justify-center gap-4">
+            <OfferCard
+              imageUrl="/photos/test.jpg"
+              discount={25}
+              startDay={1}
+              endDay={15}
+              month="juin"
+              hotelName="IBIS Ankorondrano"
+              city="Antananarivo"
+              destination="Le centre ville"
+            />
+          </div>
+          <div className="flex items-center justify-center gap-4">
+            <OfferCard
+              imageUrl="/photos/test.jpg"
+              discount={25}
+              startDay={1}
+              endDay={15}
+              month="juin"
+              hotelName="IBIS Ankorondrano"
+              city="Antananarivo"
+              destination="Le centre ville"
+            />
+          </div>
+        </div>
         {/* <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] text-center">
           <h1 className="text-3xl md:text-5xl font-bold mb-4">
             Bienvenue sur Evadia
