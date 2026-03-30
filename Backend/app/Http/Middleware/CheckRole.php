@@ -22,7 +22,7 @@ class CheckRole
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Non authentifié.'], 401);
             }
-            return redirect()->route('login');
+            return redirect(str_starts_with($request->path(), 'hotel') ? route('hotel.login') : route('login'));
         }
 
         $userRoles = $user->roles

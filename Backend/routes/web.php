@@ -111,7 +111,7 @@ Route::prefix('hotel')->name('hotel.')->group(function () {
 // ────────────────────────────────────────────────────────
 // Hotel Routes (back-office hôtelier protégé)
 // ────────────────────────────────────────────────────────
-Route::middleware(['auth', 'role:admin_hotel,gestionnaire_hotel', 'password.change'])
+Route::middleware(['auth:hotel', 'role:admin_hotel,gestionnaire_hotel', 'password.change'])
     ->prefix('hotel')->name('hotel.')->group(function () {
 
         // Password change (exempt from ForcePasswordChange middleware)

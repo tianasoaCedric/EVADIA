@@ -287,7 +287,7 @@
                 <div>
                     <p x-show="sidebarOpen" class="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-white/30">Communication</p>
                     <div class="space-y-0.5">
-                        @php $unreadMsgCount = \App\Models\Message::where('destinataire_id', auth()->id())->where('lu', false)->count() @endphp
+                        @php $unreadMsgCount = \App\Models\Message::where('destinataire_id', auth('hotel')->id())->where('lu', false)->count() @endphp
                         <a href="{{ route('hotel.messages.index') }}"
                             class="sidebar-link group {{ request()->routeIs('hotel.messages.*') ? 'active' : '' }}">
                             <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg {{ request()->routeIs('hotel.messages.*') ? 'bg-sky-500/20 text-sky-400' : 'text-white/50 group-hover:text-white/80' }} transition-colors relative">
@@ -326,10 +326,10 @@
                 <a href="{{ route('hotel.profile.edit') }}"
                     class="flex items-center gap-3 rounded-lg px-2 py-2.5 hover:bg-white/[0.06] transition-colors">
                     <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-hotel-400 to-hotel-600 text-white text-xs font-bold shadow-lg shadow-hotel-500/20">
-                        {{ substr(auth()->user()->prenom, 0, 1) }}{{ substr(auth()->user()->nom, 0, 1) }}
+                        {{ substr(auth('hotel')->user()->prenom, 0, 1) }}{{ substr(auth('hotel')->user()->nom, 0, 1) }}
                     </div>
                     <div x-show="sidebarOpen" class="min-w-0 flex-1">
-                        <p class="text-sm font-medium text-white/90 truncate">{{ auth()->user()->prenom }} {{ auth()->user()->nom }}</p>
+                        <p class="text-sm font-medium text-white/90 truncate">{{ auth('hotel')->user()->prenom }} {{ auth('hotel')->user()->nom }}</p>
                         <p class="text-[10px] text-white/40 truncate">Mon profil</p>
                     </div>
                     <div x-show="sidebarOpen" class="shrink-0">
@@ -431,10 +431,10 @@
                             class="flex items-center gap-2 rounded-lg px-3 py-1.5 hover:bg-gray-100 transition-colors">
                             <div
                                 class="h-8 w-8 rounded-full bg-gradient-to-br from-hotel-500 to-hotel-700 flex items-center justify-center text-white text-sm font-bold">
-                                {{ substr(auth()->user()->prenom, 0, 1) }}{{ substr(auth()->user()->nom, 0, 1) }}
+                                {{ substr(auth('hotel')->user()->prenom, 0, 1) }}{{ substr(auth('hotel')->user()->nom, 0, 1) }}
                             </div>
-                            <span class="text-sm font-medium text-gray-700 hidden sm:block">{{ auth()->user()->prenom }}
-                                {{ auth()->user()->nom }}</span>
+                            <span class="text-sm font-medium text-gray-700 hidden sm:block">{{ auth('hotel')->user()->prenom }}
+                                {{ auth('hotel')->user()->nom }}</span>
                             <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="2"
                                 stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />

@@ -194,9 +194,15 @@ class AuthController extends Controller
             ]);
         }
 
+        if (in_array($topRole->code, ['admin_hotel', 'gestionnaire_hotel'])) {
+            // Hotel users should use the hotel login - log them out of web guard
+            Auth::logout();
+            return redirect()->route('hotel.login')
+                ->with('success', 'Veuillez vous connecter via l\'espace hôtelier.');
+        }
+
         return match ($topRole->code) {
             'super_admin', 'admin_evadia' => redirect()->route('admin.dashboard'),
-            'admin_hotel', 'gestionnaire_hotel' => redirect('/hotel/dashboard'),
             'client' => redirect('/client/dashboard'),
             default => redirect('/client/dashboard'),
         };
