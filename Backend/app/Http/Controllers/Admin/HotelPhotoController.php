@@ -27,7 +27,7 @@ class HotelPhotoController extends Controller
             Photo::create([
                 'entite_type' => 'hotel',
                 'entite_id' => $hotel->id,
-                'url_photo' => Storage::disk('s3')->url($path),
+                'url_photo' => $path,
                 'ordre' => $maxOrdre + $index + 1,
                 'est_principale' => false,
                 'uploaded_by' => auth()->id(),
@@ -44,10 +44,10 @@ class HotelPhotoController extends Controller
         $photo = Photo::forHotel($hotel->id)->where('id', $photoId)->firstOrFail();
 
         // Delete from S3
-        $urlPath = parse_url($photo->url_photo, PHP_URL_PATH);
-        if ($urlPath) {
-            Storage::disk('s3')->delete(ltrim($urlPath, '/'));
-        }
+        $s3Path = str_starts_with($photo->url_photo, 'http')
+            ? ltrim(parse_url($photo->url_photo, PHP_URL_PATH), '/')
+            : $photo->url_photo;
+        Storage::disk('s3')->delete($s3Path);
 
         $photo->delete();
 

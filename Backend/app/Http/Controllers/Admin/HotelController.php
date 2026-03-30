@@ -54,7 +54,10 @@ class HotelController extends Controller
 
     public function store(StoreHotelRequest $request)
     {
-        DB::transaction(function () use ($request) {
+        $adminUser = null;
+        $hotel = null;
+
+        DB::transaction(function () use ($request, &$hotel, &$adminUser) {
             // 1. Create hotel
             $hotel = Hotel::create([
                 'nom' => $request->nom,
@@ -84,18 +87,20 @@ class HotelController extends Controller
             // 4. Attach destination
             $hotel->destinations()->attach($request->destination_id);
 
-            // 5. Upload photos
-            if ($request->hasFile('photos')) {
+            // 5. Upload photos (only if S3 is configured)
+            if ($request->hasFile('photos') && config('filesystems.disks.s3.bucket')) {
                 foreach ($request->file('photos') as $index => $photo) {
                     $path = $photo->store("hotels/{$hotel->id}", 's3');
-                    Photo::create([
-                        'entite_type' => 'hotel',
-                        'entite_id' => $hotel->id,
-                        'url_photo' => Storage::disk('s3')->url($path),
-                        'ordre' => $index,
-                        'est_principale' => $index === 0,
-                        'uploaded_by' => auth()->id(),
-                    ]);
+                    if ($path) {
+                        Photo::create([
+                            'entite_type' => 'hotel',
+                            'entite_id' => $hotel->id,
+                            'url_photo' => $path,
+                            'ordre' => $index,
+                            'est_principale' => $index === 0,
+                            'uploaded_by' => auth()->id(),
+                        ]);
+                    }
                 }
             }
 
@@ -137,12 +142,17 @@ class HotelController extends Controller
                 'date_debut' => now(),
             ]);
 
-            // 10. Send credentials email via queue
-            SendHotelAdminCredentials::dispatch($adminUser, $hotel);
-
-            // 11. Log action
+            // 10. Log action
             $this->logAction('hotel_created', "Hôtel {$hotel->nom} créé (ID: {$hotel->id}). Admin: {$adminUser->email}");
         });
+
+        // Send credentials email OUTSIDE the transaction so a mail failure
+        // does not roll back the hotel creation.
+        try {
+            SendHotelAdminCredentials::dispatch($adminUser, $hotel);
+        } catch (\Throwable) {
+            // Email failure is non-blocking — hotel is already created.
+        }
 
         return redirect()->route('admin.hotels.index')
             ->with('success', 'Hôtel créé avec succès. Un email avec les identifiants a été envoyé à l\'administrateur.');

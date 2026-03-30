@@ -178,7 +178,7 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 @forelse($hotel->photos as $photo)
                     <div class="relative group rounded-xl overflow-hidden border border-gray-200">
-                        <img src="{{ Storage::disk('s3')->url($photo->url_photo) }}" alt="Photo hôtel"
+                        <img src="{{ $photo->url }}" alt="Photo hôtel"
                             class="h-40 w-full object-cover">
                         @if($photo->est_principale)
                             <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-hotel-600 text-white text-xs font-medium">Principale</span>

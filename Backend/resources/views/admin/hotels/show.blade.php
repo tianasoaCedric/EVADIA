@@ -13,7 +13,7 @@
         <div class="flex items-start gap-5">
             <div class="h-20 w-20 rounded-2xl bg-gradient-to-br from-evadia-100 to-evadia-200 overflow-hidden shrink-0">
                 @if($hotel->photos->first())
-                    <img src="{{ $hotel->photos->first()->url_photo }}" class="h-full w-full object-cover">
+                    <img src="{{ $hotel->photos->first()->url }}" class="h-full w-full object-cover">
                 @endif
             </div>
             <div class="flex-1">

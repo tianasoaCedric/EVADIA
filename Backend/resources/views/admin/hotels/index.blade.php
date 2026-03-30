@@ -45,7 +45,7 @@
                 <!-- Photo -->
                 <div class="h-40 bg-gradient-to-br from-evadia-100 to-evadia-200 relative overflow-hidden">
                     @if($hotel->photos->first())
-                        <img src="{{ $hotel->photos->first()->url_photo }}" alt="{{ $hotel->nom }}"
+                        <img src="{{ $hotel->photos->first()->url }}" alt="{{ $hotel->nom }}"
                             class="h-full w-full object-cover">
                     @else
                         <div class="flex items-center justify-center h-full">

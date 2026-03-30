@@ -122,7 +122,7 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     @foreach($propriete->photos->sortBy('ordre') as $photo)
                         <div class="relative group rounded-lg overflow-hidden aspect-square bg-gray-100">
-                            <img src="{{ Storage::disk('s3')->url($photo->url_photo) }}" class="h-full w-full object-cover">
+                            <img src="{{ $photo->url }}" class="h-full w-full object-cover">
                             @if($photo->est_principale)
                                 <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-hotel-600 text-white text-xs font-medium">Principale</span>
                             @endif
