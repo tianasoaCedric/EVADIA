@@ -1,6 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useLocale } from 'next-intl';
+import { changeLanguage } from '@/app/actions/language'; // Ajustez le chemin selon votre structure
+import { usePathname } from 'next/navigation';
 
 interface ToggleLangueProps {
   /** Langue actuelle */
@@ -29,17 +32,36 @@ const ToggleLangue = ({
   className = '',
   variant = 'default'
 }: ToggleLangueProps) => {
-  const [lang, setLang] = useState<'FR' | 'EN'>(currentLang)
+  const locale = useLocale(); // Récupérer la locale actuelle depuis next-intl
+  const pathname = usePathname(); // Récupérer le chemin actuel
+  const [lang, setLang] = useState<'FR' | 'EN'>(currentLang);
+  const [isLoading, setIsLoading] = useState(false);
 
+  // Synchroniser avec la locale de next-intl
   useEffect(() => {
-    setLang(currentLang)
-  }, [currentLang])
+    const newLang = locale.toUpperCase() as 'FR' | 'EN';
+    setLang(newLang);
+  }, [locale]);
 
-  const handleToggle = () => {
-    if (disabled) return
-    const newLang = lang === 'FR' ? 'EN' : 'FR'
-    setLang(newLang)
-    onToggle?.(newLang)
+  const handleToggle = async () => {
+    if (disabled || isLoading) return;
+    
+    setIsLoading(true);
+    const newLang = lang === 'FR' ? 'EN' : 'FR';
+    const newLocale = newLang.toLowerCase();
+    
+    try {
+      // Appeler l'action serveur pour changer la langue
+      await changeLanguage(newLocale, pathname);
+      
+      // Mettre à jour l'état local
+      setLang(newLang);
+      onToggle?.(newLang);
+    } catch (error) {
+      console.error('Erreur lors du changement de langue:', error);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   /**
@@ -82,7 +104,7 @@ const ToggleLangue = ({
         type="button"
         role="switch"
         aria-checked={isEN}
-        disabled={disabled}
+        disabled={disabled || isLoading}
         onClick={handleToggle}
         className={`
           relative inline-flex items-center
@@ -92,7 +114,7 @@ const ToggleLangue = ({
           bg-transparent
           transition-colors duration-200
           ${toggleSizeStyles[size].track}
-          ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+          ${disabled || isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         `}
       >
         <span
@@ -114,6 +136,7 @@ const ToggleLangue = ({
         ${toggleSizeStyles[size].text}
         ${variant === 'dark' ? 'text-gray-800' : 'text-[#F5F5F5]'}
         transition-colors duration-200
+        ${isLoading ? 'opacity-50' : ''}
       `}>
         {isEN ? 'EN' : 'FR'}
       </span>

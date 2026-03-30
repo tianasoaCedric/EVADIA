@@ -3,6 +3,8 @@ import type { Metadata } from 'next'
 import { Outfit } from 'next/font/google'
 import './globals.css'
 import Footer from './components/molecules/Footer'
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
 
 // Configuration correcte de la police Outfit
 const outfit = Outfit({
@@ -12,21 +14,21 @@ const outfit = Outfit({
   display: 'swap',
 })
 
-export const metadata: Metadata = {
-  title: 'Evadia',
-  description: 'Application Evadia',
-}
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  // Récupérer les messages pour la locale courante
+  const messages = await getMessages();
+  
   return (
     <html lang="fr" className={outfit.variable}>
       <body className="font-outfit">
-        {children}
-        {/* <Footer/> */}
+        <NextIntlClientProvider messages={messages}>
+          {children}
+          <Footer/> 
+        </NextIntlClientProvider>
       </body>
     </html>
   )

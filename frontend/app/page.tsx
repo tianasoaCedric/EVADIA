@@ -5,8 +5,10 @@ import Header from './components/molecules/Header'
 import RoomCard from './components/ui/RoomCard'
 import OfferCard from './components/ui/OfferCard'
 import DiscoverCard from './components/ui/DiscoverCard'
+import { useTranslations } from 'next-intl'
 
 export default function Home() {
+  const t = useTranslations('HomePage');
   const [language, setLanguage] = useState<'FR' | 'EN'>('FR')
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [userName, setUserName] = useState<string | null>(null)
@@ -72,7 +74,7 @@ export default function Home() {
         <div className='flex items-center justify-center h-screen gap-4'>
           <DiscoverCard
             imageUrl="/images/decouverte-maldives.jpg"
-            title="Parc National de Madagascar"
+            title={t('title')}
             href="/decouvertes/maldives"
           />
         </div>
