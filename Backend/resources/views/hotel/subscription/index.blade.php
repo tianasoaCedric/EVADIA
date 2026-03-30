@@ -13,11 +13,12 @@
             $isExpired = $daysLeft !== null && $daysLeft <= 0;
 
             $planColors = [
-                'basic' => ['from-gray-500', 'to-gray-700', 'bg-gray-50', 'text-gray-700', 'border-gray-200'],
-                'premium' => ['from-hotel-500', 'to-hotel-700', 'bg-hotel-50', 'text-hotel-700', 'border-hotel-200'],
-                'enterprise' => ['from-indigo-500', 'to-indigo-700', 'bg-indigo-50', 'text-indigo-700', 'border-indigo-200'],
+                'explore'   => ['from-gray-600',   'to-gray-800',   'bg-gray-50',   'text-gray-700',  'border-gray-200'],
+                'select'    => ['from-hotel-500',   'to-hotel-700',  'bg-hotel-50',  'text-hotel-700', 'border-hotel-200'],
+                'signature' => ['from-amber-500',   'to-amber-700',  'bg-amber-50',  'text-amber-700', 'border-amber-200'],
+                'premium'   => ['from-amber-500',   'to-amber-700',  'bg-amber-50',  'text-amber-700', 'border-amber-200'],
             ];
-            $colors = $planColors[strtolower($abonnementActif->type_abonnement)] ?? $planColors['basic'];
+            $colors = $planColors[strtolower($abonnementActif->type_abonnement)] ?? $planColors['explore'];
         @endphp
 
         <div class="rounded-2xl bg-gradient-to-r {{ $colors[0] }} {{ $colors[1] }} p-6 text-white relative overflow-hidden">
@@ -137,39 +138,45 @@
                 <svg class="h-4 w-4 text-hotel-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
                 </svg>
-                Plans disponibles
+                Nos offres d'abonnement
             </h3>
         </div>
         <div class="p-6">
+            @php
+                $checkIcon = '<svg class="h-4 w-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>';
+            @endphp
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {{-- Basic --}}
-                @php $isCurrentPlan = $abonnementActif && strtolower($abonnementActif->type_abonnement) === 'basic'; @endphp
-                <div class="relative rounded-xl border-2 {{ $isCurrentPlan ? 'border-hotel-500 bg-hotel-50/30' : 'border-gray-200' }} p-6 transition-all hover:shadow-md">
+
+                {{-- EXPLORE --}}
+                @php $isCurrentPlan = $abonnementActif && strtolower($abonnementActif->type_abonnement) === 'explore'; @endphp
+                <div class="relative rounded-xl border-2 {{ $isCurrentPlan ? 'border-hotel-500 bg-hotel-50/30' : 'border-gray-200' }} p-6 flex flex-col transition-all hover:shadow-md">
                     @if($isCurrentPlan)
                         <span class="absolute -top-3 left-4 inline-flex items-center rounded-full bg-hotel-600 px-3 py-0.5 text-xs font-semibold text-white">Plan actuel</span>
                     @endif
-                    <h4 class="text-lg font-bold text-gray-900">Basic</h4>
-                    <p class="text-sm text-gray-500 mt-1">Pour demarrer</p>
-                    <ul class="mt-4 space-y-2.5">
-                        <li class="flex items-center gap-2 text-sm text-gray-600">
-                            <svg class="h-4 w-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                            Gestion des chambres
+                    <div class="mb-4">
+                        <div class="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600 mb-3">
+                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+                            EXPLORE
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-900">Explore</h4>
+                        <p class="text-sm text-gray-500 mt-1">Visibilité essentielle sur la plateforme</p>
+                    </div>
+                    <ul class="space-y-3 flex-1">
+                        <li class="flex items-start gap-2 text-sm text-gray-700">
+                            {!! $checkIcon !!}
+                            <span>Intégration sur le <strong>site web</strong> EVADIA</span>
                         </li>
-                        <li class="flex items-center gap-2 text-sm text-gray-600">
-                            <svg class="h-4 w-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                            Reservations en ligne
+                        <li class="flex items-start gap-2 text-sm text-gray-700">
+                            {!! $checkIcon !!}
+                            <span>Intégration sur l'<strong>application mobile</strong> EVADIA</span>
                         </li>
-                        <li class="flex items-center gap-2 text-sm text-gray-600">
-                            <svg class="h-4 w-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                            Calendrier de disponibilites
+                        <li class="flex items-start gap-2 text-sm text-gray-400">
+                            <svg class="h-4 w-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                            <span>Espace publicitaire pour les offres spéciales</span>
                         </li>
-                        <li class="flex items-center gap-2 text-sm text-gray-400">
-                            <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                            Messagerie temps reel
-                        </li>
-                        <li class="flex items-center gap-2 text-sm text-gray-400">
-                            <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                            Offres et promotions
+                        <li class="flex items-start gap-2 text-sm text-gray-400">
+                            <svg class="h-4 w-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                            <span>Sélection d'hébergements mise en avant</span>
                         </li>
                     </ul>
                     @if(!$isCurrentPlan)
@@ -180,36 +187,38 @@
                     @endif
                 </div>
 
-                {{-- Premium --}}
-                @php $isCurrentPlan = $abonnementActif && strtolower($abonnementActif->type_abonnement) === 'premium'; @endphp
-                <div class="relative rounded-xl border-2 {{ $isCurrentPlan ? 'border-hotel-500 bg-hotel-50/30' : 'border-hotel-200' }} p-6 transition-all hover:shadow-md">
+                {{-- SELECT --}}
+                @php $isCurrentPlan = $abonnementActif && strtolower($abonnementActif->type_abonnement) === 'select'; @endphp
+                <div class="relative rounded-xl border-2 {{ $isCurrentPlan ? 'border-hotel-500 bg-hotel-50/30' : 'border-hotel-300' }} p-6 flex flex-col transition-all hover:shadow-md">
                     @if($isCurrentPlan)
                         <span class="absolute -top-3 left-4 inline-flex items-center rounded-full bg-hotel-600 px-3 py-0.5 text-xs font-semibold text-white">Plan actuel</span>
                     @else
-                        <span class="absolute -top-3 left-4 inline-flex items-center rounded-full bg-amber-500 px-3 py-0.5 text-xs font-semibold text-white">Recommande</span>
+                        <span class="absolute -top-3 left-4 inline-flex items-center rounded-full bg-hotel-500 px-3 py-0.5 text-xs font-semibold text-white">Populaire</span>
                     @endif
-                    <h4 class="text-lg font-bold text-gray-900">Premium</h4>
-                    <p class="text-sm text-gray-500 mt-1">Le plus populaire</p>
-                    <ul class="mt-4 space-y-2.5">
-                        <li class="flex items-center gap-2 text-sm text-gray-600">
-                            <svg class="h-4 w-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                            Tout du plan Basic
+                    <div class="mb-4">
+                        <div class="inline-flex items-center gap-1.5 rounded-full bg-hotel-100 px-3 py-1 text-xs font-semibold text-hotel-700 mb-3">
+                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
+                            SELECT
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-900">Select</h4>
+                        <p class="text-sm text-gray-500 mt-1">Visibilité et mise en avant des offres</p>
+                    </div>
+                    <ul class="space-y-3 flex-1">
+                        <li class="flex items-start gap-2 text-sm text-gray-700">
+                            {!! $checkIcon !!}
+                            <span>Intégration sur le <strong>site web</strong> EVADIA</span>
                         </li>
-                        <li class="flex items-center gap-2 text-sm text-gray-600">
-                            <svg class="h-4 w-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                            Messagerie temps reel
+                        <li class="flex items-start gap-2 text-sm text-gray-700">
+                            {!! $checkIcon !!}
+                            <span>Intégration sur l'<strong>application mobile</strong> EVADIA</span>
                         </li>
-                        <li class="flex items-center gap-2 text-sm text-gray-600">
-                            <svg class="h-4 w-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                            Offres et promotions
+                        <li class="flex items-start gap-2 text-sm text-gray-700">
+                            {!! $checkIcon !!}
+                            <span><strong>Espace publicitaire</strong> pour les offres spéciales</span>
                         </li>
-                        <li class="flex items-center gap-2 text-sm text-gray-600">
-                            <svg class="h-4 w-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                            Tarification dynamique
-                        </li>
-                        <li class="flex items-center gap-2 text-sm text-gray-400">
-                            <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                            Support prioritaire
+                        <li class="flex items-start gap-2 text-sm text-gray-400">
+                            <svg class="h-4 w-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                            <span>Sélection d'hébergements mise en avant</span>
                         </li>
                     </ul>
                     @if(!$isCurrentPlan)
@@ -220,39 +229,45 @@
                     @endif
                 </div>
 
-                {{-- Enterprise --}}
-                @php $isCurrentPlan = $abonnementActif && strtolower($abonnementActif->type_abonnement) === 'enterprise'; @endphp
-                <div class="relative rounded-xl border-2 {{ $isCurrentPlan ? 'border-hotel-500 bg-hotel-50/30' : 'border-gray-200' }} p-6 transition-all hover:shadow-md">
+                {{-- SIGNATURE --}}
+                @php $isCurrentPlan = $abonnementActif && in_array(strtolower($abonnementActif->type_abonnement), ['signature', 'premium']); @endphp
+                <div class="relative rounded-xl border-2 {{ $isCurrentPlan ? 'border-hotel-500 bg-hotel-50/30' : 'border-gray-200' }} p-6 flex flex-col transition-all hover:shadow-md">
                     @if($isCurrentPlan)
                         <span class="absolute -top-3 left-4 inline-flex items-center rounded-full bg-hotel-600 px-3 py-0.5 text-xs font-semibold text-white">Plan actuel</span>
                     @endif
-                    <h4 class="text-lg font-bold text-gray-900">Enterprise</h4>
-                    <p class="text-sm text-gray-500 mt-1">Pour les grandes structures</p>
-                    <ul class="mt-4 space-y-2.5">
-                        <li class="flex items-center gap-2 text-sm text-gray-600">
-                            <svg class="h-4 w-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                            Tout du plan Premium
+                    <div class="mb-4">
+                        <div class="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700 mb-3">
+                            <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L9 9H1l7 5.5L5.5 23 12 18l6.5 5L16 14.5 23 9h-8L12 1z"/></svg>
+                            SIGNATURE
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-900">Signature</h4>
+                        <p class="text-sm text-gray-500 mt-1">Visibilité maximale et prestige</p>
+                    </div>
+                    <ul class="space-y-3 flex-1">
+                        <li class="flex items-start gap-2 text-sm text-gray-700">
+                            {!! $checkIcon !!}
+                            <span>Intégration sur le <strong>site web</strong> EVADIA</span>
                         </li>
-                        <li class="flex items-center gap-2 text-sm text-gray-600">
-                            <svg class="h-4 w-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                            Support prioritaire 24/7
+                        <li class="flex items-start gap-2 text-sm text-gray-700">
+                            {!! $checkIcon !!}
+                            <span>Intégration sur l'<strong>application mobile</strong> EVADIA</span>
                         </li>
-                        <li class="flex items-center gap-2 text-sm text-gray-600">
-                            <svg class="h-4 w-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                            API acces complet
+                        <li class="flex items-start gap-2 text-sm text-gray-700">
+                            {!! $checkIcon !!}
+                            <span>Espace publicitaire offres spéciales sur le <strong>site web</strong></span>
                         </li>
-                        <li class="flex items-center gap-2 text-sm text-gray-600">
-                            <svg class="h-4 w-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                            Rapports avances
+                        <li class="flex items-start gap-2 text-sm text-gray-700">
+                            {!! $checkIcon !!}
+                            <span>Espace publicitaire offres spéciales sur l'<strong>application mobile</strong></span>
                         </li>
-                        <li class="flex items-center gap-2 text-sm text-gray-600">
-                            <svg class="h-4 w-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                            Multi-etablissements
+                        <li class="flex items-start gap-2 text-sm text-gray-700">
+                            {!! $checkIcon !!}
+                            <span><strong>Sélection d'hébergements</strong> mise en avant (site web & app)</span>
                         </li>
                     </ul>
                     @if(!$isCurrentPlan)
                         <a href="{{ route('hotel.messages.index') }}"
-                            class="mt-6 block w-full text-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                            class="mt-6 block w-full text-center rounded-lg border border-amber-400 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-700 hover:bg-amber-100 transition-colors">
                             Demander ce plan
                         </a>
                     @endif
@@ -260,7 +275,7 @@
             </div>
 
             <p class="mt-6 text-center text-xs text-gray-400">
-                Pour changer de plan ou obtenir un devis, contactez l'equipe EVADIA via la messagerie.
+                Pour changer de plan, contactez l'équipe EVADIA via la messagerie.
             </p>
         </div>
     </div>
