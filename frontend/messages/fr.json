@@ -2,8 +2,37 @@
   "HomePage": {
     "title": "Merci bcp nous aimerions travailler avec vous"
   },
+  "Login": {
+    "title": "Se connecter",
+    "subtitle": "Accédez à votre compte Evadia",
+    "email": "Entrez votre adresse email",
+    "email_placeholder": "vous@exemple.com",
+    "password": "Entrez votre mot de passe",
+    "password_placeholder": "••••••••",
+    "forgot_password": "Mot de passe oublié ?",
+    "or_continue": "Continuer avec",
+    "no_account": "Vous n’avez pas de compte ?",
+    "signup": "S’inscrire",
+    "meta_title": "Se connecter | Evadia",
+    "meta_description": "Log in to your Evadia account to manage your bookings and enjoy personalized offers.",
+    "meta_keywords": "login, sign in, Evadia, account, travel"
+  },
+  "Register": {
+    "title": "S'inscrire",
+    "first_name": "Prénom",
+    "last_name": "Nom",
+    "email": "Entrez votre adresse email",
+    "password": "Entrez votre mot de passe",
+    "confirm_password": "Confirmer le mot de passe",
+    "or_continue": "Continuer avec",
+    "have_account": "Vous avez déjà un compte ?",
+    "login": "Se connecter",
+    "meta_title": "S'inscrire - Evadia",
+    "meta_description": "Créez votre compte Evadia pour accéder à toutes les fonctionnalités de la plateforme",
+    "meta_keywords": "inscription, compte, Evadia, créer un compte"
+  },
   "Bouton": {
-    "login": "Dormir",
+    "login": "Se connecter",
     "register": "S'inscrire"
   }
 }

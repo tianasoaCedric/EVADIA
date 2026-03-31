@@ -60,17 +60,17 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       light: {
         background: "bg-[#F5F5F5]",
         backgroundHover: "hover:bg-[#E8E8E8]",
-        text: "text-gray-800",           // Texte gris foncé
-        placeholder: "placeholder:text-gray-800",
-        iconColor: "text-gray-800",      // Icône grise pour le mode light
+        text: "font-light text-gray-800",           // Texte gris foncé
+        placeholder: "font-light placeholder:text-gray-800",
+        iconColor: "font-light text-gray-800",      // Icône grise pour le mode light
         border: "border border-white/10",
         focusRing: "focus:ring-1 focus:ring-[#F5F5F5] focus:ring-opacity-50"
       },
       default: {
         background: "bg-[#F5F5F5]/20",   // 20% d'opacité
         backgroundHover: "hover:bg-[#F5F5F5]/30",
-        text: "text-[#F5F5F5]",          // Texte blanc/crème
-        placeholder: "placeholder:text-[#F5F5F5]",
+        text: "font-light text-[#F5F5F5]",          // Texte blanc/crème
+        placeholder: "font-light placeholder:text-[#F5F5F5]",
         iconColor: "text-[#F5F5F5]",     // Icône de la même couleur que le texte
         border: "border border-white/10",
         focusRing: "focus:ring-1 focus:ring-[#F5F5F5] focus:ring-opacity-50"
