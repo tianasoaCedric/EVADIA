@@ -8,7 +8,7 @@
             Retour au profil</a>
     </div>
 
-    <div class="max-w-2xl">
+    <div class="max-w-2xl mx-auto">
         <form method="POST" action="{{ route('admin.users.update', $user) }}" class="space-y-6">
             @csrf @method('PUT')
 

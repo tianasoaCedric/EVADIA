@@ -8,7 +8,7 @@
             class="text-sm text-evadia-600 hover:text-evadia-700 font-medium">← Retour</a>
     </div>
 
-    <div class="max-w-2xl">
+    <div class="max-w-2xl mx-auto">
         <form method="POST" action="{{ route('admin.subscriptions.store') }}"
             class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 space-y-4">
             @csrf

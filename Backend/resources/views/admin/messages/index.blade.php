@@ -24,9 +24,15 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between">
-                        <p class="text-sm font-medium text-gray-900 truncate">
-                            {{ $conv->interlocuteur?->prenom }} {{ $conv->interlocuteur?->nom }}
-                        </p>
+                        <div class="flex items-center gap-2 min-w-0">
+                            <p class="text-sm font-medium text-gray-900 truncate">
+                                {{ $conv->interlocuteur?->prenom }} {{ $conv->interlocuteur?->nom }}
+                            </p>
+                            @php $hotel = $conv->interlocuteur?->hotelAdmins?->first()?->hotel @endphp
+                            @if($hotel)
+                                <span class="shrink-0 rounded-full bg-evadia-100 px-2 py-0.5 text-[11px] font-medium text-evadia-700">{{ $hotel->nom }}</span>
+                            @endif
+                        </div>
                         <span class="text-xs text-gray-400">{{ $conv->dernier_message?->date_envoi?->diffForHumans() }}</span>
                     </div>
                     <p class="text-xs text-gray-500 truncate mt-0.5">

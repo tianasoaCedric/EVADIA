@@ -3,14 +3,14 @@
 @section('page_title', 'Créer un hôtel')
 
 @section('content')
-    <div class="mb-6">
+    <div class="max-w-3xl mx-auto mb-6">
         <a href="{{ route('admin.hotels.index') }}" class="text-sm text-evadia-600 hover:text-evadia-700 font-medium">←
             Retour à la liste</a>
     </div>
 
-    <div x-data="hotelForm()" class="max-w-3xl">
+    <div x-data="hotelForm()" class="max-w-3xl mx-auto">
         <!-- Step Indicator -->
-        <div class="flex items-center gap-2 mb-8">
+        <div class="flex items-center justify-center gap-2 mb-8">
             <template x-for="(label, i) in ['Infos générales', 'Adresse', 'Photos', 'Administrateur']" :key="i">
                 <div class="flex items-center gap-2">
                     <button @click="step = i + 1" type="button"

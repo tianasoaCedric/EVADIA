@@ -8,7 +8,7 @@
             Retour</a>
     </div>
 
-    <div class="max-w-3xl">
+    <div class="max-w-3xl mx-auto">
         <form method="POST" action="{{ route('admin.offers.store') }}" x-data="offreForm()" class="space-y-6">
             @csrf
             <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 space-y-4">

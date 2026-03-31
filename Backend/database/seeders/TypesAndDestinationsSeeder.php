@@ -25,26 +25,11 @@ class TypesAndDestinationsSeeder extends Seeder
 
         // Destinations
         $destinations = [
-            ['nom' => 'Paris', 'description' => 'Capitale française'],
-            ['nom' => 'Côte d\'Azur', 'description' => 'Riviera française'],
-            ['nom' => 'Alpes françaises', 'description' => 'Stations de montagne'],
-            ['nom' => 'Bretagne', 'description' => 'Côte atlantique bretonne'],
-            ['nom' => 'Provence', 'description' => 'Sud de la France'],
-            ['nom' => 'Bordeaux', 'description' => 'Région viticole'],
-            ['nom' => 'Lyon', 'description' => 'Capitale gastronomique'],
-            ['nom' => 'Barcelone', 'description' => 'Capitale catalane'],
-            ['nom' => 'Madrid', 'description' => 'Capitale espagnole'],
-            ['nom' => 'Rome', 'description' => 'Ville éternelle'],
-            ['nom' => 'Milan', 'description' => 'Capitale de la mode'],
-            ['nom' => 'Marrakech', 'description' => 'Ville impériale'],
-            ['nom' => 'Agadir', 'description' => 'Station balnéaire atlantique'],
-            ['nom' => 'Dakar', 'description' => 'Capitale sénégalaise'],
-            ['nom' => 'Abidjan', 'description' => 'Capitale économique ivoirienne'],
-            ['nom' => 'Dubaï', 'description' => 'Métropole du luxe'],
-            ['nom' => 'New York', 'description' => 'La ville qui ne dort jamais'],
-            ['nom' => 'Bali', 'description' => 'Île des dieux'],
-            ['nom' => 'Maldives', 'description' => 'Archipel paradisiaque'],
-            ['nom' => 'La Réunion', 'description' => 'Île de la Réunion'],
+            ['nom' => 'Nord', 'description' => ''],
+            ['nom' => 'Sud', 'description' => ''],
+            ['nom' => 'Est', 'description' => ''],
+            ['nom' => 'Ouest', 'description' => ''],
+            ['nom' => 'Hautes terres centrales', 'description' => ''],
         ];
 
         foreach ($destinations as $dest) {
