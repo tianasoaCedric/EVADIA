@@ -34,37 +34,42 @@ const CardDestination = ({
 }: CardDestinationProps) => {
   
   const hoverStyles = {
-    zoom: 'hover:scale-105',
-    darken: 'hover:brightness-75',
+    zoom: 'group-hover:scale-110',
+    darken: 'group-hover:brightness-75',
     none: ''
   }
 
   const cardContent = (
     <div
       className={`
-        relative rounded-xl overflow-hidden hover:shadow-xl
+        relative rounded-3xl overflow-hidden
         ${height} ${width}
         transition-all duration-300
-        ${hoverStyles[hoverEffect]}
         cursor-pointer
         shadow-md hover:shadow-xl
+        group
       `}
     >
-      {/* Image de fond */}
-      <Image
-        src={imageUrl}
-        alt={alt || title}
-        fill
-        className="object-cover"
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-      />
+      {/* Conteneur de l'image avec overflow hidden pour le zoom */}
+      <div className="relative w-full h-full overflow-hidden">
+        <Image
+          src={imageUrl}
+          alt={alt || title}
+          fill
+          className={`
+            object-cover transition-transform duration-500 ease-out
+            ${hoverEffect === 'zoom' ? hoverStyles.zoom : ''}
+          `}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        />
+      </div>
       
       {/* Overlay sombre pour améliorer la lisibilité du texte */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-300 group-hover:opacity-90" />
       
       {/* Nom de la destination en bas à gauche */}
       <div className="absolute bottom-0 left-0 p-4">
-        <h3 className="text-white font-regular text-lg md:text-md lg:text-xl drop-shadow-lg">
+        <h3 className="text-white font-regular text-lg md:text-md lg:text-xl drop-shadow-lg transition-transform duration-300 group-hover:translate-y-[-2px]">
           {title}
         </h3>
       </div>

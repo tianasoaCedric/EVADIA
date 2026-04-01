@@ -49,6 +49,9 @@ body {
   font-weight: 900;
 }
 
+/* ==================== ANIMATIONS D'APPARITION AU SCROLL ==================== */
+
+/* Animation fade-in simple */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -58,7 +61,8 @@ body {
   }
 }
 
-@keyframes slideUp {
+/* Animation fade-in avec translation vers le haut */
+@keyframes fadeInUp {
   from {
     opacity: 0;
     transform: translateY(30px);
@@ -69,10 +73,140 @@ body {
   }
 }
 
+/* Animation slide-in depuis la gauche */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Animation slide-in depuis la droite */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Animation zoom-in */
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Animation apparition avec rebond léger */
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Classes d'animations */
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out forwards;
 }
 
-.animate-slide-up {
-  animation: slideUp 0.5s ease-out forwards;
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.6s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.6s ease-out forwards;
+}
+
+.animate-zoom-in {
+  animation: zoomIn 0.5s ease-out forwards;
+}
+
+.animate-bounce-in {
+  animation: bounceIn 0.6s ease-out forwards;
+}
+
+/* Délais d'animation */
+.delay-0 {
+  animation-delay: 0s;
+}
+.delay-100 {
+  animation-delay: 0.1s;
+}
+.delay-200 {
+  animation-delay: 0.2s;
+}
+.delay-300 {
+  animation-delay: 0.3s;
+}
+.delay-400 {
+  animation-delay: 0.4s;
+}
+.delay-500 {
+  animation-delay: 0.5s;
+}
+.delay-600 {
+  animation-delay: 0.6s;
+}
+.delay-700 {
+  animation-delay: 0.7s;
+}
+.delay-800 {
+  animation-delay: 0.8s;
+}
+.delay-900 {
+  animation-delay: 0.9s;
+}
+.delay-1000 {
+  animation-delay: 1s;
+}
+
+/* Durées d'animation personnalisées */
+.duration-300 {
+  animation-duration: 0.3s;
+}
+.duration-500 {
+  animation-duration: 0.5s;
+}
+.duration-700 {
+  animation-duration: 0.7s;
+}
+.duration-1000 {
+  animation-duration: 1s;
+}
+
+/* ==================== UTILITAIRES ==================== */
+
+/* Cache la scrollbar pour Chrome, Safari et Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Cache la scrollbar pour IE, Edge et Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
 }

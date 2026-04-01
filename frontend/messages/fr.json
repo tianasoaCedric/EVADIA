@@ -7,7 +7,8 @@
     "hero_subtitle": "Réservez vos hôtels, trouvez les meilleures offres et vivez des expériences inoubliables aux quatre coins du globe.",
     "download_app": "Téléchargez l'application",
     "ios": "iOS",
-    "android": "Android"
+    "android": "Android",
+    "popular":"Les destinations populaires"
   },
   "Login": {
     "title": "Se connecter",
