@@ -1,6 +1,13 @@
 {
   "HomePage": {
-    "title": "Thank you very much we would like to work with you"
+    "meta_title": "Evadia - Discover the world and book your trips",
+    "meta_description": "Book your hotels, find the best deals and enjoy unforgettable experiences around the world with Evadia.",
+    "meta_keywords": "travel, hotel, reservation, Evadia, destination, offer",
+    "hero_title": "Discover the world with Evadia",
+    "hero_subtitle": "Book your hotels, find the best deals and enjoy unforgettable experiences across the globe.",
+    "download_app": "Download the app",
+    "ios": "iOS",
+    "android": "Android"
   },
   "Login": {
     "title": "Log in",

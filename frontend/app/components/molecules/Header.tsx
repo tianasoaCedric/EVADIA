@@ -50,27 +50,47 @@ const Header = ({
     const [isMobile, setIsMobile] = useState(false)
     const [isAnimating, setIsAnimating] = useState(false)
     const [isSliding, setIsSliding] = useState(false)
+    const [isScrolled, setIsScrolled] = useState(false) // État pour détecter le scroll
 
-    const activeTheme = isMenuOpen ? 'default' : theme
+    // Détecter le scroll
+    useEffect(() => {
+        const handleScroll = () => {
+            const scrollPosition = window.scrollY
+            setIsScrolled(scrollPosition > 50) // Change après 50px de scroll
+        }
+
+        window.addEventListener('scroll', handleScroll)
+        return () => window.removeEventListener('scroll', handleScroll)
+    }, [])
 
     // Détecter la taille de l'écran pour le responsive
     useEffect(() => {
         const checkMobile = () => {
-            setIsMobile(window.innerWidth < 768) // 768px = breakpoint md
+            setIsMobile(window.innerWidth < 768)
         }
         checkMobile()
         window.addEventListener('resize', checkMobile)
         return () => window.removeEventListener('resize', checkMobile)
     }, [])
 
+    // Déterminer le thème actif :
+    // - Si le menu est ouvert : toujours 'default'
+    // - Si scrollé : 'dark'
+    // - Sinon : thème initial
+    const getActiveTheme = () => {
+        if (isMenuOpen) return 'default'
+        if (isScrolled) return 'dark'
+        return theme
+    }
+
+    const activeTheme = getActiveTheme()
+
     const handleMenuClick = () => {
         if (!isMenuOpen) {
-            // Ouverture du menu
             setIsSliding(true)
             setIsMenuOpen(true)
             setTimeout(() => setIsSliding(false), 300)
         } else {
-            // Fermeture du menu
             setIsSliding(true)
             setIsMenuOpen(false)
             setTimeout(() => setIsSliding(false), 300)
@@ -102,15 +122,17 @@ const Header = ({
             logoText: "text-gray-800",
             searchButton: "text-white hover:text-gray-300 hover:bg-white/10",
             searchInput: "default",
-            iconColor: "white"
+            iconColor: "white",
+            border: "border-transparent"
         },
         dark: {
-            header: "bg-gray-900/80 backdrop-blur-md border-b border-gray-800",
-            menuButton: "text-gray-800 hover:text-gray-300",
+            header: "bg-white/95 backdrop-blur-md border-gray-200",
+            menuButton: "text-gray-800 hover:text-[#01BDA5]",
             logoText: "text-white",
-            searchButton: "text-gray-800 hover:text-gray-300 hover:bg-gray-800",
-            searchInput: "dark",
-            iconColor: "black"
+            searchButton: "text-gray-800 hover:text-[#01BDA5] hover:bg-gray-100",
+            searchInput: "light",
+            iconColor: "black",
+            border: "border-gray-200"
         }
     }
 
@@ -125,10 +147,11 @@ const Header = ({
                 theme={theme === 'default' ? 'light' : 'light'}
             />
 
-            <header className={`fixed top-0 left-0 right-0 z-50 w-full`}>
+            <header className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${currentTheme.header} ${isScrolled ? 'shadow-sm' : ''}`}>
                 {/* Conteneur qui glisse de bas en haut */}
                 <div className={`
                     transition-transform duration-300 ease-out
+                    ${isSliding ? 'shadow-md':'' }
                     ${isSliding && isMenuOpen ? '-translate-y-2' : 'translate-y-0'}
                 `}>
                     <div className="container mx-auto px-4">
@@ -220,7 +243,7 @@ const Header = ({
                                 {/* Icône de recherche */}
                                 <button
                                     onClick={handleSearchToggle}
-                                    className={`p-2 transition-colors duration-200 rounded-full cursor-pointer ${currentTheme.searchButton} hover:bg-white`}
+                                    className={`p-2 transition-all duration-200 rounded-full cursor-pointer ${currentTheme.searchButton}`}
                                     aria-label="Rechercher"
                                 >
                                     <svg
@@ -270,7 +293,7 @@ const Header = ({
                                             </svg>
                                         }
                                         fullWidth
-                                        variant={currentTheme.searchInput === 'dark' ? 'light' : 'default'}
+                                        variant={activeTheme === 'dark' ? 'light' : 'default'}
                                         placeholderPosition="left"
                                     />
                                 </form>
@@ -278,9 +301,13 @@ const Header = ({
                         )}
                     </div>
                     <div className={`
-                        absolute bottom-0 left-0 right-0 h-[1px] bg-white/50
+                        absolute bottom-0 left-0 right-0 h-[1px] 
                         transition-all duration-300 ease-out
-                        ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-[-2px]'}
+                        ${isMenuOpen 
+                            ? 'opacity-100 translate-y-0 bg-white/50' 
+                            : 'opacity-0 translate-y-[-2px]'
+                        }
+                        ${activeTheme === 'dark' && !isMenuOpen ? 'bg-gray-200' : ''}
                     `} />
                 </div>
             </header>

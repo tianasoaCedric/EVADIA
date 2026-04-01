@@ -1,6 +1,13 @@
 {
   "HomePage": {
-    "title": "Merci bcp nous aimerions travailler avec vous"
+    "meta_title": "Evadia - Découvrez le monde et réservez vos voyages",
+    "meta_description": "Réservez vos hôtels, trouvez les meilleures offres et vivez des expériences inoubliables aux quatre coins du globe avec Evadia.",
+    "meta_keywords": "voyage, hôtel, réservation, Evadia, destination, offre",
+    "hero_title": "Découvrez le monde avec Evadia",
+    "hero_subtitle": "Réservez vos hôtels, trouvez les meilleures offres et vivez des expériences inoubliables aux quatre coins du globe.",
+    "download_app": "Téléchargez l'application",
+    "ios": "iOS",
+    "android": "Android"
   },
   "Login": {
     "title": "Se connecter",
