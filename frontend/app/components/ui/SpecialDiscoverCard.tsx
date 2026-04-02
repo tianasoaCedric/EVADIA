@@ -30,7 +30,7 @@ const SpecialDiscoverCard = ({
   href,
   alt = '',
   className = '',
-  width = 'w-full sm:w-86 md:w-86',
+  width = 'sm:w-86 md:w-86',
   imageHeight = 'h-64 sm:h-72',
   onClick
 }: SpecialDiscoverCardProps) => {

@@ -408,7 +408,7 @@ export default function HomePage() {
                         </div>
 
                         {/* Version desktop : grille */}
-                        <div className="hidden md:flex md:flex-wrap md:justify-between md:gap-12">
+                        <div className="hidden md:flex md:flex-wrap md:justify-center md:gap-24 ">
                             {specialOffers.map((offer, index) => (
                                 index === 1 ? (
                                     <div key={offer.id}>
@@ -502,9 +502,9 @@ export default function HomePage() {
                         </div>
 
                         {/* Version desktop : grille 3 cartes */}
-                        <div className="hidden md:flex md:justify-between md:gap-8 lg:gap-12">
+                        <div className="hidden md:flex md:justify-center md:gap-16 lg:gap-24">
                             {specialDiscoverItems.map((item) => (
-                                <div key={item.id} className="w-[240px] lg:w-[320px]">
+                                <div key={item.id} className="flex-shrink-0 w-[280px] p-2">
                                     <SpecialDiscoverCard
                                         imageUrl={item.imageUrl}
                                         title={item.title}
