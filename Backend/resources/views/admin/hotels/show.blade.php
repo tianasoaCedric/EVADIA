@@ -5,7 +5,11 @@
 @section('content')
     <div class="mb-6 flex items-center justify-between">
         <a href="{{ route('admin.hotels.index') }}" class="text-sm text-evadia-600 hover:text-evadia-700 font-medium">← Retour à la liste</a>
-        <a href="{{ route('admin.hotels.edit', $hotel) }}" class="rounded-xl bg-evadia-600 px-4 py-2 text-sm font-medium text-white hover:bg-evadia-700 transition-colors">Modifier</a>
+        @if($hotel->currentStatut?->statut !== 'actif')
+            <a href="{{ route('admin.hotels.edit', $hotel) }}" class="rounded-xl bg-evadia-600 px-4 py-2 text-sm font-medium text-white hover:bg-evadia-700 transition-colors">Modifier</a>
+        @else
+            <span class="rounded-xl bg-gray-100 px-4 py-2 text-sm font-medium text-gray-400 cursor-not-allowed" title="L'hôtel est actif, les modifications sont désactivées">Modifier</span>
+        @endif
     </div>
 
     <!-- Header Card -->

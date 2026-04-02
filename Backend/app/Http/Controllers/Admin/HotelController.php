@@ -182,7 +182,13 @@ class HotelController extends Controller
 
     public function edit(Hotel $hotel)
     {
-        $hotel->load(['adresse', 'types', 'destinations']);
+        $hotel->load(['adresse', 'types', 'destinations', 'currentStatut']);
+
+        if ($hotel->currentStatut?->statut === 'actif') {
+            return redirect()->route('admin.hotels.show', $hotel)
+                ->with('error', 'Cet hôtel est actif et ne peut plus être modifié depuis le back-office.');
+        }
+
         $types = TypesHotel::all();
         $destinations = Destination::all();
 
@@ -191,6 +197,12 @@ class HotelController extends Controller
 
     public function update(UpdateHotelRequest $request, Hotel $hotel)
     {
+        $hotel->load('currentStatut');
+
+        if ($hotel->currentStatut?->statut === 'actif') {
+            return redirect()->route('admin.hotels.show', $hotel)
+                ->with('error', 'Cet hôtel est actif et ne peut plus être modifié depuis le back-office.');
+        }
         DB::transaction(function () use ($request, $hotel) {
             $hotel->update($request->only([
                 'nom',
