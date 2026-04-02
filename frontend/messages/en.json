@@ -46,5 +46,12 @@
   "Bouton": {
     "login": "Log in",
     "register": "Register"
+  },
+  "SpecialOffres": {
+    "offer": "Special offers",
+    "description": "Non-refundable offer from"
+  },
+  "SpecialDiscover": {
+    "cta": "Learn more"
   }
 }

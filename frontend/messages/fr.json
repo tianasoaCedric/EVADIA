@@ -46,5 +46,13 @@
   "Bouton": {
     "login": "Se connecter",
     "register": "S'inscrire"
+  },
+  "SpecialOffres": {
+    "offer": "Offres spéciales",
+    "description": "Offre non remboursable du"
+  },
+  "SpecialDiscover" : {
+    "cta" : "En savoir plus"
   }
+
 }

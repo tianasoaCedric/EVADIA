@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { ChevronLeft, ChevronRight, Tag } from 'lucide-react'
 
 interface SpecialOfferCardProps {
@@ -51,7 +52,7 @@ const SpecialOfferCard = ({
 }: SpecialOfferCardProps) => {
   const [imageError, setImageError] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  
+  const t = useTranslations('SpecialOffres')
   // Convertir en tableau si une seule image est fournie
   const images = Array.isArray(imageUrl) ? imageUrl : [imageUrl]
   const hasMultipleImages = images.length > 1
@@ -158,14 +159,14 @@ const SpecialOfferCard = ({
         <div className="mb-3">
           <div className="inline-flex items-center gap-1.5 bg-[#01BDA5] text-white px-3 py-1.5 rounded-full">
             <Tag className="w-4 h-4" />
-            <span className="font-semibold text-sm">Offre spéciale -{discount}%</span>
+            <span className="font-semibold text-sm">{t('offer')} -{discount}%</span>
           </div>
         </div>
 
         {/* Période de l'offre avec mention non remboursable */}
         <div className="mb-3 gap-1 border-b border-[#01BDA5] pb-2">
           <span className="text-sm text-[#01BDA5]">
-            Offres non remboursables du <span className="text-sm text-gray-600">
+            {t('description')} <span className="text-sm text-gray-600">
              {startDay} au {endDay} {month}
           </span>
           </span>
