@@ -75,13 +75,19 @@ const SpecialOfferCard = ({
     'rounded-top-left-bottom-right': 'rounded-tl-[4rem] rounded-br-[4rem] rounded-tr-2xl rounded-bl-2xl'
   }
 
+  const containerRadiusStyles = {
+    'rounded-all': 'rounded-2xl',
+    'rounded-top-right-bottom-left': 'rounded-tr-[4rem] rounded-bl-2xl rounded-tl-2xl rounded-br-2xl',
+    'rounded-top-left-bottom-right': 'rounded-tl-[4rem] rounded-br-2xl rounded-tr-2xl rounded-bl-2xl'
+  }
+
   const cardContent = (
     <div className={`
       bg-white overflow-hidden 
       transition-all duration-300 hover:-translate-y-1 hover:shadow-xl
-      flex flex-col
+      flex flex-col ${containerRadiusStyles[borderRadius]}
       ${width}
-      ${borderRadiusStyles[borderRadius]}
+      
       ${className}
     `}>
       {/* Carrousel d'images */}

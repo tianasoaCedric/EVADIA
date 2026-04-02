@@ -8,7 +8,11 @@
     "download_app": "Téléchargez l'application",
     "ios": "iOS",
     "android": "Android",
-    "popular":"Les destinations populaires"
+    "popular":"Les destinations populaires",
+    "offer" : "NOS OFFRES EXCLUSIVES",
+    "see_offer" : "Voir toutes les offres",
+    "discover" : "MADAGASCAR Experiences",
+    "discover_description" : "Découvrez et expérimentez les biodiversités uniques de Madagascar"
   },
   "Login": {
     "title": "Se connecter",

@@ -391,7 +391,7 @@ export default function HomePage() {
                                 </div>
                             </div>
 
-                            <div className="flex justify-center gap-2 mt-6">
+                            <div className="flex justify-center gap-2">
                                 {specialOffers.map((_, index) => (
                                     <button
                                         key={index}
@@ -408,13 +408,13 @@ export default function HomePage() {
                         </div>
 
                         {/* Version desktop : grille */}
-                        <div className="hidden md:flex md:flex-wrap md:justify-center md:gap-12">
+                        <div className="hidden md:flex md:flex-wrap md:justify-between md:gap-12">
                             {specialOffers.map((offer, index) => (
                                 index === 1 ? (
                                     <div key={offer.id}>
                                         <div className="text-center mb-4">
-                                            <h2 className="text-2xl font-bold text-gray-900">NOS OFFRES EXCLUSIVES</h2>
-                                            <p className="text-gray-600">Voir toutes les offres</p>
+                                            <h2 className="text-2xl font-bold text-gray-900">{t('offer')}</h2>
+                                            <p className="text-gray-600">{t('see_offer')}</p>
                                         </div>
                                         <SpecialOfferCard
                                             imageUrl={offer.imageUrl}
@@ -458,10 +458,10 @@ export default function HomePage() {
                     <div className="container mx-auto px-6 overflow-visible">
                         <div className="text-center mb-10 md:mb-12">
                             <h2 className="text-4xl md:text-4xl lg:text-5xl font-light text-[#01BDA5] mb-2 font-rubik-distressed">
-                                MADAGASCAR Experiences
+                                {t('discover')}
                             </h2>
                             <p className="text-[#01BDA5] text-sm md:text-base">
-                                Découvrez et expérimentez les biodiversités uniques de Madagascar
+                                {t('discover_description')}
                             </p>
                         </div>
 
@@ -502,9 +502,9 @@ export default function HomePage() {
                         </div>
 
                         {/* Version desktop : grille 3 cartes */}
-                        <div className="hidden md:flex md:justify-center md:gap-8 lg:gap-12">
+                        <div className="hidden md:flex md:justify-between md:gap-8 lg:gap-12">
                             {specialDiscoverItems.map((item) => (
-                                <div key={item.id} className="w-[280px] lg:w-[320px]">
+                                <div key={item.id} className="w-[240px] lg:w-[320px]">
                                     <SpecialDiscoverCard
                                         imageUrl={item.imageUrl}
                                         title={item.title}
