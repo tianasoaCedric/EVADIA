@@ -492,7 +492,7 @@ export default function HomePage() {
                                         onClick={() => scrollToDiscover(index)}
                                         className={`transition-all duration-300 cursor-pointer ${
                                             activeDiscoverIndex === index
-                                                ? 'w-6 h-2 rounded-full bg-[#01BDA5]'
+                                                ? 'w-6 h-2 rounded-full bg-white'
                                                 : 'w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400'
                                         }`}
                                         aria-label={`Aller à la découverte ${index + 1}`}
