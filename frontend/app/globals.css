@@ -3,6 +3,7 @@
 /* Définition de la police Outfit avec Tailwind */
 @theme {
   --font-sans: 'Outfit', sans-serif;
+  --font-rubik-distressed: 'Rubik Distressed', regular;
   --color-primary: #01BDA5;
   --color-primary-dark: #01A38E;
   --color-primary-light: #33CAb7;
@@ -18,6 +19,11 @@ body {
 /* S'assurer que tous les éléments héritent de la police */
 * {
   font-family: inherit;
+}
+
+/* Police Rubik Distressed - la variable est définie dans layout.tsx */
+.font-rubik-distressed {
+  font-family: var(--font-rubik-distressed);
 }
 
 /* Optionnel : définir des classes utilitaires pour les différentes graisses */

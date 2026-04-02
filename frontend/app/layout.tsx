@@ -1,6 +1,6 @@
 // app/layout.tsx
 import type { Metadata } from 'next'
-import { Outfit } from 'next/font/google'
+import { Outfit, Rubik_Distressed } from 'next/font/google'
 import './globals.css'
 import Footer from './components/molecules/Footer'
 import { NextIntlClientProvider } from 'next-intl';
@@ -14,6 +14,13 @@ const outfit = Outfit({
   display: 'swap',
 })
 
+const rubikDistressed = Rubik_Distressed({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-rubik-distressed',
+  display: 'swap',
+})
+
 export default async function RootLayout({
   children,
 }: {
@@ -23,7 +30,7 @@ export default async function RootLayout({
   const messages = await getMessages();
   
   return (
-    <html lang="fr" className={outfit.variable}>
+    <html lang="fr" className={`${outfit.variable} ${rubikDistressed.variable}`}>
       <body className="font-outfit">
         <NextIntlClientProvider messages={messages}>
           {children}
