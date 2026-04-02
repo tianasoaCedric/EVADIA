@@ -502,9 +502,9 @@ export default function HomePage() {
                         </div>
 
                         {/* Version desktop : grille 3 cartes */}
-                        <div className="hidden md:flex md:justify-center md:gap-16 lg:gap-24">
+                        <div className="hidden md:flex md:justify-center md:gap-24 lg:gap-32">
                             {specialDiscoverItems.map((item) => (
-                                <div key={item.id} className="flex-shrink-0 w-[280px] p-2">
+                                <div key={item.id} className="flex justify-center w-[280px] p-2">
                                     <SpecialDiscoverCard
                                         imageUrl={item.imageUrl}
                                         title={item.title}
