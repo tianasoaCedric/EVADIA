@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Download, Apple, Smartphone, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -8,10 +8,10 @@ import Header from './components/molecules/Header'
 import { useTranslations } from 'next-intl'
 import CardDestination from './components/ui/CardDestination'
 import { useOnScreen } from '@/hooks/useOnScreen'
+import SpecialOfferCard from './components/ui/SpecialOfferCard'
 
 export default function HomePage() {
     const t = useTranslations('HomePage')
-    const [isVisible, setIsVisible] = useState(false)
     const [scrollPosition, setScrollPosition] = useState(0)
     const [maxScroll, setMaxScroll] = useState(0)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -19,10 +19,10 @@ export default function HomePage() {
         threshold: 0.2,      // 20% de la section visible
         triggerOnce: false    // L'animation ne se joue qu'une seule fois
     })
-
-    useEffect(() => {
-        setIsVisible(true)
-    }, [])
+    const [setHeroRef, isHeroVisible] = useOnScreen({
+        threshold: 0.2,      // 20% de la section visible
+        triggerOnce: false    // L'animation ne se joue qu'une seule fois
+    })
 
     // Calculer la position du scroll et le maxScroll
     useEffect(() => {
@@ -162,9 +162,10 @@ export default function HomePage() {
 
                             {/* Animation d'apparition */}
                             <div
+                                ref={setHeroRef}
                                 className={`
               transition-all duration-700 delay-200
-              ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}
+              ${isHeroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}
             `}
                             >
                                 <div className="lg:flex items-end justify-between">
@@ -232,7 +233,7 @@ export default function HomePage() {
                 <section
                     ref={setDestinationsRef}
                     className={`
-          py-4 md:py-4 bg-gray-50 transition-all duration-700 ease-out
+          py-4 md:py-4 transition-all duration-700 ease-out
           ${isDestinationsVisible
                             ? 'opacity-100 translate-y-0'
                             : 'opacity-0 translate-y-10'
@@ -301,6 +302,49 @@ export default function HomePage() {
                         </div>
                     </div>
                 </section>
+                <div className="flex flex-wrap justify-center gap-12">
+                    <div className="
+                    ">
+                        <SpecialOfferCard
+                        imageUrl="/photos/offers/hotel-maldives.jpg"
+                        discount={45}
+                        startDay={1}
+                        endDay={31}
+                        month="aoû"
+                        hotelName="Maldives Paradise"
+                        city="Malé"
+                        borderRadius="rounded-top-left-bottom-right"
+                    />
+                    </div>
+                    <div className="">
+                        <div className="text-center mb-4">
+                            <h2 className="text-2xl font-bold text-gray-900">NOS OFFRES EXCLUSIVES</h2>
+                            <p className="text-gray-600">Voir toutes les offres</p>
+                        </div>
+                        <SpecialOfferCard
+                        imageUrl="/photos/offers/hotel-paris.jpg"
+                        discount={30}
+                        startDay={1}
+                        endDay={15}
+                        month="jun"
+                        hotelName="Hôtel Le Meurice"
+                        city="Paris"
+                        borderRadius="rounded-all"
+                    />
+                    </div>
+                    <div className="">
+                        <SpecialOfferCard
+                        imageUrl="/photos/offers/hotel-rome.jpg"
+                        discount={25}
+                        startDay={15}
+                        endDay={30}
+                        month="sep"
+                        hotelName="Hotel de Russie"
+                        city="Rome"
+                        borderRadius="rounded-top-right-bottom-left"
+                    />
+                    </div>
+                </div>
             </main>
         </>
     )
