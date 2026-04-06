@@ -39,7 +39,7 @@ const CardHotel = ({
   href,
   alt = '',
   className = '',
-  width = 'w-full',
+  width = 'w-[260px]',
   onFavoriteToggle
 }: CardHotelProps) => {
   const [isFavorite, setIsFavorite] = useState(false)
@@ -114,7 +114,7 @@ const CardHotel = ({
       ${width}
     `}>
       {/* Image en haut */}
-      <div className={`relative h-42 sm:h-50 w-full rounded-xl overflow-hidden bg-gray-200`}>
+      <div className={`relative h-64 sm:h-64 w-full rounded-xl overflow-hidden bg-gray-200`}>
         {!imageError ? (
           <Image
             src={imageUrl}

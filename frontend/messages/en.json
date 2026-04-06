@@ -43,6 +43,14 @@
     "meta_description": "Create your Evadia account to access all the features of the platform",
     "meta_keywords": "registration, account, Evadia, create an account"
   },
+  "Hebergement": {
+    "meta_title": "Accommodation in Madagascar - Evadia",
+    "meta_description": "Discover our selection of accommodation for all your trips to Madagascar",
+    "meta_keywords": "accommodation, hotel, Madagascar, travel, reservation",
+    "section_title": "Our accommodation",
+    "title": "Hotels in Madagascar",
+    "subtitle": "Discover our selection of accommodation for all your trips"
+  },
   "Bouton": {
     "login": "Log in",
     "register": "Register"
@@ -53,5 +61,13 @@
   },
   "SpecialDiscover": {
     "cta": "Learn more"
+  },
+  "HotelsByCategory": {
+    "meta_title": "Hotels | {category}",
+    "meta_description": "Discover our selection of hotels in {category}",
+    "search_placeholder": "Search for a hotel...",
+    "no_results": "No hotels found",
+    "results_singular": "hotel found",
+    "results_plural": "hotels found"
   }
 }
