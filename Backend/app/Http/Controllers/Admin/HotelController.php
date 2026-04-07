@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreHotelRequest;
 use App\Http\Requests\Admin\UpdateHotelRequest;
 use App\Jobs\SendHotelAdminCredentials;
+use App\Models\Abonnement;
 use App\Models\Avis;
+use App\Models\Plan;
 use App\Models\Destination;
 use App\Models\Hotel;
 use App\Models\HotelAdmin;
@@ -48,8 +50,9 @@ class HotelController extends Controller
     {
         $types = TypesHotel::all();
         $destinations = Destination::all();
+        $plans = Plan::actif()->get();
 
-        return view('admin.hotels.create', compact('types', 'destinations'));
+        return view('admin.hotels.create', compact('types', 'destinations', 'plans'));
     }
 
     public function store(StoreHotelRequest $request)
@@ -142,7 +145,18 @@ class HotelController extends Controller
                 'date_debut' => now(),
             ]);
 
-            // 10. Log action
+            // 10. Create subscription (price from DB)
+            $plan = Plan::where('code', $request->type_abonnement)->firstOrFail();
+            Abonnement::create([
+                'hotel_id'        => $hotel->id,
+                'type_abonnement' => $request->type_abonnement,
+                'date_debut'      => $request->abonnement_date_debut,
+                'date_fin'        => $request->abonnement_date_fin ?: null,
+                'prix_mensuel'    => $plan->prix,
+                'devise'          => $plan->devise,
+            ]);
+
+            // 11. Log action
             $this->logAction('hotel_created', "Hôtel {$hotel->nom} créé (ID: {$hotel->id}). Admin: {$adminUser->email}");
         });
 

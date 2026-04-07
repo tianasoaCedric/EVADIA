@@ -11,7 +11,7 @@
     <div x-data="hotelForm()" class="max-w-3xl mx-auto">
         <!-- Step Indicator -->
         <div class="flex items-center justify-center gap-2 mb-8">
-            <template x-for="(label, i) in ['Infos générales', 'Adresse', 'Photos', 'Administrateur']" :key="i">
+            <template x-for="(label, i) in ['Infos générales', 'Adresse', 'Photos', 'Administrateur', 'Abonnement']" :key="i">
                 <div class="flex items-center gap-2">
                     <button @click="step = i + 1" type="button"
                         :class="step === i + 1 ? 'bg-evadia-600 text-white' : (step > i + 1 ? 'bg-emerald-500 text-white' : 'bg-gray-200 text-gray-500')"
@@ -24,7 +24,7 @@
                     </button>
                     <span :class="step === i + 1 ? 'text-gray-900 font-medium' : 'text-gray-400'"
                         class="text-sm hidden sm:block" x-text="label"></span>
-                    <div x-show="i < 3" class="w-8 h-px bg-gray-200 hidden sm:block"></div>
+                    <div x-show="i < 4" class="w-8 h-px bg-gray-200 hidden sm:block"></div>
                 </div>
             </template>
         </div>
@@ -214,16 +214,96 @@
                 </div>
             </div>
 
+            <!-- Step 5: Abonnement -->
+            <div x-show="step === 5" x-cloak class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 space-y-6">
+                <h3 class="text-lg font-semibold text-gray-900">Abonnement</h3>
+
+                <!-- Plan cards depuis la base de données -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    @foreach($plans as $plan)
+                        @php $checked = old('type_abonnement', 'select') === $plan->code; @endphp
+                        <label class="relative cursor-pointer rounded-xl border-2 p-5 transition-all flex flex-col gap-3
+                            {{ $checked ? $plan->border . ' bg-gray-50' : 'border-gray-200 hover:border-gray-300' }}">
+                            <input type="radio" name="type_abonnement" value="{{ $plan->code }}"
+                                {{ $checked ? 'checked' : '' }} class="sr-only"
+                                onchange="this.closest('.grid').querySelectorAll('label').forEach(l => l.classList.remove('{{ $plan->border }}','bg-gray-50')); this.closest('label').classList.add('{{ $plan->border }}','bg-gray-50')">
+
+                            <!-- Badge + check -->
+                            <div class="flex items-start justify-between">
+                                <span class="inline-flex items-center rounded-full {{ $plan->badge_bg }} {{ $plan->badge_text }} px-2.5 py-0.5 text-[11px] font-bold">
+                                    {{ $plan->label }}
+                                </span>
+                                @if($checked)
+                                    <svg class="h-5 w-5 text-evadia-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                @endif
+                            </div>
+
+                            <div>
+                                <p class="text-base font-bold text-gray-900">{{ $plan->nom }}</p>
+                                <p class="text-xs text-gray-500 mt-0.5">{{ $plan->description }}</p>
+                            </div>
+
+                            <!-- Prix -->
+                            <div class="pt-2 border-t border-gray-100">
+                                <span class="text-lg font-bold text-gray-900">{{ number_format($plan->prix, 0, ',', ' ') }}</span>
+                                <span class="text-xs text-gray-500 ml-1">{{ $plan->devise }} / mois</span>
+                            </div>
+
+                            <!-- Features -->
+                            <ul class="space-y-1.5">
+                                @foreach($plan->features as $feature)
+                                    <li class="flex items-start gap-2 text-xs {{ $feature['inclus'] ? 'text-gray-700' : 'text-gray-400' }}">
+                                        @if($feature['inclus'])
+                                            <svg class="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+                                            </svg>
+                                        @else
+                                            <svg class="h-3.5 w-3.5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        @endif
+                                        {{ $feature['texte'] }}
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </label>
+                    @endforeach
+                </div>
+                @error('type_abonnement') <p class="text-xs text-red-600">{{ $message }}</p> @enderror
+
+                <!-- Dates uniquement -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date de début *</label>
+                        <input type="date" name="abonnement_date_debut"
+                            value="{{ old('abonnement_date_debut', now()->toDateString()) }}" required
+                            class="w-full rounded-xl border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20">
+                        @error('abonnement_date_debut') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date de fin <span class="text-gray-400 font-normal">(optionnel)</span></label>
+                        <input type="date" name="abonnement_date_fin" value="{{ old('abonnement_date_fin') }}"
+                            class="w-full rounded-xl border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20">
+                    </div>
+                </div>
+
+                <div class="rounded-lg bg-blue-50 border border-blue-200 p-4 text-sm text-blue-800">
+                    Le premier paiement sera dû le jour de la date de début. Les suivants seront dus chaque mois à la même date.
+                </div>
+            </div>
+
             <!-- Navigation Buttons -->
             <div class="flex items-center justify-between mt-6">
                 <button type="button" x-show="step > 1" @click="step--"
                     class="rounded-xl border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">←
                     Précédent</button>
                 <div x-show="step <= 1"></div>
-                <button type="button" x-show="step < 4" @click="step++"
+                <button type="button" x-show="step < 5" @click="step++"
                     class="rounded-xl bg-evadia-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-evadia-700 transition-colors">Suivant
                     →</button>
-                <button type="submit" x-show="step === 4" x-cloak
+                <button type="submit" x-show="step === 5" x-cloak
                     class="rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors">Créer
                     l'hôtel</button>
             </div>
@@ -234,8 +314,18 @@
 @push('scripts')
     <script>
         function hotelForm() {
+            const errorFields = @json($errors->keys());
+            const step1 = ['nom','email_contact','telephone','site_web','etoiles','types'];
+            const step2 = ['adresse_ligne1','code_postal','ville','pays','destination_id'];
+            const step4 = ['admin_nom','admin_prenom','admin_email','admin_telephone'];
+            const step5 = ['type_abonnement','prix_mensuel','devise_abonnement','abonnement_date_debut','abonnement_date_fin'];
+            let initialStep = 1;
+            if (errorFields.some(f => step5.some(s => f.startsWith(s)))) initialStep = 5;
+            else if (errorFields.some(f => step4.some(s => f.startsWith(s)))) initialStep = 4;
+            else if (errorFields.some(f => step2.some(s => f.startsWith(s)))) initialStep = 2;
+            else if (errorFields.some(f => step1.some(s => f.startsWith(s)))) initialStep = 1;
             return {
-                step: 1,
+                step: initialStep,
                 previews: [],
                 previewPhotos(event) {
                     this.previews = [];

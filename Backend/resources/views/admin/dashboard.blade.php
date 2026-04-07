@@ -72,7 +72,7 @@
                 <div>
                     <p class="text-sm font-medium text-gray-500">CA Abonnements/mois</p>
                     <p class="mt-1 text-3xl font-bold text-gray-900">
-                        {{ number_format($stats['ca_abonnements_mois'], 0, ',', ' ') }} €</p>
+                        {{ number_format($stats['ca_abonnements_mois'], 0, ',', ' ') }} MGA</p>
                 </div>
                 <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">

@@ -44,6 +44,11 @@ class StoreHotelRequest extends FormRequest
             'admin_prenom' => 'required|string|max:100',
             'admin_email' => 'required|email|unique:users,email',
             'admin_telephone' => 'nullable|string|max:20',
+
+            // Step 5 - Abonnement
+            'type_abonnement'      => 'required|in:explore,select,signature',
+            'abonnement_date_debut' => 'required|date',
+            'abonnement_date_fin'   => 'nullable|date|after:abonnement_date_debut',
         ];
     }
 

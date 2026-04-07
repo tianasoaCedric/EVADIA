@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Hotel;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Hotel\Traits\BelongsToHotel;
 use App\Models\Abonnement;
+use App\Models\Plan;
 use Illuminate\Http\Request;
 
 class SubscriptionController extends Controller
@@ -25,6 +26,8 @@ class SubscriptionController extends Controller
             ->orderByDesc('date_debut')
             ->get();
 
-        return view('hotel.subscription.index', compact('hotel', 'abonnementActif', 'historique'));
+        $plans = Plan::actif()->get();
+
+        return view('hotel.subscription.index', compact('hotel', 'abonnementActif', 'historique', 'plans'));
     }
 }
