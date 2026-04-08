@@ -7,14 +7,17 @@ import CardHotel from '../../components/ui/CardHotel'
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-interface HotelsByCategoryClientProps {
+interface HebergementNameProps {
+    categoryId: number
     categoryName: string
+    slug: string
 }
 
-// Données mock des hôtels par catégorie (à remplacer par appel API)
-const getHotelsByCategory = (category: string) => {
-    const hotelsData: Record<string, any[]> = {
-        'Ecolodge': [
+// Données mock des catégories avec leurs IDs
+const categoriesData: Record<number, { name: string, hotels: any[] }> = {
+    1: {
+        name: 'Ecolodge',
+        hotels: [
             {
                 id: 1,
                 imageUrl: '/photos/hotels/ecolodge-1.jpg',
@@ -41,144 +44,12 @@ const getHotelsByCategory = (category: string) => {
                 price: 75000,
                 rating: 4.3,
                 reviewCount: 76
-            },
-            {
-                id: 4,
-                imageUrl: '/photos/hotels/ecolodge-1.jpg',
-                name: 'Ecolodge de la Forêt 2',
-                availability: 'Disponible',
-                price: 85000,
-                rating: 4.5,
-                reviewCount: 128
-            },
-            {
-                id: 5,
-                imageUrl: '/photos/hotels/ecolodge-2.jpg',
-                name: 'Green Paradise Ecolodge 2',
-                availability: '2 places restantes',
-                price: 95000,
-                rating: 4.7,
-                reviewCount: 95
-            },
-            {
-                id: 6,
-                imageUrl: '/photos/hotels/ecolodge-3.jpg',
-                name: 'Nature Lodge 2',
-                availability: 'Disponible',
-                price: 75000,
-                rating: 4.3,
-                reviewCount: 76
-            },
-            {
-                id: 7,
-                imageUrl: '/photos/hotels/ecolodge-1.jpg',
-                name: 'Ecolodge de la Forêt 3',
-                availability: 'Disponible',
-                price: 85000,
-                rating: 4.5,
-                reviewCount: 128
-            },
-            {
-                id: 8,
-                imageUrl: '/photos/hotels/ecolodge-2.jpg',
-                name: 'Green Paradise Ecolodge 3',
-                availability: '2 places restantes',
-                price: 95000,
-                rating: 4.7,
-                reviewCount: 95
-            },
-            {
-                id: 9,
-                imageUrl: '/photos/hotels/ecolodge-3.jpg',
-                name: 'Nature Lodge 3',
-                availability: 'Disponible',
-                price: 75000,
-                rating: 4.3,
-                reviewCount: 76
-            },
-            {
-                id: 10,
-                imageUrl: '/photos/hotels/ecolodge-1.jpg',
-                name: 'Ecolodge de la Forêt 4',
-                availability: 'Disponible',
-                price: 85000,
-                rating: 4.5,
-                reviewCount: 128
-            },
-            {
-                id: 11,
-                imageUrl: '/photos/hotels/ecolodge-2.jpg',
-                name: 'Green Paradise Ecolodge 4',
-                availability: '2 places restantes',
-                price: 95000,
-                rating: 4.7,
-                reviewCount: 95
-            },
-            {
-                id: 12,
-                imageUrl: '/photos/hotels/ecolodge-3.jpg',
-                name: 'Nature Lodge 4',
-                availability: 'Disponible',
-                price: 75000,
-                rating: 4.3,
-                reviewCount: 76
-            },
-            {
-                id: 13,
-                imageUrl: '/photos/hotels/ecolodge-1.jpg',
-                name: 'Ecolodge de la Forêt 5',
-                availability: 'Disponible',
-                price: 85000,
-                rating: 4.5,
-                reviewCount: 128
-            },
-            {
-                id: 14,
-                imageUrl: '/photos/hotels/ecolodge-2.jpg',
-                name: 'Green Paradise Ecolodge 5',
-                availability: '2 places restantes',
-                price: 95000,
-                rating: 4.7,
-                reviewCount: 95
-            },
-            {
-                id: 15,
-                imageUrl: '/photos/hotels/ecolodge-3.jpg',
-                name: 'Nature Lodge 5',
-                availability: 'Disponible',
-                price: 75000,
-                rating: 4.3,
-                reviewCount: 76
-            },
-            {
-                id: 16,
-                imageUrl: '/photos/hotels/ecolodge-1.jpg',
-                name: 'Ecolodge de la Forêt 6',
-                availability: 'Disponible',
-                price: 85000,
-                rating: 4.5,
-                reviewCount: 128
-            },
-            {
-                id: 17,
-                imageUrl: '/photos/hotels/ecolodge-2.jpg',
-                name: 'Green Paradise Ecolodge 6',
-                availability: '2 places restantes',
-                price: 95000,
-                rating: 4.7,
-                reviewCount: 95
-            },
-            {
-                id: 18,
-                imageUrl: '/photos/hotels/ecolodge-3.jpg',
-                name: 'Nature Lodge 6',
-                availability: 'Disponible',
-                price: 75000,
-                rating: 4.3,
-                reviewCount: 76
             }
-        ],
-        'Villas': [
+        ]
+    },
+    2: {
+        name: 'Villas',
+        hotels: [
             {
                 id: 4,
                 imageUrl: '/photos/hotels/villa-1.jpg',
@@ -197,8 +68,11 @@ const getHotelsByCategory = (category: string) => {
                 rating: 4.8,
                 reviewCount: 187
             }
-        ],
-        'Hôtel de luxe': [
+        ]
+    },
+    3: {
+        name: 'Hôtel de luxe',
+        hotels: [
             {
                 id: 6,
                 imageUrl: '/photos/hotels/luxe-1.jpg',
@@ -208,8 +82,11 @@ const getHotelsByCategory = (category: string) => {
                 rating: 4.9,
                 reviewCount: 342
             }
-        ],
-        'Maison de vacances': [
+        ]
+    },
+    4: {
+        name: 'Maison de vacances',
+        hotels: [
             {
                 id: 7,
                 imageUrl: '/photos/hotels/maison-1.jpg',
@@ -219,8 +96,11 @@ const getHotelsByCategory = (category: string) => {
                 rating: 4.4,
                 reviewCount: 56
             }
-        ],
-        'Lodge': [
+        ]
+    },
+    5: {
+        name: 'Lodge',
+        hotels: [
             {
                 id: 8,
                 imageUrl: '/photos/hotels/lodge-1.jpg',
@@ -230,8 +110,11 @@ const getHotelsByCategory = (category: string) => {
                 rating: 4.6,
                 reviewCount: 89
             }
-        ],
-        'Bungalows': [
+        ]
+    },
+    6: {
+        name: 'Bungalows',
+        hotels: [
             {
                 id: 9,
                 imageUrl: '/photos/hotels/bungalow-1.jpg',
@@ -243,11 +126,9 @@ const getHotelsByCategory = (category: string) => {
             }
         ]
     }
-
-    return hotelsData[category] || []
 }
 
-export default function HebergementName({ categoryName }: HotelsByCategoryClientProps) {
+export default function HebergementName({ categoryId, categoryName, slug }: HebergementNameProps) {
     const t = useTranslations('HotelsByCategory')
     const [searchQuery, setSearchQuery] = useState('')
     const [hotels, setHotels] = useState<any[]>([])
@@ -258,11 +139,16 @@ export default function HebergementName({ categoryName }: HotelsByCategoryClient
     const itemsPerPage = 15
 
     useEffect(() => {
-        const hotelsData = getHotelsByCategory(categoryName)
-        setHotels(hotelsData)
-        setFilteredHotels(hotelsData)
-        setCurrentPage(1) // Réinitialiser la page quand la catégorie change
-    }, [categoryName])
+        const categoryData = categoriesData[categoryId]
+        if (categoryData) {
+            setHotels(categoryData.hotels)
+            setFilteredHotels(categoryData.hotels)
+        } else {
+            setHotels([])
+            setFilteredHotels([])
+        }
+        setCurrentPage(1)
+    }, [categoryId])
 
     // Filtrer les hôtels par recherche
     useEffect(() => {
@@ -274,7 +160,7 @@ export default function HebergementName({ categoryName }: HotelsByCategoryClient
             )
             setFilteredHotels(filtered)
         }
-        setCurrentPage(1) // Réinitialiser la page quand la recherche change
+        setCurrentPage(1)
     }, [searchQuery, hotels])
 
     // Pagination
@@ -285,7 +171,6 @@ export default function HebergementName({ categoryName }: HotelsByCategoryClient
 
     const goToPage = (page: number) => {
         setCurrentPage(Math.max(1, Math.min(page, totalPages)))
-        // Scroll en haut de la section des résultats
         document.getElementById('hotels-list')?.scrollIntoView({ behavior: 'smooth' })
     }
 
@@ -331,11 +216,11 @@ export default function HebergementName({ categoryName }: HotelsByCategoryClient
                                             <CardHotel
                                                 imageUrl={hotel.imageUrl}
                                                 name={hotel.name}
+                                                hotelId={hotel.id}
                                                 availability={hotel.availability}
                                                 price={hotel.price}
                                                 rating={hotel.rating}
                                                 reviewCount={hotel.reviewCount}
-                                                href={`/hotels/${hotel.id}`}
                                             />
                                         </div>
                                     ))}
@@ -359,7 +244,6 @@ export default function HebergementName({ categoryName }: HotelsByCategoryClient
 
                                         <div className="flex gap-1">
                                             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                                                // Afficher seulement les pages autour de la page courante
                                                 if (
                                                     page === 1 ||
                                                     page === totalPages ||

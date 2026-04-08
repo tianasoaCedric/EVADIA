@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useOnScreen } from '@/hooks/useOnScreen'
 
 interface CardHotelProps {
   /** URL de l'image de l'hôtel */
@@ -17,7 +18,9 @@ interface CardHotelProps {
   rating: number
   /** Nombre d'avis */
   reviewCount?: number
-  /** Lien vers la page de l'hôtel */
+  /** ID de l'hôtel pour générer le lien */
+  hotelId?: number
+  /** Lien vers la page de l'hôtel (optionnel, si fourni manuellement) */
   href?: string
   /** Texte alternatif pour l'image */
   alt?: string
@@ -29,6 +32,24 @@ interface CardHotelProps {
   onFavoriteToggle?: (isFavorite: boolean) => void
 }
 
+// Fonction pour encoder l'ID en base36 (plus court et plus sûr)
+const encodeId = (id: number): string => {
+  return id.toString(36) // 1 -> '1', 10 -> 'a', 100 -> '2s'
+}
+
+// Fonction pour créer un slug avec ID encodé caché à la fin
+const createSlug = (id: number, name: string): string => {
+  const slugName = name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Enlève les accents
+    .replace(/[^a-z0-9]+/g, '-')     // Remplace les espaces par des tirets
+    .replace(/^-|-$/g, '')           // Enlève les tirets au début et à la fin
+  
+  const encodedId = encodeId(id)
+  return `${slugName}-${encodedId}`
+}
+
 const CardHotel = ({
   imageUrl,
   name,
@@ -36,6 +57,7 @@ const CardHotel = ({
   price,
   rating,
   reviewCount,
+  hotelId,
   href,
   alt = '',
   className = '',
@@ -44,6 +66,18 @@ const CardHotel = ({
 }: CardHotelProps) => {
   const [isFavorite, setIsFavorite] = useState(false)
   const [imageError, setImageError] = useState(false)
+
+  const [setCardRef, isCardVisible] = useOnScreen({
+        threshold: 0.2,
+        triggerOnce: false
+    })
+
+  // Générer le lien automatiquement si hotelId est fourni
+  const generateHref = () => {
+    if (href) return href
+    if (hotelId) return `/hotel/${createSlug(hotelId, name)}`
+    return '#'
+  }
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -107,10 +141,13 @@ const CardHotel = ({
   }
 
   const cardContent = (
-    <div className={`
+    <div
+    ref={setCardRef}
+    className={`
       bg-white rounded-xl overflow-hidden 
       transition-all duration-300 hover:-translate-y-1 hover:shadow-xl
       flex flex-col
+      ${isCardVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}
       ${width}
     `}>
       {/* Image en haut */}
@@ -169,8 +206,8 @@ const CardHotel = ({
         {/* Disponibilité */}
         <div className="mb-1">
           <span className={`
-    text-xs sm:text-sm font-medium
-    ${availability.toLowerCase().includes('disponible')
+            text-xs sm:text-sm font-medium
+            ${availability.toLowerCase().includes('disponible')
               ? 'text-green-600'
               : availability.toLowerCase().includes('complet')
                 ? 'text-red-500'
@@ -207,9 +244,11 @@ const CardHotel = ({
     </div>
   )
 
-  if (href) {
+  const linkHref = generateHref()
+  
+  if (linkHref !== '#') {
     return (
-      <Link href={href} className={`block group ${className}`}>
+      <Link href={linkHref} className={`block group ${className}`}>
         {cardContent}
       </Link>
     )

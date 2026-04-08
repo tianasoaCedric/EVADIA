@@ -89,7 +89,7 @@ const Bouton = ({
    */
   const sizeStyles: Record<string, string> = {
     small: "px-3 py-1 text-sm",     // Petit : moins d'espacement
-    medium: "px-6 py-2.5 text-md",  // Moyen : espacement standard
+    medium: "px-4 py-2.5 text-md",  // Moyen : espacement standard
     large: "px-8 py-3 text-lg"      // Grand : plus d'espacement
   }
 

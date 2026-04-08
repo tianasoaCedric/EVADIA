@@ -2,6 +2,8 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { useState } from 'react'
+import { useOnScreen } from '@/hooks/useOnScreen'
 
 interface CardDestinationProps {
   /** URL de l'image de fond */
@@ -32,6 +34,7 @@ const CardDestination = ({
   className = '',
   hoverEffect = 'zoom'
 }: CardDestinationProps) => {
+  const [imageError, setImageError] = useState(false)
   
   const hoverStyles = {
     zoom: 'group-hover:scale-110',
@@ -39,8 +42,14 @@ const CardDestination = ({
     none: ''
   }
 
+  const [setCardRef, isCardVisible] = useOnScreen({
+        threshold: 0.2,
+        triggerOnce: false
+    })
+
   const cardContent = (
     <div
+      ref={setCardRef}
       className={`
         relative rounded-3xl overflow-hidden
         ${height} ${width}
@@ -48,20 +57,32 @@ const CardDestination = ({
         cursor-pointer
         shadow-md hover:shadow-xl
         group
+        ${
+                            isCardVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                        }
       `}
     >
       {/* Conteneur de l'image avec overflow hidden pour le zoom */}
-      <div className="relative w-full h-full overflow-hidden">
-        <Image
-          src={imageUrl}
-          alt={alt || title}
-          fill
-          className={`
-            object-cover transition-transform duration-500 ease-out
-            ${hoverEffect === 'zoom' ? hoverStyles.zoom : ''}
-          `}
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        />
+      <div className="relative w-full h-full overflow-hidden bg-gray-200">
+        {!imageError ? (
+          <Image
+            src={imageUrl}
+            alt={alt || title}
+            fill
+            className={`
+              object-cover transition-transform duration-500 ease-out
+              ${hoverEffect === 'zoom' ? hoverStyles.zoom : ''}
+            `}
+            onError={() => setImageError(true)}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gray-300">
+            <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+        )}
       </div>
       
       {/* Overlay sombre pour améliorer la lisibilité du texte */}

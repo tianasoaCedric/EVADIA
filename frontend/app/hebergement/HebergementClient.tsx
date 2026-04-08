@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import CardDestination from "../components/ui/CardDestination"
 import { useOnScreen } from '@/hooks/useOnScreen'
 import { useTranslations } from "next-intl"
+import { createSlug } from '@/lib/slug'
 
 export default function HebergementClient() {
     const t = useTranslations('Hebergement')
@@ -16,14 +17,14 @@ export default function HebergementClient() {
         triggerOnce: false
     })
 
-    // Données des catégories d'hébergements avec liens dynamiques
+    // Données des catégories d'hébergements avec IDs
     const categories = [
-        { id: 1, imageUrl: '/photos/categories/ecolodge.jpg', title: 'Ecolodge', href: `/hebergement/${encodeURIComponent('Ecolodge')}` },
-        { id: 2, imageUrl: '/photos/categories/villas.jpg', title: 'Villas', href: `/hebergement/${encodeURIComponent('Villas')}` },
-        { id: 3, imageUrl: '/photos/categories/hotel-luxe.jpg', title: 'Hôtel de luxe', href: `/hebergement/${encodeURIComponent('Hôtel de luxe')}` },
-        { id: 4, imageUrl: '/photos/categories/maison-vacances.jpg', title: 'Maison de vacances', href: `/hebergement/${encodeURIComponent('Maison de vacances')}` },
-        { id: 5, imageUrl: '/photos/categories/lodge.jpg', title: 'Lodge', href: `/hebergement/${encodeURIComponent('Lodge')}` },
-        { id: 6, imageUrl: '/photos/categories/bungalows.jpg', title: 'Bungalows', href: `/hebergement/${encodeURIComponent('Bungalows')}` }
+        { id: 1, imageUrl: '/photos/categories/ecolodge.jpg', title: 'Ecolodge' },
+        { id: 2, imageUrl: '/photos/categories/villas.jpg', title: 'Villas' },
+        { id: 3, imageUrl: '/photos/categories/hotel-luxe.jpg', title: 'Hôtel de luxe' },
+        { id: 4, imageUrl: '/photos/categories/maison-vacances.jpg', title: 'Maison de vacances' },
+        { id: 5, imageUrl: '/photos/categories/lodge.jpg', title: 'Lodge' },
+        { id: 6, imageUrl: '/photos/categories/bungalows.jpg', title: 'Bungalows' }
     ]
 
     // Fonction pour déterminer la hauteur selon l'ID
@@ -103,12 +104,12 @@ export default function HebergementClient() {
                 showDownload={false}
             />
 
-            <main className="min-h-screen bg-white py-8">
+            <main className="min-h-screen bg-white">
                 <div className="container mx-auto px-6">
                     {/* Titre de la section */}
                     <div
                         ref={setCategoriesRef}
-                        className={`mb-12 transition-all duration-700 ${
+                        className={`py-4 transition-all duration-700 ${
                             isCategoriesVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                         }`}
                     >
@@ -138,7 +139,7 @@ export default function HebergementClient() {
                                         <CardDestination
                                             imageUrl={category.imageUrl}
                                             title={category.title}
-                                            href={category.href}
+                                            href={`/hebergement/${createSlug(category.id, category.title)}`}
                                             height="h-[411px]"
                                             width="w-full"
                                             hoverEffect="zoom"
@@ -174,7 +175,7 @@ export default function HebergementClient() {
                     </div>
 
                     {/* Version desktop : grille avec hauteurs alternées */}
-                    <div className="hidden md:grid md:grid-cols-3 gap-6">
+                    <div className="hidden md:grid md:grid-cols-3 gap-6 mb-8">
                         {desktopColumns.map((column, colIndex) => (
                             <div key={colIndex} className="space-y-6">
                                 {column.items.map((category, rowIndex) => (
@@ -182,7 +183,7 @@ export default function HebergementClient() {
                                         key={category.id}
                                         imageUrl={category.imageUrl}
                                         title={category.title}
-                                        href={category.href}
+                                        href={`/hebergement/${createSlug(category.id, category.title)}`}
                                         height={column.heights[rowIndex]}
                                         width="w-full"
                                         hoverEffect="zoom"
