@@ -100,7 +100,7 @@ export default function HebergementClient() {
             <HeroSection 
                 title={t('title')}
                 subtitle={t('subtitle')}
-                backgroundImage="/images/hebergement.jpg"
+                backgroundImage="/photos/bc.png"
                 showDownload={false}
             />
 

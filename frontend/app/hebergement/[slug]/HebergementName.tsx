@@ -208,9 +208,9 @@ export default function HebergementName({ categoryId, categoryName, slug }: Hebe
             <HeroSection
                 title={`${heroTitle} à Madagascar`}
                 subtitle={`Découvrez notre sélection des meilleurs ${categoryName.toLowerCase()} pour vos vacances`}
-                backgroundImage={`/images/categories/${categoryName.toLowerCase()}.jpg`}
+                backgroundImage={`/photos/bc.png`}
                 showDownload={false}
-                showScrollIndicator={false}
+                showScrollIndicator={true}
             />
 
             <main className="min-h-screen py-12">

@@ -237,7 +237,7 @@ export default function HomePage() {
                         <h2 className="text-2xl md:text-3xl lg:text-4xl font-medium text-gray-900 mb-2">
                             {t('popular')}
                         </h2>
-                        <div className="overflow-visible">
+                        <div className="relative overflow-visible">
                             <button
                                 onClick={scrollLeft}
                                 className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white rounded-full p-2 mx-2 shadow-md transition-all duration-200 hover:scale-110 hidden md:flex items-center justify-center cursor-pointer"

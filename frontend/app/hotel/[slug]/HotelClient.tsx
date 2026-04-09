@@ -7,6 +7,7 @@ import Bouton from '../../components/ui/Bouton'
 import HotelPhoto from '../../components/ui/HotelPhoto'
 import RoomCard from '../../components/ui/RoomCard'
 import AvisClient from '@/app/components/ui/AvisClient'
+import HotelInfo from '@/app/components/ui/HotelInfo'
 
 interface HotelClientProps {
   hotelId: number
@@ -212,8 +213,27 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
           />
         </div>
 
+        <div className="mt-4 mb-4">
+        <HotelInfo 
+          hotelName={hotelName}
+          location="Antananarivo, Madagascar"
+          rating={4.8}
+          reviewCount={234}
+          category="Hôtel de luxe"
+          description="Situé au cœur d'Antananarivo, cet établissement 5 étoiles offre une vue imprenable sur la ville. Les chambres spacieuses et élégantes sont équipées de tout le confort moderne. Le restaurant gastronomique propose une cuisine raffinée mêlant saveurs locales et internationales. Idéal pour les voyages d'affaires comme pour les séjours de détente."
+          includedItems={[
+            'Wi-Fi haut débit',
+            'Serviettes de bain',
+            'Gel douche et shampooing',
+            'Sèche-cheveux',
+            'Machine à café',
+            'Eau minérale offerte'
+          ]}
+        />
+      </div>
+
         {/* Section Chambres et disponibilités */}
-        <div className="">
+        <div className="mt-4 mb-4">
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-medium text-gray-600 mb-4">
             Chambres et disponibilités
           </h2>
@@ -289,7 +309,7 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                   >
                     {rooms.map((room) => (
-                      <div key={room.id} className="flex-shrink-0 w-[280px] sm:w-[320px]">
+                      <div key={room.id} className="flex-shrink-0 w-[320px]">
                         <RoomCard
                           imageUrl={room.imageUrl}
                           name={room.name}
@@ -341,8 +361,9 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
             </>
           )}
         </div>
-
+        <div className="py-4">
         <AvisClient />
+        </div>
       </div>
     </main>
   )
