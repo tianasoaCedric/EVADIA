@@ -216,3 +216,13 @@ body {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;     /* Firefox */
 }
+
+/* Pour gérer le fallback des images */
+.hide-image {
+  display: flex !important;
+}
+
+.hide-image + img,
+img.hide-image {
+  display: none;
+}

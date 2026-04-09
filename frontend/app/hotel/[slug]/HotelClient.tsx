@@ -6,6 +6,7 @@ import { ChevronLeft, Share, Heart, ChevronLeft as ChevronLeftIcon, ChevronRight
 import Bouton from '../../components/ui/Bouton'
 import HotelPhoto from '../../components/ui/HotelPhoto'
 import RoomCard from '../../components/ui/RoomCard'
+import AvisClient from '@/app/components/ui/AvisClient'
 
 interface HotelClientProps {
   hotelId: number
@@ -52,36 +53,7 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
       price: 185000,
       availability: '2 places restantes'
     },
-    // {
-    //   id: 4,
-    //   imageUrl: '/photos/chambre.jpg',
-    //   name: 'Suite Royale',
-    //   beds: 2,
-    //   bathrooms: 2,
-    //   maxPersons: 4,
-    //   price: 350000,
-    //   availability: 'Disponible'
-    // },
-    // {
-    //   id: 5,
-    //   imageUrl: '/photos/chambre.jpg',
-    //   name: 'Chambre Simple',
-    //   beds: 1,
-    //   bathrooms: 1,
-    //   maxPersons: 1,
-    //   price: 89000,
-    //   availability: 'Complet'
-    // },
-    // {
-    //   id: 6,
-    //   imageUrl: '/photos/chambre.jpg',
-    //   name: 'Suite Junior',
-    //   beds: 1,
-    //   bathrooms: 1,
-    //   maxPersons: 2,
-    //   price: 175000,
-    //   availability: 'Disponible'
-    // }
+
   ]
 
   useEffect(() => {
@@ -118,15 +90,42 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
     }
   }, [])
 
+  // Calcul de l'index actif basé sur la position de scroll
+  const getActiveIndex = () => {
+    if (!scrollContainerRef.current || rooms.length === 0) return 0
+    // Largeur de la carte + gap (gap-4 = 16px, gap-5 = 20px sur sm)
+    const cardWidth = window.innerWidth < 640 ? 280 : window.innerWidth < 768 ? 320 : 340
+    const gap = window.innerWidth < 640 ? 16 : window.innerWidth < 768 ? 20 : 24
+    const activeIndex = Math.round(scrollPosition / (cardWidth + gap))
+    return Math.min(Math.max(0, activeIndex), rooms.length - 1)
+  }
+
+  const activeIndex = getActiveIndex()
+
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: -320, behavior: 'smooth' })
+      const cardWidth = window.innerWidth < 640 ? 280 : window.innerWidth < 768 ? 320 : 340
+      const gap = window.innerWidth < 640 ? 16 : window.innerWidth < 768 ? 20 : 24
+      scrollContainerRef.current.scrollBy({ left: -(cardWidth + gap), behavior: 'smooth' })
     }
   }
 
   const scrollRight = () => {
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: 320, behavior: 'smooth' })
+      const cardWidth = window.innerWidth < 640 ? 280 : window.innerWidth < 768 ? 320 : 340
+      const gap = window.innerWidth < 640 ? 16 : window.innerWidth < 768 ? 20 : 24
+      scrollContainerRef.current.scrollBy({ left: cardWidth + gap, behavior: 'smooth' })
+    }
+  }
+
+  const scrollToIndex = (index: number) => {
+    if (scrollContainerRef.current) {
+      const cardWidth = window.innerWidth < 640 ? 280 : window.innerWidth < 768 ? 320 : 340
+      const gap = window.innerWidth < 640 ? 16 : window.innerWidth < 768 ? 20 : 24
+      scrollContainerRef.current.scrollTo({ 
+        left: index * (cardWidth + gap), 
+        behavior: 'smooth' 
+      })
     }
   }
 
@@ -147,16 +146,6 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
       alert('Lien copié dans le presse-papier !')
     }
   }
-
-  // Calculer l'index actif pour les indicateurs
-  const getActiveIndex = () => {
-    if (!scrollContainerRef.current) return 0
-    const cardWidth = 320
-    const activeIndex = Math.round(scrollPosition / cardWidth)
-    return Math.min(activeIndex, rooms.length - 1)
-  }
-
-  const activeIndex = getActiveIndex()
 
   if (isLoading) {
     return (
@@ -225,7 +214,7 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
 
         {/* Section Chambres et disponibilités */}
         <div className="">
-          <h2 className="text-2xl md:text-3xl font-medium text-gray-600 mb-8">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-medium text-gray-600 mb-4">
             Chambres et disponibilités
           </h2>
 
@@ -235,20 +224,20 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
               {/* Flèche gauche */}
               <button
                 onClick={scrollLeft}
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 hover:scale-110 hidden md:flex items-center justify-center cursor-pointer"
+                className="absolute -left-3 lg:-left-5 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white rounded-full p-2 lg:p-3 shadow-lg transition-all duration-200 hover:scale-110 hidden lg:flex items-center justify-center cursor-pointer"
                 aria-label="Défiler vers la gauche"
               >
-                <ChevronLeftIcon className="w-6 h-6 text-gray-700" />
+                <ChevronLeftIcon className="w-5 h-5 lg:w-6 lg:h-6 text-gray-700" />
               </button>
 
               {/* Carrousel des chambres */}
               <div
                 ref={scrollContainerRef}
-                className="flex overflow-x-auto scroll-smooth gap-5 pb-8 scrollbar-hide overflow-visible"
+                className="flex overflow-x-auto scroll-smooth gap-4 sm:gap-5 lg:gap-6 pb-6 lg:pb-8 scrollbar-hide"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
                 {rooms.map((room) => (
-                  <div key={room.id} className="flex-shrink-0 w-[240px] sm:w-[240px] md:w-[280px] p-2">
+                  <div key={room.id} className="flex-shrink-0 w-[320px] sm:w-[320px] md:w-[340px] lg:w-[360px] xl:w-[380px]">
                     <RoomCard
                       imageUrl={room.imageUrl}
                       name={room.name}
@@ -266,24 +255,23 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
               {/* Flèche droite */}
               <button
                 onClick={scrollRight}
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 hover:scale-110 hidden md:flex items-center justify-center cursor-pointer"
+                className="absolute -right-3 lg:-right-5 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white rounded-full p-2 lg:p-3 shadow-lg transition-all duration-200 hover:scale-110 hidden lg:flex items-center justify-center cursor-pointer"
                 aria-label="Défiler vers la droite"
               >
-                <ChevronRightIcon className="w-6 h-6 text-gray-700" />
+                <ChevronRightIcon className="w-5 h-5 lg:w-6 lg:h-6 text-gray-700" />
               </button>
 
-              {/* Indicateurs pour mobile */}
-              <div className="flex justify-center gap-2 mt-4 md:hidden">
+              {/* Indicateurs pour mobile et tablette */}
+              <div className="flex justify-center gap-2 mt-6 lg:mt-8">
                 {rooms.map((_, index) => (
                   <button
                     key={index}
-                    onClick={() => {
-                      if (scrollContainerRef.current) {
-                        scrollContainerRef.current.scrollTo({ left: index * 320, behavior: 'smooth' })
-                      }
-                    }}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 cursor-pointer ${activeIndex === index ? 'bg-[#01BDA5] w-4' : 'bg-gray-300 hover:bg-gray-400'
-                      }`}
+                    onClick={() => scrollToIndex(index)}
+                    className={`transition-all duration-300 cursor-pointer ${
+                      activeIndex === index
+                        ? 'w-6 h-2 rounded-full bg-[#01BDA5]'
+                        : 'w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400'
+                    }`}
                     aria-label={`Aller à la chambre ${index + 1}`}
                   />
                 ))}
@@ -297,11 +285,11 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
                 <div className="relative overflow-visible">
                   <div
                     ref={scrollContainerRef}
-                    className="flex overflow-x-auto scroll-smooth gap-5 pb-4 scrollbar-hide overflow-visible"
+                    className="flex overflow-x-auto overflow-visible scroll-smooth gap-4 sm:gap-5 pb-6 scrollbar-hide"
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                   >
                     {rooms.map((room) => (
-                      <div key={room.id} className="flex-shrink-0 w-[240px] p-2">
+                      <div key={room.id} className="flex-shrink-0 w-[280px] sm:w-[320px]">
                         <RoomCard
                           imageUrl={room.imageUrl}
                           name={room.name}
@@ -317,17 +305,16 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
                   </div>
 
                   {/* Indicateurs pour mobile */}
-                  <div className="flex justify-center gap-2 mt-4 md:hidden">
+                  <div className="flex justify-center gap-2 mt-6">
                     {rooms.map((_, index) => (
                       <button
                         key={index}
-                        onClick={() => {
-                          if (scrollContainerRef.current) {
-                            scrollContainerRef.current.scrollTo({ left: index * 320, behavior: 'smooth' })
-                          }
-                        }}
-                        className={`w-2 h-2 rounded-full transition-all duration-300 cursor-pointer ${activeIndex === index ? 'bg-[#01BDA5] w-4' : 'bg-gray-300 hover:bg-gray-400'
-                          }`}
+                        onClick={() => scrollToIndex(index)}
+                        className={`transition-all duration-300 cursor-pointer ${
+                          activeIndex === index
+                            ? 'w-6 h-2 rounded-full bg-[#01BDA5]'
+                            : 'w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400'
+                        }`}
                         aria-label={`Aller à la chambre ${index + 1}`}
                       />
                     ))}
@@ -336,25 +323,26 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
               </div>
 
               {/* Version desktop : grille */}
-              <div className="hidden md:grid md:hidden lg:grid-cols-3 justify-between gap-6">
+              <div className="hidden lg:grid lg:grid-cols-2 xl:grid-cols-3 gap-6 xl:gap-8">
                 {rooms.map((room) => (
-                  <div key={room.id} className="w-[280px] p-4">
-                    <RoomCard
-                      imageUrl={room.imageUrl}
-                      name={room.name}
-                      beds={room.beds}
-                      bathrooms={room.bathrooms}
-                      maxPersons={room.maxPersons}
-                      price={room.price}
-                      availability={room.availability}
-                      href={`/hotel/${slug}/room/${room.id}`}
-                    />
-                  </div>
+                  <RoomCard
+                    key={room.id}
+                    imageUrl={room.imageUrl}
+                    name={room.name}
+                    beds={room.beds}
+                    bathrooms={room.bathrooms}
+                    maxPersons={room.maxPersons}
+                    price={room.price}
+                    availability={room.availability}
+                    href={`/hotel/${slug}/room/${room.id}`}
+                  />
                 ))}
               </div>
             </>
           )}
         </div>
+
+        <AvisClient />
       </div>
     </main>
   )

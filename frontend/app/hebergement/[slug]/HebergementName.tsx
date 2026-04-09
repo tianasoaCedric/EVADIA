@@ -44,6 +44,33 @@ const categoriesData: Record<number, { name: string, hotels: any[] }> = {
                 price: 75000,
                 rating: 4.3,
                 reviewCount: 76
+            },
+            {
+                id: 4,
+                imageUrl: '/photos/hotels/ecolodge-1.jpg',
+                name: 'Ecolodge de la Forêt',
+                availability: 'Disponible',
+                price: 85000,
+                rating: 4.5,
+                reviewCount: 128
+            },
+            {
+                id: 5,
+                imageUrl: '/photos/hotels/ecolodge-2.jpg',
+                name: 'Green Paradise Ecolodge',
+                availability: '2 places restantes',
+                price: 95000,
+                rating: 4.7,
+                reviewCount: 95
+            },
+            {
+                id: 6,
+                imageUrl: '/photos/hotels/ecolodge-3.jpg',
+                name: 'Nature Lodge',
+                availability: 'Disponible',
+                price: 75000,
+                rating: 4.3,
+                reviewCount: 76
             }
         ]
     },
@@ -210,9 +237,9 @@ export default function HebergementName({ categoryId, categoryName, slug }: Hebe
                             </div>
                         ) : (
                             <>
-                                <div className="flex flex-wrap justify-center items-start gap-6">
+                                <div className="flex flex-wrap justify-start items-start gap-11">
                                     {currentHotels.map((hotel) => (
-                                        <div key={hotel.id} className="w-[200px] sm:w-[220px] md:w-[200px] lg:w-[220px] xl:w-[200px] flex-shrink-0">
+                                        <div key={hotel.id} className="w-[260px] sm:w-[260px] flex-wrap">
                                             <CardHotel
                                                 imageUrl={hotel.imageUrl}
                                                 name={hotel.name}
