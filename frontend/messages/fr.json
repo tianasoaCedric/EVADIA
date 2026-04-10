@@ -69,7 +69,46 @@
     "no_results": "Aucun hôtel trouvé",
     "results_singular": "hôtel trouvé",
     "results_plural": "hôtels trouvés"
+  },
+  "HebergementName": {
+    "meta_title": "{category} à Madagascar | Evadia",
+    "meta_description": "Découvrez notre sélection des meilleurs {category} à Madagascar. Réservez votre hébergement en ligne aux meilleurs prix.",
+    "meta_keywords": "{category}, Madagascar, hébergement, réservation, voyage, hôtel.",
+    "hotels_luxe_title": "Hôtels de luxe",
+    "hero_title": "{category} à Madagascar",
+    "hero_subtitle": "Découvrez notre sélection des meilleurs {category} pour vos vacances",
+    "search_placeholder": "Rechercher un hôtel...",
+    "no_results": "Aucun hôtel trouvé",
+    "results_count": "{count} hôtel{count, plural, =1 {} other {s}} trouvé{count, plural, =1 {} other {s}}",
+    "previous": "Page précédente",
+    "next": "Page suivante",
+    "page": "Page {current} sur {total}"
+  },
+  "Common": {
+    "previous": "Page précédente",
+    "next": "Page suivante"
+  },
+  "CardHotel": {
+    "available": "Disponible",
+    "fully_booked": "Complet",
+    "remaining_places": "{count} places restantes",
+    "per_night": "/ nuit",
+    "reviews_count": "{count} avis",
+    "add_favorite": "Ajouter aux favoris",
+    "remove_favorite": "Retirer des favoris"
+  },
+  "RoomCard": {
+    "available": "Disponible",
+    "fully_booked": "Complet",
+    "remaining_places": "{count} places restantes",
+    "per_night": "/nuit",
+    "beds_label": "lit(s)",
+    "bathrooms_label": "SDB",
+    "persons_label": "pers",
+    "book_button": "Réserver",
+    "image": "image",
+    "previous_image": "Image précédente",
+    "next_image": "Image suivante",
+    "go_to_image": "Aller à l'image {index}"
   }
-
-
 }

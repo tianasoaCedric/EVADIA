@@ -156,7 +156,9 @@ const categoriesData: Record<number, { name: string, hotels: any[] }> = {
 }
 
 export default function HebergementName({ categoryId, categoryName, slug }: HebergementNameProps) {
-    const t = useTranslations('HotelsByCategory')
+    const t = useTranslations('HebergementName')
+    const commonT = useTranslations('Common')
+    
     const [searchQuery, setSearchQuery] = useState('')
     const [hotels, setHotels] = useState<any[]>([])
     const [filteredHotels, setFilteredHotels] = useState<any[]>([])
@@ -201,13 +203,13 @@ export default function HebergementName({ categoryId, categoryName, slug }: Hebe
         document.getElementById('hotels-list')?.scrollIntoView({ behavior: 'smooth' })
     }
 
-    const heroTitle = categoryName === 'Hôtel de luxe' ? 'Hôtels de luxe' : categoryName
+    const heroTitle = categoryName === 'Hôtel de luxe' ? t('hotels_luxe_title') : categoryName
 
     return (
         <>
             <HeroSection
-                title={`${heroTitle} à Madagascar`}
-                subtitle={`Découvrez notre sélection des meilleurs ${categoryName.toLowerCase()} pour vos vacances`}
+                title={t('hero_title', { category: heroTitle })}
+                subtitle={t('hero_subtitle', { category: categoryName.toLowerCase() })}
                 backgroundImage={`/photos/bc.png`}
                 showDownload={false}
                 showScrollIndicator={true}
@@ -264,7 +266,7 @@ export default function HebergementName({ categoryId, categoryName, slug }: Hebe
                                                     ? 'opacity-50 cursor-not-allowed'
                                                     : 'hover:bg-gray-100 cursor-pointer'
                                             }`}
-                                            aria-label="Page précédente"
+                                            aria-label={commonT('previous')}
                                         >
                                             <ChevronLeft className="w-5 h-5 text-gray-600" />
                                         </button>
@@ -311,7 +313,7 @@ export default function HebergementName({ categoryId, categoryName, slug }: Hebe
                                                     ? 'opacity-50 cursor-not-allowed'
                                                     : 'hover:bg-gray-100 cursor-pointer'
                                             }`}
-                                            aria-label="Page suivante"
+                                            aria-label={commonT('next')}
                                         >
                                             <ChevronRight className="w-5 h-5 text-gray-600" />
                                         </button>
@@ -320,7 +322,7 @@ export default function HebergementName({ categoryId, categoryName, slug }: Hebe
 
                                 {/* Nombre de résultats */}
                                 <div className="text-center mt-6 text-sm text-gray-500">
-                                    {filteredHotels.length} {filteredHotels.length > 1 ? t('results_plural') : t('results_singular')}
+                                    {t('results_count', { count: filteredHotels.length })}
                                 </div>
                             </>
                         )}

@@ -69,5 +69,46 @@
     "no_results": "No hotels found",
     "results_singular": "hotel found",
     "results_plural": "hotels found"
+  },
+  "HebergementName": {
+    "meta_title": "{category} in Madagascar | Evadia",
+    "meta_description": "Discover our selection of the best {category} in Madagascar. Book your accommodation online at the best prices.",
+    "meta_keywords": "{category}, Madagascar, accommodation, reservation, travel, hotel.",
+    "hotels_luxe_title": "Luxury hotels",
+    "hero_title": "{category} in Madagascar",
+    "hero_subtitle": "Discover our selection of the best {category} for your vacation",
+    "search_placeholder": "Search for a hotel...",
+    "no_results": "No hotels found",
+    "results_count": "{count} hotel{count, plural, =1 {} other {s}} found{count, plural, =1 {} other {s}}",
+    "previous": "Previous page",
+    "next": "Next page",
+    "page": "Page {current} of {total}"
+  },
+  "Common": {
+    "previous": "Previous page",
+    "next": "Next page"
+  },
+  "CardHotel": {
+    "available": "Available",
+    "fully_booked": "Complete",
+    "remaining_places": "{count} places remaining",
+    "per_night": "/ night",
+    "reviews_count": "{count} reviews",
+    "add_favorite": "Add to favorites",
+    "remove_favorite": "Remove from favorites"
+  },
+  "RoomCard": {
+    "available": "Available",
+    "fully_booked": "Complete",
+    "remaining_places": "{count} places remaining",
+    "per_night": "/night",
+    "beds_label": "bed(s)",
+    "bathrooms_label": "Bathroom",
+    "persons_label": "pers",
+    "book_button": "To book",
+    "image": "picture",
+    "previous_image": "Previous image",
+    "next_image": "Next image",
+    "go_to_image": "Go to image {index}"
   }
 }

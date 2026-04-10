@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useOnScreen } from '@/hooks/useOnScreen'
+import { useTranslations } from 'next-intl'
 
 interface CardHotelProps {
   /** URL de l'image de l'hôtel */
@@ -64,6 +65,7 @@ const CardHotel = ({
   width = 'w-[260px]',
   onFavoriteToggle
 }: CardHotelProps) => {
+  const t = useTranslations('CardHotel')
   const [isFavorite, setIsFavorite] = useState(false)
   const [imageError, setImageError] = useState(false)
 
@@ -85,6 +87,19 @@ const CardHotel = ({
     const newFavoriteState = !isFavorite
     setIsFavorite(newFavoriteState)
     onFavoriteToggle?.(newFavoriteState)
+  }
+
+  // Fonction pour traduire la disponibilité
+  const getTranslatedAvailability = (availabilityText: string): string => {
+    const lowerText = availabilityText.toLowerCase()
+    if (lowerText.includes('disponible')) return t('available')
+    if (lowerText.includes('complet')) return t('fully_booked')
+    if (lowerText.includes('places restantes')) {
+      const match = availabilityText.match(/(\d+)/)
+      const number = match ? match[1] : ''
+      return t('remaining_places', { count: number })
+    }
+    return availabilityText
   }
 
   // Générer les étoiles en fonction de la note
@@ -178,7 +193,7 @@ const CardHotel = ({
             transition-all duration-200 hover:scale-110
             ${isFavorite ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}
           `}
-          aria-label={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+          aria-label={isFavorite ? t('remove_favorite') : t('add_favorite')}
         >
           <svg
             className="w-4 h-4 sm:w-5 sm:h-5"
@@ -198,12 +213,12 @@ const CardHotel = ({
 
       {/* Contenu de la carte */}
       <div className="flex flex-col flex-1 p-1 sm:p-2">
-        {/* Nom de l'hôtel */}
+        {/* Nom de l'hôtel (non traduit) */}
         <h3 className="font-semibold text-base sm:text-lg text-gray-900 line-clamp-1 mb-1">
           {name}
         </h3>
 
-        {/* Disponibilité */}
+        {/* Disponibilité traduite */}
         <div className="mb-1">
           <span className={`
             text-xs sm:text-sm font-medium
@@ -214,7 +229,7 @@ const CardHotel = ({
                 : 'text-orange-500'
             }
           `}>
-            {availability}
+            {getTranslatedAvailability(availability)}
           </span>
         </div>
 
@@ -223,7 +238,7 @@ const CardHotel = ({
           <span className="text-lg sm:text-xl font-bold text-gray-900">
             {price.toLocaleString('fr-FR')} Ar
           </span>
-          <span className="text-xs sm:text-sm text-gray-500"> / nuit</span>
+          <span className="text-xs sm:text-sm text-gray-500"> {t('per_night')}</span>
         </div>
 
         {/* Note (étoiles + note/5) */}
@@ -235,7 +250,7 @@ const CardHotel = ({
             </span>
             {reviewCount !== undefined && (
               <span className="text-[10px] sm:text-xs text-gray-400">
-                ({reviewCount} avis)
+                ({t('reviews_count', { count: reviewCount })})
               </span>
             )}
           </div>

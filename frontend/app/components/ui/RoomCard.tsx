@@ -5,9 +5,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Bed, Bath, Users, ChevronLeft, ChevronRight } from 'lucide-react'
 import { createSlug } from '@/lib/slug'
+import { useTranslations } from 'next-intl'
+import { useOnScreen } from '@/hooks/useOnScreen'
 
 interface RoomCardProps {
-  imageUrl: string | string[]  // Accepte une seule URL ou un tableau d'URLs
+  imageUrl: string | string[]
   name: string
   beds: number
   bathrooms: number
@@ -19,7 +21,7 @@ interface RoomCardProps {
   className?: string
   width?: string
   onBookClick?: () => void
-  hotelId?: number  // Ajout de l'ID de l'hôtel pour générer le lien
+  hotelId?: number
 }
 
 const RoomCard = ({
@@ -33,16 +35,21 @@ const RoomCard = ({
   href,
   alt = '',
   className = '',
-  width = 'w-80 sm:w-96',  // Largeur augmentée
+  width = 'w-80 sm:w-96',
   onBookClick,
-  hotelId  // Ajout de la prop hotelId
+  hotelId
 }: RoomCardProps) => {
+  const t = useTranslations('RoomCard')
   const [imageError, setImageError] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   
-  // Convertir en tableau si une seule image est fournie
   const images = Array.isArray(imageUrl) ? imageUrl : [imageUrl]
   const hasMultipleImages = images.length > 1
+
+  const [setCardRef, isCardVisible] = useOnScreen({
+    threshold: 0.2,
+    triggerOnce: false
+  })
 
   const handlePrevImage = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -62,7 +69,18 @@ const RoomCard = ({
     onBookClick?.()
   }
 
-  // Générer le lien vers la page de la chambre
+  const getTranslatedAvailability = (availabilityText: string): string => {
+    const lowerText = availabilityText.toLowerCase()
+    if (lowerText.includes('disponible')) return t('available')
+    if (lowerText.includes('complet')) return t('fully_booked')
+    if (lowerText.includes('places restantes')) {
+      const match = availabilityText.match(/(\d+)/)
+      const number = match ? match[1] : ''
+      return t('remaining_places', { count: number })
+    }
+    return availabilityText
+  }
+
   const generateHref = () => {
     if (href) return href
     if (hotelId && name) return `/propriete/${createSlug(hotelId, name)}`
@@ -70,20 +88,23 @@ const RoomCard = ({
   }
 
   const cardContent = (
-    <div className={`
-      bg-white rounded-2xl overflow-hidden 
-      transition-all duration-300 hover:-translate-y-1 hover:shadow-xl
-      flex flex-col
-      ${width}
-    `}>
+    <div
+      ref={setCardRef}
+      className={`
+        bg-white rounded-2xl overflow-hidden 
+        transition-all duration-700 ease-out
+        flex flex-col
+        ${width}
+        ${isCardVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}
+      `}
+    >
       {/* Carrousel d'images */}
       <div className="relative rounded-2xl h-48 sm:h-56 w-full overflow-hidden bg-gray-200">
-        {/* Image courante */}
         {!imageError ? (
           <Image
             src={images[currentImageIndex]}
             fill
-            alt={alt || `${name} - image ${currentImageIndex + 1}`}
+            alt={alt || `${name} - ${t('image')} ${currentImageIndex + 1}`}
             className="object-cover transition-transform duration-500 group-hover:scale-110"
             onError={() => setImageError(true)}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -96,29 +117,25 @@ const RoomCard = ({
           </div>
         )}
 
-        {/* Flèche gauche */}
         {hasMultipleImages && (
-          <button
-            onClick={handlePrevImage}
-            className="absolute left-2 top-1/2 -translate-y-1/2 p-1 rounded-full bg-black/50 text-white hover:bg-black/70 transition-all duration-200 cursor-pointer"
-            aria-label="Image précédente"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
+          <>
+            <button
+              onClick={handlePrevImage}
+              className="absolute left-2 top-1/2 -translate-y-1/2 p-1 rounded-full bg-black/50 text-white hover:bg-black/70 transition-all duration-200 cursor-pointer"
+              aria-label={t('previous_image')}
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button
+              onClick={handleNextImage}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full bg-black/50 text-white hover:bg-black/70 transition-all duration-200 cursor-pointer"
+              aria-label={t('next_image')}
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </>
         )}
 
-        {/* Flèche droite */}
-        {hasMultipleImages && (
-          <button
-            onClick={handleNextImage}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full bg-black/50 text-white hover:bg-black/70 transition-all duration-200 cursor-pointer"
-            aria-label="Image suivante"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        )}
-
-        {/* Indicateurs de page */}
         {hasMultipleImages && (
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
             {images.map((_, idx) => (
@@ -134,27 +151,20 @@ const RoomCard = ({
                     ? 'bg-white w-3'
                     : 'bg-white/50 hover:bg-white/80'
                 }`}
-                aria-label={`Aller à l'image ${idx + 1}`}
+                aria-label={t('go_to_image', { index: idx + 1 })}
               />
             ))}
           </div>
         )}
         
-        {/* Badge de disponibilité */}
-        {availability && (
-          <div className={`absolute top-2 left-2 sm:top-3 sm:left-3 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${
-            availability.toLowerCase().includes('disponible') 
-              ? 'bg-green-500 text-white hidden' 
-              : 'bg-red-500 text-white'
-          }`}>
-            {availability}
+        {availability && !availability.toLowerCase().includes('disponible') && (
+          <div className={`absolute top-2 left-2 sm:top-3 sm:left-3 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium bg-red-500 text-white`}>
+            {getTranslatedAvailability(availability)}
           </div>
         )}
       </div>
 
-      {/* Contenu de la carte */}
       <div className="p-3 sm:p-4 flex flex-col flex-1">
-        {/* Nom et prix sur la même ligne */}
         <div className="flex flex-row items-center justify-between gap-2 mb-3">
           <h3 className="font-medium text-lg sm:text-xl text-gray-900 line-clamp-1">
             {name}
@@ -163,35 +173,30 @@ const RoomCard = ({
             <span className="text-lg sm:text-xl font-medium text-gray-900">
               {price.toLocaleString('fr-FR')} Ar
             </span>
-            <span className="text-xs text-gray-500">/nuit</span>
+            <span className="text-xs text-gray-500">{t('per_night')}</span>
           </div>
         </div>
 
-        {/* Caractéristiques - Lits, SDB, Pers sur la même ligne */}
         <div className="flex items-center gap-3 sm:gap-4 mb-4 justify-between">
-          {/* Lits */}
           <div className="flex items-center gap-1.5">
             <Bed className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
-            <span className="text-xs text-gray-500">lit(s) :</span>
+            <span className="text-xs text-gray-500">{t('beds_label')} :</span>
             <span className="text-sm sm:text-base text-gray-700 font-medium">{beds}</span>
           </div>
 
-          {/* Salle de bain */}
           <div className="flex items-center gap-1.5">
             <Bath className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
-            <span className="text-xs text-gray-500">SDB :</span>
+            <span className="text-xs text-gray-500">{t('bathrooms_label')} :</span>
             <span className="text-sm sm:text-base text-gray-700 font-medium">{bathrooms}</span>
           </div>
 
-          {/* Personnes */}
           <div className="flex items-center gap-1.5">
             <Users className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
-            <span className="text-xs text-gray-500">pers :</span>
+            <span className="text-xs text-gray-500">{t('persons_label')} :</span>
             <span className="text-sm sm:text-base text-gray-700 font-medium">{maxPersons}</span>
           </div>
         </div>
 
-        {/* Bouton Réserver - pleine largeur */}
         <button
           onClick={handleBookClick}
           className={`
@@ -204,7 +209,7 @@ const RoomCard = ({
           `}
           disabled={!availability.toLowerCase().includes('disponible')}
         >
-          Réserver
+          {t('book_button')}
         </button>
       </div>
     </div>

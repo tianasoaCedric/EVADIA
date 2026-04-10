@@ -134,25 +134,6 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
                         </h1>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <Bouton
-                            size="medium"
-                            onClick={handleSave}
-                            className="flex items-center gap-2"
-                        >
-                            <Heart className={`w-5 h-5 ${isSaved ? 'fill-current' : ''}`} />
-                            <span className="hidden sm:inline">{isSaved ? 'Enregistré' : 'Enregistrer'}</span>
-                        </Bouton>
-
-                        <Bouton
-                            size="medium"
-                            onClick={handleShare}
-                            className="flex items-center gap-2"
-                        >
-                            <Share className="w-5 h-5" />
-                            <span className="hidden sm:inline">Partager</span>
-                        </Bouton>
-                    </div>
                 </div>
 
                 {/* Photos de la chambre */}
