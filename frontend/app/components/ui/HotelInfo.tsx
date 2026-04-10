@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { MapPin, Star, Wifi, ParkingMeter, Snowflake, Tv, Bath, Coffee, Utensils, Dumbbell, Check, Bell } from 'lucide-react'
+import { MapPin, Star, Wifi, ParkingMeter, Snowflake, Tv, Bath, Coffee, Utensils, Dumbbell, Check, Bell, Bed, Users } from 'lucide-react'
 
 interface HotelInfoProps {
   hotelName: string
@@ -10,8 +10,12 @@ interface HotelInfoProps {
   reviewCount: number
   category: string
   description: string
+  beds?: number
+  bathrooms?: number
+  maxPersons?: number
   includedItems?: string[]
   equipments?: Equipment[]
+  layout?: 'columns' | 'rows'
 }
 
 interface Equipment {
@@ -48,8 +52,12 @@ export default function HotelInfo({
   reviewCount,
   category,
   description,
+  beds,
+  bathrooms,
+  maxPersons,
   includedItems = defaultIncluded,
-  equipments = defaultEquipments
+  equipments = defaultEquipments,
+  layout = 'columns'
 }: HotelInfoProps) {
   const [showAllEquipments, setShowAllEquipments] = useState(false)
   const displayedEquipments = showAllEquipments ? equipments : equipments.slice(0, 8)
@@ -79,12 +87,129 @@ export default function HotelInfo({
     )
   }
 
+  // Composant des caractéristiques (lits, sdb, personnes)
+  const FeaturesSection = () => (
+    <div className="flex items-center gap-6">
+      {beds !== undefined && (
+        <div className="flex items-center gap-2">
+          <Bed className="w-5 h-5 text-[#01BDA5]" />
+          <div className='flex items-center gap-3'>
+            <p className="text-xs text-gray-500">lit(s) :</p>
+            <p className="text-xl font-bold text-gray-800">{beds}</p>
+            
+          </div>
+        </div>
+      )}
+      {bathrooms !== undefined && (
+        <div className="flex items-center gap-2">
+          <Bath className="w-5 h-5 text-[#01BDA5]" />
+          <div  className='flex items-center gap-3'>
+            <p className="text-xs text-gray-500">sdb :</p>
+            <p className="text-xl font-bold text-gray-800">{bathrooms}</p>
+          </div>
+        </div>
+      )}
+      {maxPersons !== undefined && (
+        <div className="flex items-center gap-2">
+          <Users className="w-5 h-5 text-[#01BDA5]" />
+          <div  className='flex items-center gap-3'>
+            <p className="text-xs text-gray-500">personnes :</p>
+            <p className="text-xl font-bold text-gray-800">{maxPersons}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+
+  // Layout en colonnes (pour la page hôtel)
+  if (layout === 'columns') {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-32 justify-start">
+        {/* Colonne 1 : Informations de l'hôtel */}
+        <div className='h-full flex flex-col justify-between'>
+          <div className="space-y-6">
+            {/* Localisation + avis */}
+            <div>
+              <div className="flex items-center gap-2 text-gray-600 mb-2">
+                <MapPin className="w-5 h-5 text-[#01BDA5]" />
+                <span>{location}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                {renderStars()}
+                <span className="text-sm font-medium text-gray-700">{rating.toFixed(1)}</span>
+                <span className="text-sm text-gray-500">({reviewCount} avis)</span>
+              </div>
+            </div>
+
+            {/* Catégorie */}
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Catégorie</h3>
+              <p className="text-gray-800">{category}</p>
+            </div>
+
+            {/* À propos */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">À propos</h3>
+              <p className="text-gray-600 leading-relaxed">{description}</p>
+            </div>
+
+            {/* Caractéristiques (lits, sdb, personnes) */}
+            {(beds !== undefined || bathrooms !== undefined || maxPersons !== undefined) && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-3">Caractéristiques</h3>
+                <FeaturesSection />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Colonne 2 : Inclus et Équipements */}
+        <div className='h-full flex flex-col justify-between'>
+          <div className="space-y-8">
+            {/* Inclus dans le logement */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Inclus dans le logement</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {includedItems.map((item, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-[#01BDA5] flex-shrink-0" />
+                    <span className="text-gray-600">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Équipements */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Équipements</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {displayedEquipments.map((equipment) => (
+                  <div key={equipment.id} className="flex items-center gap-3">
+                    <div className="text-[#01BDA5] flex-shrink-0">{equipment.icon}</div>
+                    <span className="text-gray-600">{equipment.name}</span>
+                  </div>
+                ))}
+              </div>
+              {equipments.length > 8 && (
+                <button
+                  onClick={() => setShowAllEquipments(!showAllEquipments)}
+                  className="mt-4 text-[#01BDA5] text-sm font-medium hover:underline transition-all cursor-pointer"
+                >
+                  {showAllEquipments ? 'Voir moins' : 'Afficher tout les équipements'}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Layout en lignes (pour la page chambre)
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-32 justify-start">
-      {/* Colonne 1 : Informations de l'hôtel */}
-      <div className='h-full flex flex-col justify-between'>
-      <div className="space-y-6">
-        {/* Localisation + avis */}
+    <div className="space-y-8">
+      {/* Ligne 1 : Informations de base */}
+      <div className="space-y-4">
         <div>
           <div className="flex items-center gap-2 text-gray-600 mb-2">
             <MapPin className="w-5 h-5 text-[#01BDA5]" />
@@ -97,63 +222,58 @@ export default function HotelInfo({
           </div>
         </div>
 
-        {/* Catégorie */}
         <div>
           <h3 className="text-sm font-medium text-gray-500 mb-1">Catégorie</h3>
           <p className="text-gray-800">{category}</p>
         </div>
 
-        {/* À propos */}
-        <div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">À propos</h3>
-          <p className="text-gray-600 leading-relaxed">
-            {description}
-          </p>
-        </div>
-      </div>
+        {/* Caractéristiques (lits, sdb, personnes) */}
+        {(beds !== undefined || bathrooms !== undefined || maxPersons !== undefined) && (
+          <div>
+            <h3 className="text-sm font-medium text-gray-500 mb-2">Caractéristiques</h3>
+            <FeaturesSection />
+          </div>
+        )}
       </div>
 
-      {/* Colonne 2 : Inclus et Équipements */}
-      <div className='h-full flex flex-col justify-between'>
-      <div className="space-y-8">
-        {/* Inclus dans le logement */}
-        <div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Inclus dans le logement</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {includedItems.map((item, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <Check className="w-5 h-5 text-[#01BDA5] flex-shrink-0" />
-                <span className="text-gray-600">{item}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* Ligne 2 : À propos */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">À propos</h3>
+        <p className="text-gray-600 leading-relaxed">{description}</p>
+      </div>
 
-        {/* Équipements */}
-        <div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Équipements</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {displayedEquipments.map((equipment) => (
-              <div key={equipment.id} className="flex items-center gap-3">
-                <div className="text-[#01BDA5] flex-shrink-0">
-                  {equipment.icon}
-                </div>
-                <span className="text-gray-600">{equipment.name}</span>
-              </div>
-            ))}
-          </div>
-          
-          {/* Bouton Afficher tout les équipements */}
-          {equipments.length > 8 && (
-            <button
-              onClick={() => setShowAllEquipments(!showAllEquipments)}
-              className="mt-4 text-[#01BDA5] text-sm font-medium hover:underline transition-all cursor-pointer"
-            >
-              {showAllEquipments ? 'Voir moins' : 'Afficher tout les équipements'}
-            </button>
-          )}
+      {/* Ligne 3 : Inclus dans le logement */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">Inclus dans le logement</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          {includedItems.map((item, index) => (
+            <div key={index} className="flex items-center gap-2">
+              <Check className="w-5 h-5 text-[#01BDA5] flex-shrink-0" />
+              <span className="text-gray-600">{item}</span>
+            </div>
+          ))}
         </div>
       </div>
+
+      {/* Ligne 4 : Équipements */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">Équipements</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {displayedEquipments.map((equipment) => (
+            <div key={equipment.id} className="flex items-center gap-3">
+              <div className="text-[#01BDA5] flex-shrink-0">{equipment.icon}</div>
+              <span className="text-gray-600">{equipment.name}</span>
+            </div>
+          ))}
+        </div>
+        {equipments.length > 8 && (
+          <button
+            onClick={() => setShowAllEquipments(!showAllEquipments)}
+            className="mt-4 text-[#01BDA5] text-sm font-medium hover:underline transition-all cursor-pointer"
+          >
+            {showAllEquipments ? 'Voir moins' : 'Afficher tout les équipements'}
+          </button>
+        )}
       </div>
     </div>
   )

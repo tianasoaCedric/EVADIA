@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Bed, Bath, Users, ChevronLeft, ChevronRight } from 'lucide-react'
+import { createSlug } from '@/lib/slug'
 
 interface RoomCardProps {
   imageUrl: string | string[]  // Accepte une seule URL ou un tableau d'URLs
@@ -18,6 +19,7 @@ interface RoomCardProps {
   className?: string
   width?: string
   onBookClick?: () => void
+  hotelId?: number  // Ajout de l'ID de l'hôtel pour générer le lien
 }
 
 const RoomCard = ({
@@ -32,7 +34,8 @@ const RoomCard = ({
   alt = '',
   className = '',
   width = 'w-80 sm:w-96',  // Largeur augmentée
-  onBookClick
+  onBookClick,
+  hotelId  // Ajout de la prop hotelId
 }: RoomCardProps) => {
   const [imageError, setImageError] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
@@ -57,6 +60,13 @@ const RoomCard = ({
     e.preventDefault()
     e.stopPropagation()
     onBookClick?.()
+  }
+
+  // Générer le lien vers la page de la chambre
+  const generateHref = () => {
+    if (href) return href
+    if (hotelId && name) return `/propriete/${createSlug(hotelId, name)}`
+    return '#'
   }
 
   const cardContent = (
@@ -200,9 +210,11 @@ const RoomCard = ({
     </div>
   )
 
-  if (href) {
+  const linkHref = generateHref()
+  
+  if (linkHref !== '#') {
     return (
-      <Link href={href} className={`block group ${className}`}>
+      <Link href={linkHref} className={`block group ${className}`}>
         {cardContent}
       </Link>
     )

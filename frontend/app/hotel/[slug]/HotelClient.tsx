@@ -259,6 +259,7 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
                 {rooms.map((room) => (
                   <div key={room.id} className="flex-shrink-0 w-[320px] sm:w-[320px] md:w-[340px] lg:w-[360px] xl:w-[380px]">
                     <RoomCard
+                      hotelId={room.id}
                       imageUrl={room.imageUrl}
                       name={room.name}
                       beds={room.beds}
@@ -266,7 +267,7 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
                       maxPersons={room.maxPersons}
                       price={room.price}
                       availability={room.availability}
-                      href={`/hotel/${slug}/room/${room.id}`}
+                      
                     />
                   </div>
                 ))}
@@ -311,6 +312,7 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
                     {rooms.map((room) => (
                       <div key={room.id} className="flex-shrink-0 w-[320px]">
                         <RoomCard
+                          hotelId={room.id}
                           imageUrl={room.imageUrl}
                           name={room.name}
                           beds={room.beds}
@@ -318,7 +320,7 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
                           maxPersons={room.maxPersons}
                           price={room.price}
                           availability={room.availability}
-                          href={`/hotel/${slug}/room/${room.id}`}
+                          
                         />
                       </div>
                     ))}
@@ -347,6 +349,7 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
                 {rooms.map((room) => (
                   <RoomCard
                     key={room.id}
+                    hotelId={room.id}
                     imageUrl={room.imageUrl}
                     name={room.name}
                     beds={room.beds}
@@ -354,7 +357,7 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
                     maxPersons={room.maxPersons}
                     price={room.price}
                     availability={room.availability}
-                    href={`/hotel/${slug}/room/${room.id}`}
+                    
                   />
                 ))}
               </div>
