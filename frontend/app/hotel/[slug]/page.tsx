@@ -1,5 +1,5 @@
-'use client'
-
+import { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 import * as React from 'react'
 import HotelClient from './HotelClient'
 
@@ -22,8 +22,34 @@ const getHotelNameFromSlug = (slug: string): string => {
   return parts.join(' ').replace(/-/g, ' ')
 }
 
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params
+  const t = await getTranslations('HotelPage')
+  const hotelName = getHotelNameFromSlug(slug)
+  
+  return {
+    title: t('meta_title', { hotelName }),
+    description: t('meta_description', { hotelName }),
+    keywords: t('meta_keywords'),
+    openGraph: {
+      title: t('meta_title', { hotelName }),
+      description: t('meta_description', { hotelName }),
+      type: 'website',
+      locale: 'fr_FR',
+      siteName: 'Evadia',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('meta_title', { hotelName }),
+      description: t('meta_description', { hotelName }),
+    },
+    alternates: {
+      canonical: `https://evadia.com/hotel/${slug}`,
+    },
+  }
+}
+
 export default function HotelPage({ params }: PageProps) {
-  // Déballer la Promise avec React.use() dans un composant client
   const { slug } = React.use(params)
   const hotelId = decodeIdFromSlug(slug)
   const hotelName = getHotelNameFromSlug(slug)

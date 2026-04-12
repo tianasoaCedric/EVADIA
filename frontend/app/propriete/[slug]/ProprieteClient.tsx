@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronLeft, Share, Heart } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { useOnScreen } from '@/hooks/useOnScreen'
 import Bouton from '../../components/ui/Bouton'
 import HotelPhoto from '../../components/ui/HotelPhoto'
 import Reservation from '../../components/ui/Reservation'
@@ -57,9 +59,13 @@ const getRoomData = (id: number) => {
 
 export default function ProprieteClient({ proprieteId, proprieteName, slug }: ProprieteClientProps) {
     const router = useRouter()
+    const t = useTranslations('ProprieteClient')
     const [isLoading, setIsLoading] = useState(true)
     const [isSaved, setIsSaved] = useState(false)
     const [room, setRoom] = useState<any>(null)
+
+    // Animation au scroll
+    const [setMainRef, isMainVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
 
     useEffect(() => {
         const fetchRoom = async () => {
@@ -79,31 +85,31 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
 
     const handleSave = () => {
         setIsSaved(!isSaved)
-        console.log('Chambre sauvegardée')
+        console.log(t('save_log'))
     }
 
     const handleShare = () => {
         if (navigator.share) {
             navigator.share({
                 title: proprieteName,
-                text: `Découvrez ${proprieteName} sur Evadia`,
+                text: t('share_text', { name: proprieteName }),
                 url: window.location.href,
             })
         } else {
             navigator.clipboard.writeText(window.location.href)
-            alert('Lien copié dans le presse-papier !')
+            alert(t('share_alert'))
         }
     }
 
     const handleReservation = (data: any) => {
-        console.log('Réservation:', data)
+        console.log(t('reservation_log'), data)
         // Rediriger vers la page de paiement
     }
 
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-pulse text-gray-500">Chargement...</div>
+                <div className="animate-pulse text-gray-500">{t('loading')}</div>
             </div>
         )
     }
@@ -111,13 +117,18 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
     if (!room) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="text-gray-500">Chambre non trouvée</div>
+                <div className="text-gray-500">{t('not_found')}</div>
             </div>
         )
     }
 
     return (
-        <main className="min-h-screen pt-24 pb-16">
+        <main 
+            ref={setMainRef}
+            className={`min-h-screen pt-24 pb-16 transition-all duration-700 ease-out ${
+                isMainVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}
+        >
             <div className="container mx-auto px-4">
                 {/* Header avec retour, titre et boutons */}
                 <div className="flex flex-row items-center justify-between gap-4 mb-6">
@@ -125,7 +136,7 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
                         <button
                             onClick={() => router.back()}
                             className="rounded-full transition-colors cursor-pointer"
-                            aria-label="Retour"
+                            aria-label={t('back_label')}
                         >
                             <ChevronLeft className="w-8 h-8 text-gray-600 hover:text-[#01BDA5] transition-colors" />
                         </button>
@@ -133,7 +144,6 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
                             {proprieteName}
                         </h1>
                     </div>
-
                 </div>
 
                 {/* Photos de la chambre */}

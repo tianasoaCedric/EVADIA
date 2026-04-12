@@ -5,6 +5,8 @@ import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight, X, Grid } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { useOnScreen } from '@/hooks/useOnScreen'
 
 interface HotelPhotoProps {
     imageUrl: string | string[]
@@ -23,6 +25,7 @@ const HotelPhoto = ({
     onBookClick,
     autoPlayInterval
 }: HotelPhotoProps) => {
+    const t = useTranslations('HotelPhoto')
     const [imageError, setImageError] = useState(false)
     const [currentIndex, setCurrentIndex] = useState(0)
     const [isTransitioning, setIsTransitioning] = useState(false)
@@ -34,8 +37,14 @@ const HotelPhoto = ({
     const [selectedImageIndex, setSelectedImageIndex] = useState(0)
     const containerRef = useRef<HTMLDivElement>(null)
 
+    // Animation au scroll
+    const [setPhotoRef, isPhotoVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
+
     const images = Array.isArray(imageUrl) ? imageUrl : [imageUrl]
-    const hasMultipleImages = images.length > 1
+    // Limiter l'affichage à 5 photos dans le carrousel principal
+    const displayImages = images.slice(0, 5)
+    const remainingImagesCount = images.length - 5
+    const hasMultipleImages = displayImages.length > 1
     const hasMoreThanOneImage = images.length > 1
 
     // Auto-play
@@ -66,14 +75,14 @@ const HotelPhoto = ({
     const goToPrevious = () => {
         if (isTransitioning) return
         setIsTransitioning(true)
-        setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
+        setCurrentIndex((prev) => (prev === 0 ? displayImages.length - 1 : prev - 1))
         setTimeout(() => setIsTransitioning(false), 300)
     }
 
     const goToNext = () => {
         if (isTransitioning) return
         setIsTransitioning(true)
-        setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
+        setCurrentIndex((prev) => (prev === displayImages.length - 1 ? 0 : prev + 1))
         setTimeout(() => setIsTransitioning(false), 300)
     }
 
@@ -179,6 +188,12 @@ const HotelPhoto = ({
 
     const cardContent = (
         <>
+        <div
+            ref={setPhotoRef}
+            className={`transition-all duration-700 ease-out ${
+                isPhotoVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}
+        >
             <div className={`rounded-2xl overflow-hidden bg-gray-800 ${className}`}>
                 <div 
                     className="relative w-full bg-gray-200"
@@ -203,12 +218,12 @@ const HotelPhoto = ({
                                 transition: isDragging ? 'none' : 'transform 0.3s ease-out'
                             }}
                         >
-                            {images.map((img, idx) => (
+                            {displayImages.map((img, idx) => (
                                 <div key={idx} className="relative w-full h-full flex-shrink-0">
                                     {!imageError ? (
                                         <Image
                                             src={img}
-                                            alt={alt || `image ${idx + 1}`}
+                                            alt={alt || `${t('image')} ${idx + 1}`}
                                             fill
                                             className="object-cover pointer-events-none"
                                             onError={() => setImageError(true)}
@@ -232,7 +247,7 @@ const HotelPhoto = ({
                             <button
                                 onClick={goToPrevious}
                                 className="absolute left-2 top-1/2 -translate-y-1/2 p-1 rounded-full bg-black/50 text-white hover:bg-black/70 transition-all duration-200 cursor-pointer z-20"
-                                aria-label="Image précédente"
+                                aria-label={t('previous_image')}
                             >
                                 <ChevronLeft className="w-5 h-5" />
                             </button>
@@ -240,13 +255,13 @@ const HotelPhoto = ({
                             <button
                                 onClick={goToNext}
                                 className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full bg-black/50 text-white hover:bg-black/70 transition-all duration-200 cursor-pointer z-20"
-                                aria-label="Image suivante"
+                                aria-label={t('next_image')}
                             >
                                 <ChevronRight className="w-5 h-5" />
                             </button>
 
                             <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-20">
-                                {images.map((_, idx) => (
+                                {displayImages.map((_, idx) => (
                                     <button
                                         key={idx}
                                         onClick={(e) => {
@@ -259,7 +274,7 @@ const HotelPhoto = ({
                                                 ? 'bg-white w-3'
                                                 : 'bg-white/50 hover:bg-white/80'
                                         }`}
-                                        aria-label={`Aller à l'image ${idx + 1}`}
+                                        aria-label={t('go_to_image', { number: idx + 1 })}
                                     />
                                 ))}
                             </div>
@@ -279,13 +294,19 @@ const HotelPhoto = ({
                         className="px-3 cursor-pointer text-[#01BDA5] text-sm font-medium transition-all duration-200 flex items-center gap-2 hover:opacity-80"
                     >
                         <Grid className="w-4 h-4" />
-                        <span className="hidden sm:inline">Voir plus de photos</span>
-                        <span className="md:hidden">{images.length} photos</span>
+                        <span className="hidden sm:inline">
+                            {remainingImagesCount > 0 
+                                ? t('see_more_photos_with_count', { count: remainingImagesCount })
+                                : t('see_more_photos')}
+                        </span>
+                        <span className="md:hidden">{images.length} {t('photos')}</span>
                     </button>
                 </div>
             )}
 
-            {/* Modal avec grille */}
+            
+        </div>
+        {/* Modal avec grille - IDENTIQUE À L'ORIGINAL */}
             {isModalOpen && (
                 <div 
                     className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md overflow-y-auto"
@@ -295,7 +316,7 @@ const HotelPhoto = ({
                     <button
                         onClick={closeModal}
                         className="fixed top-4 right-4 p-2 rounded-full bg-gray-800 hover:bg-gray-700 text-white transition-all duration-200 z-50"
-                        aria-label="Fermer"
+                        aria-label={t('close')}
                     >
                         <X className="w-6 h-6" />
                     </button>
@@ -318,7 +339,7 @@ const HotelPhoto = ({
                                 >
                                     <Image
                                         src={img}
-                                        alt={`Photo ${idx + 1}`}
+                                        alt={t('photo_number', { number: idx + 1 })}
                                         fill
                                         className="object-cover"
                                         sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
@@ -330,7 +351,7 @@ const HotelPhoto = ({
                 </div>
             )}
 
-            {/* Modal plein écran pour zoom */}
+            {/* Modal plein écran pour zoom - IDENTIQUE À L'ORIGINAL */}
             {isModalOpen && modalView === 'fullscreen' && (
                 <div 
                     className="fixed inset-0 z-[60] bg-black"
@@ -345,14 +366,14 @@ const HotelPhoto = ({
                         className="fixed top-4 left-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-200 z-50 flex items-center gap-2"
                     >
                         <ChevronLeft className="w-5 h-5" />
-                        <span className="text-sm">Retour</span>
+                        <span className="text-sm">{t('back_to_grid')}</span>
                     </button>
 
                     {/* Bouton fermeture */}
                     <button
                         onClick={closeModal}
                         className="fixed top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-200 z-50"
-                        aria-label="Fermer"
+                        aria-label={t('close')}
                     >
                         <X className="w-6 h-6" />
                     </button>
@@ -383,10 +404,10 @@ const HotelPhoto = ({
                         >
                             {images.map((img, idx) => (
                                 <div key={idx} className="relative w-full h-full flex-shrink-0 flex items-center justify-center bg-black">
-                                    <div className="relative w-full h-full ">
+                                    <div className="relative w-full h-full">
                                         <Image
                                             src={img}
-                                            alt={`Photo ${idx + 1}`}
+                                            alt={t('photo_number', { number: idx + 1 })}
                                             fill
                                             className="object-contain"
                                             sizes="100vw"

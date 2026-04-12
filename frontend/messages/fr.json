@@ -110,5 +110,82 @@
     "previous_image": "Image précédente",
     "next_image": "Image suivante",
     "go_to_image": "Aller à l'image {index}"
+  },
+  "HotelInfo": {
+    "beds_label": "lit(s)",
+    "bathrooms_label": "sdb",
+    "persons_label": "personnes",
+    "reviews": "avis",
+    "category_label": "Catégorie",
+    "about_label": "À propos",
+    "features_label": "Caractéristiques",
+    "included_label": "Inclus dans le logement",
+    "equipments_label": "Équipements",
+    "see_all": "Afficher tout les équipements",
+    "see_less": "Voir moins"
+  },
+  "AvisClient": {
+    "default_title": "Avis des voyageurs",
+    "show_more": "Afficher plus d'avis"
+  },
+  "HotelPage": {
+    "meta_title": "{hotelName} | Evadia",
+    "meta_description": "Découvrez {hotelName} sur Evadia. Réservez votre séjour en ligne aux meilleurs prix.",
+    "meta_keywords": "hôtel, réservation, voyage, Evadia, hébergement"
+  },
+  "HotelClient": {
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "saved": "Enregistré",
+    "share": "Partager",
+    "share_text": "Découvrez {hotelName} sur Evadia",
+    "share_alert": "Lien copié dans le presse-papier !",
+    "save_log": "Hôtel sauvegardé",
+    "back_label": "Retour",
+    "rooms_title": "Chambres et disponibilités",
+    "previous_rooms": "Défiler vers la gauche",
+    "next_rooms": "Défiler vers la droite",
+    "go_to_room": "Aller à la chambre {number}"
+  },
+  "HotelPhoto": {
+    "image": "image",
+    "previous_image": "Image précédente",
+    "next_image": "Image suivante",
+    "go_to_image": "Aller à l'image {number}",
+    "see_more_photos": "Voir plus de photos",
+    "see_more_photos_with_count": "Voir plus de photos (+{count})",
+    "photos": "photos",
+    "close": "Fermer",
+    "back_to_grid": "Retour",
+    "photo_number": "Photo {number}"
+  },
+  "Reservation": {
+    "per_night": "/nuit",
+    "offer": "Offre",
+    "check_in": "Check In",
+    "check_out": "Check Out",
+    "guests": "Nombre de voyageurs",
+    "stay": "Séjour ({nights} nuits)",
+    "service_fees": "Frais de services",
+    "discount": "Réduction ({percent}%)",
+    "total": "Total",
+    "book_button": "Réserver"
+  },
+  "ProprietePage": {
+    "meta_title": "{name} | Evadia",
+    "meta_description": "Découvrez {name} sur Evadia. Réservez votre chambre en ligne aux meilleurs prix. Profitez de nos offres exclusives.",
+    "meta_keywords": "chambre, suite, réservation, voyage, Evadia, hébergement"
+  },
+  "ProprieteClient": {
+    "loading": "Chargement...",
+    "not_found": "Chambre non trouvée",
+    "save": "Enregistrer",
+    "saved": "Enregistrée",
+    "share": "Partager",
+    "share_text": "Découvrez {name} sur Evadia",
+    "share_alert": "Lien copié dans le presse-papier !",
+    "save_log": "Chambre sauvegardée",
+    "reservation_log": "Réservation en cours...",
+    "back_label": "Retour"
   }
 }

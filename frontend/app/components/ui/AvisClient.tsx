@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { Star } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { useOnScreen } from '@/hooks/useOnScreen'
 
 interface Avis {
   id: number
@@ -62,8 +64,13 @@ const getInitials = (name: string): string => {
   return nameParts[0][0].toUpperCase()
 }
 
-export default function AvisClient({ avis = defaultAvis, title = "Avis des voyageurs" }: AvisClientProps) {
+export default function AvisClient({ avis = defaultAvis, title }: AvisClientProps) {
+  const t = useTranslations('AvisClient')
   const [visibleAvis, setVisibleAvis] = useState(4)
+  
+  // Refs pour chaque section
+  const [setTitleRef, isTitleVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
+  const [setGridRef, isGridVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
 
   const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating)
@@ -118,80 +125,96 @@ export default function AvisClient({ avis = defaultAvis, title = "Avis des voyag
     setVisibleAvis(prev => prev + 4)
   }
 
+  const displayTitle = title || t('default_title')
+
   return (
     <div className="w-full">
-      <h2 className="text-2xl md:text-3xl font-medium text-gray-800 mb-8">
-        {title}
-      </h2>
-
-      {/* Grille d'avis - 2 colonnes */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 ">
-        {avis.slice(0, visibleAvis).map((avisItem) => (
-          <div
-            key={avisItem.id}
-            className="rounded-2xl p-5 "
-          >
-            {/* En-tête : photo + nom */}
-            <div className="flex items-center gap-3 mb-3">
-              {/* Photo de profil ou initiales */}
-              <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-                {avisItem.userPhoto ? (
-                  <Image
-                    src={avisItem.userPhoto}
-                    alt={avisItem.userName}
-                    fill
-                    className="object-cover"
-                    onError={(e) => {
-                      // Si l'image ne charge pas, afficher les initiales
-                      const target = e.target as HTMLElement;
-                      target.parentElement?.classList.add('hide-image');
-                    }}
-                  />
-                ) : null}
-                {/* Initiales affichées si pas de photo ou si l'image a échoué */}
-                <div className={`w-full h-full flex items-center justify-center bg-[#01BDA5]/20 text-[#01BDA5] font-bold text-lg ${avisItem.userPhoto ? 'hide-image' : ''}`}>
-                  {getInitials(avisItem.userName)}
-                </div>
-              </div>
-              
-              {/* Nom et étoiles */}
-              <div>
-                <h3 className="font-semibold text-gray-800">
-                  {avisItem.userName}
-                </h3>
-                <div className="flex items-center gap-2 mt-1">
-                  {renderStars(avisItem.rating)}
-                  <span className="text-sm text-gray-500">{avisItem.rating.toFixed(1)}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Commentaire */}
-            <p className="text-gray-600 text-sm leading-relaxed">
-              {avisItem.comment}
-            </p>
-
-            {/* Date (optionnelle) */}
-            {avisItem.date && (
-              <p className="text-xs text-gray-400 mt-3">
-                {avisItem.date}
-              </p>
-            )}
-          </div>
-        ))}
+      {/* Titre avec animation */}
+      <div
+        ref={setTitleRef}
+        className={`transition-all duration-700 ease-out ${
+          isTitleVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}
+      >
+        <h2 className="text-2xl md:text-3xl font-medium text-gray-800 mb-8">
+          {displayTitle}
+        </h2>
       </div>
 
-      {/* Bouton "Afficher plus" */}
-      {visibleAvis < avis.length && (
-        <div className="flex justify-center mt-8">
-          <button
-            onClick={loadMore}
-            className="px-6 py-2 rounded-full border border-[#01BDA5] text-[#01BDA5] hover:bg-[#01BDA5] hover:text-white transition-all duration-200 cursor-pointer"
-          >
-            Afficher plus d'avis
-          </button>
+      {/* Grille d'avis - 2 colonnes avec animation */}
+      <div
+        ref={setGridRef}
+        className={`transition-all duration-700 ease-out ${
+          isGridVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {avis.slice(0, visibleAvis).map((avisItem, index) => (
+            <div
+              key={avisItem.id}
+              className={`rounded-2xl p-5 transition-all duration-500 ease-out`}
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              {/* En-tête : photo + nom */}
+              <div className="flex items-center gap-3 mb-3">
+                {/* Photo de profil ou initiales */}
+                <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                  {avisItem.userPhoto ? (
+                    <Image
+                      src={avisItem.userPhoto}
+                      alt={avisItem.userName}
+                      fill
+                      className="object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLElement;
+                        target.parentElement?.classList.add('hide-image');
+                      }}
+                    />
+                  ) : null}
+                  <div className={`w-full h-full flex items-center justify-center bg-[#01BDA5]/20 text-[#01BDA5] font-bold text-lg ${avisItem.userPhoto ? 'hide-image' : ''}`}>
+                    {getInitials(avisItem.userName)}
+                  </div>
+                </div>
+                
+                {/* Nom et étoiles */}
+                <div>
+                  <h3 className="font-semibold text-gray-800">
+                    {avisItem.userName}
+                  </h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    {renderStars(avisItem.rating)}
+                    <span className="text-sm text-gray-500">{avisItem.rating.toFixed(1)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Commentaire */}
+              <p className="text-gray-600 text-sm leading-relaxed">
+                {avisItem.comment}
+              </p>
+
+              {/* Date (optionnelle) */}
+              {avisItem.date && (
+                <p className="text-xs text-gray-400 mt-3">
+                  {avisItem.date}
+                </p>
+              )}
+            </div>
+          ))}
         </div>
-      )}
+
+        {/* Bouton "Afficher plus" */}
+        {visibleAvis < avis.length && (
+          <div className="flex justify-center mt-8">
+            <button
+              onClick={loadMore}
+              className="px-6 py-2 rounded-full border border-[#01BDA5] text-[#01BDA5] hover:bg-[#01BDA5] hover:text-white transition-all duration-200 cursor-pointer"
+            >
+              {t('show_more')}
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

@@ -9,16 +9,32 @@ interface PageProps {
   }>
 }
 
-// export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-//   const t = await getTranslations('Propriete')
-//   const { slug } = await params
-//   const proprieteName = getNameFromSlug(slug)
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const t = await getTranslations('ProprietePage')
+  const { slug } = await params
+  const proprieteName = getNameFromSlug(slug)
   
-//   return {
-//     title: `${proprieteName} | ${t('meta_title')}`,
-//     description: t('meta_description'),
-//   }
-// }
+  return {
+    title: t('meta_title', { name: proprieteName }),
+    description: t('meta_description', { name: proprieteName }),
+    keywords: t('meta_keywords'),
+    openGraph: {
+      title: t('meta_title', { name: proprieteName }),
+      description: t('meta_description', { name: proprieteName }),
+      type: 'website',
+      locale: 'fr_FR',
+      siteName: 'Evadia',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('meta_title', { name: proprieteName }),
+      description: t('meta_description', { name: proprieteName }),
+    },
+    alternates: {
+      canonical: `https://evadia.com/propriete/${slug}`,
+    },
+  }
+}
 
 export default async function ProprietePage({ params }: PageProps) {
   const { slug } = await params

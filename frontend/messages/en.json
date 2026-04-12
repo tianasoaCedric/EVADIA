@@ -110,5 +110,82 @@
     "previous_image": "Previous image",
     "next_image": "Next image",
     "go_to_image": "Go to image {index}"
+  },
+  "HotelInfo": {
+    "beds_label": "bed(s)",
+    "bathrooms_label": "bathroom",
+    "persons_label": "people",
+    "reviews": "notice",
+    "category_label": "Category",
+    "about_label": "About",
+    "features_label": "Features",
+    "included_label": "Included in accommodation",
+    "equipments_label": "Equipment",
+    "see_all": "Show all equipment",
+    "see_less": "See less"
+  },
+  "AvisClient": {
+    "default_title": "Traveler reviews",
+    "show_more": "Show more reviews"
+  },
+  "HotelPage": {
+    "meta_title": "{hotelName} | Evadia",
+    "meta_description": "Discover {hotelName} on Evadia. Book your stay online at the best prices.",
+    "meta_keywords": "hotel, reservation, travel, Evadia, accommodation"
+  },
+  "HotelClient": {
+    "loading": "Loading...",
+    "save": "Save",
+    "saved": "Registered",
+    "share": "Share",
+    "share_text": "Discover {hotelName} on Evadia",
+    "share_alert": "Link copied to clipboard!",
+    "save_log": "Saved hotel",
+    "back_label": "Back",
+    "rooms_title": "Rooms and availability",
+    "previous_rooms": "Scroll left",
+    "next_rooms": "Scroll right",
+    "go_to_room": "Go to room {number}"
+  },
+  "HotelPhoto": {
+    "image": "picture",
+    "previous_image": "Previous image",
+    "next_image": "Next image",
+    "go_to_image": "Go to image {number}",
+    "see_more_photos": "See more photos",
+    "see_more_photos_with_count": "See more photos (+{count})",
+    "photos": "pictures",
+    "close": "Close",
+    "back_to_grid": "Back",
+    "photo_number": "Photo {number}"
+  },
+  "Reservation": {
+    "per_night": "/night",
+    "offer": "Offer",
+    "check_in": "Check In",
+    "check_out": "Check Out",
+    "guests": "Number of travelers",
+    "stay": "Stay ({nights} nights)",
+    "service_fees": "Service fees",
+    "discount": "Reduction ({percent}%)",
+    "total": "Total",
+    "book_button": "To book"
+  },
+  "ProprietePage": {
+    "meta_title": "{name} | Evadia",
+    "meta_description": "Discover {name} on Evadia. Book your room online at the best prices. Take advantage of our exclusive offers.",
+    "meta_keywords": "room, suite, reservation, travel, Evadia, accommodation"
+  },
+  "ProprieteClient": {
+    "loading": "Loading...",
+    "not_found": "Room not found",
+    "save": "Save",
+    "saved": "Registered",
+    "share": "Share",
+    "share_text": "Discover {name} on Evadia",
+    "share_alert": "Link copied to clipboard!",
+    "save_log": "Saved room",
+    "reservation_log": "Reservation in progress...",
+    "back_label": "Back"
   }
 }

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { Calendar, Users } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { useOnScreen } from '@/hooks/useOnScreen'
 import Bouton from './Bouton'
 
 interface ReservationProps {
@@ -36,6 +38,7 @@ export default function Reservation({
     roomName,
     onReserve
 }: ReservationProps) {
+    const t = useTranslations('Reservation')
     const [checkIn, setCheckIn] = useState<Date>(() => {
         const today = new Date()
         today.setHours(0, 0, 0, 0)
@@ -49,6 +52,9 @@ export default function Reservation({
     })
     const [guests, setGuests] = useState(2)
     const [isClient, setIsClient] = useState(false)
+
+    // Animation au scroll
+    const [setReservationRef, isReservationVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
 
     useEffect(() => {
         setIsClient(true)
@@ -89,33 +95,40 @@ export default function Reservation({
     }
 
     return (
-        <div className="bg-white border-l-1 border-gray-200 p-6">
+        <div
+            ref={setReservationRef}
+            className={`bg-white border-l-1 border-gray-200 p-6 transition-all duration-700 ease-out ${
+                isReservationVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}
+        >
             {/* Prix et offre */}
             <div className="mb-4">
-                <div className="flex items-baseline justify-between ">
+                <div className="flex items-baseline justify-between">
                     <span className="text-2xl font-bold text-gray-900">
-                        {pricePerNight.toLocaleString('fr-FR')} Ar <span className="text-lg font-medium text-gray-500">/nuit</span>
+                        {pricePerNight.toLocaleString('fr-FR')} Ar <span className="text-lg font-medium text-gray-500">{t('per_night')}</span>
                     </span>
 
                     {discountPercent > 0 && (
                         <span className="ml-2 px-2 py-1.5 bg-[#01BDA5] text-white text-sm font-medium rounded-full">
-                            Offre -{discountPercent}%
+                            {t('offer')} -{discountPercent}%
                         </span>
                     )}
                 </div>
                 {discountPercent > 0 && (
                     <p className="text-sm text-gray-500 line-through mt-1">
-                        {(pricePerNight * (1 + discountPercent / 100)).toLocaleString('fr-FR')} Ar /nuit
+                        {(pricePerNight * (1 + discountPercent / 100)).toLocaleString('fr-FR')} Ar {t('per_night')}
                     </p>
                 )}
             </div>
+
             {/* Séparateur */}
             <div className="border-t border-gray-100 my-4"></div>
+
             <div className="space-y-4">
                 {/* Check In */}
                 <div className='flex items-center justify-between'>
                     <label className="block text-md font-medium text-gray-700 mb-1">
-                        Check In
+                        {t('check_in')}
                     </label>
                     <div className="relative">
                         <button
@@ -151,7 +164,7 @@ export default function Reservation({
                 {/* Check Out */}
                 <div className='flex items-center justify-between'>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Check Out
+                        {t('check_out')}
                     </label>
                     <div className="relative">
                         <button
@@ -178,10 +191,11 @@ export default function Reservation({
                         />
                     </div>
                 </div>
+
                 {/* Nombre de voyageurs */}
-                <div className="flex items-baseline justify-between ">
+                <div className="flex items-baseline justify-between">
                     <label className="block text-md font-medium text-gray-700 mb-1">
-                        Nombre de voyageurs
+                        {t('guests')}
                     </label>
                     <div className="relative">
                         <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -203,16 +217,16 @@ export default function Reservation({
             {/* Détails des prix */}
             <div className="space-y-2">
                 <div className="flex justify-between text-gray-600 pr-8 py-2">
-                    <span>Séjour ({nights} nuits)</span>
+                    <span>{t('stay', { nights })}</span>
                     <span>{subtotal.toLocaleString('fr-FR')} Ar</span>
                 </div>
                 <div className="flex justify-between text-gray-600 pr-8 py-2">
-                    <span>Frais de services</span>
+                    <span>{t('service_fees')}</span>
                     <span>{serviceFees.toLocaleString('fr-FR')} Ar</span>
                 </div>
                 {discountAmount > 0 && (
                     <div className="flex justify-between text-green-600 pr-8 py-2">
-                        <span>Réduction ({discountPercent}%)</span>
+                        <span>{t('discount', { percent: discountPercent })}</span>
                         <span>-{discountAmount.toLocaleString('fr-FR')} Ar</span>
                     </div>
                 )}
@@ -223,7 +237,7 @@ export default function Reservation({
 
             {/* Total */}
             <div className="flex justify-between items-center mb-6 pr-8">
-                <span className="text-lg font-semibold text-gray-900">Total</span>
+                <span className="text-lg font-semibold text-gray-900">{t('total')}</span>
                 <span className="text-2xl font-bold text-gray-900">
                     {total.toLocaleString('fr-FR')} Ar
                 </span>
@@ -236,7 +250,7 @@ export default function Reservation({
                 widthMode="full"
                 onClick={handleReserve}
             >
-                Réserver
+                {t('book_button')}
             </Bouton>
         </div>
     )
