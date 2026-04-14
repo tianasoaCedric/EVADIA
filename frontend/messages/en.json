@@ -187,5 +187,18 @@
     "save_log": "Saved room",
     "reservation_log": "Reservation in progress...",
     "back_label": "Back"
+  },
+  "DestinationPage": {
+    "meta_title": "Destinations | Evadia",
+    "meta_description": "Discover our dream destinations and find the perfect accommodation for your next trip.",
+    "meta_keywords": "destinations, travel, Evadia, vacation"
+  },
+  "DestinationClient": {
+    "hero_title": "Dream destinations",
+    "where_to_go": "Where do you want to go?",
+    "our_selection": "Our selection of accommodation",
+    "previous_hotels": "Scroll left",
+    "next_hotels": "Scroll right",
+    "go_to_hotel": "Go to hotel {number}"
   }
 }
