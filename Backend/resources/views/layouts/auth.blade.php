@@ -35,7 +35,7 @@
     <div class="flex min-h-full">
         <!-- Left Panel - Branding -->
         <div
-            class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-evadia-900 via-evadia-800 to-evadia-950 relative overflow-hidden">
+            class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-evadia-500 via-evadia-600 to-evadia-700 relative overflow-hidden">
             <div
                 class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2240%22%20height%3D%2240%22%20viewBox%3D%220%200%2040%2040%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.03%22%3E%3Cpath%20d%3D%22M0%200h20v20H0V0zm20%2020h20v20H20V20z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E')]">
             </div>

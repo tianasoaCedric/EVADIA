@@ -1,0 +1,7 @@
+export { authService } from './auth.service'
+export { destinationService } from './destination.service'
+export { hotelService } from './hotel.service'
+export { reservationService } from './reservation.service'
+export { favoriService } from './favori.service'
+export { avisService } from './avis.service'
+export { profileService } from './profile.service'

@@ -1,15 +1,27 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Bouton from '../components/ui/Bouton'
 import Input from '../components/ui/Input'
 import { useTranslations } from 'next-intl'
 import { Mail, Lock, Eye, EyeOff, Shield, User, UserRound } from 'lucide-react'
+import { authService } from '@/lib/services'
+import { ApiError } from '@/lib/api-client'
+
+type FieldErrors = {
+  prenom?: string
+  nom?: string
+  email?: string
+  password?: string
+  password_confirmation?: string
+}
 
 export default function RegisterClient() {
   const t = useTranslations('Register')
   const btn = useTranslations('Bouton')
-  
+  const router = useRouter()
+
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
@@ -18,11 +30,62 @@ export default function RegisterClient() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
+  const [globalError, setGlobalError] = useState<string | null>(null)
+
+  const validate = (): boolean => {
+    const errors: FieldErrors = {}
+
+    if (!firstName.trim()) errors.prenom = t('error_required')
+    if (!lastName.trim()) errors.nom = t('error_required')
+    if (!email.trim()) errors.email = t('error_required')
+    if (!password) errors.password = t('error_required')
+    else if (password.length < 8) errors.password = t('error_password_min')
+
+    if (!confirmPassword) {
+      errors.password_confirmation = t('error_required')
+    } else if (password !== confirmPassword) {
+      errors.password_confirmation = t('error_passwords_mismatch')
+    }
+
+    setFieldErrors(errors)
+    return Object.keys(errors).length === 0
+  }
 
   const handleRegisterSubmit = async () => {
+    setGlobalError(null)
+    if (!validate()) return
+
     setIsLoading(true)
-    console.log('Prénom:', firstName, 'Nom:', lastName, 'Email:', email)
-    setTimeout(() => setIsLoading(false), 1000)
+    try {
+      await authService.register({
+        prenom: firstName.trim(),
+        nom: lastName.trim(),
+        email: email.trim(),
+        password,
+        password_confirmation: confirmPassword,
+      })
+      router.push('/')
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.status === 422 && err.errors) {
+          // Erreurs de validation Laravel — afficher sous chaque champ
+          setFieldErrors({
+            prenom: err.errors.prenom?.[0],
+            nom: err.errors.nom?.[0],
+            email: err.errors.email?.[0],
+            password: err.errors.password?.[0],
+            password_confirmation: err.errors.password_confirmation?.[0],
+          })
+        } else {
+          setGlobalError(err.message)
+        }
+      } else {
+        setGlobalError(t('error_generic'))
+      }
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleGoogleRegister = () => {
@@ -30,7 +93,7 @@ export default function RegisterClient() {
   }
 
   return (
-    <main 
+    <main
       className="min-h-screen"
       style={{
         backgroundImage: 'url("/photos/bc.png")',
@@ -41,103 +104,150 @@ export default function RegisterClient() {
     >
       <div className='flex items-center justify-center min-h-screen px-4 py-12'>
         <div className="w-full max-w-md rounded-2xl p-6 md:p-8">
-          
+
           <div className="text-center mb-8">
             <h1 className="text-3xl md:text-4xl font-semibold text-white">
               {t('title')}
             </h1>
           </div>
 
+          {/* Erreur globale */}
+          {globalError && (
+            <div className="mb-4 rounded-lg bg-red-500/20 border border-red-400/50 px-4 py-3 text-sm text-white text-center">
+              {globalError}
+            </div>
+          )}
+
           <div className="space-y-5">
             {/* Nom et Prénom */}
             <div className="grid grid-cols-2 gap-3">
-              <Input
-                type="text"
-                placeholder={t('first_name')}
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                icon={<User className="w-5 h-5 text-white" />}
-                fullWidth
-                variant="default"
-                placeholderPosition="left"
-                sizes="medium"
-              />
-              <Input
-                type="text"
-                placeholder={t('last_name')}
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                icon={<UserRound className="w-5 h-5 text-white" />}
-                fullWidth
-                variant="default"
-                placeholderPosition="left"
-                sizes="medium"
-              />
+              <div>
+                <Input
+                  type="text"
+                  placeholder={t('first_name')}
+                  value={firstName}
+                  onChange={(e) => {
+                    setFirstName(e.target.value)
+                    setFieldErrors((prev) => ({ ...prev, prenom: undefined }))
+                  }}
+                  icon={<User className="w-5 h-5 text-white" />}
+                  fullWidth
+                  variant="default"
+                  placeholderPosition="left"
+                  sizes="medium"
+                />
+                {fieldErrors.prenom && (
+                  <p className="mt-1 text-xs text-red-300">{fieldErrors.prenom}</p>
+                )}
+              </div>
+              <div>
+                <Input
+                  type="text"
+                  placeholder={t('last_name')}
+                  value={lastName}
+                  onChange={(e) => {
+                    setLastName(e.target.value)
+                    setFieldErrors((prev) => ({ ...prev, nom: undefined }))
+                  }}
+                  icon={<UserRound className="w-5 h-5 text-white" />}
+                  fullWidth
+                  variant="default"
+                  placeholderPosition="left"
+                  sizes="medium"
+                />
+                {fieldErrors.nom && (
+                  <p className="mt-1 text-xs text-red-300">{fieldErrors.nom}</p>
+                )}
+              </div>
             </div>
 
             {/* Email */}
-            <Input
-              type="email"
-              placeholder={t('email')}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              icon={<Mail className="w-5 h-5 text-white" />}
-              fullWidth
-              variant="default"
-              placeholderPosition="left"
-              sizes="medium"
-            />
-
-            {/* Mot de passe */}
-            <div className="relative">
+            <div>
               <Input
-                type={showPassword ? 'text' : 'password'}
-                placeholder={t('password')}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                icon={<Shield className="w-5 h-5 text-white" />}
+                type="email"
+                placeholder={t('email')}
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value)
+                  setFieldErrors((prev) => ({ ...prev, email: undefined }))
+                }}
+                icon={<Mail className="w-5 h-5 text-white" />}
                 fullWidth
                 variant="default"
                 placeholderPosition="left"
                 sizes="medium"
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
-              >
-                {showPassword ? (
-                  <EyeOff className="w-5 h-5 text-white" />
-                ) : (
-                  <Eye className="w-5 h-5 text-white" />
-                )}
-              </button>
+              {fieldErrors.email && (
+                <p className="mt-1 text-xs text-red-300">{fieldErrors.email}</p>
+              )}
+            </div>
+
+            {/* Mot de passe */}
+            <div>
+              <div className="relative">
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder={t('password')}
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value)
+                    setFieldErrors((prev) => ({ ...prev, password: undefined }))
+                  }}
+                  icon={<Shield className="w-5 h-5 text-white" />}
+                  fullWidth
+                  variant="default"
+                  placeholderPosition="left"
+                  sizes="medium"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5 text-white" />
+                  ) : (
+                    <Eye className="w-5 h-5 text-white" />
+                  )}
+                </button>
+              </div>
+              {fieldErrors.password && (
+                <p className="mt-1 text-xs text-red-300">{fieldErrors.password}</p>
+              )}
             </div>
 
             {/* Confirmer mot de passe */}
-            <div className="relative">
-              <Input
-                type={showConfirmPassword ? 'text' : 'password'}
-                placeholder={t('confirm_password')}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                icon={<Lock className="w-5 h-5 text-white" />}
-                fullWidth
-                variant="default"
-                placeholderPosition="left"
-                sizes="medium"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
-              >
-                {showConfirmPassword ? (
-                  <EyeOff className="w-5 h-5 text-white" />
-                ) : (
-                  <Eye className="w-5 h-5 text-white" />
-                )}
-              </button>
+            <div>
+              <div className="relative">
+                <Input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder={t('confirm_password')}
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value)
+                    setFieldErrors((prev) => ({ ...prev, password_confirmation: undefined }))
+                  }}
+                  icon={<Lock className="w-5 h-5 text-white" />}
+                  fullWidth
+                  variant="default"
+                  placeholderPosition="left"
+                  sizes="medium"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="w-5 h-5 text-white" />
+                  ) : (
+                    <Eye className="w-5 h-5 text-white" />
+                  )}
+                </button>
+              </div>
+              {fieldErrors.password_confirmation && (
+                <p className="mt-1 text-xs text-red-300">{fieldErrors.password_confirmation}</p>
+              )}
             </div>
 
             {/* Bouton inscription */}
@@ -163,7 +273,7 @@ export default function RegisterClient() {
               <div className="w-full border-t border-white/30"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              
+
             </div>
           </div>
 
