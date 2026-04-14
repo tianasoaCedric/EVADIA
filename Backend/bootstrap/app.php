@@ -13,15 +13,19 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->prepend(\Illuminate\Http\Middleware\HandleCors::class);
+
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
             'level' => \App\Http\Middleware\CheckRoleLevel::class,
             'password.change' => \App\Http\Middleware\ForcePasswordChange::class,
         ]);
 
-        $middleware->redirectGuestsTo(fn ($request) =>
-            str_starts_with($request->path(), 'hotel') ? '/hotel/login' : '/'
-        );
+        $middleware->redirectGuestsTo(fn ($request) => match(true) {
+            str_starts_with($request->path(), 'api/') => null,
+            str_starts_with($request->path(), 'hotel') => '/hotel/login',
+            default => '/',
+        });
         $middleware->redirectUsersTo('/admin/dashboard');
     })
     ->withExceptions(function (Exceptions $exceptions): void {

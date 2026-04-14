@@ -27,7 +27,13 @@
     "signup": "Register",
     "meta_title": "Log in | Evadia",
     "meta_description": "Log in to your Evadia account to manage your bookings and enjoy personalized offers.",
-    "meta_keywords": "login, sign in, Evadia, account, travel"
+    "meta_keywords": "login, sign in, Evadia, account, travel",
+    "error_required": "This field is required",
+    "error_invalid_credentials": "Incorrect email or password",
+    "error_account_disabled": "This account is disabled",
+    "error_too_many": "Too many attempts. Please try again later.",
+    "error_generic": "An error has occurred. Please try again.",
+    "error_not_client": "This space is reserved for customers. Use the portal dedicated to your role."
   },
   "Register": {
     "title": "Register",
@@ -41,7 +47,11 @@
     "login": "Log in",
     "meta_title": "Register - Evadia",
     "meta_description": "Create your Evadia account to access all the features of the platform",
-    "meta_keywords": "registration, account, Evadia, create an account"
+    "meta_keywords": "registration, account, Evadia, create an account",
+    "error_required": "This field is required",
+    "error_passwords_mismatch": "Passwords do not match",
+    "error_password_min": "Password must contain at least 8 characters",
+    "error_generic": "An error has occurred. Please try again."
   },
   "Hebergement": {
     "meta_title": "Accommodation in Madagascar - Evadia",

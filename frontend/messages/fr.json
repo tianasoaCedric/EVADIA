@@ -27,7 +27,13 @@
     "signup": "S’inscrire",
     "meta_title": "Se connecter | Evadia",
     "meta_description": "Log in to your Evadia account to manage your bookings and enjoy personalized offers.",
-    "meta_keywords": "login, sign in, Evadia, account, travel"
+    "meta_keywords": "login, sign in, Evadia, account, travel",
+    "error_required": "Ce champ est obligatoire",
+    "error_invalid_credentials": "Email ou mot de passe incorrect",
+    "error_account_disabled": "Ce compte est désactivé",
+    "error_too_many": "Trop de tentatives. Veuillez réessayer plus tard.",
+    "error_generic": "Une erreur est survenue. Veuillez réessayer.",
+    "error_not_client": "Cet espace est réservé aux clients. Utilisez le portail dédié à votre rôle."
   },
   "Register": {
     "title": "S'inscrire",
@@ -41,7 +47,11 @@
     "login": "Se connecter",
     "meta_title": "S'inscrire - Evadia",
     "meta_description": "Créez votre compte Evadia pour accéder à toutes les fonctionnalités de la plateforme",
-    "meta_keywords": "inscription, compte, Evadia, créer un compte"
+    "meta_keywords": "inscription, compte, Evadia, créer un compte",
+    "error_required": "Ce champ est obligatoire",
+    "error_passwords_mismatch": "Les mots de passe ne correspondent pas",
+    "error_password_min": "Le mot de passe doit contenir au moins 8 caractères",
+    "error_generic": "Une erreur est survenue. Veuillez réessayer."
   },
   "Hebergement": {
     "meta_title": "Les Hébergements à Madagascar - Evadia",

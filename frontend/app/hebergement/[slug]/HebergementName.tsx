@@ -1,11 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import HeroSection from '../../components/ui/HeroSection'
 import Input from '../../components/ui/Input'
 import CardHotel from '../../components/ui/CardHotel'
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { hotelService } from '@/lib/services'
+import type { Hotel } from '@/lib/types'
 
 interface HebergementNameProps {
     categoryId: number
@@ -13,193 +15,52 @@ interface HebergementNameProps {
     slug: string
 }
 
-// Données mock des catégories avec leurs IDs
-const categoriesData: Record<number, { name: string, hotels: any[] }> = {
-    1: {
-        name: 'Ecolodge',
-        hotels: [
-            {
-                id: 1,
-                imageUrl: '/photos/hotels/ecolodge-1.jpg',
-                name: 'Ecolodge de la Forêt',
-                availability: 'Disponible',
-                price: 85000,
-                rating: 4.5,
-                reviewCount: 128
-            },
-            {
-                id: 2,
-                imageUrl: '/photos/hotels/ecolodge-2.jpg',
-                name: 'Green Paradise Ecolodge',
-                availability: '2 places restantes',
-                price: 95000,
-                rating: 4.7,
-                reviewCount: 95
-            },
-            {
-                id: 3,
-                imageUrl: '/photos/hotels/ecolodge-3.jpg',
-                name: 'Nature Lodge',
-                availability: 'Disponible',
-                price: 75000,
-                rating: 4.3,
-                reviewCount: 76
-            },
-            {
-                id: 4,
-                imageUrl: '/photos/hotels/ecolodge-1.jpg',
-                name: 'Ecolodge de la Forêt',
-                availability: 'Disponible',
-                price: 85000,
-                rating: 4.5,
-                reviewCount: 128
-            },
-            {
-                id: 5,
-                imageUrl: '/photos/hotels/ecolodge-2.jpg',
-                name: 'Green Paradise Ecolodge',
-                availability: '2 places restantes',
-                price: 95000,
-                rating: 4.7,
-                reviewCount: 95
-            },
-            {
-                id: 6,
-                imageUrl: '/photos/hotels/ecolodge-3.jpg',
-                name: 'Nature Lodge',
-                availability: 'Disponible',
-                price: 75000,
-                rating: 4.3,
-                reviewCount: 76
-            }
-        ]
-    },
-    2: {
-        name: 'Villas',
-        hotels: [
-            {
-                id: 4,
-                imageUrl: '/photos/hotels/villa-1.jpg',
-                name: 'Villa de Rêve',
-                availability: 'Disponible',
-                price: 250000,
-                rating: 4.9,
-                reviewCount: 234
-            },
-            {
-                id: 5,
-                imageUrl: '/photos/hotels/villa-2.jpg',
-                name: 'Villa Azur',
-                availability: 'Complet',
-                price: 320000,
-                rating: 4.8,
-                reviewCount: 187
-            }
-        ]
-    },
-    3: {
-        name: 'Hôtel de luxe',
-        hotels: [
-            {
-                id: 6,
-                imageUrl: '/photos/hotels/luxe-1.jpg',
-                name: 'Palace Hôtel',
-                availability: 'Disponible',
-                price: 450000,
-                rating: 4.9,
-                reviewCount: 342
-            }
-        ]
-    },
-    4: {
-        name: 'Maison de vacances',
-        hotels: [
-            {
-                id: 7,
-                imageUrl: '/photos/hotels/maison-1.jpg',
-                name: 'Maison Tropicale',
-                availability: 'Disponible',
-                price: 120000,
-                rating: 4.4,
-                reviewCount: 56
-            }
-        ]
-    },
-    5: {
-        name: 'Lodge',
-        hotels: [
-            {
-                id: 8,
-                imageUrl: '/photos/hotels/lodge-1.jpg',
-                name: 'Lodge des Hautes Terres',
-                availability: '3 places restantes',
-                price: 110000,
-                rating: 4.6,
-                reviewCount: 89
-            }
-        ]
-    },
-    6: {
-        name: 'Bungalows',
-        hotels: [
-            {
-                id: 9,
-                imageUrl: '/photos/hotels/bungalow-1.jpg',
-                name: 'Bungalow Beach',
-                availability: 'Disponible',
-                price: 65000,
-                rating: 4.2,
-                reviewCount: 145
-            }
-        ]
-    }
-}
-
-export default function HebergementName({ categoryId, categoryName, slug }: HebergementNameProps) {
+export default function HebergementName({ categoryId, categoryName }: HebergementNameProps) {
     const t = useTranslations('HebergementName')
     const commonT = useTranslations('Common')
-    
-    const [searchQuery, setSearchQuery] = useState('')
-    const [hotels, setHotels] = useState<any[]>([])
-    const [filteredHotels, setFilteredHotels] = useState<any[]>([])
-    
-    // État pour la pagination
-    const [currentPage, setCurrentPage] = useState(1)
-    const itemsPerPage = 15
 
-    useEffect(() => {
-        const categoryData = categoriesData[categoryId]
-        if (categoryData) {
-            setHotels(categoryData.hotels)
-            setFilteredHotels(categoryData.hotels)
-        } else {
+    const [searchQuery, setSearchQuery] = useState('')
+    const [hotels, setHotels] = useState<Hotel[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [totalPages, setTotalPages] = useState(1)
+    const [total, setTotal] = useState(0)
+
+    const fetchHotels = useCallback(async (page: number, search: string) => {
+        setIsLoading(true)
+        try {
+            const res = await hotelService.list({
+                type_id: categoryId,
+                page,
+                search: search.trim() || undefined,
+            })
+            setHotels(res.data)
+            setTotalPages(res.last_page)
+            setTotal(res.total)
+        } catch {
             setHotels([])
-            setFilteredHotels([])
+        } finally {
+            setIsLoading(false)
         }
-        setCurrentPage(1)
     }, [categoryId])
 
-    // Filtrer les hôtels par recherche
+    // Chargement initial et changement de page
     useEffect(() => {
-        if (searchQuery.trim() === '') {
-            setFilteredHotels(hotels)
-        } else {
-            const filtered = hotels.filter(hotel =>
-                hotel.name.toLowerCase().includes(searchQuery.toLowerCase())
-            )
-            setFilteredHotels(filtered)
-        }
-        setCurrentPage(1)
-    }, [searchQuery, hotels])
+        fetchHotels(currentPage, searchQuery)
+    }, [currentPage, fetchHotels])
 
-    // Pagination
-    const totalPages = Math.ceil(filteredHotels.length / itemsPerPage)
-    const startIndex = (currentPage - 1) * itemsPerPage
-    const endIndex = startIndex + itemsPerPage
-    const currentHotels = filteredHotels.slice(startIndex, endIndex)
+    // Recherche avec debounce — repart à la page 1
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setCurrentPage(1)
+            fetchHotels(1, searchQuery)
+        }, 400)
+        return () => clearTimeout(timer)
+    }, [searchQuery])
 
     const goToPage = (page: number) => {
-        setCurrentPage(Math.max(1, Math.min(page, totalPages)))
+        const next = Math.max(1, Math.min(page, totalPages))
+        setCurrentPage(next)
         document.getElementById('hotels-list')?.scrollIntoView({ behavior: 'smooth' })
     }
 
@@ -210,7 +71,7 @@ export default function HebergementName({ categoryId, categoryName, slug }: Hebe
             <HeroSection
                 title={t('hero_title', { category: heroTitle })}
                 subtitle={t('hero_subtitle', { category: categoryName.toLowerCase() })}
-                backgroundImage={`/photos/bc.png`}
+                backgroundImage="/photos/bc.png"
                 showDownload={false}
                 showScrollIndicator={true}
             />
@@ -231,25 +92,40 @@ export default function HebergementName({ categoryId, categoryName, slug }: Hebe
                         />
                     </div>
 
-                    {/* Résultats */}
                     <div id="hotels-list">
-                        {currentHotels.length === 0 ? (
+                        {/* Skeleton */}
+                        {isLoading && (
+                            <div className="flex flex-wrap justify-start items-start gap-11">
+                                {[...Array(6)].map((_, i) => (
+                                    <div key={i} className="w-[260px] flex flex-col gap-3">
+                                        <div className="h-64 rounded-xl bg-gray-200 animate-pulse" />
+                                        <div className="h-4 rounded bg-gray-200 animate-pulse w-3/4" />
+                                        <div className="h-4 rounded bg-gray-200 animate-pulse w-1/2" />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Aucun résultat */}
+                        {!isLoading && hotels.length === 0 && (
                             <div className="text-center py-16">
                                 <p className="text-gray-500 text-lg">{t('no_results')}</p>
                             </div>
-                        ) : (
+                        )}
+
+                        {/* Liste des hôtels */}
+                        {!isLoading && hotels.length > 0 && (
                             <>
                                 <div className="flex flex-wrap justify-start items-start gap-11">
-                                    {currentHotels.map((hotel) => (
-                                        <div key={hotel.id} className="w-[260px] sm:w-[260px] flex-wrap">
+                                    {hotels.map((hotel) => (
+                                        <div key={hotel.id} className="w-[260px]">
                                             <CardHotel
-                                                imageUrl={hotel.imageUrl}
-                                                name={hotel.name}
                                                 hotelId={hotel.id}
-                                                availability={hotel.availability}
-                                                price={hotel.price}
-                                                rating={hotel.rating}
-                                                reviewCount={hotel.reviewCount}
+                                                imageUrl={hotel.photo_principale ?? '/photos/bc.png'}
+                                                name={hotel.nom}
+                                                availability="Disponible"
+                                                price={hotel.prix_min ?? 0}
+                                                rating={hotel.note_moyenne ?? 0}
                                             />
                                         </div>
                                     ))}
@@ -291,10 +167,7 @@ export default function HebergementName({ categoryId, categoryName, slug }: Hebe
                                                             {page}
                                                         </button>
                                                     )
-                                                } else if (
-                                                    page === currentPage - 2 ||
-                                                    page === currentPage + 2
-                                                ) {
+                                                } else if (page === currentPage - 2 || page === currentPage + 2) {
                                                     return (
                                                         <span key={page} className="w-8 h-8 flex items-center justify-center text-gray-400">
                                                             ...
@@ -320,9 +193,9 @@ export default function HebergementName({ categoryId, categoryName, slug }: Hebe
                                     </div>
                                 )}
 
-                                {/* Nombre de résultats */}
+                                {/* Compteur */}
                                 <div className="text-center mt-6 text-sm text-gray-500">
-                                    {t('results_count', { count: filteredHotels.length })}
+                                    {t('results_count', { count: total })}
                                 </div>
                             </>
                         )}
