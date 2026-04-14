@@ -1,204 +1,175 @@
 'use client'
 
-import { useState, ReactNode } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { LogOut, User, CalendarDays } from 'lucide-react'
+import { authService } from '@/lib/services'
+import { tokenStorage } from '@/lib/api-client'
+import type { User as UserType } from '@/lib/types'
 
 interface AvatarProps {
-  /** URL de la photo de profil (si disponible) */
-  photoUrl?: string | null
-  /** Nom de l'utilisateur pour générer l'initiale */
-  userName?: string | null
-  /** Taille de l'avatar */
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
-  /** Variante de style (couleur de fond) */
   variant?: 'default' | 'dark'
-  /** Statut en ligne */
-  isOnline?: boolean
-  /** État de chargement */
-  isLoading?: boolean
-  /** Fonction callback au clic */
-  onClick?: () => void
-  /** Classes CSS supplémentaires */
   className?: string
 }
 
-/**
- * Composant Avatar
- * Affiche :
- * - Icône par défaut si non connecté
- * - Initiale si connecté sans photo
- * - Photo si connecté avec photo
- */
-const Avatar = ({
-  photoUrl,
-  userName,
-  size = 'md',
-  variant = 'default',
-  isOnline = false,
-  isLoading = false,
-  onClick,
-  className = ''
-}: AvatarProps) => {
+const sizeStyles = {
+  xs:  { container: 'w-6 h-6',   text: 'text-xs',  online: 'w-1.5 h-1.5', icon: 'w-3 h-3' },
+  sm:  { container: 'w-8 h-8',   text: 'text-sm',  online: 'w-2 h-2',     icon: 'w-4 h-4' },
+  md:  { container: 'w-10 h-10', text: 'text-base', online: 'w-2.5 h-2.5', icon: 'w-5 h-5' },
+  lg:  { container: 'w-12 h-12', text: 'text-lg',  online: 'w-3 h-3',     icon: 'w-6 h-6' },
+  xl:  { container: 'w-16 h-16', text: 'text-xl',  online: 'w-3.5 h-3.5', icon: 'w-8 h-8' },
+}
+
+const variantStyles = {
+  default: { bg: 'bg-white/20 border border-white/20',  text: 'text-white' },
+  dark:    { bg: 'bg-gray-100 border border-gray-200',  text: 'text-gray-800' },
+}
+
+const Avatar = ({ size = 'md', variant = 'default', className = '' }: AvatarProps) => {
+  const router = useRouter()
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  const [user, setUser] = useState<UserType | null>(null)
   const [imageError, setImageError] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
-  /**
-   * Tailles disponibles
-   */
-  const sizeStyles = {
-    xs: {
-      container: "w-6 h-6",
-      icon: "w-3 h-3",
-      text: "text-xs",
-      online: "w-1.5 h-1.5"
-    },
-    sm: {
-      container: "w-8 h-8",
-      icon: "w-4 h-4",
-      text: "text-sm",
-      online: "w-2 h-2"
-    },
-    md: {
-      container: "w-10 h-10",
-      icon: "w-5 h-5",
-      text: "text-base",
-      online: "w-2.5 h-2.5"
-    },
-    lg: {
-      container: "w-12 h-12",
-      icon: "w-6 h-6",
-      text: "text-lg",
-      online: "w-3 h-3"
-    },
-    xl: {
-      container: "w-16 h-16",
-      icon: "w-8 h-8",
-      text: "text-xl",
-      online: "w-3.5 h-3.5"
+  // Charger l'utilisateur connecté
+  useEffect(() => {
+    if (!tokenStorage.get()) return
+    authService.me()
+      .then(({ user }) => setUser(user))
+      .catch(() => {
+        tokenStorage.remove()
+        setUser(null)
+      })
+  }, [])
+
+  // Fermer le dropdown si clic extérieur
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const handleClick = () => {
+    if (!user) {
+      router.push('/login')
+      return
+    }
+    setIsOpen((prev) => !prev)
+  }
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+    try {
+      await authService.logout()
+    } finally {
+      setUser(null)
+      setIsOpen(false)
+      setIsLoggingOut(false)
+      router.push('/')
     }
   }
 
-  /**
-   * Styles de fond selon la variante
-   */
-  const variantStyles = {
-    default: {
-      background: "bg-[#F5F5F5]/20",
-      iconColor: "text-[#F5F5F5]",
-      border: "border border-white/20"
-    },
-    dark: {
-      background: "bg-[#F5F5F5]/20",
-      iconColor: "text-gray-800",
-      border: "border-transparent"
-    }
+  const getInitials = (): string => {
+    if (!user) return '?'
+    const p = user.prenom?.[0] ?? ''
+    const n = user.nom?.[0] ?? ''
+    return (p + n).toUpperCase() || '?'
   }
 
-  /**
-   * Récupère l'initiale du nom de l'utilisateur
-   */
-  const getInitial = (): string => {
-    if (!userName || userName.trim() === '') return '?'
-    // Prend la première lettre du prénom ou du nom
-    const nameParts = userName.trim().split(' ')
-    if (nameParts.length >= 2) {
-      // Prend la première lettre du prénom et la première lettre du nom
-      return (nameParts[0][0] + nameParts[1][0]).toUpperCase()
-    }
-    // Sinon prend la première lettre
-    return userName[0].toUpperCase()
-  }
+  const s = sizeStyles[size]
+  const v = variantStyles[variant]
 
-  /**
-   * Détermine ce qu'il faut afficher
-   * 1. Si chargement -> afficher un loader
-   * 2. Si photo et pas d'erreur -> afficher la photo
-   * 3. Si utilisateur connecté (userName) -> afficher l'initiale
-   * 4. Sinon -> afficher l'icône par défaut
-   */
   const renderContent = () => {
-    // État de chargement
-    if (isLoading) {
-      return (
-        <div className="animate-pulse">
-          <div className={`rounded-full ${variantStyles[variant].background} ${sizeStyles[size].container}`} />
-        </div>
-      )
-    }
-
-    // Cas 1 : Photo de profil disponible et pas d'erreur de chargement
-    if (photoUrl && !imageError) {
+    if (user?.avatar_url && !imageError) {
       return (
         <Image
-          src={photoUrl}
-          alt={userName || 'Avatar'}
+          src={user.avatar_url as string}
+          alt={user.prenom}
           fill
           className="object-cover rounded-full"
           onError={() => setImageError(true)}
-          sizes={`(max-width: 768px) ${parseInt(sizeStyles[size].container) * 4}px, ${parseInt(sizeStyles[size].container) * 4}px`}
+          sizes="64px"
         />
       )
     }
-
-    // Cas 2 : Utilisateur connecté (nom disponible) -> afficher l'initiale
-    if (userName && userName.trim() !== '') {
-      return (
-        <span className={`
-          font-medium
-          ${variantStyles[variant].iconColor}
-          ${sizeStyles[size].text}
-        `}>
-          {getInitial()}
-        </span>
-      )
+    if (user) {
+      return <span className={`font-semibold ${v.text} ${s.text}`}>{getInitials()}</span>
     }
-
-    // Cas 3 : Utilisateur non connecté -> afficher l'icône par défaut
     return (
-      <svg 
-        className={`
-          ${variantStyles[variant].iconColor}
-          ${sizeStyles[size].icon}
-        `}
-        fill="none" 
-        stroke="currentColor" 
-        viewBox="0 0 24 24"
-      >
-        <path 
-          strokeLinecap="round" 
-          strokeLinejoin="round" 
-          strokeWidth={1.5} 
-          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" 
-        />
+      <svg className={`${v.text} ${s.icon}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
       </svg>
     )
   }
 
   return (
-    <div 
-      className={`
-        relative
-        flex items-center justify-center
-        rounded-full
-        ${variantStyles[variant].background}
-        ${variantStyles[variant].border}
-        ${sizeStyles[size].container}
-        transition-all duration-200
-        ${onClick ? 'cursor-pointer hover:scale-105 active:scale-95' : ''}
-        ${className}
-      `}
-      onClick={onClick}
-    >
-      {renderContent()}
-      
-      {/* Indicateur de statut en ligne */}
-      {isOnline && (
-        <span className={`
-          absolute bottom-0 right-0
-          rounded-full
-          bg-green-500
-          ring-2 ring-white
-          ${sizeStyles[size].online}
-        `} />
+    <div ref={dropdownRef} className="relative">
+      {/* Bouton avatar */}
+      <button
+        onClick={handleClick}
+        aria-label={user ? 'Mon compte' : 'Se connecter'}
+        className={`
+          relative flex items-center justify-center rounded-full
+          ${v.bg} ${s.container}
+          transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95
+          ${className}
+        `}
+      >
+        {renderContent()}
+      </button>
+
+      {/* Dropdown — affiché uniquement si connecté */}
+      {isOpen && user && (
+        <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white shadow-xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+
+          {/* En-tête utilisateur */}
+          <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
+            <p className="text-sm font-semibold text-gray-900 truncate">
+              {user.prenom} {user.nom}
+            </p>
+            <p className="text-xs text-gray-500 truncate">{user.email}</p>
+          </div>
+
+          {/* Actions */}
+          <div className="py-1">
+            <button
+              onClick={() => { setIsOpen(false); router.push('/profil') }}
+              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <User className="w-4 h-4 text-gray-400" />
+              Mon profil
+            </button>
+            <button
+              onClick={() => { setIsOpen(false); router.push('/reservations') }}
+              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <CalendarDays className="w-4 h-4 text-gray-400" />
+              Mes réservations
+            </button>
+          </div>
+
+          {/* Déconnexion */}
+          <div className="border-t border-gray-100 py-1">
+            <button
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+            >
+              <LogOut className="w-4 h-4" />
+              {isLoggingOut ? 'Déconnexion...' : 'Se déconnecter'}
+            </button>
+          </div>
+        </div>
       )}
     </div>
   )

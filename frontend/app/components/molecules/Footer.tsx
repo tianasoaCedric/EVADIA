@@ -13,7 +13,7 @@ export default function Footer() {
           <div className="space-y-3 text-sm">
             <ul className="space-y-2">
               <li>
-                <Link href="/hebergements" className="hover:underline">
+                <Link href="/hebergement" className="hover:underline">
                   • Hébergements
                 </Link>
               </li>

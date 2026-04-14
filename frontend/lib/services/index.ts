@@ -1,6 +1,8 @@
 export { authService } from './auth.service'
 export { destinationService } from './destination.service'
 export { hotelService } from './hotel.service'
+export { typeHotelService } from './typeHotel.service'
+export type { TypeHotelWithImage } from './typeHotel.service'
 export { reservationService } from './reservation.service'
 export { favoriService } from './favori.service'
 export { avisService } from './avis.service'

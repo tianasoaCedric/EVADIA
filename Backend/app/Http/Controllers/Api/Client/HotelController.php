@@ -55,7 +55,7 @@ class HotelController extends Controller
     )]
     public function index(Request $request): JsonResponse
     {
-        $query = Hotel::with(['photoPrincipale', 'adresse', 'currentStatut'])
+        $query = Hotel::with(['photos' => fn($q) => $q->where('est_principale', true), 'adresse', 'currentStatut'])
             ->whereHas('currentStatut', fn($q) => $q->where('statut', 'actif'));
 
         if ($search = $request->input('search')) {
@@ -64,6 +64,10 @@ class HotelController extends Controller
 
         if ($destinationId = $request->input('destination_id')) {
             $query->whereHas('destinations', fn($q) => $q->where('destinations.id', $destinationId));
+        }
+
+        if ($typeId = $request->input('type_id')) {
+            $query->whereHas('types', fn($q) => $q->where('types_hotels.id', $typeId));
         }
 
         if ($etoilesMin = $request->input('etoiles_min')) {
@@ -95,7 +99,7 @@ class HotelController extends Controller
                 'nom' => $hotel->nom,
                 'description' => $hotel->description,
                 'etoiles' => $hotel->etoiles,
-                'photo_principale' => $hotel->photoPrincipale?->url_photo,
+                'photo_principale' => $hotel->photos->first()?->url,
                 'adresse' => $hotel->adresse ? [
                     'ville' => $hotel->adresse->ville,
                     'pays' => $hotel->adresse->pays,
@@ -164,7 +168,11 @@ class HotelController extends Controller
         }
 
         $chambres = $hotel->proprietes()
-            ->with(['currentPrix', 'photoPrincipale', 'currentStatut'])
+            ->with([
+                'currentPrix',
+                'currentStatut',
+                'photos' => fn($q) => $q->where('est_principale', true),
+            ])
             ->whereHas('currentStatut', fn($q) => $q->where('statut', 'disponible'))
             ->get()
             ->map(fn($p) => [
@@ -176,7 +184,7 @@ class HotelController extends Controller
                 'nb_lits' => $p->nb_lits,
                 'superficie' => $p->superficie,
                 'prix_par_nuit' => $p->currentPrix?->prix_par_nuit,
-                'photo' => $p->photoPrincipale?->url_photo,
+                'photo' => $p->photos->first()?->url,
             ]);
 
         $avis = $hotel->proprietes()->withCount('avis')->withAvg('avis', 'note')->get();
@@ -185,7 +193,7 @@ class HotelController extends Controller
 
         return response()->json([
             'hotel' => $hotel,
-            'photos' => $hotel->photos,
+            'photos' => $hotel->photos->map(fn($p) => ['url_photo' => $p->url, 'est_principale' => $p->est_principale, 'ordre' => $p->ordre]),
             'chambres' => $chambres,
             'services' => $hotel->services,
             'note_moyenne' => $noteMoyenne ? round($noteMoyenne, 1) : null,

@@ -21,9 +21,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'password.change' => \App\Http\Middleware\ForcePasswordChange::class,
         ]);
 
-        $middleware->redirectGuestsTo(fn ($request) =>
-            str_starts_with($request->path(), 'hotel') ? '/hotel/login' : '/'
-        );
+        $middleware->redirectGuestsTo(fn ($request) => match(true) {
+            str_starts_with($request->path(), 'api/') => null,
+            str_starts_with($request->path(), 'hotel') => '/hotel/login',
+            default => '/',
+        });
         $middleware->redirectUsersTo('/admin/dashboard');
     })
     ->withExceptions(function (Exceptions $exceptions): void {

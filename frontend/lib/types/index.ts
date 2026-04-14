@@ -30,6 +30,7 @@ export interface User {
   telephone?: string
   devise_preferee?: string
   langue_preferee?: string
+  avatar_url?: string | null
   est_actif: boolean
   email_verified: boolean
   force_password_change: boolean
@@ -103,6 +104,7 @@ export interface Hotel {
   devise_principale: string
   note_moyenne?: number
   prix_min?: number
+  photo_principale?: string | null
   adresse?: Adresse
   photos?: Photo[]
   types?: TypeHotel[]
@@ -126,6 +128,7 @@ export interface HotelFilters {
   page?: number
   search?: string
   destination_id?: number
+  type_id?: number
   etoiles_min?: number
   date_debut?: string
   date_fin?: string

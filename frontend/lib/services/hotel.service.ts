@@ -12,6 +12,7 @@ export const hotelService = {
     if (filters.page) params.set('page', String(filters.page))
     if (filters.search) params.set('search', filters.search)
     if (filters.destination_id) params.set('destination_id', String(filters.destination_id))
+    if (filters.type_id) params.set('type_id', String(filters.type_id))
     if (filters.etoiles_min) params.set('etoiles_min', String(filters.etoiles_min))
     if (filters.date_debut) params.set('date_debut', filters.date_debut)
     if (filters.date_fin) params.set('date_fin', filters.date_fin)

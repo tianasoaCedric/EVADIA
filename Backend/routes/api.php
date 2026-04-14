@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\Client\HotelController as ClientHotelController;
 use App\Http\Controllers\Api\Client\ProfileController;
 use App\Http\Controllers\Api\Client\ReservationController as ClientReservationController;
 use App\Http\Controllers\Api\Public\DestinationController;
+use App\Http\Controllers\Api\Public\TypeHotelController;
 use App\Http\Controllers\Api\Hotel\CalendarController;
 use App\Http\Controllers\Api\Hotel\DashboardController as HotelDashboardController;
 use App\Http\Controllers\Api\Hotel\MessageController as HotelMessageController;
@@ -37,6 +38,7 @@ Route::prefix('auth')->group(function () {
 Route::get('/hotels', [ClientHotelController::class, 'index']);
 Route::get('/hotels/{id}', [ClientHotelController::class, 'show']);
 Route::get('/destinations', [DestinationController::class, 'index']);
+Route::get('/types-hotels', [TypeHotelController::class, 'index']);
 
 // ============================================================
 // Routes authentifiées (token Sanctum requis)
