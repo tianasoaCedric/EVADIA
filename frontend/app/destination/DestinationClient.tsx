@@ -7,17 +7,18 @@ import HeroSection from '../components/ui/HeroSection'
 import CardDestination from '../components/ui/CardDestination'
 import CardHotel from '../components/ui/CardHotel'
 import { useOnScreen } from '@/hooks/useOnScreen'
+import { createSlug } from '@/lib/slug'
 
 // Données mock des destinations (à remplacer par appel API)
 const destinationsData = {
   heroImage: '/photos/destinations/madagascar-hero.jpg',
   description: 'Découvrez l\'île rouge, ses paysages uniques et sa biodiversité exceptionnelle',
   popularSpots: [
-    { id: 1, imageUrl: '/photos/destinations/paris.jpg', title: 'Paris', href: '/destinations/paris' },
-    { id: 2, imageUrl: '/photos/destinations/maldives.jpg', title: 'Maldives', href: '/destinations/maldives' },
-    { id: 3, imageUrl: '/photos/destinations/rome.jpg', title: 'Rome', href: '/destinations/rome' },
-    { id: 4, imageUrl: '/photos/destinations/tokyo.jpg', title: 'Tokyo', href: '/destinations/tokyo' },
-    { id: 5, imageUrl: '/photos/destinations/new-york.jpg', title: 'New York', href: '/destinations/new-york' }
+    { id: 1, imageUrl: '/photos/destinations/paris.jpg', title: 'Madagascar', href: `/destination/${createSlug(1, 'Paris')}` },
+    { id: 2, imageUrl: '/photos/destinations/maldives.jpg', title: 'Maldives', href: `/destination/${createSlug(2, 'Maldives')}` },
+    { id: 3, imageUrl: '/photos/destinations/rome.jpg', title: 'Rome', href: `/destination/${createSlug(3, 'Rome')}` },
+    { id: 4, imageUrl: '/photos/destinations/tokyo.jpg', title: 'Tokyo', href: `/destination/${createSlug(4, 'Tokyo')}` },
+    { id: 5, imageUrl: '/photos/destinations/new-york.jpg', title: 'New York', href: `/destination/${createSlug(5, 'New York')}` }
   ],
   hotels: [
     {

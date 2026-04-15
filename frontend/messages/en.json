@@ -210,5 +210,29 @@
     "previous_hotels": "Scroll left",
     "next_hotels": "Scroll right",
     "go_to_hotel": "Go to hotel {number}"
+  },
+  "CityClient": {
+    "loading": "Loading...",
+    "not_found": "Destination not found",
+    "back_label": "Back",
+    "search_placeholder": "Search for a hotel...",
+    "your_destination": "Your destination",
+    "our_selection": "Our selection of accommodation for your destination",
+    "popular_hotels": "Popular accommodations",
+    "no_results": "No hotels found",
+    "previous_cities": "Scroll left",
+    "next_cities": "Scroll right",
+    "go_to_city": "Go to town {number}",
+    "previous_hotels": "Scroll left",
+    "next_hotels": "Scroll right",
+    "go_to_hotel": "Go to hotel {number}",
+    "previous_popular": "Scroll left",
+    "next_popular": "Scroll right",
+    "go_to_popular": "Go to accommodation {number}"
+  },
+  "CityPage": {
+    "meta_title": "{name} | Evadia",
+    "meta_description": "Discover {name} with Evadia. Find the best hotels, accommodation and activities for your trip to {name}.",
+    "meta_keywords": "{name}, travel, hotels, accommodation, Evadia, vacation, destination"
   }
 }
