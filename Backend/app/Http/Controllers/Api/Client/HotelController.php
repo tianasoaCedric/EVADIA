@@ -87,7 +87,7 @@ class HotelController extends Controller
                 ->whereHas('currentPrix')
                 ->with('currentPrix')
                 ->get()
-                ->min(fn($p) => $p->currentPrix?->prix_par_nuit);
+                ->min(fn($p) => $p->currentPrix?->prix);
 
             $noteMoyenne = $hotel->proprietes()
                 ->withAvg('avis', 'note')
@@ -159,7 +159,7 @@ class HotelController extends Controller
     )]
     public function show(int $id): JsonResponse
     {
-        $hotel = Hotel::with(['photos', 'adresse', 'services', 'currentStatut'])
+        $hotel = Hotel::with(['photos', 'adresse', 'types', 'services', 'currentStatut'])
             ->whereHas('currentStatut', fn($q) => $q->where('statut', 'actif'))
             ->find($id);
 
@@ -182,8 +182,10 @@ class HotelController extends Controller
                 'capacite' => $p->capacite,
                 'nb_chambres' => $p->nb_chambres,
                 'nb_lits' => $p->nb_lits,
+                'nb_salles_bain' => $p->nb_salles_bain,
                 'superficie' => $p->superficie,
-                'prix_par_nuit' => $p->currentPrix?->prix_par_nuit,
+                'prix_par_nuit' => $p->currentPrix?->prix,
+                'devise' => $p->currentPrix?->devise,
                 'photo' => $p->photos->first()?->url,
             ]);
 

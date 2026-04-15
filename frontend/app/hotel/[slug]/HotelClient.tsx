@@ -10,6 +10,10 @@ import HotelPhoto from '../../components/ui/HotelPhoto'
 import RoomCard from '../../components/ui/RoomCard'
 import AvisClient from '@/app/components/ui/AvisClient'
 import HotelInfo from '@/app/components/ui/HotelInfo'
+import { hotelService } from '@/lib/services/hotel.service'
+import { favoriService } from '@/lib/services/favori.service'
+import { authService } from '@/lib/services/auth.service'
+import type { HotelDetail } from '@/lib/types'
 
 interface HotelClientProps {
   hotelId: number
@@ -17,151 +21,106 @@ interface HotelClientProps {
   slug: string
 }
 
-// Données mock (à remplacer par appel API)
-const mockHotelData = {
-  location: 'Antananarivo, Madagascar',
-  rating: 4.8,
-  reviewCount: 234,
-  category: 'Hôtel de luxe',
-  description: 'Situé au cœur d\'Antananarivo, cet établissement 5 étoiles offre une vue imprenable sur la ville. Les chambres spacieuses et élégantes sont équipées de tout le confort moderne. Le restaurant gastronomique propose une cuisine raffinée mêlant saveurs locales et internationales. Idéal pour les voyages d\'affaires comme pour les séjours de détente.',
-  includedItems: [
-    'Wi-Fi haut débit',
-    'Serviettes de bain',
-    'Gel douche et shampooing',
-    'Sèche-cheveux',
-    'Machine à café',
-    'Eau minérale offerte'
-  ]
-}
-
 export default function HotelClient({ hotelId, hotelName, slug }: HotelClientProps) {
   const router = useRouter()
   const t = useTranslations('HotelClient')
   const [isLoading, setIsLoading] = useState(true)
+  const [hotelData, setHotelData] = useState<HotelDetail | null>(null)
   const [isSaved, setIsSaved] = useState(false)
   const [scrollPosition, setScrollPosition] = useState(0)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-  // Animation au scroll pour la section des chambres
   const [setRoomsRef, isRoomsVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
-
-  // Données mock des chambres (à remplacer par appel API)
-  const rooms = [
-    {
-      id: 1,
-      imageUrl: '/photos/chambre.jpg',
-      name: 'Suite de Luxe',
-      beds: 1,
-      bathrooms: 1,
-      maxPersons: 2,
-      price: 225000,
-      availability: 'Disponible'
-    },
-    {
-      id: 2,
-      imageUrl: ['/photos/chambre.jpg', '/photos/bc.png'],
-      name: 'Chambre Double',
-      beds: 2,
-      bathrooms: 1,
-      maxPersons: 2,
-      price: 125000,
-      availability: 'Disponible'
-    },
-    {
-      id: 3,
-      imageUrl: ['/photos/chambre.jpg', '/photos/test.jpg'],
-      name: 'Chambre Familiale',
-      beds: 2,
-      bathrooms: 1,
-      maxPersons: 4,
-      price: 185000,
-      availability: '2 places restantes'
-    },
-  ]
 
   useEffect(() => {
     const fetchHotel = async () => {
       setIsLoading(true)
       try {
-        console.log(`Chargement de l'hôtel ID: ${hotelId}`)
+        const data = await hotelService.get(hotelId)
+        setHotelData(data)
       } catch (error) {
         console.error(error)
       } finally {
         setIsLoading(false)
       }
     }
-
     fetchHotel()
   }, [hotelId])
 
-  // Gestion du scroll pour le carrousel des chambres
+  // Vérifie si l'hôtel est dans les favoris
+  useEffect(() => {
+    if (!authService.isAuthenticated()) return
+    favoriService.list().then(res => {
+      setIsSaved(res.data.some(f => f.hotel_id === hotelId))
+    }).catch(() => {})
+  }, [hotelId])
+
+  // Scroll pour le carrousel des chambres
   useEffect(() => {
     const container = scrollContainerRef.current
     if (!container) return
-
-    const updateScrollInfo = () => {
-      setScrollPosition(container.scrollLeft)
-    }
-
-    updateScrollInfo()
-    container.addEventListener('scroll', updateScrollInfo)
-    window.addEventListener('resize', updateScrollInfo)
-
+    const update = () => setScrollPosition(container.scrollLeft)
+    update()
+    container.addEventListener('scroll', update)
+    window.addEventListener('resize', update)
     return () => {
-      container.removeEventListener('scroll', updateScrollInfo)
-      window.removeEventListener('resize', updateScrollInfo)
+      container.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
     }
   }, [])
+
+  const rooms = hotelData?.chambres ?? []
 
   const getActiveIndex = () => {
     if (!scrollContainerRef.current || rooms.length === 0) return 0
     const cardWidth = window.innerWidth < 640 ? 280 : window.innerWidth < 768 ? 320 : 340
     const gap = window.innerWidth < 640 ? 16 : window.innerWidth < 768 ? 20 : 24
-    const activeIndex = Math.round(scrollPosition / (cardWidth + gap))
-    return Math.min(Math.max(0, activeIndex), rooms.length - 1)
+    return Math.min(Math.max(0, Math.round(scrollPosition / (cardWidth + gap))), rooms.length - 1)
   }
 
   const activeIndex = getActiveIndex()
 
   const scrollLeft = () => {
-    if (scrollContainerRef.current) {
-      const cardWidth = window.innerWidth < 640 ? 280 : window.innerWidth < 768 ? 320 : 340
-      const gap = window.innerWidth < 640 ? 16 : window.innerWidth < 768 ? 20 : 24
-      scrollContainerRef.current.scrollBy({ left: -(cardWidth + gap), behavior: 'smooth' })
-    }
+    if (!scrollContainerRef.current) return
+    const cardWidth = window.innerWidth < 640 ? 280 : window.innerWidth < 768 ? 320 : 340
+    const gap = window.innerWidth < 640 ? 16 : window.innerWidth < 768 ? 20 : 24
+    scrollContainerRef.current.scrollBy({ left: -(cardWidth + gap), behavior: 'smooth' })
   }
 
   const scrollRight = () => {
-    if (scrollContainerRef.current) {
-      const cardWidth = window.innerWidth < 640 ? 280 : window.innerWidth < 768 ? 320 : 340
-      const gap = window.innerWidth < 640 ? 16 : window.innerWidth < 768 ? 20 : 24
-      scrollContainerRef.current.scrollBy({ left: cardWidth + gap, behavior: 'smooth' })
-    }
+    if (!scrollContainerRef.current) return
+    const cardWidth = window.innerWidth < 640 ? 280 : window.innerWidth < 768 ? 320 : 340
+    const gap = window.innerWidth < 640 ? 16 : window.innerWidth < 768 ? 20 : 24
+    scrollContainerRef.current.scrollBy({ left: cardWidth + gap, behavior: 'smooth' })
   }
 
   const scrollToIndex = (index: number) => {
-    if (scrollContainerRef.current) {
-      const cardWidth = window.innerWidth < 640 ? 280 : window.innerWidth < 768 ? 320 : 340
-      const gap = window.innerWidth < 640 ? 16 : window.innerWidth < 768 ? 20 : 24
-      scrollContainerRef.current.scrollTo({ 
-        left: index * (cardWidth + gap), 
-        behavior: 'smooth' 
-      })
-    }
+    if (!scrollContainerRef.current) return
+    const cardWidth = window.innerWidth < 640 ? 280 : window.innerWidth < 768 ? 320 : 340
+    const gap = window.innerWidth < 640 ? 16 : window.innerWidth < 768 ? 20 : 24
+    scrollContainerRef.current.scrollTo({ left: index * (cardWidth + gap), behavior: 'smooth' })
   }
 
-  const handleSave = () => {
-    setIsSaved(!isSaved)
-    console.log(t('save_log'))
+  const handleSave = async () => {
+    if (!authService.isAuthenticated()) {
+      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`)
+      return
+    }
+    try {
+      if (isSaved) {
+        await favoriService.remove(hotelId)
+      } else {
+        await favoriService.add(hotelId)
+      }
+      setIsSaved(!isSaved)
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   const handleShare = () => {
     if (navigator.share) {
-      navigator.share({
-        title: hotelName,
-        text: t('share_text', { hotelName }),
-        url: window.location.href,
-      })
+      navigator.share({ title: hotelName, text: t('share_text', { hotelName }), url: window.location.href })
     } else {
       navigator.clipboard.writeText(window.location.href)
       alert(t('share_alert'))
@@ -176,10 +135,19 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
     )
   }
 
+  const hotel = hotelData?.hotel
+  const photos = hotelData?.photos.map(p => p.url_photo) ?? ['/photos/bc.png']
+  const location = hotel?.adresse
+    ? `${hotel.adresse.ville}, ${hotel.adresse.pays}`
+    : 'Madagascar'
+  const category = hotel?.types?.[0]?.nom ?? ''
+  const includedItems = hotelData?.services.map(s => s.nom) ?? []
+
   return (
     <main className="min-h-screen pt-24 pb-16">
       <div className="container mx-auto px-4">
-        {/* Header avec retour, titre et boutons */}
+
+        {/* Header */}
         <div className="flex flex-row items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
             <button
@@ -190,62 +158,46 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
               <ChevronLeft className="w-8 h-8 text-gray-600 hover:text-[#01BDA5] transition-colors" />
             </button>
             <h1 className="text-xl md:text-3xl lg:text-4xl font-medium text-gray-800">
-              {hotelName}
+              {hotel?.nom ?? hotelName}
             </h1>
           </div>
 
           <div className="flex items-center gap-3">
-            <Bouton
-              size="medium"
-              onClick={handleSave}
-              className="flex items-center gap-2"
-            >
+            <Bouton size="medium" onClick={handleSave} className="flex items-center gap-2">
               <Heart className={`w-5 h-5 ${isSaved ? 'fill-current' : ''}`} />
               <span className="hidden sm:inline">{isSaved ? t('saved') : t('save')}</span>
             </Bouton>
-
-            <Bouton
-              size="medium"
-              onClick={handleShare}
-              className="flex items-center gap-2"
-            >
+            <Bouton size="medium" onClick={handleShare} className="flex items-center gap-2">
               <Share className="w-5 h-5" />
               <span className="hidden sm:inline">{t('share')}</span>
             </Bouton>
           </div>
         </div>
 
-        {/* Photos de l'hôtel */}
+        {/* Photos */}
         <div className="py-4">
           <HotelPhoto
-            imageUrl={[
-              '/photos/chambre.jpg',
-              '/photos/test.jpg',
-              '/photos/chambre.jpg',
-              '/photos/test.jpg',
-              '/photos/chambre.jpg',
-              '/photos/test.jpg',
-            ]}
+            imageUrl={photos.length > 0 ? photos : ['/photos/bc.png']}
             autoPlayInterval={5000}
             className="mb-4"
           />
         </div>
 
-        {/* HotelInfo - données dynamiques non traduites */}
+        {/* Infos hôtel */}
         <div className="mt-4 mb-4">
-          <HotelInfo 
-            hotelName={hotelName}
-            location={mockHotelData.location}
-            rating={mockHotelData.rating}
-            reviewCount={mockHotelData.reviewCount}
-            category={mockHotelData.category}
-            description={mockHotelData.description}
-            includedItems={mockHotelData.includedItems}
+          <HotelInfo
+            hotelName={hotel?.nom ?? hotelName}
+            location={location}
+            rating={hotelData?.note_moyenne ?? 0}
+            reviewCount={hotelData?.nb_avis ?? 0}
+            category={category}
+            description={hotel?.description ?? ''}
+            includedItems={includedItems.length > 0 ? includedItems : undefined}
           />
         </div>
 
-        {/* Section Chambres et disponibilités */}
-        <div 
+        {/* Chambres et disponibilités */}
+        <div
           ref={setRoomsRef}
           className={`mt-4 mb-4 transition-all duration-700 ease-out ${
             isRoomsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
@@ -255,7 +207,10 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
             {t('rooms_title')}
           </h2>
 
-          {rooms.length > 3 ? (
+          {rooms.length === 0 ? (
+            <p className="text-gray-400 text-center py-8">Aucune chambre disponible</p>
+          ) : rooms.length > 3 ? (
+            /* Carrousel > 3 chambres */
             <div className="relative overflow-visible">
               <button
                 onClick={scrollLeft}
@@ -274,13 +229,12 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
                   <div key={room.id} className="flex-shrink-0 w-[320px] sm:w-[320px] md:w-[340px] lg:w-[360px] xl:w-[380px]">
                     <RoomCard
                       hotelId={room.id}
-                      imageUrl={room.imageUrl}
-                      name={room.name}
-                      beds={room.beds}
-                      bathrooms={room.bathrooms}
-                      maxPersons={room.maxPersons}
-                      price={room.price}
-                      availability={room.availability}
+                      imageUrl={room.photo ?? '/photos/bc.png'}
+                      name={room.nom}
+                      beds={room.nb_lits ?? 1}
+                      bathrooms={room.nb_salles_bain ?? 1}
+                      maxPersons={room.capacite}
+                      price={room.prix_par_nuit ?? 0}
                     />
                   </div>
                 ))}
@@ -310,30 +264,29 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
               </div>
             </div>
           ) : (
+            /* ≤ 3 chambres : carrousel mobile / grille desktop */
             <>
               <div className="lg:hidden">
                 <div className="relative overflow-visible">
                   <div
                     ref={scrollContainerRef}
-                    className="flex overflow-x-auto overflow-visible scroll-smooth gap-4 sm:gap-5 pb-6 scrollbar-hide"
+                    className="flex overflow-x-auto scroll-smooth gap-4 sm:gap-5 pb-6 scrollbar-hide"
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                   >
                     {rooms.map((room) => (
                       <div key={room.id} className="flex-shrink-0 w-[320px]">
                         <RoomCard
                           hotelId={room.id}
-                          imageUrl={room.imageUrl}
-                          name={room.name}
-                          beds={room.beds}
-                          bathrooms={room.bathrooms}
-                          maxPersons={room.maxPersons}
-                          price={room.price}
-                          availability={room.availability}
+                          imageUrl={room.photo ?? '/photos/bc.png'}
+                          name={room.nom}
+                          beds={room.nb_lits ?? 1}
+                          bathrooms={room.nb_salles_bain ?? 1}
+                          maxPersons={room.capacite}
+                          price={room.prix_par_nuit ?? 0}
                         />
                       </div>
                     ))}
                   </div>
-
                   <div className="flex justify-center gap-2 mt-6">
                     {rooms.map((_, index) => (
                       <button
@@ -356,13 +309,12 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
                   <RoomCard
                     key={room.id}
                     hotelId={room.id}
-                    imageUrl={room.imageUrl}
-                    name={room.name}
-                    beds={room.beds}
-                    bathrooms={room.bathrooms}
-                    maxPersons={room.maxPersons}
-                    price={room.price}
-                    availability={room.availability}
+                    imageUrl={room.photo ?? '/photos/bc.png'}
+                    name={room.nom}
+                    beds={room.nb_lits ?? 1}
+                    bathrooms={room.nb_salles_bain ?? 1}
+                    maxPersons={room.capacite}
+                    price={room.prix_par_nuit ?? 0}
                   />
                 ))}
               </div>

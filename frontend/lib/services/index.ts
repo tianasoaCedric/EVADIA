@@ -1,4 +1,5 @@
 export { authService } from './auth.service'
+export { proprieteService } from './propriete.service'
 export { destinationService } from './destination.service'
 export { hotelService } from './hotel.service'
 export { typeHotelService } from './typeHotel.service'

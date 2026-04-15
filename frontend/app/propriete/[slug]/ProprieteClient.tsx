@@ -3,192 +3,219 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronLeft, Share, Heart } from 'lucide-react'
+import {
+  Wifi, Snowflake, Tv, Bath, Coffee, Utensils, Wind, Bed,
+  Lock, Key, Bell, Phone, Droplets, Briefcase, Thermometer,
+  Flame, Waves, Mountain, Trees, Star, ShowerHead
+} from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useOnScreen } from '@/hooks/useOnScreen'
 import Bouton from '../../components/ui/Bouton'
 import HotelPhoto from '../../components/ui/HotelPhoto'
 import Reservation from '../../components/ui/Reservation'
 import HotelInfo from '../../components/ui/HotelInfo'
-import { Wifi, Snowflake, Tv, Bath, Coffee, Utensils } from 'lucide-react'
+import { proprieteService } from '@/lib/services/propriete.service'
+import { reservationService } from '@/lib/services/reservation.service'
+import { authService } from '@/lib/services/auth.service'
+import type { ProprietePublic } from '@/lib/types'
 
 interface ProprieteClientProps {
-    proprieteId: number
-    proprieteName: string
-    slug: string
+  proprieteId: number
+  proprieteName: string
+  slug: string
 }
 
-// Données mock de la chambre (à remplacer par appel API)
-const getRoomData = (id: number) => {
-    const roomsData: Record<number, any> = {
-        1: {
-            id: 1,
-            name: 'Suite de Luxe',
-            images: ['/photos/chambre.jpg', '/photos/test.jpg', '/photos/chambre.jpg', '/photos/test.jpg'],
-            price: 225000,
-            discountPercent: 20,
-            serviceFees: 0,
-            availability: 'Disponible',
-            location: 'Antananarivo, Madagascar',
-            rating: 4.9,
-            reviewCount: 128,
-            category: 'Suite de luxe',
-            description: 'Suite luxueuse avec vue imprenable sur l\'océan. Profitez d\'un espace de 50m² entièrement rénové, d\'une terrasse privée et d\'un service de conciergerie 24h/24.',
-            beds: 1,
-            bathrooms: 1,
-            maxPersons: 2,
-            includedItems: [
-                'Wi-Fi haut débit',
-                'Serviettes de bain',
-                'Gel douche et shampooing',
-                'Sèche-cheveux',
-                'Machine à café',
-                'Eau minérale offerte'
-            ],
-            equipments: [
-                { id: 1, name: 'Wi-Fi gratuit', icon: <Wifi className="w-5 h-5" /> },
-                { id: 2, name: 'Climatisation', icon: <Snowflake className="w-5 h-5" /> },
-                { id: 3, name: 'Télévision', icon: <Tv className="w-5 h-5" /> },
-                { id: 4, name: 'Salle de bain privée', icon: <Bath className="w-5 h-5" /> },
-                { id: 5, name: 'Petit-déjeuner', icon: <Coffee className="w-5 h-5" /> },
-                { id: 6, name: 'Restaurant', icon: <Utensils className="w-5 h-5" /> },
-            ]
-        }
-    }
-    return roomsData[id] || null
+function getEquipementIcon(icone?: string) {
+  const map: Record<string, React.ReactNode> = {
+    wifi: <Wifi className="w-5 h-5" />,
+    snowflake: <Snowflake className="w-5 h-5" />,
+    tv: <Tv className="w-5 h-5" />,
+    bath: <Bath className="w-5 h-5" />,
+    coffee: <Coffee className="w-5 h-5" />,
+    utensils: <Utensils className="w-5 h-5" />,
+    wind: <Wind className="w-5 h-5" />,
+    bed: <Bed className="w-5 h-5" />,
+    lock: <Lock className="w-5 h-5" />,
+    key: <Key className="w-5 h-5" />,
+    bell: <Bell className="w-5 h-5" />,
+    phone: <Phone className="w-5 h-5" />,
+    droplets: <Droplets className="w-5 h-5" />,
+    briefcase: <Briefcase className="w-5 h-5" />,
+    thermometer: <Thermometer className="w-5 h-5" />,
+    flame: <Flame className="w-5 h-5" />,
+    waves: <Waves className="w-5 h-5" />,
+    mountain: <Mountain className="w-5 h-5" />,
+    trees: <Trees className="w-5 h-5" />,
+    'shower-head': <ShowerHead className="w-5 h-5" />,
+  }
+  return map[icone ?? ''] ?? <Star className="w-5 h-5" />
 }
 
 export default function ProprieteClient({ proprieteId, proprieteName, slug }: ProprieteClientProps) {
-    const router = useRouter()
-    const t = useTranslations('ProprieteClient')
-    const [isLoading, setIsLoading] = useState(true)
-    const [isSaved, setIsSaved] = useState(false)
-    const [room, setRoom] = useState<any>(null)
+  const router = useRouter()
+  const t = useTranslations('ProprieteClient')
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaved, setIsSaved] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [propriete, setPropriete] = useState<ProprietePublic | null>(null)
 
-    // Animation au scroll
-    const [setMainRef, isMainVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
+  const [setMainRef, isMainVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
 
-    useEffect(() => {
-        const fetchRoom = async () => {
-            setIsLoading(true)
-            try {
-                const data = getRoomData(proprieteId)
-                setRoom(data)
-            } catch (error) {
-                console.error(error)
-            } finally {
-                setIsLoading(false)
-            }
-        }
-
-        fetchRoom()
-    }, [proprieteId])
-
-    const handleSave = () => {
-        setIsSaved(!isSaved)
-        console.log(t('save_log'))
+  useEffect(() => {
+    const fetchPropriete = async () => {
+      setIsLoading(true)
+      try {
+        const data = await proprieteService.get(proprieteId)
+        setPropriete(data)
+      } catch (error) {
+        console.error(error)
+      } finally {
+        setIsLoading(false)
+      }
     }
+    fetchPropriete()
+  }, [proprieteId])
 
-    const handleShare = () => {
-        if (navigator.share) {
-            navigator.share({
-                title: proprieteName,
-                text: t('share_text', { name: proprieteName }),
-                url: window.location.href,
-            })
-        } else {
-            navigator.clipboard.writeText(window.location.href)
-            alert(t('share_alert'))
-        }
+  const handleSave = () => {
+    setIsSaved(!isSaved)
+  }
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({ title: proprieteName, text: t('share_text', { name: proprieteName }), url: window.location.href })
+    } else {
+      navigator.clipboard.writeText(window.location.href)
+      alert(t('share_alert'))
     }
+  }
 
-    const handleReservation = (data: any) => {
-        console.log(t('reservation_log'), data)
-        // Rediriger vers la page de paiement
+  const handleReservation = async (data: any) => {
+    if (!authService.isAuthenticated()) {
+      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`)
+      return
     }
-
-    if (isLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-pulse text-gray-500">{t('loading')}</div>
-            </div>
-        )
+    setIsSubmitting(true)
+    try {
+      const fmt = (d: Date) => d.toISOString().split('T')[0]
+      await reservationService.create({
+        chambre_id: proprieteId,
+        date_debut: fmt(data.checkIn),
+        date_fin: fmt(data.checkOut),
+        nb_adultes: data.guests,
+      })
+      router.push('/reservations')
+    } catch (error) {
+      console.error(t('reservation_log'), error)
+    } finally {
+      setIsSubmitting(false)
     }
+  }
 
-    if (!room) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-gray-500">{t('not_found')}</div>
-            </div>
-        )
-    }
-
+  if (isLoading) {
     return (
-        <main 
-            ref={setMainRef}
-            className={`min-h-screen pt-24 pb-16 transition-all duration-700 ease-out ${
-                isMainVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-            }`}
-        >
-            <div className="container mx-auto px-4">
-                {/* Header avec retour, titre et boutons */}
-                <div className="flex flex-row items-center justify-between gap-4 mb-6">
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => router.back()}
-                            className="rounded-full transition-colors cursor-pointer"
-                            aria-label={t('back_label')}
-                        >
-                            <ChevronLeft className="w-8 h-8 text-gray-600 hover:text-[#01BDA5] transition-colors" />
-                        </button>
-                        <h1 className="text-xl md:text-3xl lg:text-4xl font-medium text-gray-800">
-                            {proprieteName}
-                        </h1>
-                    </div>
-                </div>
-
-                {/* Photos de la chambre */}
-                <div className="py-4">
-                    <HotelPhoto
-                        imageUrl={room.images}
-                        autoPlayInterval={5000}
-                        className="mb-4"
-                    />
-                </div>
-
-                {/* Section informations avec HotelInfo et Reservation */}
-                <div className="mt-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
-                        {/* Colonne 1 : HotelInfo - Utilisation du layout 'rows' pour la chambre */}
-                        <div>
-                            <HotelInfo
-                                hotelName={room.name}
-                                location={room.location}
-                                rating={room.rating}
-                                reviewCount={room.reviewCount}
-                                category={room.category}
-                                description={room.description}
-                                beds={room.beds}
-                                bathrooms={room.bathrooms}
-                                maxPersons={room.maxPersons}
-                                includedItems={room.includedItems}
-                                equipments={room.equipments}
-                                layout="rows"
-                            />
-                        </div>
-
-                        {/* Colonne 2 : Reservation */}
-                        <div className="lg:sticky lg:top-24">
-                            <Reservation
-                                pricePerNight={room.price}
-                                discountPercent={room.discountPercent || 0}
-                                serviceFees={room.serviceFees || 0}
-                                roomName={room.name}
-                                onReserve={handleReservation}
-                            />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-gray-500">{t('loading')}</div>
+      </div>
     )
+  }
+
+  if (!propriete) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-500">{t('not_found')}</div>
+      </div>
+    )
+  }
+
+  const photos = propriete.photos.map(p => p.url_photo)
+  const location = propriete.hotel.adresse
+    ? `${propriete.hotel.adresse.ville}, ${propriete.hotel.adresse.pays}`
+    : 'Madagascar'
+  const equipements = propriete.equipements.map(e => ({
+    id: e.id,
+    name: e.nom,
+    icon: getEquipementIcon(e.icone),
+  }))
+
+  return (
+    <main
+      ref={setMainRef}
+      className={`min-h-screen pt-24 pb-16 transition-all duration-700 ease-out ${
+        isMainVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+      }`}
+    >
+      <div className="container mx-auto px-4">
+
+        {/* Header */}
+        <div className="flex flex-row items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.back()}
+              className="rounded-full transition-colors cursor-pointer"
+              aria-label={t('back_label')}
+            >
+              <ChevronLeft className="w-8 h-8 text-gray-600 hover:text-[#01BDA5] transition-colors" />
+            </button>
+            <h1 className="text-xl md:text-3xl lg:text-4xl font-medium text-gray-800">
+              {propriete.nom}
+            </h1>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Bouton size="medium" onClick={handleSave} className="flex items-center gap-2">
+              <Heart className={`w-5 h-5 ${isSaved ? 'fill-current' : ''}`} />
+              <span className="hidden sm:inline">{isSaved ? t('saved') : t('save')}</span>
+            </Bouton>
+            <Bouton size="medium" onClick={handleShare} className="flex items-center gap-2">
+              <Share className="w-5 h-5" />
+              <span className="hidden sm:inline">{t('share')}</span>
+            </Bouton>
+          </div>
+        </div>
+
+        {/* Photos */}
+        <div className="py-4">
+          <HotelPhoto
+            imageUrl={photos.length > 0 ? photos : ['/photos/bc.png']}
+            autoPlayInterval={5000}
+            className="mb-4"
+          />
+        </div>
+
+        {/* Infos + Réservation */}
+        <div className="mt-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+
+            {/* Colonne gauche : détails */}
+            <div>
+              <HotelInfo
+                hotelName={propriete.nom}
+                location={location}
+                rating={0}
+                reviewCount={0}
+                category={propriete.type_propriete}
+                description={propriete.description ?? ''}
+                beds={propriete.nb_lits}
+                bathrooms={propriete.nb_salles_bain}
+                maxPersons={propriete.capacite}
+                equipments={equipements.length > 0 ? equipements : undefined}
+                layout="rows"
+              />
+            </div>
+
+            {/* Colonne droite : réservation */}
+            <div className="lg:sticky lg:top-24">
+              <Reservation
+                pricePerNight={propriete.prix_par_nuit ?? 0}
+                discountPercent={0}
+                serviceFees={0}
+                roomName={propriete.nom}
+                onReserve={handleReservation}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  )
 }

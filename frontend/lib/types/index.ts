@@ -110,15 +110,52 @@ export interface Hotel {
   types?: TypeHotel[]
 }
 
+/** Chambre telle que retournée dans GET /hotels/{id} */
+export interface ChambrePublic {
+  id: number
+  nom: string
+  type_propriete: string
+  capacite: number
+  nb_chambres?: number
+  nb_lits?: number
+  nb_salles_bain?: number
+  superficie?: number
+  prix_par_nuit?: number
+  devise?: string
+  photo?: string | null
+}
+
+/** Détail complet d'une chambre — GET /proprietes/{id} */
+export interface ProprietePublic {
+  id: number
+  nom: string
+  description?: string
+  type_propriete: string
+  capacite: number
+  nb_chambres?: number
+  nb_lits?: number
+  nb_salles_bain?: number
+  superficie?: number
+  prix_par_nuit?: number
+  devise?: string
+  photos: { url_photo: string; est_principale: boolean; ordre: number }[]
+  equipements: { id: number; nom: string; categorie: string; icone?: string }[]
+  hotel: {
+    id: number
+    nom: string
+    etoiles: number
+    adresse?: { ville: string; pays: string }
+  }
+}
+
 /** Réponse complète de GET /hotels/{id} */
 export interface HotelDetail {
   hotel: Hotel & {
-    email_contact?: string
-    telephone?: string
-    site_web?: string
+    adresse?: Adresse
+    types?: TypeHotel[]
   }
-  photos: Photo[]
-  chambres: Chambre[]
+  photos: { url_photo: string; est_principale: boolean; ordre: number }[]
+  chambres: ChambrePublic[]
   services: { id: number; nom: string }[]
   note_moyenne: number | null
   nb_avis: number
