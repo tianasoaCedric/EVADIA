@@ -210,5 +210,50 @@
     "previous_hotels": "Défiler vers la gauche",
     "next_hotels": "Défiler vers la droite",
     "go_to_hotel": "Aller à l'hôtel {number}"
+  },
+  "CityClient": {
+    "loading": "Chargement...",
+    "not_found": "Destination non trouvée",
+    "back_label": "Retour",
+    "search_placeholder": "Rechercher un hôtel...",
+    "your_destination": "Votre destination",
+    "our_selection": "Notre sélection d'hébergement pour votre destination",
+    "popular_hotels": "Hébergements populaires",
+    "no_results": "Aucun hôtel trouvé",
+    "previous_cities": "Défiler vers la gauche",
+    "next_cities": "Défiler vers la droite",
+    "go_to_city": "Aller à la ville {number}",
+    "previous_hotels": "Défiler vers la gauche",
+    "next_hotels": "Défiler vers la droite",
+    "go_to_hotel": "Aller à l'hôtel {number}",
+    "previous_popular": "Défiler vers la gauche",
+    "next_popular": "Défiler vers la droite",
+    "go_to_popular": "Aller à l'hébergement {number}"
+  },
+  "CityPage": {
+    "meta_title": "{name} | Evadia",
+    "meta_description": "Découvrez {name} avec Evadia. Trouvez les meilleurs hôtels, hébergements et activités pour votre voyage à {name}.",
+    "meta_keywords": "{name}, voyage, hôtels, hébergement, Evadia, vacances, destination"
+  },
+  "VillePage": {
+    "meta_title": "{name} | Evadia",
+    "meta_description": "Découvrez les meilleurs hôtels à {name} avec Evadia. Réservez votre hébergement en ligne aux meilleurs prix.",
+    "meta_keywords": "{name}, hôtels, hébergement, Evadia, voyage, réservation"
+  },
+  "VilleClient": {
+    "loading": "Chargement...",
+    "not_found": "Ville non trouvée",
+    "back_label": "Retour",
+    "search_placeholder": "Rechercher un hôtel...",
+    "popular_hotels": "Hébergements populaires à {name}",
+    "hotels_title": "Hébergements à {name}",
+    "no_results": "Aucun hôtel trouvé",
+    "previous_popular": "Défiler vers la gauche",
+    "next_popular": "Défiler vers la droite",
+    "go_to_popular": "Aller à l'hébergement {number}",
+    "previous_page": "Page précédente",
+    "next_page": "Page suivante",
+    "results_singular": "hôtel trouvé",
+    "results_plural": "hôtels trouvés"
   }
 }
