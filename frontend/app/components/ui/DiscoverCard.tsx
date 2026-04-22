@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import { useOnScreen } from '@/hooks/useOnScreen'
 
 interface DiscoverCardProps {
   imageUrl: string | string[]
@@ -30,6 +31,9 @@ const DiscoverCard = ({
   const images = Array.isArray(imageUrl) ? imageUrl : [imageUrl]
   const hasMultipleImages = images.length > 1
 
+  // Animation au scroll pour chaque carte
+  const [setCardRef, isCardVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
+
   const handlePrevImage = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -47,12 +51,16 @@ const DiscoverCard = ({
   }
 
   const cardContent = (
-    <div className={`
-      group bg-white rounded-2xl overflow-hidden 
-      transition-all duration-300 hover:-translate-y-1 hover:shadow-xl
-      cursor-pointer
-      ${width}
-    `}>
+    <div
+      ref={setCardRef}
+      className={`
+        group bg-white rounded-2xl overflow-hidden 
+        transition-all duration-700 ease-out
+        cursor-pointer
+        ${width}
+        ${isCardVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}
+      `}
+    >
       {/* Image en haut */}
       <div className="relative rounded-2xl h-60 sm:h-72 w-full overflow-hidden bg-gray-200">
         {!imageError ? (

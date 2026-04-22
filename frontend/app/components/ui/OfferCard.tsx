@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight, Tag } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface OfferCardProps {
   imageUrl: string | string[]
@@ -34,6 +35,7 @@ const OfferCard = ({
   className = '',
   width = 'w-full sm:w-80 md:w-72'
 }: OfferCardProps) => {
+  const t = useTranslations('OfferCard')
   const [imageError, setImageError] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   
@@ -65,7 +67,7 @@ const OfferCard = ({
           <Image
             src={images[currentImageIndex]}
             fill
-            alt={alt || `${hotelName} - offre`}
+            alt={alt || `${hotelName} - ${t('offer')}`}
             className="object-cover transition-transform duration-500 group-hover:scale-110"
             onError={() => setImageError(true)}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -84,14 +86,14 @@ const OfferCard = ({
             <button
               onClick={handlePrevImage}
               className="absolute left-2 top-1/2 -translate-y-1/2 p-1 rounded-full bg-black/50 text-white hover:bg-black/70 transition-all duration-200 cursor-pointer"
-              aria-label="Image précédente"
+              aria-label={t('previous_image')}
             >
               <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
             <button
               onClick={handleNextImage}
               className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full bg-black/50 text-white hover:bg-black/70 transition-all duration-200 cursor-pointer"
-              aria-label="Image suivante"
+              aria-label={t('next_image')}
             >
               <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
@@ -114,7 +116,7 @@ const OfferCard = ({
                     ? 'bg-white w-3'
                     : 'bg-white/50 hover:bg-white/80'
                 }`}
-                aria-label={`Aller à l'image ${idx + 1}`}
+                aria-label={t('go_to_image', { number: idx + 1 })}
               />
             ))}
           </div>
@@ -127,7 +129,14 @@ const OfferCard = ({
         <div className="flex items-center gap-2 mb-2 sm:mb-3">
           <div className="inline-flex items-center gap-1 sm:gap-1.5 bg-[#01BDA5] text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full w-full">
             <Tag className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="font-semibold text-md sm:text-md">Offres -{discount}% du {startDay} au {endDay} {month}</span>
+            <span className="font-semibold text-md sm:text-md">
+              {t('offer_badge', { 
+                discount, 
+                startDay, 
+                endDay, 
+                month 
+              })}
+            </span>
           </div>
         </div>
 
@@ -140,7 +149,7 @@ const OfferCard = ({
 
         {/* Description */}
         <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-          Profitez de l’offre exclusive : {destination} vous appelle.
+          {t('description', { destination })}
         </p>
       </div>
     </div>
