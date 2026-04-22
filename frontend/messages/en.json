@@ -228,11 +228,119 @@
     "go_to_hotel": "Go to hotel {number}",
     "previous_popular": "Scroll left",
     "next_popular": "Scroll right",
-    "go_to_popular": "Go to accommodation {number}"
+    "go_to_popular": "Go to hosting {number}"
   },
   "CityPage": {
     "meta_title": "{name} | Evadia",
     "meta_description": "Discover {name} with Evadia. Find the best hotels, accommodation and activities for your trip to {name}.",
     "meta_keywords": "{name}, travel, hotels, accommodation, Evadia, vacation, destination"
+  },
+  "VillePage": {
+    "meta_title": "{name} | Evadia",
+    "meta_description": "Discover the best hotels in {name} with Evadia. Book your accommodation online at the best prices.",
+    "meta_keywords": "{name}, hotels, accommodation, Evadia, travel, reservation"
+  },
+  "VilleClient": {
+    "loading": "Loading...",
+    "not_found": "City not found",
+    "back_label": "Back",
+    "search_placeholder": "Search for a hotel...",
+    "popular_hotels": "Popular accommodations in {name}",
+    "hotels_title": "Accommodations in {name}",
+    "no_results": "No hotels found",
+    "previous_popular": "Scroll left",
+    "next_popular": "Scroll right",
+    "go_to_popular": "Go to hosting {number}",
+    "previous_page": "Previous page",
+    "next_page": "Next page",
+    "results_singular": "hotel found",
+    "results_plural": "hotels found"
+  },
+  "OfferPage": {
+    "meta_title": "Special offers | Evadia",
+    "meta_description": "Discover our special offers and benefit from exceptional discounts on your favorite accommodation.",
+    "meta_keywords": "offers, promotions, discounts, Evadia, travel, hotel"
+  },
+  "OfferClient": {
+    "hero_title": "Special offers",
+    "hero_subtitle": "Take advantage of exceptional discounts on our accommodation",
+    "search_placeholder": "Search for an offer by hotel, city or destination...",
+    "no_results": "No offers found",
+    "previous_page": "Previous page",
+    "next_page": "Next page",
+    "results_singular": "offer found",
+    "results_plural": "offers found",
+    "offer_title": "Find the offers that suit you here"
+  },
+  "OfferCard": {
+    "offer": "offer",
+    "previous_image": "Previous image",
+    "next_image": "Next image",
+    "go_to_image": "Go to image {number}",
+    "offer_badge": "Offers -{discount}% from {startDay} to {endDay} {month}",
+    "description": "Take advantage of the exclusive offer: {destination} is calling you."
+  },
+  "OfferDetailPage": {
+    "meta_title": "{name} | Exclusive Evadia offer",
+    "meta_description": "Take advantage of our exclusive offer on {name}. Exceptional reduction and advantageous conditions."
+  },
+  "OfferDetailClient": {
+    "loading": "Loading...",
+    "not_found": "Offer not found",
+    "back_button": "Back to offers",
+    "hero_title": "{hotelName}",
+    "hero_subtitle": "Exclusive offer -{discount}% for {destination}",
+    "discount_badge": "discount",
+    "period_label": "Offer Period",
+    "period_value": "from {startDay} to {endDay} {month}",
+    "description_label": "Description of the offer",
+    "contact_label": "For any reservation",
+    "phone_label": "Phone",
+    "email_label": "E-mail",
+    "accept_terms": "I accept the terms and conditions",
+    "reserve_button": "Book now",
+    "terms_title": "Terms and conditions",
+    "reservation_success": "Your reservation request has been sent! We will contact you as soon as possible."
+  },
+  "FavoritePage": {
+    "meta_title": "My favorites | Evadia",
+    "meta_description": "Find all your favorite hotels and accommodation registered on Evadia.",
+    "meta_keywords": "favorites, favorite hotels, Evadia, wish list"
+  },
+  "FavoriteClient": {
+    "loading": "Loading your favorites...",
+    "previous_page": "Previous page",
+    "next_page": "Next page",
+    "back_button": "Back",
+    "hero_title": "My favorites",
+    "hero_subtitle": "Find all your favorite hotels and accommodation",
+    "clear_all": "Delete all",
+    "favorites_singular": "favorite",
+    "favorites_plural": "favorites",
+    "no_favorites": "You don't have any favorites yet",
+    "discover_hotels": "Discover hotels",
+    "remove_favorite": "Remove from favorites",
+    "search_placeholder": "Search for a favorite...",
+    "no_search_results": "No favorites match your search",
+    "clear_search": "Clear search"
+  },
+  "DiscoverPage": {
+    "meta_title": "Discover | Evadia",
+    "meta_description": "Explore the most beautiful destinations in the world with Evadia. Find inspiration for your next trips.",
+    "meta_keywords": "discover, destinations, travel, Evadia, inspirations"
+  },
+  "DiscoverClient": {
+    "loading": "Loading...",
+    "hero_title": "Discover the world",
+    "hero_subtitle": "Explore the most beautiful destinations and enjoy unique experiences",
+    "section_title": "Make every trip magical & memorable",
+    "section_description": "Discover our selection of the most beautiful destinations in the world. Whether you're looking for adventure, relaxation or culture, find inspiration for your next trip. Each destination has been carefully chosen to offer you unique and unforgettable experiences.",
+    "search_placeholder": "Search for a destination...",
+    "no_results": "No destination found",
+    "clear_search": "Clear search",
+    "previous_page": "Previous page",
+    "next_page": "Next page",
+    "results_singular": "destination found",
+    "results_plural": "destinations found"
   }
 }

@@ -255,5 +255,92 @@
     "next_page": "Page suivante",
     "results_singular": "hôtel trouvé",
     "results_plural": "hôtels trouvés"
+  },
+  "OfferPage": {
+    "meta_title": "Offres spéciales | Evadia",
+    "meta_description": "Découvrez nos offres spéciales et profitez de réductions exceptionnelles sur vos hébergements préférés.",
+    "meta_keywords": "offres, promotions, réductions, Evadia, voyage, hôtel"
+  },
+  "OfferClient": {
+    "hero_title": "Offres spéciales",
+    "hero_subtitle": "Profitez de réductions exceptionnelles sur nos hébergements",
+    "search_placeholder": "Rechercher une offre par hôtel, ville ou destination...",
+    "no_results": "Aucune offre trouvée",
+    "previous_page": "Page précédente",
+    "next_page": "Page suivante",
+    "results_singular": "offre trouvée",
+    "results_plural": "offres trouvées",
+    "offer_title" : "Trouvez ici les offres qui vous convient"
+  },
+  "OfferCard": {
+    "offer": "offre",
+    "previous_image": "Image précédente",
+    "next_image": "Image suivante",
+    "go_to_image": "Aller à l'image {number}",
+    "offer_badge": "Offres -{discount}% du {startDay} au {endDay} {month}",
+    "description": "Profitez de l'offre exclusive : {destination} vous appelle."
+  },
+  "OfferDetailPage": {
+    "meta_title": "{name} | Offre exclusive Evadia",
+    "meta_description": "Profitez de notre offre exclusive sur {name}. Réduction exceptionnelle et conditions avantageuses."
+  },
+  "OfferDetailClient": {
+    "loading": "Chargement...",
+    "not_found": "Offre non trouvée",
+    "back_button": "Retour aux offres",
+    "hero_title": "{hotelName}",
+    "hero_subtitle": "Offre exclusive -{discount}% pour {destination}",
+    "discount_badge": "de réduction",
+    "period_label": "Période de l'offre",
+    "period_value": "du {startDay} au {endDay} {month}",
+    "description_label": "Description de l'offre",
+    "contact_label": "Pour toute réservation",
+    "phone_label": "Téléphone",
+    "email_label": "Email",
+    "accept_terms": "J'accepte les termes et conditions",
+    "reserve_button": "Réserver maintenant",
+    "terms_title": "Termes et conditions",
+    "reservation_success": "Votre demande de réservation a été envoyée ! Nous vous contacterons dans les plus brefs délais."
+  },
+  "FavoritePage": {
+    "meta_title": "Mes favoris | Evadia",
+    "meta_description": "Retrouvez tous vos hôtels et hébergements favoris enregistrés sur Evadia.",
+    "meta_keywords": "favoris, hôtels favoris, Evadia, liste de souhaits"
+  },
+  "FavoriteClient": {
+    "loading": "Chargement de vos favoris...",
+    "previous_page": "Page précédente",
+    "next_page": "Page suivante",
+    "back_button": "Retour",
+    "hero_title": "Mes favoris",
+    "hero_subtitle": "Retrouvez tous vos hôtels et hébergements préférés",
+    "clear_all": "Tout supprimer",
+    "favorites_singular": "favori",
+    "favorites_plural": "favoris",
+    "no_favorites": "Vous n'avez pas encore de favoris",
+    "discover_hotels": "Découvrir des hôtels",
+    "remove_favorite": "Retirer des favoris",
+    "search_placeholder": "Rechercher un favori...",
+    "no_search_results": "Aucun favori ne correspond à votre recherche",
+    "clear_search": "Effacer la recherche"
+  },
+  "DiscoverPage": {
+    "meta_title": "Découvrir | Evadia",
+    "meta_description": "Explorez les plus belles destinations du monde avec Evadia. Trouvez l'inspiration pour vos prochains voyages.",
+    "meta_keywords": "découvrir, destinations, voyage, Evadia, inspirations"
+  },
+  "DiscoverClient": {
+    "loading": "Chargement...",
+    "hero_title": "Découvrir le monde",
+    "hero_subtitle": "Explorez les plus belles destinations et vivez des expériences uniques",
+    "section_title": "Rendez chaque voyage magique & mémorable",
+    "section_description": "Découvrez notre sélection des plus belles destinations du monde. Que vous soyez à la recherche d'aventure, de détente ou de culture, trouvez l'inspiration pour votre prochain voyage. Chaque destination a été soigneusement choisie pour vous offrir des expériences uniques et inoubliables.",
+    "search_placeholder": "Rechercher une destination...",
+    "no_results": "Aucune destination trouvée",
+    "clear_search": "Effacer la recherche",
+    "previous_page": "Page précédente",
+    "next_page": "Page suivante",
+    "results_singular": "destination trouvée",
+    "results_plural": "destinations trouvées"
   }
 }
