@@ -11,7 +11,7 @@ class Destination extends Model
     protected $table = 'destinations';
     public $timestamps = false;
 
-    protected $fillable = ['nom', 'description', 'created_at'];
+    protected $fillable = ['nom', 'description', 'image_url', 'created_at'];
 
     protected function casts(): array
     {

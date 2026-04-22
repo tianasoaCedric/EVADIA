@@ -26,6 +26,7 @@ class DestinationController extends Controller
             'id'           => $d->id,
             'nom'          => $d->nom,
             'description'  => $d->description,
+            'image_url'    => $d->image_url,
             'hotels_count' => $d->hotels_count,
         ]);
 

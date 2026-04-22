@@ -25,15 +25,22 @@ class TypesAndDestinationsSeeder extends Seeder
 
         // Destinations
         $destinations = [
-            ['nom' => 'Nord', 'description' => ''],
-            ['nom' => 'Sud', 'description' => ''],
-            ['nom' => 'Est', 'description' => ''],
-            ['nom' => 'Ouest', 'description' => ''],
-            ['nom' => 'Hautes terres centrales', 'description' => ''],
+            ['nom' => 'Nord',                   'description' => 'Nosy Be, Diego Suarez, Ambanja',    'image_url' => '/photos/destinations/nord.jpg'],
+            ['nom' => 'Sud',                     'description' => 'Tuléar, Fort Dauphin, Isalo',       'image_url' => '/photos/destinations/sud.jpg'],
+            ['nom' => 'Est',                     'description' => 'Tamatave, Île Sainte-Marie',         'image_url' => '/photos/destinations/est.jpg'],
+            ['nom' => 'Ouest',                   'description' => 'Morondava, Majunga, Allée des Baobabs', 'image_url' => '/photos/destinations/ouest.jpg'],
+            ['nom' => 'Hautes terres centrales', 'description' => 'Antananarivo, Antsirabe, Fianarantsoa', 'image_url' => '/photos/destinations/hautes-terres.jpg'],
         ];
 
         foreach ($destinations as $dest) {
-            \App\Models\Destination::firstOrCreate(['nom' => $dest['nom']], ['description' => $dest['description']]);
+            \App\Models\Destination::firstOrCreate(
+                ['nom' => $dest['nom']],
+                ['description' => $dest['description'], 'image_url' => $dest['image_url']]
+            );
+            // Mettre à jour image_url si la ligne existait déjà sans image
+            \App\Models\Destination::where('nom', $dest['nom'])
+                ->whereNull('image_url')
+                ->update(['image_url' => $dest['image_url']]);
         }
     }
 }

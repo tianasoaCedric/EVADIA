@@ -64,6 +64,7 @@ export interface Destination {
   id: number
   nom: string
   description?: string
+  image_url?: string | null
   hotels_count: number
 }
 

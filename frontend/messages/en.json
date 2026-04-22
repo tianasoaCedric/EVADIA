@@ -205,6 +205,7 @@
   },
   "DestinationClient": {
     "hero_title": "Dream destinations",
+    "hero_subtitle": "Discover the regions of Madagascar and their exceptional accommodation",
     "where_to_go": "Where do you want to go?",
     "our_selection": "Our selection of accommodation",
     "previous_hotels": "Scroll left",
@@ -291,7 +292,7 @@
     "hero_title": "{hotelName}",
     "hero_subtitle": "Exclusive offer -{discount}% for {destination}",
     "discount_badge": "discount",
-    "period_label": "Offer Period",
+    "period_label": "Offer period",
     "period_value": "from {startDay} to {endDay} {month}",
     "description_label": "Description of the offer",
     "contact_label": "For any reservation",
