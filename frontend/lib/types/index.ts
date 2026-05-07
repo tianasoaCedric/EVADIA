@@ -213,12 +213,13 @@ export interface Reservation {
 }
 
 export interface CreateReservationPayload {
-  chambre_id: number
+  propriete_id: number
   date_debut: string
   date_fin: string
   nb_adultes: number
   nb_enfants?: number
-  notes_client?: string
+  nb_bebes?: number
+  demande_speciale?: string
 }
 
 // ─── Favoris ──────────────────────────────────────────────────────────────────

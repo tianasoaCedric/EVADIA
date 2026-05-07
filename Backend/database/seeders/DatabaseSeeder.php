@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             RolesAndAdminSeeder::class,
             TypesAndDestinationsSeeder::class,
             EquipementSeeder::class,
+            TypesAvantagesSeeder::class,
+            PlansSeeder::class,
         ]);
     }
 }

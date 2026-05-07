@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { typeHotelService } from '@/lib/services'
+import { destinationService } from '@/lib/services'
+import { createSlug } from '@/lib/slug'
 
 interface MenuFullscreenProps {
     isOpen: boolean
@@ -16,40 +19,39 @@ interface MenuColumn {
 
 const MenuFullscreen = ({ isOpen, onClose, theme = 'light' }: MenuFullscreenProps) => {
     const [menuStructure, setMenuStructure] = useState<MenuColumn[]>([
-        {
-            title: 'Découvrir',
-            items: [
-                { label: 'Accueil', href: '/' },
-                { label: 'Notre histoire', href: '/about' },
-                { label: 'Blog', href: '/blog' },
-            ]
-        },
-        {
-            title: 'Services',
-            items: [
-                { label: 'Nos offres', href: '/services' },
-                { label: 'Tarifs', href: '/pricing' },
-                { label: 'FAQ', href: '/faq' },
-            ]
-        },
-        {
-            title: 'Contact',
-            items: [
-                { label: 'Nous contacter', href: '/contact' },
-                { label: 'Support', href: '/support' },
-                { label: 'Presse', href: '/press' },
-            ]
-        },
-        {
-            title: 'Légal',
-            items: [
-                { label: 'Mentions légales', href: '/legal' },
-                { label: 'Confidentialité', href: '/privacy' },
-                { label: 'CGU', href: '/terms' },
-            ]
-        }
+        { title: 'Hébergements', items: [] },
+        { title: 'Destinations',  items: [] },
+        { title: 'Offres',        items: [{ label: 'Toutes les offres', href: '/offre' }] },
+        { title: 'Découvrir',    items: [{ label: 'Découvrir Madagascar', href: '/decouvrir' }] },
     ])
-    
+
+    // Charger les types d'hôtels et destinations depuis l'API
+    useEffect(() => {
+        Promise.all([
+            typeHotelService.list(),
+            destinationService.list(),
+        ]).then(([types, destResponse]) => {
+            setMenuStructure([
+                {
+                    title: 'Hébergements',
+                    items: [
+                        { label: 'Tous les hébergements', href: '/hebergement' },
+                        ...types.map(t => ({ label: t.nom, href: `/hebergement/${createSlug(t.id, t.nom)}` })),
+                    ]
+                },
+                {
+                    title: 'Destinations',
+                    items: [
+                        { label: 'Toutes les destinations', href: '/destination' },
+                        ...destResponse.data.map(d => ({ label: d.nom, href: `/destination/${createSlug(d.id, d.nom)}` })),
+                    ]
+                },
+                { title: 'Offres',    items: [{ label: 'Toutes les offres', href: '/offre' }] },
+                { title: 'Découvrir', items: [{ label: 'Découvrir Madagascar', href: '/decouvrir' }] },
+            ])
+        }).catch(() => {})
+    }, [])
+
     // État pour les sections ouvertes/déroulées sur mobile
     const [openSections, setOpenSections] = useState<Record<string, boolean>>({})
 

@@ -78,7 +78,8 @@ export default function LoginClient() {
   }
 
   const handleGoogleLogin = () => {
-    console.log('Connexion avec Google')
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000/api'
+    window.location.href = `${apiUrl}/auth/google`
   }
 
   return (

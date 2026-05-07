@@ -202,6 +202,7 @@ export default function DestinationClient() {
                       hotelId={hotel.id}
                       availability="Disponible"
                       price={hotel.prix_min ?? 0}
+                      etoiles={hotel.etoiles ?? undefined}
                       rating={hotel.note_moyenne ?? 0}
                     />
                   </div>

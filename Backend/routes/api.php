@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Admin\HotelController;
 use App\Http\Controllers\Api\Admin\MessageController as AdminMessageController;
 use App\Http\Controllers\Api\Admin\OffreController as AdminOffreController;
 use App\Http\Controllers\Api\Admin\UserController;
+use App\Http\Controllers\Api\Auth\GoogleAuthController;
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\Auth\RegisterController;
 use App\Http\Controllers\Api\Client\AvisController;
@@ -33,6 +34,8 @@ Route::prefix('auth')->group(function () {
         ->middleware('throttle:register');
     Route::post('/login', [LoginController::class, 'login'])
         ->middleware('throttle:login');
+    Route::get('/google', [GoogleAuthController::class, 'redirect']);
+    Route::get('/google/callback', [GoogleAuthController::class, 'callback']);
 });
 
 // Navigation / discovery — accessibles sans compte (booking.com style)

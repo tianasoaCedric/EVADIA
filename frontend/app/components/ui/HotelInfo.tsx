@@ -8,6 +8,7 @@ import { useOnScreen } from '@/hooks/useOnScreen'
 interface HotelInfoProps {
   hotelName: string
   location: string
+  etoiles?: number
   rating: number
   reviewCount: number
   category: string
@@ -47,9 +48,10 @@ const defaultIncluded = [
   'Eau minérale offerte'
 ]
 
-export default function HotelInfo({ 
+export default function HotelInfo({
   hotelName,
   location,
+  etoiles,
   rating,
   reviewCount,
   category,
@@ -149,11 +151,21 @@ export default function HotelInfo({
                 <MapPin className="w-5 h-5 text-[#01BDA5]" />
                 <span>{location}</span>
               </div>
-              <div className="flex items-center gap-3">
-                {renderStars()}
-                <span className="text-sm font-medium text-gray-700">{rating.toFixed(1)}</span>
-                <span className="text-sm text-gray-500">({reviewCount} {t('reviews')})</span>
-              </div>
+              {etoiles !== undefined && etoiles > 0 && (
+                <div className="flex items-center gap-1 mb-1">
+                  {[...Array(etoiles)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-yellow-500 text-yellow-500" />
+                  ))}
+                  <span className="text-xs text-gray-400 ml-1">{t('official_classification')}</span>
+                </div>
+              )}
+              {rating > 0 && (
+                <div className="flex items-center gap-3">
+                  {renderStars()}
+                  <span className="text-sm font-medium text-gray-700">{rating.toFixed(1)}</span>
+                  <span className="text-sm text-gray-500">({reviewCount} {t('reviews')})</span>
+                </div>
+              )}
             </div>
 
             {/* Catégorie */}

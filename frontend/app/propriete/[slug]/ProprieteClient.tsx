@@ -98,7 +98,7 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
     try {
       const fmt = (d: Date) => d.toISOString().split('T')[0]
       await reservationService.create({
-        chambre_id: proprieteId,
+        propriete_id: proprieteId,
         date_debut: fmt(data.checkIn),
         date_fin: fmt(data.checkOut),
         nb_adultes: data.guests,

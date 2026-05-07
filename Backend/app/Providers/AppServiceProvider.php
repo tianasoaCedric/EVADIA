@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Avis;
+use App\Observers\AvisObserver;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -22,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Avis::observe(AvisObserver::class);
+
         RateLimiter::for('login', function (Request $request) {
             $key = $request->input('email', '') . '|' . $request->ip();
 

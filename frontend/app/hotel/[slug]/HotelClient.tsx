@@ -188,6 +188,7 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
           <HotelInfo
             hotelName={hotel?.nom ?? hotelName}
             location={location}
+            etoiles={hotel?.etoiles ?? undefined}
             rating={hotelData?.note_moyenne ?? 0}
             reviewCount={hotelData?.nb_avis ?? 0}
             category={category}

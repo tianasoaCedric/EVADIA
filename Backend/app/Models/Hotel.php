@@ -23,6 +23,8 @@ class Hotel extends Model
         'telephone',
         'site_web',
         'etoiles',
+        'note_moyenne',
+        'nb_avis',
         'devise_principale',
         'date_creation',
         'updated_at',
@@ -33,6 +35,8 @@ class Hotel extends Model
     {
         return [
             'etoiles' => 'integer',
+            'note_moyenne' => 'decimal:2',
+            'nb_avis' => 'integer',
             'date_creation' => 'datetime',
             'updated_at' => 'datetime',
         ];

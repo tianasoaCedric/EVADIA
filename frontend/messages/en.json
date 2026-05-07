@@ -132,7 +132,8 @@
     "included_label": "Included in accommodation",
     "equipments_label": "Equipment",
     "see_all": "Show all equipment",
-    "see_less": "See less"
+    "see_less": "See less",
+    "official_classification": "Official ranking"
   },
   "AvisClient": {
     "default_title": "Traveler reviews",
@@ -229,7 +230,7 @@
     "go_to_hotel": "Go to hotel {number}",
     "previous_popular": "Scroll left",
     "next_popular": "Scroll right",
-    "go_to_popular": "Go to hosting {number}"
+    "go_to_popular": "Go to accommodation {number}"
   },
   "CityPage": {
     "meta_title": "{name} | Evadia",
@@ -251,7 +252,7 @@
     "no_results": "No hotels found",
     "previous_popular": "Scroll left",
     "next_popular": "Scroll right",
-    "go_to_popular": "Go to hosting {number}",
+    "go_to_popular": "Go to accommodation {number}",
     "previous_page": "Previous page",
     "next_page": "Next page",
     "results_singular": "hotel found",

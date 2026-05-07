@@ -132,7 +132,8 @@
     "included_label": "Inclus dans le logement",
     "equipments_label": "Équipements",
     "see_all": "Afficher tout les équipements",
-    "see_less": "Voir moins"
+    "see_less": "Voir moins",
+    "official_classification": "Classement officiel"
   },
   "AvisClient": {
     "default_title": "Avis des voyageurs",
