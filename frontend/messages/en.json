@@ -228,7 +228,7 @@
     "go_to_hotel": "Go to hotel {number}",
     "previous_popular": "Scroll left",
     "next_popular": "Scroll right",
-    "go_to_popular": "Go to hosting {number}"
+    "go_to_popular": "Go to accommodation {number}"
   },
   "CityPage": {
     "meta_title": "{name} | Evadia",
@@ -250,7 +250,7 @@
     "no_results": "No hotels found",
     "previous_popular": "Scroll left",
     "next_popular": "Scroll right",
-    "go_to_popular": "Go to hosting {number}",
+    "go_to_popular": "Go to accommodation {number}",
     "previous_page": "Previous page",
     "next_page": "Next page",
     "results_singular": "hotel found",
@@ -291,7 +291,7 @@
     "hero_title": "{hotelName}",
     "hero_subtitle": "Exclusive offer -{discount}% for {destination}",
     "discount_badge": "discount",
-    "period_label": "Offer Period",
+    "period_label": "Offer period",
     "period_value": "from {startDay} to {endDay} {month}",
     "description_label": "Description of the offer",
     "contact_label": "For any reservation",
@@ -342,5 +342,14 @@
     "next_page": "Next page",
     "results_singular": "destination found",
     "results_plural": "destinations found"
+  },
+  "DiscoverArticlePage": {
+    "meta_title": "{name} | Evadia",
+    "meta_description": "Discover {name} with Evadia. A complete guide to preparing your trip."
+  },
+  "DiscoverArticleClient": {
+    "loading": "Loading...",
+    "not_found": "Item not found",
+    "back_button": "Back to discoveries"
   }
 }

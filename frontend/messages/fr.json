@@ -342,5 +342,14 @@
     "next_page": "Page suivante",
     "results_singular": "destination trouvée",
     "results_plural": "destinations trouvées"
+  },
+  "DiscoverArticlePage": {
+    "meta_title": "{name} | Evadia",
+    "meta_description": "Découvrez {name} avec Evadia. Un guide complet pour préparer votre voyage."
+  },
+  "DiscoverArticleClient": {
+    "loading": "Chargement...",
+    "not_found": "Article non trouvé",
+    "back_button": "Retour aux découvertes"
   }
 }

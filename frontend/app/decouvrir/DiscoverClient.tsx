@@ -7,6 +7,7 @@ import { useOnScreen } from '@/hooks/useOnScreen'
 import HeroSection from '../components/ui/HeroSection'
 import DiscoverCard from '../components/ui/DiscoverCard'
 import Input from '../components/ui/Input'
+import { createSlug } from '@/lib/slug'
 
 // Données mock des découvertes (à remplacer par appel API)
 const getDiscoverData = () => {
@@ -15,109 +16,109 @@ const getDiscoverData = () => {
       id: 1,
       imageUrl: '/photos/discover/paris.jpg',
       title: 'Paris, la ville lumière',
-      href: '/decouvertes/paris'
+      href: `/decouvrir/${createSlug(1, 'Paris-la-ville-lumiere')}`
     },
     {
       id: 2,
       imageUrl: '/photos/discover/kyoto.jpg',
       title: 'Kyoto, tradition et modernité',
-      href: '/decouvertes/kyoto'
+      href: `/decouvrir/${createSlug(2, 'Kyoto-tradition-et-modernite')}`
     },
     {
       id: 3,
       imageUrl: '/photos/discover/santorini.jpg',
       title: 'Santorini, île des amoureux',
-      href: '/decouvertes/santorini'
+      href: `/decouvrir/${createSlug(3, 'Santorini-ile-des-amoureux')}`
     },
     {
       id: 4,
       imageUrl: '/photos/discover/bali.jpg',
       title: 'Bali, l\'île des dieux',
-      href: '/decouvertes/bali'
+      href: `/decouvrir/${createSlug(4, 'Bali-l-ile-des-dieux')}`
     },
     {
       id: 5,
       imageUrl: '/photos/discover/rome.jpg',
       title: 'Rome, la cité éternelle',
-      href: '/decouvertes/rome'
+      href: `/decouvrir/${createSlug(5, 'Rome-la-cite-eternelle')}`
     },
     {
       id: 6,
       imageUrl: '/photos/discover/new-york.jpg',
       title: 'New York, la ville qui ne dort jamais',
-      href: '/decouvertes/new-york'
+      href: `/decouvrir/${createSlug(6, 'New-York-la-ville-qui-ne-dort-jamais')}`
     },
     {
       id: 7,
       imageUrl: '/photos/discover/tokyo.jpg',
       title: 'Tokyo, la ville du futur',
-      href: '/decouvertes/tokyo'
+      href: `/decouvrir/${createSlug(7, 'Tokyo-la-ville-du-futur')}`
     },
     {
       id: 8,
       imageUrl: '/photos/discover/londres.jpg',
       title: 'Londres, entre tradition et modernité',
-      href: '/decouvertes/londres'
+      href: `/decouvrir/${createSlug(8, 'Londres-entre-tradition-et-modernite')}`
     },
     {
       id: 9,
       imageUrl: '/photos/discover/dubai.jpg',
       title: 'Dubai, la ville des records',
-      href: '/decouvertes/dubai'
+      href: `/decouvrir/${createSlug(9, 'Dubai-la-ville-des-records')}`
     },
     {
       id: 10,
       imageUrl: '/photos/discover/venise.jpg',
       title: 'Venise, la cité des canaux',
-      href: '/decouvertes/venise'
+      href: `/decouvrir/${createSlug(10, 'Venise-la-cite-des-canaux')}`
     },
     {
       id: 11,
       imageUrl: '/photos/discover/barcelone.jpg',
       title: 'Barcelone, la ville de Gaudí',
-      href: '/decouvertes/barcelone'
+      href: `/decouvrir/${createSlug(11, 'Barcelone-la-ville-de-Gaudi')}`
     },
     {
       id: 12,
       imageUrl: '/photos/discover/amsterdam.jpg',
       title: 'Amsterdam, la Venise du Nord',
-      href: '/decouvertes/amsterdam'
+      href: `/decouvrir/${createSlug(12, 'Amsterdam-la-Venise-du-Nord')}`
     },
     {
       id: 13,
       imageUrl: '/photos/discover/prague.jpg',
       title: 'Prague, la ville aux cent clochers',
-      href: '/decouvertes/prague'
+      href: `/decouvrir/${createSlug(13, 'Prague-la-ville-aux-cent-clochers')}`
     },
     {
       id: 14,
       imageUrl: '/photos/discover/vienne.jpg',
       title: 'Vienne, la ville de la musique',
-      href: '/decouvertes/vienne'
+      href: `/decouvrir/${createSlug(14, 'Vienne-la-ville-de-la-musique')}`
     },
     {
       id: 15,
       imageUrl: '/photos/discover/berlin.jpg',
       title: 'Berlin, la ville de l\'histoire',
-      href: '/decouvertes/berlin'
+      href: `/decouvrir/${createSlug(15, 'Berlin-la-ville-de-l-histoire')}`
     },
     {
       id: 16,
       imageUrl: '/photos/discover/madrid.jpg',
       title: 'Madrid, la ville de l\'art',
-      href: '/decouvertes/madrid'
+      href: `/decouvrir/${createSlug(16, 'Madrid-la-ville-de-l-art')}`
     },
     {
       id: 17,
       imageUrl: '/photos/discover/lisbonne.jpg',
       title: 'Lisbonne, la ville des lumières',
-      href: '/decouvertes/lisbonne'
+      href: `/decouvrir/${createSlug(17, 'Lisbonne-la-ville-des-lumieres')}`
     },
     {
       id: 18,
       imageUrl: '/photos/discover/athenes.jpg',
       title: 'Athènes, le berceau de la civilisation',
-      href: '/decouvertes/athenes'
+      href: `/decouvrir/${createSlug(18, 'Athenes-le-berceau-de-la-civilisation')}`
     }
   ]
 }
