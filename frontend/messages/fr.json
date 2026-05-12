@@ -136,7 +136,15 @@
   },
   "AvisClient": {
     "default_title": "Avis des voyageurs",
-    "show_more": "Afficher plus d'avis"
+    "show_more": "Afficher plus d'avis",
+    "write_review": "Écrire un avis",
+    "cancel": "Annuler",
+    "write_review_title": "Partagez votre expérience.",
+    "rating_label": "Votre note",
+    "name_placeholder": "Votre nom",
+    "email_placeholder": "Votre email",
+    "review_placeholder": "Votre avis...",
+    "submit_button": "Publier mon avis"
   },
   "HotelPage": {
     "meta_title": "{hotelName} | Evadia",

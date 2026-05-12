@@ -8,6 +8,8 @@ import HeroSection from '../components/ui/HeroSection'
 import DiscoverCard from '../components/ui/DiscoverCard'
 import Input from '../components/ui/Input'
 import { createSlug } from '@/lib/slug'
+import AvisClient from '../components/ui/AvisClient'
+
 
 // Données mock des découvertes (à remplacer par appel API)
 const getDiscoverData = () => {
@@ -364,6 +366,7 @@ export default function DiscoverClient() {
               <div className="text-center mt-6 text-sm text-gray-500">
                 {filteredDiscoveries.length} {filteredDiscoveries.length > 1 ? t('results_plural') : t('results_singular')}
               </div>
+              <AvisClient />
             </>
           )}
         </div>

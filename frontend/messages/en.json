@@ -136,7 +136,15 @@
   },
   "AvisClient": {
     "default_title": "Traveler reviews",
-    "show_more": "Show more reviews"
+    "show_more": "Show more reviews",
+    "write_review": "Write a review",
+    "cancel": "Cancel",
+    "write_review_title": "Share your experience.",
+    "rating_label": "Your rating",
+    "name_placeholder": "Your name",
+    "email_placeholder": "Your email",
+    "review_placeholder": "Your opinion...",
+    "submit_button": "Publish my review"
   },
   "HotelPage": {
     "meta_title": "{hotelName} | Evadia",
@@ -228,7 +236,7 @@
     "go_to_hotel": "Go to hotel {number}",
     "previous_popular": "Scroll left",
     "next_popular": "Scroll right",
-    "go_to_popular": "Go to accommodation {number}"
+    "go_to_popular": "Go to hosting {number}"
   },
   "CityPage": {
     "meta_title": "{name} | Evadia",
@@ -250,7 +258,7 @@
     "no_results": "No hotels found",
     "previous_popular": "Scroll left",
     "next_popular": "Scroll right",
-    "go_to_popular": "Go to accommodation {number}",
+    "go_to_popular": "Go to hosting {number}",
     "previous_page": "Previous page",
     "next_page": "Next page",
     "results_singular": "hotel found",
