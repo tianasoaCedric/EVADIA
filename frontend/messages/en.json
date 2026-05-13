@@ -137,7 +137,15 @@
   },
   "AvisClient": {
     "default_title": "Traveler reviews",
-    "show_more": "Show more reviews"
+    "show_more": "Show more reviews",
+    "write_review": "Write a review",
+    "cancel": "Cancel",
+    "write_review_title": "Share your experience.",
+    "rating_label": "Your rating",
+    "name_placeholder": "Your name",
+    "email_placeholder": "Your email",
+    "review_placeholder": "Your opinion...",
+    "submit_button": "Publish my review"
   },
   "HotelPage": {
     "meta_title": "{hotelName} | Evadia",
@@ -344,5 +352,14 @@
     "next_page": "Next page",
     "results_singular": "destination found",
     "results_plural": "destinations found"
+  },
+  "DiscoverArticlePage": {
+    "meta_title": "{name} | Evadia",
+    "meta_description": "Discover {name} with Evadia. A complete guide to preparing your trip."
+  },
+  "DiscoverArticleClient": {
+    "loading": "Loading...",
+    "not_found": "Item not found",
+    "back_button": "Back to discoveries"
   }
 }

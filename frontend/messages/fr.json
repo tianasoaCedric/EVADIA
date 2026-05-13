@@ -137,7 +137,15 @@
   },
   "AvisClient": {
     "default_title": "Avis des voyageurs",
-    "show_more": "Afficher plus d'avis"
+    "show_more": "Afficher plus d'avis",
+    "write_review": "Écrire un avis",
+    "cancel": "Annuler",
+    "write_review_title": "Partagez votre expérience.",
+    "rating_label": "Votre note",
+    "name_placeholder": "Votre nom",
+    "email_placeholder": "Votre email",
+    "review_placeholder": "Votre avis...",
+    "submit_button": "Publier mon avis"
   },
   "HotelPage": {
     "meta_title": "{hotelName} | Evadia",
@@ -344,5 +352,14 @@
     "next_page": "Page suivante",
     "results_singular": "destination trouvée",
     "results_plural": "destinations trouvées"
+  },
+  "DiscoverArticlePage": {
+    "meta_title": "{name} | Evadia",
+    "meta_description": "Découvrez {name} avec Evadia. Un guide complet pour préparer votre voyage."
+  },
+  "DiscoverArticleClient": {
+    "loading": "Chargement...",
+    "not_found": "Article non trouvé",
+    "back_button": "Retour aux découvertes"
   }
 }
