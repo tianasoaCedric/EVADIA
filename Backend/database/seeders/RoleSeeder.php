@@ -32,10 +32,10 @@ class RoleSeeder extends Seeder
                 'description' => 'Gestion d\'un établissement hôtelier',
             ],
             [
-                'code' => 'clients',
+                'code' => 'client',
                 'nom' => 'Client',
                 'niveau' => 4,
-                'description' => 'Utilisateur client de la plateforme',
+                'description' => 'Utilisateur de la plateforme',
             ],
         ];
 
