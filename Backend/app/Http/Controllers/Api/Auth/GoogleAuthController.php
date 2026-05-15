@@ -7,20 +7,25 @@ use App\Models\AuthProvider;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 
 class GoogleAuthController extends Controller
 {
     public function redirect(): RedirectResponse
     {
-        return Socialite::driver('google')->stateless()->redirect();
+        /** @var \Laravel\Socialite\Two\AbstractProvider $driver */
+        $driver = Socialite::driver('google');
+        return $driver->stateless()->redirect();
     }
 
     public function callback(): RedirectResponse
     {
         try {
-            $googleUser = Socialite::driver('google')->stateless()->user();
-        } catch (\Throwable $e) {
+            /** @var \Laravel\Socialite\Two\AbstractProvider $driver */
+            $driver = Socialite::driver('google');
+            $googleUser = $driver->stateless()->user();
+        } catch (\Throwable) {
             $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
             return redirect("{$frontendUrl}/login?error=google_failed");
         }
@@ -53,12 +58,16 @@ class GoogleAuthController extends Controller
                     'updated_at'     => now(),
                 ]);
 
-                $clientRole = Role::where('code', 'clients')->first();
+                $clientRole = Role::where('code', 'client')->first();
                 if ($clientRole) {
                     $user->roles()->attach($clientRole->id, [
                         'est_actif'   => true,
                         'assigned_at' => now(),
                     ]);
+                } else {
+                    Log::error('GoogleAuth: rôle "clients" introuvable en DB — seeder manquant ?');
+                    $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+                    return redirect("{$frontendUrl}/login?error=role_missing");
                 }
             }
 

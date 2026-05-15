@@ -29,7 +29,7 @@ export default function AuthCallbackPage() {
 
     authService.me()
       .then(({ user }) => {
-        const isClient = user.roles?.some((r: { code: string }) => r.code === 'clients')
+        const isClient = user.roles?.some((r: { code: string }) => r.code === 'client')
         if (!isClient) {
           localStorage.removeItem('evadia_token')
           router.push('/login?error=not_client')

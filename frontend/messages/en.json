@@ -238,7 +238,7 @@
     "go_to_hotel": "Go to hotel {number}",
     "previous_popular": "Scroll left",
     "next_popular": "Scroll right",
-    "go_to_popular": "Go to accommodation {number}"
+    "go_to_popular": "Go to hosting {number}"
   },
   "CityPage": {
     "meta_title": "{name} | Evadia",
@@ -260,7 +260,7 @@
     "no_results": "No hotels found",
     "previous_popular": "Scroll left",
     "next_popular": "Scroll right",
-    "go_to_popular": "Go to accommodation {number}",
+    "go_to_popular": "Go to hosting {number}",
     "previous_page": "Previous page",
     "next_page": "Next page",
     "results_singular": "hotel found",

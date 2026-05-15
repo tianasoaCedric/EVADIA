@@ -88,7 +88,7 @@ class RegisterController extends Controller
             'telephone' => $request->telephone,
         ]);
 
-        $clientRole = Role::where('code', 'clients')->first();
+        $clientRole = Role::where('code', 'client')->first();
         if ($clientRole) {
             $user->roles()->attach($clientRole->id, [
                 'est_actif' => true,

@@ -48,7 +48,7 @@ if not exist "public\build\manifest.json" (
 
 echo.
 :: Demarrage de Redis
-set "REDIS_PATH=D:\Telechargements\Compressed\Redis-x64-5.0.14.1\redis-server.exe"
+set "REDIS_PATH=D:\Telechargements\Redis-8.6.3-Windows-x64-cygwin\Redis-8.6.3-Windows-x64-cygwin\redis-server.exe"
 if exist "%REDIS_PATH%" (
     echo [1/5] Demarrage de Redis...
     start "EVADIA - Redis" cmd /k ""%REDIS_PATH%""
