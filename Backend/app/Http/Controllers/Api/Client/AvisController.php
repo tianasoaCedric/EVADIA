@@ -42,6 +42,17 @@ class AvisController extends Controller
             new OA\Response(response: 401, description: 'Non authentifié'),
         ]
     )]
+    public function byHotel(int $hotelId): JsonResponse
+    {
+        $avis = Avis::with(['client:id,prenom,nom,photo_profil', 'propriete:id,nom'])
+            ->whereHas('propriete', fn($q) => $q->where('hotel_id', $hotelId))
+            ->where('signale_abus', false)
+            ->latest('date_avis')
+            ->get();
+
+        return response()->json(['data' => $avis]);
+    }
+
     public function index(): JsonResponse
     {
         $avis = Avis::with(['propriete.hotel'])

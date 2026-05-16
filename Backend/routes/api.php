@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\Client\FavoriController;
 use App\Http\Controllers\Api\Client\HotelController as ClientHotelController;
 use App\Http\Controllers\Api\Client\ProfileController;
 use App\Http\Controllers\Api\Client\ReservationController as ClientReservationController;
+use App\Http\Controllers\Api\Public\DecouverteController;
 use App\Http\Controllers\Api\Public\DestinationController;
 use App\Http\Controllers\Api\Public\ProprieteController as PublicProprieteController;
 use App\Http\Controllers\Api\Public\TypeHotelController;
@@ -44,6 +45,9 @@ Route::get('/hotels/{id}', [ClientHotelController::class, 'show']);
 Route::get('/destinations', [DestinationController::class, 'index']);
 Route::get('/types-hotels', [TypeHotelController::class, 'index']);
 Route::get('/proprietes/{id}', [PublicProprieteController::class, 'show']);
+Route::get('/hotels/{id}/reviews', [AvisController::class, 'byHotel']);
+Route::get('/decouverte/villes', [DecouverteController::class, 'villes']);
+Route::get('/decouverte/villes/{slug}/lieux', [DecouverteController::class, 'lieux']);
 
 // ============================================================
 // Routes authentifiées (token Sanctum requis)
@@ -142,6 +146,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('reservations', [ClientReservationController::class, 'store']);
         Route::get('reservations/{id}', [ClientReservationController::class, 'show']);
         Route::patch('reservations/{id}/cancel', [ClientReservationController::class, 'cancel']);
+        Route::get('promo/{code}', [ClientReservationController::class, 'verifierPromo']);
 
         // Favoris
         Route::get('favorites', [FavoriController::class, 'index']);

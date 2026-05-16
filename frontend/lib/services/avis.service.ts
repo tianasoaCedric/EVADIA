@@ -1,7 +1,15 @@
 import { apiClient } from '@/lib/api-client'
-import type { Avis, CreateAvisPayload, PaginatedResponse } from '@/lib/types'
+import type { Avis, AvisPublic, CreateAvisPayload, PaginatedResponse } from '@/lib/types'
 
 export const avisService = {
+  /**
+   * Avis publics d'un hôtel
+   * GET /hotels/{id}/reviews
+   */
+  listByHotel(hotelId: number): Promise<{ data: AvisPublic[] }> {
+    return apiClient.get<{ data: AvisPublic[] }>(`/hotels/${hotelId}/reviews`)
+  },
+
   /**
    * Liste des avis du client connecté
    * GET /client/reviews

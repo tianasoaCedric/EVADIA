@@ -207,17 +207,16 @@
                             <span x-show="!sidebarOpen" class="sidebar-tooltip">Abonnements</span>
                         </a>
 
-                        <a href="{{ route('admin.offers.index') }}"
-                            class="sidebar-link group {{ request()->routeIs('admin.offers.*') ? 'active' : '' }}">
-                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg {{ request()->routeIs('admin.offers.*') ? 'bg-rose-500/20 text-rose-400' : 'text-white/50 group-hover:text-white/80' }} transition-colors">
+                        <a href="{{ route('admin.decouverte.villes.index') }}"
+                            class="sidebar-link group {{ request()->routeIs('admin.decouverte.*') ? 'active' : '' }}">
+                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg {{ request()->routeIs('admin.decouverte.*') ? 'bg-teal-500/20 text-teal-400' : 'text-white/50 group-hover:text-white/80' }} transition-colors">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+                                        d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
                                 </svg>
                             </div>
-                            <span x-show="sidebarOpen">Offres</span>
-                            <span x-show="!sidebarOpen" class="sidebar-tooltip">Offres</span>
+                            <span x-show="sidebarOpen">Contenu Découverte</span>
+                            <span x-show="!sidebarOpen" class="sidebar-tooltip">Contenu Découverte</span>
                         </a>
                     </div>
                 </div>

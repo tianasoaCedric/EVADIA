@@ -152,22 +152,27 @@
             {{-- Step 4: Price --}}
             <div x-show="step === 4" x-cloak class="bg-white rounded-xl border border-gray-200 p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Prix initial</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-md">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-lg">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Prix par nuit *</label>
-                        <input type="number" step="0.01" name="prix" value="{{ old('prix') }}" required min="0"
-                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-hotel-500 focus:ring-hotel-500">
-                        @error('prix') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Prix par nuit (MGA) *</label>
+                        <div class="relative">
+                            <input type="number" step="1" name="prix_mga" value="{{ old('prix_mga') }}" required min="0"
+                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 pr-12 text-sm focus:border-hotel-500 focus:ring-hotel-500">
+                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">Ar</span>
+                        </div>
+                        @error('prix_mga') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Devise *</label>
-                        <input type="text" name="devise" value="{{ old('devise', $hotel->devise_principale ?? 'EUR') }}"
-                            required maxlength="3"
-                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-hotel-500 focus:ring-hotel-500">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Prix par nuit (EUR) *</label>
+                        <div class="relative">
+                            <input type="number" step="0.01" name="prix_eur" value="{{ old('prix_eur') }}" required min="0"
+                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 pr-8 text-sm focus:border-hotel-500 focus:ring-hotel-500">
+                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">€</span>
+                        </div>
+                        @error('prix_eur') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                 </div>
-                <p class="text-xs text-gray-400 mt-2">Ce prix sera le prix de base, modifiable ensuite via le module Prix.
-                </p>
+                <p class="text-xs text-gray-400 mt-2">Ces prix seront les prix de base, modifiables ensuite via le module Prix.</p>
                 <div class="mt-6 flex justify-between">
                     <button type="button" @click="step = 3" class="text-sm text-gray-500 hover:text-gray-700">←
                         Retour</button>

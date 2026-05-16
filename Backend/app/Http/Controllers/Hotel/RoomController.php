@@ -57,8 +57,8 @@ class RoomController extends Controller
             'equipements.*.quantite' => 'integer|min:1',
             'photos' => 'nullable|array',
             'photos.*' => 'image|max:5120',
-            'prix' => 'required|numeric|min:0',
-            'devise' => 'required|size:3',
+            'prix_mga' => 'required|numeric|min:0',
+            'prix_eur' => 'required|numeric|min:0',
         ]);
 
         DB::transaction(function () use ($request) {
@@ -112,10 +112,12 @@ class RoomController extends Controller
             // Initial price
             ProprietePrix::create([
                 'propriete_id' => $propriete->id,
-                'prix' => $request->prix,
-                'devise' => $request->devise,
-                'date_debut' => now(),
-                'changed_by' => auth()->id(),
+                'prix'         => $request->prix_mga,
+                'devise'       => 'MGA',
+                'prix_mga'     => $request->prix_mga,
+                'prix_eur'     => $request->prix_eur ?: null,
+                'date_debut'   => now(),
+                'changed_by'   => $request->user()->id,
             ]);
 
             $this->logAction('room_created', "Chambre {$propriete->nom} créée");

@@ -325,7 +325,7 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
 
         {/* Avis des voyageurs */}
         <div className="py-4">
-          <AvisClient />
+          <AvisClient hotelId={hotelId} />
         </div>
       </div>
     </main>

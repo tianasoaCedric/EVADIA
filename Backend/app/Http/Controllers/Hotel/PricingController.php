@@ -25,32 +25,32 @@ class PricingController extends Controller
         return view('hotel.pricing.index', compact('proprietes', 'hotel'));
     }
 
-    public function updatePrice(Request $request, $id)
+    public function updatePrice(Request $request, int $id)
     {
         $hotel = $this->getHotel();
         $propriete = Propriete::where('id', $id)->where('hotel_id', $hotel->id)->firstOrFail();
 
         $request->validate([
-            'prix' => 'required|numeric|min:0',
-            'devise' => 'required|size:3',
-            'raison' => 'nullable|string|max:255',
+            'prix_mga' => 'required|numeric|min:0',
+            'prix_eur' => 'required|numeric|min:0',
+            'raison'   => 'nullable|string|max:255',
         ]);
 
         DB::transaction(function () use ($propriete, $request) {
-            // Close current price
             $propriete->prix()->whereNull('date_fin')->update(['date_fin' => now()]);
 
-            // Create new price
             ProprietePrix::create([
                 'propriete_id' => $propriete->id,
-                'prix' => $request->prix,
-                'devise' => $request->devise,
-                'date_debut' => now(),
-                'raison' => $request->raison,
-                'changed_by' => auth()->id(),
+                'prix'         => $request->prix_mga,
+                'devise'       => 'MGA',
+                'prix_mga'     => $request->prix_mga,
+                'prix_eur'     => $request->prix_eur ?: null,
+                'date_debut'   => now(),
+                'raison'       => $request->raison,
+                'changed_by'   => $request->user()->id,
             ]);
 
-            $this->logAction('price_updated', "Prix de {$propriete->nom} : {$request->prix} {$request->devise}");
+            $this->logAction('price_updated', "Prix de {$propriete->nom} : {$request->prix_mga} MGA" . ($request->prix_eur ? " / {$request->prix_eur} EUR" : ''));
         });
 
         return back()->with('success', 'Prix mis à jour avec succès.');

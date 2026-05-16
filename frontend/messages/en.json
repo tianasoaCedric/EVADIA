@@ -142,10 +142,15 @@
     "cancel": "Cancel",
     "write_review_title": "Share your experience.",
     "rating_label": "Your rating",
-    "name_placeholder": "Your name",
-    "email_placeholder": "Your email",
     "review_placeholder": "Your opinion...",
-    "submit_button": "Publish my review"
+    "submit_button": "Publish my review",
+    "submit_success": "Your review has been successfully published. THANKS !",
+    "submit_error": "An error has occurred. Please try again.",
+    "no_reviews": "No reviews at the moment. Be the first to share your experience!",
+    "no_eligible_reservation": "You do not have a completed stay at this establishment. Only guests who have stayed here can leave a review.",
+    "select_reservation": "Select your stay",
+    "hotel_reply": "Response from the establishment",
+    "anonymous": "Anonymous traveler"
   },
   "HotelPage": {
     "meta_title": "{hotelName} | Evadia",
@@ -238,7 +243,7 @@
     "go_to_hotel": "Go to hotel {number}",
     "previous_popular": "Scroll left",
     "next_popular": "Scroll right",
-    "go_to_popular": "Go to hosting {number}"
+    "go_to_popular": "Go to accommodation {number}"
   },
   "CityPage": {
     "meta_title": "{name} | Evadia",
@@ -260,7 +265,7 @@
     "no_results": "No hotels found",
     "previous_popular": "Scroll left",
     "next_popular": "Scroll right",
-    "go_to_popular": "Go to hosting {number}",
+    "go_to_popular": "Go to accommodation {number}",
     "previous_page": "Previous page",
     "next_page": "Next page",
     "results_singular": "hotel found",
@@ -301,7 +306,7 @@
     "hero_title": "{hotelName}",
     "hero_subtitle": "Exclusive offer -{discount}% for {destination}",
     "discount_badge": "discount",
-    "period_label": "Offer period",
+    "period_label": "Offer Period",
     "period_value": "from {startDay} to {endDay} {month}",
     "description_label": "Description of the offer",
     "contact_label": "For any reservation",
@@ -346,7 +351,7 @@
     "section_title": "Make every trip magical & memorable",
     "section_description": "Discover our selection of the most beautiful destinations in the world. Whether you're looking for adventure, relaxation or culture, find inspiration for your next trip. Each destination has been carefully chosen to offer you unique and unforgettable experiences.",
     "search_placeholder": "Search for a destination...",
-    "no_results": "No destination found",
+    "no_results": "No destinations found",
     "clear_search": "Clear search",
     "previous_page": "Previous page",
     "next_page": "Next page",

@@ -197,18 +197,24 @@ export type StatutReservation = 'en_attente' | 'confirmee' | 'annulee' | 'termin
 
 export interface Reservation {
   id: number
-  hotel_id: number
-  chambre_id: number
+  hotel_id?: number
+  chambre_id?: number
   date_debut: string
   date_fin: string
   nb_adultes: number
   nb_enfants: number
   statut: StatutReservation
-  montant_total: number
-  devise: string
+  montant_total?: number
+  prix_total?: number
+  devise?: string
   notes_client?: string
   hotel?: Hotel
   chambre?: Chambre
+  propriete?: {
+    id: number
+    nom: string
+    hotel?: Pick<Hotel, 'id' | 'nom'>
+  }
   created_at: string
 }
 
@@ -244,6 +250,24 @@ export interface Avis {
   hotel?: Pick<Hotel, 'id' | 'nom'>
 }
 
+export interface AvisPublic {
+  id: number
+  note: number
+  commentaire: string
+  reponse_hotel?: string
+  date_avis: string
+  client?: {
+    id: number
+    prenom: string
+    nom: string
+    photo_profil?: string
+  }
+  propriete?: {
+    id: number
+    nom: string
+  }
+}
+
 export interface CreateAvisPayload {
   reservation_id: number
   note: number
@@ -264,4 +288,29 @@ export interface UpdatePasswordPayload {
   current_password: string
   password: string
   password_confirmation: string
+}
+
+// ─── Découverte ───────────────────────────────────────────────────────────────
+
+export interface VilleDecouverte {
+  id: number
+  nom: string
+  slug: string
+  image: string | null
+  ordre: number
+  actif: boolean
+  lieux_count?: number
+}
+
+export interface LieuDecouverte {
+  id: number
+  ville_id: number
+  nom: string
+  slug: string
+  description: string | null
+  emplacement: string | null
+  images: string[] | null
+  position_image: 'left' | 'right'
+  ordre: number
+  actif: boolean
 }

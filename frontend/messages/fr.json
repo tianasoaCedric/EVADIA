@@ -142,10 +142,15 @@
     "cancel": "Annuler",
     "write_review_title": "Partagez votre expérience.",
     "rating_label": "Votre note",
-    "name_placeholder": "Votre nom",
-    "email_placeholder": "Votre email",
     "review_placeholder": "Votre avis...",
-    "submit_button": "Publier mon avis"
+    "submit_button": "Publier mon avis",
+    "submit_success": "Votre avis a été publié avec succès. Merci !",
+    "submit_error": "Une erreur est survenue. Veuillez réessayer.",
+    "no_reviews": "Aucun avis pour le moment. Soyez le premier à partager votre expérience !",
+    "no_eligible_reservation": "Vous n'avez pas de séjour terminé dans cet établissement. Seuls les clients ayant séjourné ici peuvent laisser un avis.",
+    "select_reservation": "Sélectionner votre séjour",
+    "hotel_reply": "Réponse de l'établissement",
+    "anonymous": "Voyageur anonyme"
   },
   "HotelPage": {
     "meta_title": "{hotelName} | Evadia",

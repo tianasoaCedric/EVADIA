@@ -4,7 +4,7 @@
 @section('page_title', 'Gestion des prix')
 
 @section('content')
-<div class="space-y-6" x-data="{ priceModal: false, selectedPropriete: null, selectedPrix: '', selectedDevise: 'EUR' }">
+<div class="space-y-6" x-data="{ priceModal: false, selectedPropriete: null, selectedMga: '', selectedEur: '' }">
     {{-- Header --}}
     <div class="flex items-center justify-between">
         <p class="text-sm text-gray-500">Gérez les prix de vos propriétés</p>
@@ -20,10 +20,11 @@
                 <tr>
                     <th class="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">Propriété</th>
                     <th class="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">Type</th>
-                    <th class="text-right py-3 px-4 text-xs font-medium text-gray-500 uppercase">Prix actuel / nuit</th>
+                    <th class="text-right py-3 px-4 text-xs font-medium text-gray-500 uppercase">Prix actuel / nuit (MGA)</th>
+                    <th class="text-right py-3 px-4 text-xs font-medium text-gray-500 uppercase">EUR</th>
                     <th class="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">Depuis le</th>
                     <th class="text-center py-3 px-4 text-xs font-medium text-gray-500 uppercase">Historique</th>
-                    <th class="text-right py-3 px-4 text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    <th class="text-right py-3 px-4 text-xs font-medium text-gray-500 uppercase" colspan="2">Actions</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -33,10 +34,18 @@
                         <td class="py-3 px-4 text-gray-600">{{ ucfirst($propriete->type_propriete) }}</td>
                         <td class="py-3 px-4 text-right">
                             @if($propriete->currentPrix)
-                                <span class="text-lg font-bold text-gray-900">{{ number_format($propriete->currentPrix->prix, 0, ',', ' ') }}</span>
-                                <span class="text-xs text-gray-500">{{ $propriete->currentPrix->devise }}</span>
+                                <span class="text-lg font-bold text-gray-900">{{ number_format($propriete->currentPrix->prix_mga, 0, ',', ' ') }}</span>
+                                <span class="text-xs text-gray-500">Ar</span>
                             @else
                                 <span class="text-gray-400">Non défini</span>
+                            @endif
+                        </td>
+                        <td class="py-3 px-4 text-right">
+                            @if($propriete->currentPrix?->prix_eur)
+                                <span class="font-medium text-gray-700">{{ number_format($propriete->currentPrix->prix_eur, 2, ',', ' ') }}</span>
+                                <span class="text-xs text-gray-500">€</span>
+                            @else
+                                <span class="text-xs text-gray-400">—</span>
                             @endif
                         </td>
                         <td class="py-3 px-4 text-gray-500 text-xs">{{ $propriete->currentPrix?->date_debut?->format('d/m/Y') }}</td>
@@ -49,8 +58,8 @@
                                 <span class="text-xs text-gray-400">-</span>
                             @endif
                         </td>
-                        <td class="py-3 px-4 text-right">
-                            <button @click="selectedPropriete = {{ $propriete->id }}; selectedPrix = '{{ $propriete->currentPrix?->prix ?? '' }}'; selectedDevise = '{{ $propriete->currentPrix?->devise ?? 'EUR' }}'; priceModal = true"
+                        <td class="py-3 px-4 text-right" colspan="2">
+                            <button @click="selectedPropriete = {{ $propriete->id }}; selectedMga = '{{ $propriete->currentPrix?->prix_mga ?? '' }}'; selectedEur = '{{ $propriete->currentPrix?->prix_eur ?? '' }}'; priceModal = true"
                                 class="text-hotel-600 hover:text-hotel-700 text-sm font-medium">Modifier</button>
                         </td>
                     </tr>
@@ -62,9 +71,12 @@
                                     @foreach($propriete->prix->skip(1) as $prix)
                                         <div class="flex items-center gap-4 text-xs">
                                             <span class="text-gray-500">{{ $prix->date_debut?->format('d/m/Y') }} - {{ $prix->date_fin?->format('d/m/Y') ?? 'actuel' }}</span>
-                                            <span class="font-medium text-gray-700">{{ number_format($prix->prix, 0, ',', ' ') }} {{ $prix->devise }}</span>
+                                            <span class="font-medium text-gray-700">{{ number_format($prix->prix_mga, 0, ',', ' ') }} Ar</span>
+                                            @if($prix->prix_eur)
+                                                <span class="text-gray-500">/ {{ number_format($prix->prix_eur, 2, ',', ' ') }} €</span>
+                                            @endif
                                             @if($prix->raison)
-                                                <span class="text-gray-400">{{ $prix->raison }}</span>
+                                                <span class="text-gray-400">· {{ $prix->raison }}</span>
                                             @endif
                                         </div>
                                     @endforeach
@@ -89,14 +101,20 @@
                 @csrf
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nouveau prix / nuit *</label>
-                        <input type="number" name="prix" x-model="selectedPrix" step="0.01" min="0" required
-                            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-hotel-500 focus:ring-hotel-500">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Prix / nuit en Ariary (MGA) *</label>
+                        <div class="relative">
+                            <input type="number" name="prix_mga" x-model="selectedMga" step="1" min="0" required
+                                class="w-full rounded-lg border border-gray-300 px-3 py-2 pr-12 text-sm focus:border-hotel-500 focus:ring-hotel-500">
+                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">Ar</span>
+                        </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Devise *</label>
-                        <input type="text" name="devise" x-model="selectedDevise" maxlength="3" required
-                            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-hotel-500 focus:ring-hotel-500 uppercase" placeholder="EUR">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Prix / nuit en Euros (EUR) *</label>
+                        <div class="relative">
+                            <input type="number" name="prix_eur" x-model="selectedEur" step="0.01" min="0" required
+                                class="w-full rounded-lg border border-gray-300 px-3 py-2 pr-8 text-sm focus:border-hotel-500 focus:ring-hotel-500">
+                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">€</span>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Raison du changement</label>

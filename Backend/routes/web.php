@@ -6,7 +6,8 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\HotelController;
 use App\Http\Controllers\Admin\HotelPhotoController;
 use App\Http\Controllers\Admin\AbonnementController;
-use App\Http\Controllers\Admin\OffreController;
+use App\Http\Controllers\Admin\VilleDecouverteController;
+use App\Http\Controllers\Admin\LieuDecouverteController;
 use App\Http\Controllers\Admin\MessageController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Hotel\PasswordController;
@@ -74,12 +75,16 @@ Route::middleware(['auth', 'role:super_admin,admin_evadia'])
             'subscriptions' => 'subscription',
         ]);
 
-        // Offers (Offres)
-        Route::resource('offers', OffreController::class)->parameters([
-            'offers' => 'offer',
-        ]);
-        Route::patch('offers/{offer}/toggle', [OffreController::class, 'toggle'])->name('offers.toggle');
-        Route::get('offers/generate-promo-code', [OffreController::class, 'generatePromoCode'])->name('offers.generate-promo');
+        // Contenu Découverte
+        Route::resource('decouverte/villes', VilleDecouverteController::class)->parameters([
+            'villes' => 'ville',
+        ])->names('decouverte.villes');
+        Route::patch('decouverte/villes/{ville}/toggle', [VilleDecouverteController::class, 'toggle'])->name('decouverte.villes.toggle');
+
+        Route::resource('decouverte/villes/{ville}/lieux', LieuDecouverteController::class)->parameters([
+            'lieux' => 'lieu',
+        ])->names('decouverte.villes.lieux');
+        Route::patch('decouverte/villes/{ville}/lieux/{lieu}/toggle', [LieuDecouverteController::class, 'toggle'])->name('decouverte.villes.lieux.toggle');
 
         // Messages
         Route::get('messages', [MessageController::class, 'index'])->name('messages.index');
