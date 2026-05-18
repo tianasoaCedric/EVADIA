@@ -191,16 +191,16 @@ const CardHotel = ({
         <button
           onClick={handleFavoriteClick}
           className={`
-            absolute top-2 right-2 sm:top-3 sm:right-3 p-1.5 sm:p-2 rounded-full cursor-pointer
-            bg-white/80 backdrop-blur-sm shadow-md
+            absolute top-2 right-2 sm:top-3 sm:right-3 p-1.5 sm:p-2rounded-full cursor-pointer
+            
             transition-all duration-200 hover:scale-110
-            ${isFavorite ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}
+            ${isFavorite ? 'text-red-500' : 'text-gray-300 hover:text-red-400'}
           `}
           aria-label={isFavorite ? t('remove_favorite') : t('add_favorite')}
         >
           <svg
-            className="w-4 h-4 sm:w-5 sm:h-5"
-            fill={isFavorite ? 'currentColor' : 'none'}
+            className="w-6 h-6 sm:w-8 sm:h-8"
+            fill={isFavorite ? 'currentColor' : 'currentColor'}
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
