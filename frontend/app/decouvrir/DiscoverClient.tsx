@@ -7,7 +7,6 @@ import { useOnScreen } from '@/hooks/useOnScreen'
 import HeroSection from '../components/ui/HeroSection'
 import DiscoverCard from '../components/ui/DiscoverCard'
 import Input from '../components/ui/Input'
-import AvisClient from '../components/ui/AvisClient'
 import { decouverteService } from '@/lib/services'
 import type { VilleDecouverte } from '@/lib/types'
 
@@ -187,7 +186,6 @@ export default function DiscoverClient() {
               <div className="text-center mt-6 text-sm text-gray-500">
                 {filtered.length} {filtered.length > 1 ? t('results_plural') : t('results_singular')}
               </div>
-              <AvisClient />
             </>
           )}
         </div>
