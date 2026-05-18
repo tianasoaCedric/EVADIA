@@ -366,5 +366,28 @@
     "loading": "Chargement...",
     "not_found": "Article non trouvé",
     "back_button": "Retour aux découvertes"
+  },
+  "ContactPopup": {
+    "title": "Prendre contact",
+    "subtitle": "Nous serions ravis de vous entendre !",
+    "name_placeholder": "Votre nom",
+    "email_placeholder": "Votre email",
+    "phone_placeholder": "Votre numéro de téléphone",
+    "message_placeholder": "Écrivez quelque chose...",
+    "send_button": "Envoyer le message",
+    "contact_info_title": "Informations de contact",
+    "email_label": "Email:",
+    "phone_label": "Téléphone:",
+    "address_label": "Adresse:",
+    "follow_us": "Suivez-nous",
+    "close": "Fermer"
+  },
+  "Avatar": {
+    "my_profile": "Mon profil",
+    "my_bookings": "Mes réservations",
+    "currency": "Devise",
+    "my_favorites": "Vos favoris",
+    "logout": "Se déconnecter",
+    "logging_out": "Déconnexion..."
   }
 }

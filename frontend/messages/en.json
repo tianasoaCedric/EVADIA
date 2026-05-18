@@ -243,7 +243,7 @@
     "go_to_hotel": "Go to hotel {number}",
     "previous_popular": "Scroll left",
     "next_popular": "Scroll right",
-    "go_to_popular": "Go to accommodation {number}"
+    "go_to_popular": "Go to hosting {number}"
   },
   "CityPage": {
     "meta_title": "{name} | Evadia",
@@ -265,7 +265,7 @@
     "no_results": "No hotels found",
     "previous_popular": "Scroll left",
     "next_popular": "Scroll right",
-    "go_to_popular": "Go to accommodation {number}",
+    "go_to_popular": "Go to hosting {number}",
     "previous_page": "Previous page",
     "next_page": "Next page",
     "results_singular": "hotel found",
@@ -366,5 +366,28 @@
     "loading": "Loading...",
     "not_found": "Item not found",
     "back_button": "Back to discoveries"
+  },
+  "ContactPopup": {
+    "title": "Get in touch",
+    "subtitle": "We would love to hear from you!",
+    "name_placeholder": "Your Name",
+    "email_placeholder": "Email address",
+    "phone_placeholder": "Phone number",
+    "message_placeholder": "Write something...",
+    "send_button": "Send Message",
+    "contact_info_title": "Contact Info",
+    "email_label": "E-mail:",
+    "phone_label": "Phone:",
+    "address_label": "Address:",
+    "follow_us": "Follow us",
+    "close": "Close"
+  },
+  "Avatar": {
+    "my_profile": "My profile",
+    "my_bookings": "My reservations",
+    "currency": "Currency",
+    "my_favorites": "Your favorites",
+    "logout": "Log out",
+    "logging_out": "Disconnect..."
   }
 }

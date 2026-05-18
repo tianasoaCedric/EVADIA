@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { LogOut, User, CalendarDays } from 'lucide-react'
+import { LogOut, User, CalendarDays, DollarSign, ChevronDown, Heart } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { authService } from '@/lib/services'
 import { tokenStorage } from '@/lib/api-client'
 import type { User as UserType } from '@/lib/types'
@@ -12,6 +13,7 @@ interface AvatarProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   variant?: 'default' | 'dark'
   className?: string
+  onDeviseChange?: (devise: string) => void
 }
 
 const sizeStyles = {
@@ -27,14 +29,31 @@ const variantStyles = {
   dark:    { bg: 'bg-gray-100 border border-gray-200',  text: 'text-gray-800' },
 }
 
-const Avatar = ({ size = 'md', variant = 'default', className = '' }: AvatarProps) => {
+// Liste des devises disponibles
+const devises = [
+  { code: 'EUR', name: 'Euro' },
+  { code: 'MGA', name: 'Ariary' },
+]
+
+const Avatar = ({ size = 'md', variant = 'default', className = '', onDeviseChange }: AvatarProps) => {
   const router = useRouter()
+  const t = useTranslations('Avatar')
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const [user, setUser] = useState<UserType | null>(null)
   const [imageError, setImageError] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [deviseOpen, setDeviseOpen] = useState(false)
+  const [selectedDevise, setSelectedDevise] = useState('EUR')
+
+  // Charger la devise depuis localStorage
+  useEffect(() => {
+    const savedDevise = localStorage.getItem('selectedDevise')
+    if (savedDevise) {
+      setSelectedDevise(savedDevise)
+    }
+  }, [])
 
   // Charger l'utilisateur connecté
   useEffect(() => {
@@ -52,6 +71,7 @@ const Avatar = ({ size = 'md', variant = 'default', className = '' }: AvatarProp
     const handler = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsOpen(false)
+        setDeviseOpen(false)
       }
     }
     document.addEventListener('mousedown', handler)
@@ -64,6 +84,7 @@ const Avatar = ({ size = 'md', variant = 'default', className = '' }: AvatarProp
       return
     }
     setIsOpen((prev) => !prev)
+    setDeviseOpen(false)
   }
 
   const handleLogout = async () => {
@@ -76,6 +97,13 @@ const Avatar = ({ size = 'md', variant = 'default', className = '' }: AvatarProp
       setIsLoggingOut(false)
       router.push('/')
     }
+  }
+
+  const handleDeviseChange = (code: string) => {
+    setSelectedDevise(code)
+    setDeviseOpen(false)
+    localStorage.setItem('selectedDevise', code)
+    onDeviseChange?.(code)
   }
 
   const getInitials = (): string => {
@@ -117,7 +145,7 @@ const Avatar = ({ size = 'md', variant = 'default', className = '' }: AvatarProp
       {/* Bouton avatar */}
       <button
         onClick={handleClick}
-        aria-label={user ? 'Mon compte' : 'Se connecter'}
+        aria-label={user ? t('my_profile') : 'Se connecter'}
         className={`
           relative flex items-center justify-center rounded-full
           ${v.bg} ${s.container}
@@ -131,7 +159,6 @@ const Avatar = ({ size = 'md', variant = 'default', className = '' }: AvatarProp
       {/* Dropdown — affiché uniquement si connecté */}
       {isOpen && user && (
         <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white shadow-xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-
           {/* En-tête utilisateur */}
           <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
             <p className="text-sm font-semibold text-gray-900 truncate">
@@ -147,15 +174,53 @@ const Avatar = ({ size = 'md', variant = 'default', className = '' }: AvatarProp
               className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
             >
               <User className="w-4 h-4 text-gray-400" />
-              Mon profil
+              {t('my_profile')}
             </button>
+            
             <button
               onClick={() => { setIsOpen(false); router.push('/reservations') }}
               className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
             >
               <CalendarDays className="w-4 h-4 text-gray-400" />
-              Mes réservations
+              {t('my_bookings')}
             </button>
+
+            <button
+              onClick={() => { setIsOpen(false); router.push('/favoris') }}
+              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <Heart className="w-4 h-4 text-gray-400" />
+              {t('my_favorites')}
+            </button>
+
+            {/* Devise */}
+            <div>
+              <button
+                onClick={() => setDeviseOpen(!deviseOpen)}
+                className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <DollarSign className="w-4 h-4 text-gray-400" />
+                {t('currency')}
+                <ChevronDown className={`w-3 h-3 ml-auto transition-transform duration-200 ${deviseOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {deviseOpen && (
+                <div className="mt-1 bg-white rounded-lg border border-gray-100">
+                  {devises.map((dev) => (
+                    <button
+                      key={dev.code}
+                      onClick={() => handleDeviseChange(dev.code)}
+                      className={`flex items-center justify-between w-full px-4 py-2 text-sm hover:bg-gray-50 transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                        selectedDevise === dev.code ? 'text-[#01BDA5]' : 'text-gray-700'
+                      }`}
+                    >
+                      <span>{dev.code}</span>
+                      <span className="text-xs text-gray-400">{dev.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Déconnexion */}
@@ -166,7 +231,7 @@ const Avatar = ({ size = 'md', variant = 'default', className = '' }: AvatarProp
               className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
             >
               <LogOut className="w-4 h-4" />
-              {isLoggingOut ? 'Déconnexion...' : 'Se déconnecter'}
+              {isLoggingOut ? t('logging_out') : t('logout')}
             </button>
           </div>
         </div>
