@@ -1,5 +1,5 @@
 // app/(dark)/layout.tsx
-import Header from "../../components/molecules/Header"
+import Header from "../components/molecules/Header"
 
 export default function DarkLayout({
   children,
@@ -8,7 +8,7 @@ export default function DarkLayout({
 }) {
   return (
     <>
-      <Header theme="dark" />
+      <Header theme="default" />
       <main className="min-h-screen">
         {children}
       </main>

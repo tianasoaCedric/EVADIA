@@ -118,10 +118,10 @@ export default function FavoriteClient() {
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
                         <button
                             onClick={() => router.back()}
-                            className="flex items-center gap-2 text-gray-600 hover:text-[#01BDA5] transition-colors cursor-pointer"
+                            className="flex items-center gap-2 text-gray-800 hover:text-[#01BDA5] transition-colors cursor-pointer"
                         >
-                            <ChevronLeft className="w-5 h-5" />
-                            <span>{filteredFavorites.length} {filteredFavorites.length > 1 ? t('favorites_plural') : t('favorites_singular')}</span>
+                            <ChevronLeft className="w-8 h-8" />
+                            <span className="text-2xl md:text-3xl font-bold text-gray-900 ">{filteredFavorites.length} {filteredFavorites.length > 1 ? t('favorites_plural') : t('favorites_singular')}</span>
                         </button>
                         {filteredFavorites.length > 0 && (
                             <Bouton
