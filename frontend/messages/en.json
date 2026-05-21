@@ -306,7 +306,7 @@
     "hero_title": "{hotelName}",
     "hero_subtitle": "Exclusive offer -{discount}% for {destination}",
     "discount_badge": "discount",
-    "period_label": "Offer Period",
+    "period_label": "Offer period",
     "period_value": "from {startDay} to {endDay} {month}",
     "description_label": "Description of the offer",
     "contact_label": "For any reservation",
@@ -370,12 +370,12 @@
   "ContactPopup": {
     "title": "Get in touch",
     "subtitle": "We would love to hear from you!",
-    "name_placeholder": "Your Name",
-    "email_placeholder": "Email address",
-    "phone_placeholder": "Phone number",
+    "name_placeholder": "Your name",
+    "email_placeholder": "Your email",
+    "phone_placeholder": "Your phone number",
     "message_placeholder": "Write something...",
-    "send_button": "Send Message",
-    "contact_info_title": "Contact Info",
+    "send_button": "Send message",
+    "contact_info_title": "Contact information",
     "email_label": "E-mail:",
     "phone_label": "Phone:",
     "address_label": "Address:",
@@ -389,5 +389,100 @@
     "my_favorites": "Your favorites",
     "logout": "Log out",
     "logging_out": "Disconnect..."
+  },
+  "ProfilePage": {
+    "meta_title": "My profile | Evadia",
+    "meta_description": "Manage your personal information, reservations and preferences on Evadia."
+  },
+  "Profile": {
+    "title": "My profile",
+    "subtitle": "Manage your personal information and preferences",
+    "back": "Back",
+    "loading": "Loading...",
+    "not_authenticated": "Please log in to access your profile",
+    "tabs": {
+      "info": "Information",
+      "security": "Security",
+      "favorites": "Favorites",
+      "bookings": "Reservations",
+      "preferences": "Preferences",
+      "payments": "Payments",
+      "activity": "Activity"
+    }
+  },
+  "ProfileInfo": {
+    "title": "Personal information",
+    "edit": "To modify",
+    "save": "Save",
+    "cancel": "Cancel",
+    "first_name": "First name",
+    "last_name": "Name",
+    "email": "E-mail",
+    "phone": "Phone",
+    "birth_date": "Date of birth",
+    "country": "Country",
+    "city": "City"
+  },
+  "ProfileSecurity": {
+    "title": "Security",
+    "current_password": "Current password",
+    "new_password": "New Password",
+    "confirm_password": "Confirm password",
+    "change_password": "Change password",
+    "password_mismatch": "Passwords do not match",
+    "success": "Password changed successfully",
+    "password_tip": "Use at least 8 characters with letters, numbers and symbols"
+  },
+  "ProfilePreferences": {
+    "title": "Preferences",
+    "language": "Language",
+    "currency": "Currency",
+    "notifications": "Notifications",
+    "email_notifications": "Email notifications",
+    "newsletter": "Newsletter",
+    "save": "Save preferences",
+    "success": "Saved preferences"
+  },
+  "ProfileBookings": {
+    "title": "My reservations",
+    "view_all": "See all",
+    "filter_all": "All",
+    "filter_confirmed": "Confirmed",
+    "filter_pending": "On hold",
+    "filter_cancelled": "Canceled",
+    "status_confirmed": "Confirmed",
+    "status_pending": "On hold",
+    "status_cancelled": "Canceled",
+    "nights": "{nights} nights",
+    "details": "Details",
+    "no_bookings": "No reservations",
+    "discover_hotels": "Discover hotels"
+  },
+  "ProfileFavorites": {
+    "title": "My favorites",
+    "view_all": "See all",
+    "no_favorites": "No favorites",
+    "discover_hotels": "Discover hotels"
+  },
+  "ProfilePaymentMethods": {
+    "title": "Payment methods",
+    "add_card": "Add a card",
+    "add_card_title": "Add a new card",
+    "card_number": "Card number",
+    "expiry_month": "Expiry month",
+    "expiry_year": "Expiration year",
+    "cvv": "CVV",
+    "save_card": "Save",
+    "cancel": "Cancel",
+    "default": "By default",
+    "no_cards": "No card saved"
+  },
+  "ProfileActivity": {
+    "title": "Recent activity",
+    "clear_history": "Clear history",
+    "viewed": "You viewed",
+    "searched": "You searched for",
+    "see": "See",
+    "no_activity": "No recent activity"
   }
 }
