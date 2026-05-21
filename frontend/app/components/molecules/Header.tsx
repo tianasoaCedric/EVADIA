@@ -17,18 +17,12 @@ interface HeaderProps {
     onLanguageChange?: (lang: 'FR' | 'EN') => void
     /** État de connexion de l'utilisateur */
     isLoggedIn?: boolean
-    /** Nom de l'utilisateur */
-    userName?: string | null
-    /** Photo de l'utilisateur */
-    userPhoto?: string | null
     /** Callback clic sur le menu */
     onMenuClick?: () => void
     /** Callback clic sur le logo */
     onLogoClick?: () => void
     /** Callback clic sur la recherche */
     onSearchClick?: () => void
-    /** Callback clic sur l'avatar */
-    onAvatarClick?: () => void
     /** Afficher le champ de recherche (mobile vs desktop) */
     showSearchInput?: boolean
     /** Mode du header (default ou dark) */
@@ -46,35 +40,24 @@ const devises = [
 const Header = ({
     currentLang = 'FR',
     onLanguageChange,
-    isLoggedIn = false,
-    userName = null,
-    userPhoto = null,
     onMenuClick,
     onLogoClick,
     onSearchClick,
-    onAvatarClick,
     showSearchInput = false,
-    theme = 'default',  // Thème initial
+    theme = 'default',
     onDeviseChange
 }: HeaderProps) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [searchValue, setSearchValue] = useState('')
     const [isMobile, setIsMobile] = useState(false)
-    const [isAnimating, setIsAnimating] = useState(false)
     const [isSliding, setIsSliding] = useState(false)
-    const [isScrolled, setIsScrolled] = useState(false) // État pour détecter le scroll
+    const [isScrolled, setIsScrolled] = useState(false)
     const [deviseOpen, setDeviseOpen] = useState(false)
-    const [selectedDevise, setSelectedDevise] = useState('EUR')
+    const [selectedDevise, setSelectedDevise] = useState(() =>
+        typeof window !== 'undefined' ? (localStorage.getItem('selectedDevise') ?? 'EUR') : 'EUR'
+    )
     const deviseRef = useRef<HTMLDivElement>(null)
-
-    // Charger la devise depuis localStorage
-    useEffect(() => {
-        const savedDevise = localStorage.getItem('selectedDevise')
-        if (savedDevise) {
-            setSelectedDevise(savedDevise)
-        }
-    }, [])
 
     // Fermer le dropdown devise si clic extérieur
     useEffect(() => {
@@ -348,10 +331,7 @@ const Header = ({
                                 {/* Avatar utilisateur */}
                                  <Avatar
                                     variant={activeTheme === 'default' ? 'default' : 'dark'}
-                                    photoUrl={userPhoto}
-                                    userName={isLoggedIn ? userName : null}
                                     size={isMenuOpen ? 'sm' : 'md'}
-                                    onClick={onAvatarClick}
                                 />
                             </div>
                         </div>

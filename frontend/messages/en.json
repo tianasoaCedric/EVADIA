@@ -222,7 +222,6 @@
     "hero_subtitle": "Discover the regions of Madagascar and their exceptional accommodation",
     "where_to_go": "Where do you want to go?",
     "our_selection": "Our selection of accommodation",
-    "popular_hotels": "Popular accommodations",
     "previous_hotels": "Scroll left",
     "next_hotels": "Scroll right",
     "go_to_hotel": "Go to hotel {number}"
@@ -261,7 +260,6 @@
     "not_found": "City not found",
     "back_label": "Back",
     "search_placeholder": "Search for a hotel...",
-    "our_selection": "Selection of accommodation",
     "popular_hotels": "Popular accommodations in {name}",
     "hotels_title": "Accommodations in {name}",
     "no_results": "No hotels found",
@@ -282,7 +280,6 @@
     "hero_title": "Special offers",
     "hero_subtitle": "Take advantage of exceptional discounts on our accommodation",
     "search_placeholder": "Search for an offer by hotel, city or destination...",
-    "loading": "Loading...",
     "no_results": "No offers found",
     "previous_page": "Previous page",
     "next_page": "Next page",
