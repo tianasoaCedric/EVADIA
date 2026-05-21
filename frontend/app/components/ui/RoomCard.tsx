@@ -7,6 +7,7 @@ import { Bed, Bath, Users, ChevronLeft, ChevronRight } from 'lucide-react'
 import { createSlug } from '@/lib/slug'
 import { useTranslations } from 'next-intl'
 import { useOnScreen } from '@/hooks/useOnScreen'
+import { useDevise } from '@/app/context/DeviseContext'
 
 interface RoomCardProps {
   imageUrl: string | string[]
@@ -15,6 +16,8 @@ interface RoomCardProps {
   bathrooms: number
   maxPersons: number
   price: number
+  prixMga?: number
+  prixEur?: number
   availability?: string
   href?: string
   alt?: string
@@ -31,6 +34,8 @@ const RoomCard = ({
   bathrooms,
   maxPersons,
   price,
+  prixMga,
+  prixEur,
   availability = 'Disponible',
   href,
   alt = '',
@@ -40,6 +45,8 @@ const RoomCard = ({
   hotelId
 }: RoomCardProps) => {
   const t = useTranslations('RoomCard')
+  const { getPrix, symbole } = useDevise()
+  const displayPrice = getPrix(prixMga, prixEur) ?? price
   const [imageError, setImageError] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   
@@ -171,7 +178,7 @@ const RoomCard = ({
           </h3>
           <div className="flex-shrink-0">
             <span className="text-lg sm:text-xl font-medium text-gray-900">
-              {price.toLocaleString('fr-FR')} Ar
+              {displayPrice.toLocaleString('fr-FR')} {symbole}
             </span>
             <span className="text-xs text-gray-500">{t('per_night')}</span>
           </div>

@@ -7,6 +7,7 @@ import ToggleLangue from '../ui/ToggleLangue'
 import Avatar from '../ui/Avatar'
 import Input from '../ui/Input'
 import { ChevronDown } from 'lucide-react'
+import { useDevise } from '../../context/DeviseContext'
 
 const MenuFullscreen = dynamic(() => import('./MenuFullscreen'), { ssr: false })
 
@@ -54,9 +55,7 @@ const Header = ({
     const [isSliding, setIsSliding] = useState(false)
     const [isScrolled, setIsScrolled] = useState(false)
     const [deviseOpen, setDeviseOpen] = useState(false)
-    const [selectedDevise, setSelectedDevise] = useState(() =>
-        typeof window !== 'undefined' ? (localStorage.getItem('selectedDevise') ?? 'EUR') : 'EUR'
-    )
+    const { devise: selectedDevise, setDevise } = useDevise()
     const deviseRef = useRef<HTMLDivElement>(null)
 
     // Fermer le dropdown devise si clic extérieur
@@ -134,9 +133,8 @@ const Header = ({
     }
 
     const handleDeviseChange = (code: string) => {
-        setSelectedDevise(code)
+        setDevise(code as 'EUR' | 'MGA')
         setDeviseOpen(false)
-        localStorage.setItem('selectedDevise', code)
         onDeviseChange?.(code)
     }
 
@@ -169,11 +167,6 @@ const Header = ({
     const currentTheme = themeStyles[activeTheme]
 
     // Récupérer le symbole de la devise sélectionnée
-    const getSelectedDeviseSymbol = () => {
-        const devise = devises.find(d => d.code === selectedDevise)
-        return devise?.code || '€'
-    }
-
     return (
         <>
             {/* Menu plein écran */}
@@ -306,7 +299,7 @@ const Header = ({
                                         className={`flex items-center gap-2 px-2 py-1.5 rounded-full transition-colors duration-200 ${currentTheme.deviseButton}`}
                                         aria-label="Changer de devise"
                                     >
-                                        <span className="text-sm md:text-base font-medium">{getSelectedDeviseSymbol()}</span>
+                                        <span className="text-sm md:text-base font-medium">{selectedDevise}</span>
                                         <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${deviseOpen ? 'rotate-180' : ''}`} />
                                     </button>
 

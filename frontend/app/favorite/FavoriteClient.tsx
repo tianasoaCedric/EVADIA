@@ -185,6 +185,8 @@ export default function FavoriteClient() {
                                                 hotelId={favori.hotel_id}
                                                 availability="Disponible"
                                                 price={favori.hotel.prix_min ?? 0}
+                                                prixMga={favori.hotel.prix_min_mga}
+                                                prixEur={favori.hotel.prix_min_eur}
                                                 etoiles={favori.hotel.etoiles ?? undefined}
                                                 rating={favori.hotel.note_moyenne ?? 0}
                                                 onFavoriteToggle={(isFavorite) => {

@@ -125,6 +125,8 @@ export default function HebergementName({ categoryId, categoryName }: Hebergemen
                                                 name={hotel.nom}
                                                 availability="Disponible"
                                                 price={hotel.prix_min ?? 0}
+                                                prixMga={hotel.prix_min_mga}
+                                                prixEur={hotel.prix_min_eur}
                                                 etoiles={hotel.etoiles ?? undefined}
                                                 rating={hotel.note_moyenne ?? 0}
                                             />

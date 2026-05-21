@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useOnScreen } from '@/hooks/useOnScreen'
 import { useTranslations } from 'next-intl'
+import { useDevise } from '@/app/context/DeviseContext'
 
 interface CardHotelProps {
   /** URL de l'image de l'hôtel */
@@ -13,8 +14,12 @@ interface CardHotelProps {
   name: string
   /** Disponibilité (ex: "Disponible", "Complet", "2 places restantes") */
   availability: string
-  /** Prix par nuit */
+  /** Prix par nuit (fallback) */
   price: number
+  /** Prix en MGA */
+  prixMga?: number
+  /** Prix en EUR */
+  prixEur?: number
   /** Classement officiel en étoiles (1-5) */
   etoiles?: number
   /** Note moyenne des avis clients sur 5 */
@@ -58,6 +63,8 @@ const CardHotel = ({
   name,
   availability,
   price,
+  prixMga,
+  prixEur,
   etoiles,
   rating,
   reviewCount,
@@ -69,6 +76,8 @@ const CardHotel = ({
   onFavoriteToggle
 }: CardHotelProps) => {
   const t = useTranslations('CardHotel')
+  const { getPrix, symbole } = useDevise()
+  const displayPrice = getPrix(prixMga, prixEur) ?? price
   const [isFavorite, setIsFavorite] = useState(false)
   const [imageError, setImageError] = useState(false)
 
@@ -239,7 +248,7 @@ const CardHotel = ({
         {/* Prix */}
         <div className="mb-1">
           <span className="text-lg sm:text-xl font-bold text-gray-900">
-            {price.toLocaleString('fr-FR')} Ar
+            {displayPrice.toLocaleString('fr-FR')} {symbole}
           </span>
           <span className="text-xs sm:text-sm text-gray-500"> {t('per_night')}</span>
         </div>

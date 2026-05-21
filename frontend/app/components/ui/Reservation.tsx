@@ -5,10 +5,15 @@ import { Calendar, Users } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useOnScreen } from '@/hooks/useOnScreen'
 import Bouton from './Bouton'
+import { useDevise } from '@/app/context/DeviseContext'
 
 interface ReservationProps {
-    /** Prix par nuit */
+    /** Prix par nuit (fallback) */
     pricePerNight: number
+    /** Prix en MGA */
+    prixMga?: number
+    /** Prix en EUR */
+    prixEur?: number
     /** Pourcentage de réduction (optionnel) */
     discountPercent?: number
     /** Frais de service (optionnel) */
@@ -33,12 +38,16 @@ export interface ReservationData {
 
 export default function Reservation({
     pricePerNight,
+    prixMga,
+    prixEur,
     discountPercent = 0,
     serviceFees = 0,
     roomName,
     onReserve
 }: ReservationProps) {
     const t = useTranslations('Reservation')
+    const { getPrix, symbole } = useDevise()
+    const effectivePrice = getPrix(prixMga, prixEur) ?? pricePerNight
     const [checkIn, setCheckIn] = useState<Date>(() => {
         const today = new Date()
         today.setHours(0, 0, 0, 0)
@@ -67,7 +76,7 @@ export default function Reservation({
     }
 
     const nights = calculateNights()
-    const subtotal = pricePerNight * nights
+    const subtotal = effectivePrice * nights
     const discountAmount = discountPercent > 0 ? (subtotal * discountPercent) / 100 : 0
     const total = subtotal - discountAmount + serviceFees
 
@@ -105,7 +114,7 @@ export default function Reservation({
             <div className="mb-4">
                 <div className="flex items-baseline justify-between">
                     <span className="text-2xl font-bold text-gray-900">
-                        {pricePerNight.toLocaleString('fr-FR')} Ar <span className="text-lg font-medium text-gray-500">{t('per_night')}</span>
+                        {effectivePrice.toLocaleString('fr-FR')} {symbole} <span className="text-lg font-medium text-gray-500">{t('per_night')}</span>
                     </span>
 
                     {discountPercent > 0 && (
@@ -116,7 +125,7 @@ export default function Reservation({
                 </div>
                 {discountPercent > 0 && (
                     <p className="text-sm text-gray-500 line-through mt-1">
-                        {(pricePerNight * (1 + discountPercent / 100)).toLocaleString('fr-FR')} Ar {t('per_night')}
+                        {(effectivePrice * (1 + discountPercent / 100)).toLocaleString('fr-FR')} {symbole} {t('per_night')}
                     </p>
                 )}
             </div>
@@ -218,16 +227,16 @@ export default function Reservation({
             <div className="space-y-2">
                 <div className="flex justify-between text-gray-600 pr-8 py-2">
                     <span>{t('stay', { nights })}</span>
-                    <span>{subtotal.toLocaleString('fr-FR')} Ar</span>
+                    <span>{subtotal.toLocaleString('fr-FR')} {symbole}</span>
                 </div>
                 <div className="flex justify-between text-gray-600 pr-8 py-2">
                     <span>{t('service_fees')}</span>
-                    <span>{serviceFees.toLocaleString('fr-FR')} Ar</span>
+                    <span>{serviceFees.toLocaleString('fr-FR')} {symbole}</span>
                 </div>
                 {discountAmount > 0 && (
                     <div className="flex justify-between text-green-600 pr-8 py-2">
                         <span>{t('discount', { percent: discountPercent })}</span>
-                        <span>-{discountAmount.toLocaleString('fr-FR')} Ar</span>
+                        <span>-{discountAmount.toLocaleString('fr-FR')} {symbole}</span>
                     </div>
                 )}
             </div>
@@ -239,7 +248,7 @@ export default function Reservation({
             <div className="flex justify-between items-center mb-6 pr-8">
                 <span className="text-lg font-semibold text-gray-900">{t('total')}</span>
                 <span className="text-2xl font-bold text-gray-900">
-                    {total.toLocaleString('fr-FR')} Ar
+                    {total.toLocaleString('fr-FR')} {symbole}
                 </span>
             </div>
 

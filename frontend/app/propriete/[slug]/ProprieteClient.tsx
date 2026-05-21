@@ -207,6 +207,8 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
             <div className="lg:sticky lg:top-24">
               <Reservation
                 pricePerNight={propriete.prix_par_nuit ?? 0}
+                prixMga={propriete.prix_mga}
+                prixEur={propriete.prix_eur}
                 discountPercent={0}
                 serviceFees={0}
                 roomName={propriete.nom}

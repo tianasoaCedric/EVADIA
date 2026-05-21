@@ -105,6 +105,8 @@ export interface Hotel {
   devise_principale: string
   note_moyenne?: number
   prix_min?: number
+  prix_min_mga?: number
+  prix_min_eur?: number
   photo_principale?: string | null
   adresse?: Adresse
   photos?: Photo[]
@@ -123,6 +125,8 @@ export interface ChambrePublic {
   superficie?: number
   prix_par_nuit?: number
   devise?: string
+  prix_mga?: number
+  prix_eur?: number
   photo?: string | null
 }
 
@@ -139,6 +143,8 @@ export interface ProprietePublic {
   superficie?: number
   prix_par_nuit?: number
   devise?: string
+  prix_mga?: number
+  prix_eur?: number
   photos: { url_photo: string; est_principale: boolean; ordre: number }[]
   equipements: { id: number; nom: string; categorie: string; icone?: string }[]
   hotel: {

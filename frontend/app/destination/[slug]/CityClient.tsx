@@ -331,6 +331,8 @@ export default function CityClient({ cityId, cityName, slug }: CityClientProps) 
                       hotelId={hotel.id}
                       availability="Disponible"
                       price={hotel.prix_min ?? 0}
+                      prixMga={hotel.prix_min_mga}
+                      prixEur={hotel.prix_min_eur}
                       rating={hotel.note_moyenne ?? 0}
                       reviewCount={hotel.nb_avis}
                     />
@@ -398,6 +400,8 @@ export default function CityClient({ cityId, cityName, slug }: CityClientProps) 
                       hotelId={hotel.id}
                       availability="Disponible"
                       price={hotel.prix_min ?? 0}
+                      prixMga={hotel.prix_min_mga}
+                      prixEur={hotel.prix_min_eur}
                       rating={hotel.note_moyenne ?? 0}
                       reviewCount={hotel.nb_avis}
                     />

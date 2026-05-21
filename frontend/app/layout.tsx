@@ -5,6 +5,7 @@ import './globals.css'
 import Footer from './components/molecules/Footer'
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
+import { DeviseProvider } from './context/DeviseContext';
 
 // Configuration correcte de la police Outfit
 const outfit = Outfit({
@@ -33,8 +34,10 @@ export default async function RootLayout({
     <html lang="fr" className={`${outfit.variable} ${rubikDistressed.variable}`}>
       <body className="font-outfit">
         <NextIntlClientProvider messages={messages}>
-          {children}
-          <Footer/> 
+          <DeviseProvider>
+            {children}
+            <Footer/>
+          </DeviseProvider>
         </NextIntlClientProvider>
       </body>
     </html>

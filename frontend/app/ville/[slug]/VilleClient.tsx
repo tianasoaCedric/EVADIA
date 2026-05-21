@@ -203,6 +203,8 @@ export default function VilleClient({ villeId, villeName, slug }: VilleClientPro
                       hotelId={hotel.id}
                       availability="Disponible"
                       price={hotel.prix_min ?? 0}
+                      prixMga={hotel.prix_min_mga}
+                      prixEur={hotel.prix_min_eur}
                       etoiles={hotel.etoiles ?? undefined}
                       rating={hotel.note_moyenne ?? 0}
                       reviewCount={hotel.nb_avis}

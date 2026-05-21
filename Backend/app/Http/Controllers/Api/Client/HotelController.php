@@ -118,11 +118,14 @@ class HotelController extends Controller
 
     private function formatHotel(Hotel $hotel): array
     {
-        $prixMin = $hotel->proprietes()
+        $proprietes = $hotel->proprietes()
             ->whereHas('currentPrix')
             ->with('currentPrix')
-            ->get()
-            ->min(fn($p) => $p->currentPrix?->prix);
+            ->get();
+
+        $prixMin    = $proprietes->min(fn($p) => $p->currentPrix?->prix);
+        $prixMinMga = $proprietes->min(fn($p) => $p->currentPrix?->prix_mga);
+        $prixMinEur = $proprietes->min(fn($p) => $p->currentPrix?->prix_eur);
 
         $noteMoyenne = $hotel->proprietes()
             ->withAvg('avis', 'note')
@@ -140,6 +143,8 @@ class HotelController extends Controller
                 'pays'  => $hotel->adresse->pays,
             ] : null,
             'prix_min'         => $prixMin,
+            'prix_min_mga'     => $prixMinMga,
+            'prix_min_eur'     => $prixMinEur,
             'note_moyenne'     => $noteMoyenne ? round($noteMoyenne, 1) : null,
         ];
     }
@@ -218,6 +223,8 @@ class HotelController extends Controller
                 'superficie' => $p->superficie,
                 'prix_par_nuit' => $p->currentPrix?->prix,
                 'devise' => $p->currentPrix?->devise,
+                'prix_mga' => $p->currentPrix?->prix_mga,
+                'prix_eur' => $p->currentPrix?->prix_eur,
                 'photo' => $p->photos->first()?->url,
             ]);
 

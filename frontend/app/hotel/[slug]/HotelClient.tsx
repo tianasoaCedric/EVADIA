@@ -237,6 +237,8 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
                       bathrooms={room.nb_salles_bain ?? 1}
                       maxPersons={room.capacite}
                       price={room.prix_par_nuit ?? 0}
+                      prixMga={room.prix_mga}
+                      prixEur={room.prix_eur}
                     />
                   </div>
                 ))}
@@ -285,6 +287,8 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
                           bathrooms={room.nb_salles_bain ?? 1}
                           maxPersons={room.capacite}
                           price={room.prix_par_nuit ?? 0}
+                          prixMga={room.prix_mga}
+                          prixEur={room.prix_eur}
                         />
                       </div>
                     ))}
@@ -317,6 +321,8 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
                     bathrooms={room.nb_salles_bain ?? 1}
                     maxPersons={room.capacite}
                     price={room.prix_par_nuit ?? 0}
+                    prixMga={room.prix_mga}
+                    prixEur={room.prix_eur}
                   />
                 ))}
               </div>

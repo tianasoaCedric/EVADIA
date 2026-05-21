@@ -40,6 +40,8 @@ class ProprieteController extends Controller
             'superficie'     => $propriete->superficie,
             'prix_par_nuit'  => $propriete->currentPrix?->prix,
             'devise'         => $propriete->currentPrix?->devise,
+            'prix_mga'       => $propriete->currentPrix?->prix_mga,
+            'prix_eur'       => $propriete->currentPrix?->prix_eur,
             'photos'         => $propriete->photos->map(fn($p) => [
                 'url_photo'      => $p->url,
                 'est_principale' => $p->est_principale,
