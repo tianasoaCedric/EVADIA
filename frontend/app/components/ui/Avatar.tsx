@@ -29,11 +29,6 @@ const variantStyles = {
   dark:    { bg: 'bg-gray-100 border border-gray-200',  text: 'text-gray-800' },
 }
 
-// Liste des devises disponibles
-const devises = [
-  { code: 'EUR', name: 'Euro' },
-  { code: 'MGA', name: 'Ariary' },
-]
 
 const Avatar = ({ size = 'md', variant = 'default', className = '', onDeviseChange }: AvatarProps) => {
   const router = useRouter()
@@ -193,34 +188,6 @@ const Avatar = ({ size = 'md', variant = 'default', className = '', onDeviseChan
               {t('my_favorites')}
             </button>
 
-            {/* Devise */}
-            <div>
-              <button
-                onClick={() => setDeviseOpen(!deviseOpen)}
-                className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                <DollarSign className="w-4 h-4 text-gray-400" />
-                {t('currency')}
-                <ChevronDown className={`w-3 h-3 ml-auto transition-transform duration-200 ${deviseOpen ? 'rotate-180' : ''}`} />
-              </button>
-              
-              {deviseOpen && (
-                <div className="mt-1 bg-white rounded-lg border border-gray-100">
-                  {devises.map((dev) => (
-                    <button
-                      key={dev.code}
-                      onClick={() => handleDeviseChange(dev.code)}
-                      className={`flex items-center justify-between w-full px-4 py-2 text-sm hover:bg-gray-50 transition-colors first:rounded-t-lg last:rounded-b-lg ${
-                        selectedDevise === dev.code ? 'text-[#01BDA5]' : 'text-gray-700'
-                      }`}
-                    >
-                      <span>{dev.code}</span>
-                      <span className="text-xs text-gray-400">{dev.name}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
           </div>
 
           {/* Déconnexion */}

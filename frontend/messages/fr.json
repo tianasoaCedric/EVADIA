@@ -392,5 +392,100 @@
     "my_favorites": "Vos favoris",
     "logout": "Se déconnecter",
     "logging_out": "Déconnexion..."
+  },
+  "ProfilePage": {
+    "meta_title": "Mon profil | Evadia",
+    "meta_description": "Gérez vos informations personnelles, réservations et préférences sur Evadia."
+  },
+  "Profile": {
+    "title": "Mon profil",
+    "subtitle": "Gérez vos informations personnelles et vos préférences",
+    "back": "Retour",
+    "loading": "Chargement...",
+    "not_authenticated": "Veuillez vous connecter pour accéder à votre profil",
+    "tabs": {
+      "info": "Informations",
+      "security": "Sécurité",
+      "favorites": "Favoris",
+      "bookings": "Réservations",
+      "preferences": "Préférences",
+      "payments": "Paiements",
+      "activity": "Activité"
+    }
+  },
+  "ProfileInfo": {
+    "title": "Informations personnelles",
+    "edit": "Modifier",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "first_name": "Prénom",
+    "last_name": "Nom",
+    "email": "Email",
+    "phone": "Téléphone",
+    "birth_date": "Date de naissance",
+    "country": "Pays",
+    "city": "Ville"
+  },
+  "ProfileSecurity": {
+    "title": "Sécurité",
+    "current_password": "Mot de passe actuel",
+    "new_password": "Nouveau mot de passe",
+    "confirm_password": "Confirmer le mot de passe",
+    "change_password": "Changer le mot de passe",
+    "password_mismatch": "Les mots de passe ne correspondent pas",
+    "success": "Mot de passe changé avec succès",
+    "password_tip": "Utilisez au moins 8 caractères avec des lettres, chiffres et symboles"
+  },
+  "ProfilePreferences": {
+    "title": "Préférences",
+    "language": "Langue",
+    "currency": "Devise",
+    "notifications": "Notifications",
+    "email_notifications": "Notifications par email",
+    "newsletter": "Newsletter",
+    "save": "Enregistrer les préférences",
+    "success": "Préférences enregistrées"
+  },
+  "ProfileBookings": {
+    "title": "Mes réservations",
+    "view_all": "Voir tout",
+    "filter_all": "Toutes",
+    "filter_confirmed": "Confirmées",
+    "filter_pending": "En attente",
+    "filter_cancelled": "Annulées",
+    "status_confirmed": "Confirmée",
+    "status_pending": "En attente",
+    "status_cancelled": "Annulée",
+    "nights": "{nights} nuits",
+    "details": "Détails",
+    "no_bookings": "Aucune réservation",
+    "discover_hotels": "Découvrir des hôtels"
+  },
+  "ProfileFavorites": {
+    "title": "Mes favoris",
+    "view_all": "Voir tout",
+    "no_favorites": "Aucun favori",
+    "discover_hotels": "Découvrir des hôtels"
+  },
+  "ProfilePaymentMethods": {
+    "title": "Moyens de paiement",
+    "add_card": "Ajouter une carte",
+    "add_card_title": "Ajouter une nouvelle carte",
+    "card_number": "Numéro de carte",
+    "expiry_month": "Mois d'expiration",
+    "expiry_year": "Année d'expiration",
+    "cvv": "CVV",
+    "save_card": "Enregistrer",
+    "cancel": "Annuler",
+    "default": "Par défaut",
+    "no_cards": "Aucune carte enregistrée"
+  },
+  "ProfileActivity": {
+    "title": "Activité récente",
+    "clear_history": "Effacer l'historique",
+    "viewed": "Vous avez consulté",
+    "searched": "Vous avez recherché",
+    "see": "Voir",
+    "no_activity": "Aucune activité récente"
   }
 }

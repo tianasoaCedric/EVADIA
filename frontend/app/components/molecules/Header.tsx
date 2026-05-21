@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
 import ToggleLangue from '../ui/ToggleLangue'
 import Avatar from '../ui/Avatar'
 import Input from '../ui/Input'
+import { ChevronDown } from 'lucide-react'
 
 const MenuFullscreen = dynamic(() => import('./MenuFullscreen'), { ssr: false })
 
@@ -32,7 +33,15 @@ interface HeaderProps {
     showSearchInput?: boolean
     /** Mode du header (default ou dark) */
     theme?: 'default' | 'dark'
+    /** Callback changement de devise */
+    onDeviseChange?: (devise: string) => void
 }
+
+// Liste des devises disponibles
+const devises = [
+    { code: 'EUR', name: 'Euro', symbol: '€' },
+    { code: 'MGA', name: 'Ariary', symbol: 'Ar' },
+]
 
 const Header = ({
     currentLang = 'FR',
@@ -45,7 +54,8 @@ const Header = ({
     onSearchClick,
     onAvatarClick,
     showSearchInput = false,
-    theme = 'default'  // Thème initial
+    theme = 'default',  // Thème initial
+    onDeviseChange
 }: HeaderProps) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [isSearchOpen, setIsSearchOpen] = useState(false)
@@ -54,6 +64,28 @@ const Header = ({
     const [isAnimating, setIsAnimating] = useState(false)
     const [isSliding, setIsSliding] = useState(false)
     const [isScrolled, setIsScrolled] = useState(false) // État pour détecter le scroll
+    const [deviseOpen, setDeviseOpen] = useState(false)
+    const [selectedDevise, setSelectedDevise] = useState('EUR')
+    const deviseRef = useRef<HTMLDivElement>(null)
+
+    // Charger la devise depuis localStorage
+    useEffect(() => {
+        const savedDevise = localStorage.getItem('selectedDevise')
+        if (savedDevise) {
+            setSelectedDevise(savedDevise)
+        }
+    }, [])
+
+    // Fermer le dropdown devise si clic extérieur
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (deviseRef.current && !deviseRef.current.contains(e.target as Node)) {
+                setDeviseOpen(false)
+            }
+        }
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [])
 
     // Détecter le scroll
     useEffect(() => {
@@ -82,10 +114,7 @@ const Header = ({
         return () => window.removeEventListener('resize', checkMobile)
     }, [])
 
-    // Déterminer le thème actif :
-    // - Si le menu est ouvert : toujours 'default'
-    // - Si scrollé : 'dark'
-    // - Sinon : thème initial
+    // Déterminer le thème actif
     const getActiveTheme = () => {
         if (isMenuOpen) return 'default'
         if (isScrolled) return 'dark'
@@ -121,6 +150,13 @@ const Header = ({
         console.log('Recherche:', searchValue)
     }
 
+    const handleDeviseChange = (code: string) => {
+        setSelectedDevise(code)
+        setDeviseOpen(false)
+        localStorage.setItem('selectedDevise', code)
+        onDeviseChange?.(code)
+    }
+
     /**
      * Styles selon le thème (default/dark)
      */
@@ -132,7 +168,8 @@ const Header = ({
             searchButton: "text-white hover:text-gray-300 hover:bg-white/10",
             searchInput: "default",
             iconColor: "white",
-            border: "border-transparent"
+            border: "border-transparent",
+            deviseButton: "text-white hover:text-gray-300"
         },
         dark: {
             header: "bg-white/95 backdrop-blur-md border-gray-200",
@@ -141,11 +178,18 @@ const Header = ({
             searchButton: "text-gray-800 hover:text-[#01BDA5] hover:bg-gray-100",
             searchInput: "light",
             iconColor: "black",
-            border: "border-gray-200"
+            border: "border-gray-200",
+            deviseButton: "text-gray-800 hover:text-[#01BDA5]"
         }
     }
 
     const currentTheme = themeStyles[activeTheme]
+
+    // Récupérer le symbole de la devise sélectionnée
+    const getSelectedDeviseSymbol = () => {
+        const devise = devises.find(d => d.code === selectedDevise)
+        return devise?.code || '€'
+    }
 
     return (
         <>
@@ -160,7 +204,7 @@ const Header = ({
                 {/* Conteneur qui glisse de bas en haut */}
                 <div className={`
                     transition-transform duration-300 ease-out
-                    ${isSliding ? 'shadow-md':'' }
+                    ${isSliding ? 'shadow-md':''}
                     ${isSliding && isMenuOpen ? '-translate-y-2' : 'translate-y-0'}
                 `}>
                     <div className="container mx-auto px-4">
@@ -248,7 +292,7 @@ const Header = ({
                                 </div>
                             </div>
 
-                            {/* Partie droite : Recherche + Avatar */}
+                            {/* Partie droite : Recherche + Devise + Avatar */}
                             <div className="flex items-center gap-3 md:gap-4">
 
                                 {/* Icône de recherche */}
@@ -271,6 +315,35 @@ const Header = ({
                                         />
                                     </svg>
                                 </button>
+
+                                {/* Sélecteur de devise */}
+                                <div className="relative" ref={deviseRef}>
+                                    <button
+                                        onClick={() => setDeviseOpen(!deviseOpen)}
+                                        className={`flex items-center gap-2 px-2 py-1.5 rounded-full transition-colors duration-200 ${currentTheme.deviseButton}`}
+                                        aria-label="Changer de devise"
+                                    >
+                                        <span className="text-sm md:text-base font-medium">{getSelectedDeviseSymbol()}</span>
+                                        <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${deviseOpen ? 'rotate-180' : ''}`} />
+                                    </button>
+
+                                    {deviseOpen && (
+                                        <div className="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
+                                            {devises.map((dev) => (
+                                                <button
+                                                    key={dev.code}
+                                                    onClick={() => handleDeviseChange(dev.code)}
+                                                    className={`flex items-center justify-between w-full px-4 py-2 text-sm hover:bg-gray-50 transition-colors ${
+                                                        selectedDevise === dev.code ? 'text-[#01BDA5]' : 'text-gray-700'
+                                                    }`}
+                                                >
+                                                    <span>{dev.code}</span>
+                                                    <span className="text-xs text-gray-400">{dev.symbol}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
 
                                 {/* Avatar utilisateur */}
                                  <Avatar
