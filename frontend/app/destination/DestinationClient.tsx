@@ -8,7 +8,6 @@ import CardDestination from '../components/ui/CardDestination'
 import CardHotel from '../components/ui/CardHotel'
 import { useOnScreen } from '@/hooks/useOnScreen'
 import { createSlug } from '@/lib/slug'
-import { destinationService, hotelService } from '@/lib/services'
 import type { Destination, Hotel } from '@/lib/types'
 
 const DESTINATION_IMAGES: Record<string, string> = {
@@ -22,37 +21,19 @@ const DESTINATION_IMAGES: Record<string, string> = {
 const getDestinationImage = (nom: string): string =>
   DESTINATION_IMAGES[nom.toLowerCase()] ?? '/photos/chambre.jpg'
 
-export default function DestinationClient() {
-  const t = useTranslations('DestinationClient')
+interface DestinationClientProps {
+  destinations: Destination[]
+  selectionHotels: Hotel[]
+}
 
-  const [destinations, setDestinations]       = useState<Destination[]>([])
-  const [selectionHotels, setSelectionHotels] = useState<Hotel[]>([])
-  const [isLoading, setIsLoading]             = useState(true)
+export default function DestinationClient({ destinations, selectionHotels }: DestinationClientProps) {
+  const t = useTranslations('DestinationClient')
 
   const selectionScrollRef = useRef<HTMLDivElement>(null)
   const [selectionScrollPos, setSelectionScrollPos] = useState(0)
 
   const [setSpotsRef,     isSpotsVisible]     = useOnScreen({ threshold: 0.2, triggerOnce: false })
   const [setSelectionRef, isSelectionVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true)
-      try {
-        const [destRes, selectionRes] = await Promise.all([
-          destinationService.list(),
-          hotelService.selection(),
-        ])
-        setDestinations(destRes.data)
-        setSelectionHotels(selectionRes.data)
-      } catch (error) {
-        console.error(error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    fetchData()
-  }, [])
 
   useEffect(() => {
     const el = selectionScrollRef.current
@@ -82,14 +63,6 @@ export default function DestinationClient() {
   const middleSpot  = destinations[2]
   const bottomSpots = destinations.slice(3, 5)
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-gray-500">Chargement…</div>
-      </div>
-    )
-  }
-
   return (
     <main className="min-h-screen">
       <HeroSection
@@ -115,7 +88,7 @@ export default function DestinationClient() {
 
           <div className="max-w-8xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              {topSpots.map((dest) => (
+              {topSpots.map((dest, i) => (
                 <CardDestination
                   key={dest.id}
                   imageUrl={getDestinationImage(dest.nom)}
@@ -124,6 +97,7 @@ export default function DestinationClient() {
                   height="h-72"
                   width="w-full"
                   hoverEffect="zoom"
+                  priority={i < 2}
                 />
               ))}
             </div>

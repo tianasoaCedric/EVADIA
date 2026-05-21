@@ -3,7 +3,7 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 const nextConfig: NextConfig = {
   images: {
-    qualities: [100, 75],
+    qualities: [100, 80, 75, 70],
     remotePatterns: [
       {
         protocol: 'https',

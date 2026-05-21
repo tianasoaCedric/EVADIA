@@ -1,10 +1,11 @@
 import { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
+import { apiClient } from '@/lib/api-client'
+import type { Destination, Hotel } from '@/lib/types'
 import DestinationClient from './DestinationClient'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('DestinationPage')
-  
   return {
     title: t('meta_title'),
     description: t('meta_description'),
@@ -24,6 +25,16 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-export default function DestinationPage() {
-  return <DestinationClient />
+export default async function DestinationPage() {
+  const [destRes, selectionRes] = await Promise.all([
+    apiClient.get<{ data: Destination[] }>('/destinations', undefined, 300),
+    apiClient.get<{ data: Hotel[] }>('/hotels?selection=1', undefined, 300),
+  ])
+
+  return (
+    <DestinationClient
+      destinations={destRes.data}
+      selectionHotels={selectionRes.data}
+    />
+  )
 }

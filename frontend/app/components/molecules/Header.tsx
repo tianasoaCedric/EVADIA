@@ -262,7 +262,8 @@ const Header = ({
                                         alt="Evadia"
                                         className="hidden md:block"
                                         width={180}
-                                        height={180}
+                                        height={40}
+                                        style={{ width: 'auto', height: '40px' }}
                                         priority
                                     />
                                 </div>

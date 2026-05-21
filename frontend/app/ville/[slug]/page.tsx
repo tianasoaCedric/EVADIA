@@ -2,18 +2,36 @@ import { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import VilleClient from './VilleClient'
 import { decodeIdFromSlug, getNameFromSlug } from '@/lib/slug'
+import { apiClient } from '@/lib/api-client'
 
 interface PageProps {
-  params: Promise<{
-    slug: string
-  }>
+  params: Promise<{ slug: string }>
+}
+
+interface ApiHotel {
+  id: number
+  nom: string
+  etoiles: number | null
+  photo_principale: string | null
+  ville: string | null
+  prix_min: number | null
+  prix_min_mga?: number | null
+  prix_min_eur?: number | null
+  note_moyenne: number | null
+  nb_avis: number
+}
+
+interface PaginatedHotels {
+  data: ApiHotel[]
+  current_page: number
+  last_page: number
+  total: number
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const t = await getTranslations('VillePage')
   const { slug } = await params
   const villeName = getNameFromSlug(slug)
-  
   return {
     title: t('meta_title', { name: villeName }),
     description: t('meta_description', { name: villeName }),
@@ -37,6 +55,22 @@ export default async function VillePage({ params }: PageProps) {
   const { slug } = await params
   const villeId = decodeIdFromSlug(slug)
   const villeName = getNameFromSlug(slug)
-  
-  return <VilleClient villeId={villeId} villeName={villeName} slug={slug} />
+
+  const [hotelsRes, selectionRes] = await Promise.all([
+    apiClient.get<PaginatedHotels>(`/villes/${villeId}/hotels`, undefined, 120),
+    apiClient.get<{ data: ApiHotel[] }>(`/villes/${villeId}/hotels?selection=1`, undefined, 300),
+  ])
+
+  return (
+    <VilleClient
+      villeId={villeId}
+      villeName={villeName}
+      slug={slug}
+      initialHotels={hotelsRes.data}
+      initialCurrentPage={hotelsRes.current_page}
+      initialLastPage={hotelsRes.last_page}
+      initialTotal={hotelsRes.total}
+      initialSelectionHotels={selectionRes.data}
+    />
+  )
 }
