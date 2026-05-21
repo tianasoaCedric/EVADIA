@@ -60,7 +60,7 @@ const HeroSection = ({
                     fill
                     className="object-cover"
                     priority
-                    quality={100}
+                    quality={80}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/40 to-transparent" />
             </div>

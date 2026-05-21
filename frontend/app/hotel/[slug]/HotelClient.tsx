@@ -34,26 +34,23 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
   const [setRoomsRef, isRoomsVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
 
   useEffect(() => {
-    const fetchHotel = async () => {
+    const fetchAll = async () => {
       setIsLoading(true)
       try {
-        const data = await hotelService.get(hotelId)
+        const isAuth = authService.isAuthenticated()
+        const [data, favoris] = await Promise.all([
+          hotelService.get(hotelId),
+          isAuth ? favoriService.list().catch(() => ({ data: [] })) : Promise.resolve({ data: [] }),
+        ])
         setHotelData(data)
+        setIsSaved((favoris as { data: { hotel_id: number }[] }).data.some(f => f.hotel_id === hotelId))
       } catch (error) {
         console.error(error)
       } finally {
         setIsLoading(false)
       }
     }
-    fetchHotel()
-  }, [hotelId])
-
-  // Vérifie si l'hôtel est dans les favoris
-  useEffect(() => {
-    if (!authService.isAuthenticated()) return
-    favoriService.list().then(res => {
-      setIsSaved(res.data.some(f => f.hotel_id === hotelId))
-    }).catch(() => {})
+    fetchAll()
   }, [hotelId])
 
   // Scroll pour le carrousel des chambres

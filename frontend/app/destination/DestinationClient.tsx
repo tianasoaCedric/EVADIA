@@ -181,7 +181,7 @@ export default function DestinationClient() {
                 className="flex overflow-x-auto scroll-smooth pb-8 lg:pb-10 scrollbar-hide overflow-visible"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
-                {selectionHotels.map((hotel) => (
+                {selectionHotels.map((hotel, index) => (
                   <div key={hotel.id} className="flex-shrink-0 w-[280px] p-2">
                     <CardHotel
                       imageUrl={hotel.photo_principale ?? ''}
@@ -191,6 +191,7 @@ export default function DestinationClient() {
                       price={hotel.prix_min ?? 0}
                       prixMga={hotel.prix_min_mga}
                       prixEur={hotel.prix_min_eur}
+                      priority={index < 3}
                       etoiles={hotel.etoiles ?? undefined}
                       rating={hotel.note_moyenne ?? 0}
                     />

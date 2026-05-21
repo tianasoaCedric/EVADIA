@@ -323,7 +323,7 @@ export default function CityClient({ cityId, cityName, slug }: CityClientProps) 
                 className="flex overflow-x-auto scroll-smooth pb-8 lg:pb-10 scrollbar-hide overflow-visible"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
-                {hotels.map((hotel) => (
+                {hotels.map((hotel, index) => (
                   <div key={hotel.id} className="flex-shrink-0 w-[280px] p-2">
                     <CardHotel
                       imageUrl={hotel.photo_principale ?? ''}
@@ -333,6 +333,7 @@ export default function CityClient({ cityId, cityName, slug }: CityClientProps) 
                       price={hotel.prix_min ?? 0}
                       prixMga={hotel.prix_min_mga}
                       prixEur={hotel.prix_min_eur}
+                      priority={index < 3}
                       rating={hotel.note_moyenne ?? 0}
                       reviewCount={hotel.nb_avis}
                     />

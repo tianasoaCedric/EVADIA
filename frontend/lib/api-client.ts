@@ -61,7 +61,7 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
   const nextCache = method === 'GET' && !authToken && revalidate !== undefined
     ? { next: { revalidate } }
     : method === 'GET' && !authToken
-      ? { next: { revalidate: 60 } }
+      ? { next: { revalidate: 300 } }
       : { cache: 'no-store' as RequestCache }
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {

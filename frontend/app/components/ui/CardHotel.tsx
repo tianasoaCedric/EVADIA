@@ -10,6 +10,8 @@ import { useDevise } from '@/app/context/DeviseContext'
 interface CardHotelProps {
   /** URL de l'image de l'hôtel */
   imageUrl: string
+  /** Priorité de chargement de l'image (true pour les cartes au-dessus du fold) */
+  priority?: boolean
   /** Nom de l'hôtel */
   name: string
   /** Disponibilité (ex: "Disponible", "Complet", "2 places restantes") */
@@ -73,6 +75,7 @@ const CardHotel = ({
   alt = '',
   className = '',
   width = 'w-[260px]',
+  priority = false,
   onFavoriteToggle
 }: CardHotelProps) => {
   const t = useTranslations('CardHotel')
@@ -187,6 +190,8 @@ const CardHotel = ({
             className="object-cover transition-transform duration-300 group-hover:scale-105"
             onError={() => setImageError(true)}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority={priority}
+            quality={75}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gray-300">

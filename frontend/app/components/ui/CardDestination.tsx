@@ -22,6 +22,8 @@ interface CardDestinationProps {
   className?: string
   /** Effet au survol */
   hoverEffect?: 'zoom' | 'darken' | 'none'
+  /** Priorité de chargement de l'image */
+  priority?: boolean
 }
 
 const CardDestination = ({
@@ -32,7 +34,8 @@ const CardDestination = ({
   width = 'w-full',
   alt = '',
   className = '',
-  hoverEffect = 'zoom'
+  hoverEffect = 'zoom',
+  priority = false
 }: CardDestinationProps) => {
   const [imageError, setImageError] = useState(false)
   
@@ -75,6 +78,8 @@ const CardDestination = ({
             `}
             onError={() => setImageError(true)}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority={priority}
+            quality={75}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gray-300">
