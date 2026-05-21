@@ -1,10 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import Image from 'next/image'
+import dynamic from 'next/dynamic'
 import ToggleLangue from '../ui/ToggleLangue'
 import Avatar from '../ui/Avatar'
 import Input from '../ui/Input'
-import MenuFullscreen from './MenuFullscreen'
+
+const MenuFullscreen = dynamic(() => import('./MenuFullscreen'), { ssr: false })
 
 interface HeaderProps {
     /** Langue actuelle */
@@ -54,13 +57,19 @@ const Header = ({
 
     // Détecter le scroll
     useEffect(() => {
+        let rafId: number
         const handleScroll = () => {
-            const scrollPosition = window.scrollY
-            setIsScrolled(scrollPosition > 50) // Change après 50px de scroll
+            cancelAnimationFrame(rafId)
+            rafId = requestAnimationFrame(() => {
+                setIsScrolled(window.scrollY > 50)
+            })
         }
 
-        window.addEventListener('scroll', handleScroll)
-        return () => window.removeEventListener('scroll', handleScroll)
+        window.addEventListener('scroll', handleScroll, { passive: true })
+        return () => {
+            cancelAnimationFrame(rafId)
+            window.removeEventListener('scroll', handleScroll)
+        }
     }, [])
 
     // Détecter la taille de l'écran pour le responsive
@@ -219,20 +228,22 @@ const Header = ({
                             >
                                 <div className="flex items-center justify-center">
                                     {/* Logo pour mobile */}
-                                    <img
+                                    <Image
                                         src={`/Evadia_Logo 4${activeTheme === 'dark' ? '_dark' : ''}.png`}
                                         alt="Evadia"
                                         className="block md:hidden"
                                         width={40}
                                         height={40}
+                                        priority
                                     />
                                     {/* Logo pour desktop */}
-                                    <img
+                                    <Image
                                         src={`/Evadia_Logo 2${activeTheme === 'dark' ? '_dark' : ''}.png`}
                                         alt="Evadia"
                                         className="hidden md:block"
                                         width={180}
                                         height={180}
+                                        priority
                                     />
                                 </div>
                             </div>

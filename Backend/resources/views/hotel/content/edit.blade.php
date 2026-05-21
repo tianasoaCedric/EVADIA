@@ -126,10 +126,39 @@
                             class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-hotel-500 focus:ring-hotel-500">
                     </div>
 
-                    <div>
+                    <div x-data="villeSearch('{{ old('ville', $hotel->adresse?->ville) }}', {{ $hotel->destinations->first()?->id ?? 'null' }})" class="relative">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Ville</label>
-                        <input type="text" name="ville" value="{{ old('ville', $hotel->adresse?->ville) }}" required
+                        <input type="text"
+                            x-model="query"
+                            @input.debounce.300ms="search()"
+                            @focus="search()"
+                            @keydown.escape="open = false"
+                            @keydown.arrow-down.prevent="highlight = Math.min(highlight + 1, results.length - 1)"
+                            @keydown.arrow-up.prevent="highlight = Math.max(highlight - 1, 0)"
+                            @keydown.enter.prevent="select(results[highlight])"
+                            autocomplete="off"
+                            required
+                            placeholder="Rechercher une ville…"
                             class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-hotel-500 focus:ring-hotel-500">
+                        <input type="hidden" name="ville" x-bind:value="selected">
+
+                        <ul x-show="open && results.length > 0"
+                            x-cloak
+                            @click.outside="open = false"
+                            class="absolute z-50 mt-1 w-full max-h-56 overflow-auto rounded-lg border border-gray-200 bg-white shadow-lg text-sm">
+                            <template x-for="(ville, i) in results" :key="ville.id">
+                                <li @click="select(ville)"
+                                    @mouseenter="highlight = i"
+                                    :class="highlight === i ? 'bg-hotel-50 text-hotel-700' : 'text-gray-700'"
+                                    class="cursor-pointer px-4 py-2.5 hover:bg-hotel-50 hover:text-hotel-700"
+                                    x-text="ville.nom">
+                                </li>
+                            </template>
+                        </ul>
+
+                        <p x-show="open && query.length >= 2 && results.length === 0"
+                            x-cloak
+                            class="mt-1 text-xs text-gray-400">Aucune ville trouvée</p>
                     </div>
 
                     <div>
@@ -283,3 +312,35 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function villeSearch(initialValue, destinationId) {
+    return {
+        query:       initialValue ?? '',
+        selected:    initialValue ?? '',
+        results:     [],
+        open:        false,
+        highlight:   0,
+
+        async search() {
+            if (this.query.length < 2) { this.open = false; return; }
+            const params = new URLSearchParams({ q: this.query });
+            if (destinationId) params.append('destination_id', destinationId);
+            const res  = await fetch(`/api/villes/search?${params}`);
+            const json = await res.json();
+            this.results   = json.data ?? [];
+            this.highlight = 0;
+            this.open      = this.results.length > 0;
+        },
+
+        select(ville) {
+            if (!ville) return;
+            this.query    = ville.nom;
+            this.selected = ville.nom;
+            this.open     = false;
+        },
+    };
+}
+</script>
+@endpush

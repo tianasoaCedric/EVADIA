@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import Image from "next/image";
 import Link from "next/link";
-import ContactPopup from './ContactPopup';
+import dynamic from 'next/dynamic'
+const ContactPopup = dynamic(() => import('./ContactPopup'), { ssr: false })
 
 export default function Footer() {
   const [isContactOpen, setIsContactOpen] = useState(false)

@@ -38,12 +38,14 @@ interface RequestOptions {
   token?: string
   /** Si true, une réponse 401 redirige vers /login au lieu de lever une erreur */
   requiresAuth?: boolean
+  /** Durée de revalidation Next.js en secondes (GET public uniquement). 0 = no-store */
+  revalidate?: number | false
 }
 
 // ─── Fonction de requête centrale ────────────────────────────────────────────
 
 async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-  const { method = 'GET', body, token, requiresAuth = false } = options
+  const { method = 'GET', body, token, requiresAuth = false, revalidate } = options
 
   const authToken = token ?? tokenStorage.get()
 
@@ -56,10 +58,17 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     headers['Authorization'] = `Bearer ${authToken}`
   }
 
+  const nextCache = method === 'GET' && !authToken && revalidate !== undefined
+    ? { next: { revalidate } }
+    : method === 'GET' && !authToken
+      ? { next: { revalidate: 60 } }
+      : { cache: 'no-store' as RequestCache }
+
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     method,
     headers,
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+    ...nextCache,
   })
 
   // 401 — session expirée ou action nécessitant un compte
@@ -93,8 +102,8 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
 
 export const apiClient = {
   /** Requête publique — fonctionne sans compte (ex: liste des hôtels) */
-  get<T>(endpoint: string, token?: string) {
-    return request<T>(endpoint, { method: 'GET', token })
+  get<T>(endpoint: string, token?: string, revalidate?: number | false) {
+    return request<T>(endpoint, { method: 'GET', token, revalidate })
   },
   /** Requête authentifiée — redirige vers /login si token absent ou expiré */
   authGet<T>(endpoint: string) {

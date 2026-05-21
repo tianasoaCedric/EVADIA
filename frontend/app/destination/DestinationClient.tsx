@@ -11,41 +11,40 @@ import { createSlug } from '@/lib/slug'
 import { destinationService, hotelService } from '@/lib/services'
 import type { Destination, Hotel } from '@/lib/types'
 
-// Images statiques par destination (remplacer par de vraies photos quand disponibles)
 const DESTINATION_IMAGES: Record<string, string> = {
-  'nord':                   '/photos/chambre.jpg',
-  'sud':                    '/photos/test.jpg',
-  'est':                    '/photos/chambre.jpg',
-  'ouest':                  '/photos/test.jpg',
-  'hautes terres centrales':'/photos/chambre.jpg',
+  'nord':                    '/photos/chambre.jpg',
+  'sud':                     '/photos/test.jpg',
+  'est':                     '/photos/chambre.jpg',
+  'ouest':                   '/photos/test.jpg',
+  'hautes terres centrales': '/photos/chambre.jpg',
 }
 
-const getDestinationImage = (nom: string): string => {
-  return DESTINATION_IMAGES[nom.toLowerCase()] ?? '/photos/chambre.jpg'
-}
+const getDestinationImage = (nom: string): string =>
+  DESTINATION_IMAGES[nom.toLowerCase()] ?? '/photos/chambre.jpg'
 
 export default function DestinationClient() {
   const t = useTranslations('DestinationClient')
-  const [destinations, setDestinations] = useState<Destination[]>([])
-  const [hotels, setHotels] = useState<Hotel[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [scrollPosition, setScrollPosition] = useState(0)
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-  // Animation au scroll
-  const [setSpotsRef, isSpotsVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
-  const [setHotelsRef, isHotelsVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
+  const [destinations, setDestinations]       = useState<Destination[]>([])
+  const [selectionHotels, setSelectionHotels] = useState<Hotel[]>([])
+  const [isLoading, setIsLoading]             = useState(true)
+
+  const selectionScrollRef = useRef<HTMLDivElement>(null)
+  const [selectionScrollPos, setSelectionScrollPos] = useState(0)
+
+  const [setSpotsRef,     isSpotsVisible]     = useOnScreen({ threshold: 0.2, triggerOnce: false })
+  const [setSelectionRef, isSelectionVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true)
       try {
-        const [destResponse, hotelsResponse] = await Promise.all([
+        const [destRes, selectionRes] = await Promise.all([
           destinationService.list(),
-          hotelService.list({ sort: 'note_desc', page: 1 }),
+          hotelService.selection(),
         ])
-        setDestinations(destResponse.data)
-        setHotels(hotelsResponse.data)
+        setDestinations(destRes.data)
+        setSelectionHotels(selectionRes.data)
       } catch (error) {
         console.error(error)
       } finally {
@@ -55,40 +54,32 @@ export default function DestinationClient() {
     fetchData()
   }, [])
 
-  // Gestion du scroll pour le carrousel des hôtels
   useEffect(() => {
-    const container = scrollContainerRef.current
-    if (!container) return
-
-    const updateScrollInfo = () => setScrollPosition(container.scrollLeft)
-    updateScrollInfo()
-    container.addEventListener('scroll', updateScrollInfo)
-    window.addEventListener('resize', updateScrollInfo)
-
-    return () => {
-      container.removeEventListener('scroll', updateScrollInfo)
-      window.removeEventListener('resize', updateScrollInfo)
-    }
+    const el = selectionScrollRef.current
+    if (!el) return
+    const update = () => setSelectionScrollPos(el.scrollLeft)
+    update()
+    el.addEventListener('scroll', update)
+    window.addEventListener('resize', update)
+    return () => { el.removeEventListener('scroll', update); window.removeEventListener('resize', update) }
   }, [])
 
-  const getActiveIndex = () => {
-    if (!scrollContainerRef.current) return 0
-    const cardWidth = 320
-    const gap = 24
-    return Math.min(Math.round(scrollPosition / (cardWidth + gap)), hotels.length - 1)
-  }
+  const getActiveIndex = (scrollPos: number, length: number) =>
+    Math.min(Math.round(scrollPos / (320 + 24)), length - 1)
 
-  const scrollLeft = () => {
-    scrollContainerRef.current?.scrollBy({ left: -(320 + 24), behavior: 'smooth' })
-  }
+  const scrollLeft  = (ref: React.RefObject<HTMLDivElement | null>) =>
+    ref.current?.scrollBy({ left: -(320 + 24), behavior: 'smooth' })
 
-  const scrollRight = () => {
-    scrollContainerRef.current?.scrollBy({ left: 320 + 24, behavior: 'smooth' })
-  }
+  const scrollRight = (ref: React.RefObject<HTMLDivElement | null>) =>
+    ref.current?.scrollBy({ left: 320 + 24, behavior: 'smooth' })
 
-  // Organisation : 2 en haut, 1 pleine largeur, 2 en bas
-  const topSpots = destinations.slice(0, 2)
-  const middleSpot = destinations[2]
+  const scrollToIndex = (ref: React.RefObject<HTMLDivElement | null>, index: number) =>
+    ref.current?.scrollTo({ left: index * (320 + 24), behavior: 'smooth' })
+
+  const selectionActiveIndex = getActiveIndex(selectionScrollPos, selectionHotels.length)
+
+  const topSpots    = destinations.slice(0, 2)
+  const middleSpot  = destinations[2]
   const bottomSpots = destinations.slice(3, 5)
 
   if (isLoading) {
@@ -110,6 +101,7 @@ export default function DestinationClient() {
       />
 
       <div className="container mx-auto px-4 py-12">
+
         {/* Section destinations */}
         <div
           ref={setSpotsRef}
@@ -122,7 +114,6 @@ export default function DestinationClient() {
           </h2>
 
           <div className="max-w-8xl mx-auto">
-            {/* Ligne 1 : 2 colonnes */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               {topSpots.map((dest) => (
                 <CardDestination
@@ -136,8 +127,6 @@ export default function DestinationClient() {
                 />
               ))}
             </div>
-
-            {/* Ligne 2 : pleine largeur */}
             {middleSpot && (
               <div className="mb-6">
                 <CardDestination
@@ -150,8 +139,6 @@ export default function DestinationClient() {
                 />
               </div>
             )}
-
-            {/* Ligne 3 : 2 colonnes */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {bottomSpots.map((dest) => (
                 <CardDestination
@@ -168,12 +155,12 @@ export default function DestinationClient() {
           </div>
         </div>
 
-        {/* Section hôtels */}
-        {hotels.length > 0 && (
+        {/* Section sélection d'hébergement (Signature) */}
+        {selectionHotels.length > 0 && (
           <div
-            ref={setHotelsRef}
-            className={`transition-all duration-700 ease-out ${
-              isHotelsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            ref={setSelectionRef}
+            className={`mb-16 transition-all duration-700 ease-out ${
+              isSelectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
             }`}
           >
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-medium text-gray-800 mb-8">
@@ -182,7 +169,7 @@ export default function DestinationClient() {
 
             <div className="relative overflow-visible">
               <button
-                onClick={scrollLeft}
+                onClick={() => scrollLeft(selectionScrollRef)}
                 className="absolute -left-3 lg:-left-5 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white rounded-full p-2 lg:p-3 shadow-lg transition-all duration-200 hover:scale-110 hidden lg:flex items-center justify-center cursor-pointer"
                 aria-label={t('previous_hotels')}
               >
@@ -190,11 +177,11 @@ export default function DestinationClient() {
               </button>
 
               <div
-                ref={scrollContainerRef}
+                ref={selectionScrollRef}
                 className="flex overflow-x-auto scroll-smooth pb-8 lg:pb-10 scrollbar-hide overflow-visible"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
-                {hotels.map((hotel) => (
+                {selectionHotels.map((hotel) => (
                   <div key={hotel.id} className="flex-shrink-0 w-[280px] p-2">
                     <CardHotel
                       imageUrl={hotel.photo_principale ?? ''}
@@ -210,15 +197,31 @@ export default function DestinationClient() {
               </div>
 
               <button
-                onClick={scrollRight}
+                onClick={() => scrollRight(selectionScrollRef)}
                 className="absolute -right-3 lg:-right-5 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white rounded-full p-2 lg:p-3 shadow-lg transition-all duration-200 hover:scale-110 hidden lg:flex items-center justify-center cursor-pointer"
                 aria-label={t('next_hotels')}
               >
                 <ChevronRight className="w-5 h-5 lg:w-6 lg:h-6 text-gray-700" />
               </button>
+
+              <div className="flex justify-center gap-2 mt-6 lg:hidden">
+                {selectionHotels.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => scrollToIndex(selectionScrollRef, index)}
+                    className={`transition-all duration-300 cursor-pointer ${
+                      selectionActiveIndex === index
+                        ? 'w-6 h-2 rounded-full bg-[#01BDA5]'
+                        : 'w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400'
+                    }`}
+                    aria-label={t('previous_hotels')}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         )}
+
       </div>
     </main>
   )

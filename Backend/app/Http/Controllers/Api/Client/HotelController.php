@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Hotel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use OpenApi\Attributes as OA;
 
 class HotelController extends Controller
@@ -74,6 +75,34 @@ class HotelController extends Controller
             $query->where('etoiles', '>=', $etoilesMin);
         }
 
+        // Sélection : hôtels avec abonnement Signature actif
+        if ($request->boolean('selection')) {
+            $query->whereHas('abonnements', fn($q) => $q
+                ->where('type_abonnement', 'signature')
+                ->where(fn($q2) => $q2->whereNull('date_fin')->orWhere('date_fin', '>=', now()))
+            );
+            $hotels = $query->paginate(12);
+            $hotels->getCollection()->transform(fn($h) => $this->formatHotel($h));
+            return response()->json($hotels);
+        }
+
+        // Populaires : triés par nombre de réservations confirmées/terminées
+        if ($request->boolean('popular')) {
+            $hotels = $query
+                ->select('hotels.*')
+                ->addSelect(DB::raw('(
+                    SELECT COUNT(r.id)
+                    FROM reservations r
+                    INNER JOIN proprietes p ON r.propriete_id = p.id
+                    WHERE p.hotel_id = hotels.id
+                    AND r.statut IN (\'confirmee\', \'terminee\')
+                ) as nb_reservations'))
+                ->orderByDesc('nb_reservations')
+                ->limit(10)
+                ->get();
+            return response()->json(['data' => $hotels->map(fn($h) => $this->formatHotel($h))]);
+        }
+
         $sort = $request->input('sort', 'nom');
         match ($sort) {
             'etoiles' => $query->orderByDesc('etoiles'),
@@ -82,34 +111,37 @@ class HotelController extends Controller
 
         $hotels = $query->paginate(12);
 
-        $hotels->getCollection()->transform(function ($hotel) {
-            $prixMin = $hotel->proprietes()
-                ->whereHas('currentPrix')
-                ->with('currentPrix')
-                ->get()
-                ->min(fn($p) => $p->currentPrix?->prix);
-
-            $noteMoyenne = $hotel->proprietes()
-                ->withAvg('avis', 'note')
-                ->get()
-                ->avg('avis_avg_note');
-
-            return [
-                'id' => $hotel->id,
-                'nom' => $hotel->nom,
-                'description' => $hotel->description,
-                'etoiles' => $hotel->etoiles,
-                'photo_principale' => $hotel->photos->first()?->url,
-                'adresse' => $hotel->adresse ? [
-                    'ville' => $hotel->adresse->ville,
-                    'pays' => $hotel->adresse->pays,
-                ] : null,
-                'prix_min' => $prixMin,
-                'note_moyenne' => $noteMoyenne ? round($noteMoyenne, 1) : null,
-            ];
-        });
+        $hotels->getCollection()->transform(fn($h) => $this->formatHotel($h));
 
         return response()->json($hotels);
+    }
+
+    private function formatHotel(Hotel $hotel): array
+    {
+        $prixMin = $hotel->proprietes()
+            ->whereHas('currentPrix')
+            ->with('currentPrix')
+            ->get()
+            ->min(fn($p) => $p->currentPrix?->prix);
+
+        $noteMoyenne = $hotel->proprietes()
+            ->withAvg('avis', 'note')
+            ->get()
+            ->avg('avis_avg_note');
+
+        return [
+            'id'               => $hotel->id,
+            'nom'              => $hotel->nom,
+            'description'      => $hotel->description,
+            'etoiles'          => $hotel->etoiles,
+            'photo_principale' => $hotel->photos->first()?->url,
+            'adresse'          => $hotel->adresse ? [
+                'ville' => $hotel->adresse->ville,
+                'pays'  => $hotel->adresse->pays,
+            ] : null,
+            'prix_min'         => $prixMin,
+            'note_moyenne'     => $noteMoyenne ? round($noteMoyenne, 1) : null,
+        ];
     }
 
     #[OA\Get(

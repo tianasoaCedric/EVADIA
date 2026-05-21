@@ -67,6 +67,11 @@ class Photo extends Model
         );
     }
 
+    public function scopeForOffre(Builder $query, int $offreId): Builder
+    {
+        return $query->where('entite_type', 'offre')->where('entite_id', $offreId);
+    }
+
     public function scopeForPropriete(Builder $query, int $proprieteId): Builder
     {
         return $query->where(fn ($q) =>

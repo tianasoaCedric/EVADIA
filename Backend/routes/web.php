@@ -21,6 +21,7 @@ use App\Http\Controllers\Hotel\ReservationController;
 use App\Http\Controllers\Hotel\CalendarController;
 use App\Http\Controllers\Hotel\PricingController;
 use App\Http\Controllers\Hotel\HotelOffreController;
+use App\Http\Controllers\Hotel\OffrePhotoController;
 use App\Http\Controllers\Hotel\MessageController as HotelMessageController;
 use App\Http\Controllers\Hotel\NotificationController as HotelNotificationController;
 use App\Http\Controllers\Hotel\PaymentController;
@@ -165,6 +166,8 @@ Route::middleware(['auth:hotel', 'role:admin_hotel,gestionnaire_hotel', 'passwor
         Route::post('pricing/{propriete}/price', [PricingController::class, 'updatePrice'])->name('pricing.update');
         Route::resource('offers', HotelOffreController::class)->except(['show', 'destroy']);
         Route::patch('offers/{offre}/toggle', [HotelOffreController::class, 'toggle'])->name('offers.toggle');
+        Route::post('offers/{offre}/photo', [OffrePhotoController::class, 'store'])->name('offers.photo.store');
+        Route::delete('offers/{offre}/photo/{photo}', [OffrePhotoController::class, 'destroy'])->name('offers.photo.destroy');
 
         // Messaging
         Route::get('messages', [HotelMessageController::class, 'index'])->name('messages.index');

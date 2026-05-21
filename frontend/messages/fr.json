@@ -222,6 +222,7 @@
     "hero_subtitle": "Découvrez les régions de Madagascar et leurs hébergements d'exception",
     "where_to_go": "Où voulez-vous partir ?",
     "our_selection": "Notre sélection d'hébergements",
+    "popular_hotels": "Hébergements populaires",
     "previous_hotels": "Défiler vers la gauche",
     "next_hotels": "Défiler vers la droite",
     "go_to_hotel": "Aller à l'hôtel {number}"
@@ -260,6 +261,7 @@
     "not_found": "Ville non trouvée",
     "back_label": "Retour",
     "search_placeholder": "Rechercher un hôtel...",
+    "our_selection": "Sélection d'hébergements",
     "popular_hotels": "Hébergements populaires à {name}",
     "hotels_title": "Hébergements à {name}",
     "no_results": "Aucun hôtel trouvé",
@@ -280,12 +282,13 @@
     "hero_title": "Offres spéciales",
     "hero_subtitle": "Profitez de réductions exceptionnelles sur nos hébergements",
     "search_placeholder": "Rechercher une offre par hôtel, ville ou destination...",
+    "loading": "Chargement...",
     "no_results": "Aucune offre trouvée",
     "previous_page": "Page précédente",
     "next_page": "Page suivante",
     "results_singular": "offre trouvée",
     "results_plural": "offres trouvées",
-    "offer_title" : "Trouvez ici les offres qui vous convient"
+    "offer_title": "Trouvez ici les offres qui vous convient"
   },
   "OfferCard": {
     "offer": "offre",

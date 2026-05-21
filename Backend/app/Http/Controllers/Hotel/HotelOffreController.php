@@ -7,7 +7,9 @@ use App\Http\Controllers\Hotel\Traits\BelongsToHotel;
 use App\Models\AvantageOffre;
 use App\Models\Offre;
 use App\Models\OffreApplication;
+use App\Models\Photo;
 use App\Models\TypesAvantage;
+use Illuminate\Support\Facades\Storage;
 use App\Traits\LogsAdminAction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -53,29 +55,35 @@ class HotelOffreController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'titre' => 'required|max:200',
-            'description' => 'nullable|string',
-            'date_debut' => 'required|date',
-            'date_fin' => 'required|date|after:date_debut',
-            'code_promo' => 'nullable|string|max:50|unique:offres,code_promo',
-            'avantages' => 'required|array|min:1',
+            'titre'        => 'required|max:200',
+            'description'  => 'nullable|string',
+            'date_debut'   => 'required|date',
+            'date_fin'     => 'required|date|after:date_debut',
+            'code_promo'   => 'nullable|string|max:50|unique:offres,code_promo',
+            'remise_pct'   => 'nullable|integer|min:0|max:100',
+            'conditions'   => 'nullable|array',
+            'conditions.*' => 'string|max:500',
+            'photo'        => 'nullable|image|max:5120',
+            'avantages'    => 'required|array|min:1',
             'avantages.*.type_avantage_id' => 'required|exists:types_avantages,id',
-            'avantages.*.valeur' => 'required|string',
-            'avantages.*.entite_type' => 'required|in:hotel,propriete,service',
-            'avantages.*.entite_id' => 'required|integer',
+            'avantages.*.valeur'           => 'required|string',
+            'avantages.*.entite_type'      => 'required|in:hotel,propriete,service',
+            'avantages.*.entite_id'        => 'required|integer',
         ]);
 
         $hotel = $this->getHotel();
 
         DB::transaction(function () use ($request, $hotel) {
             $offre = Offre::create([
-                'hotel_id' => $hotel->id,
-                'titre' => $request->titre,
-                'description' => $request->description,
+                'hotel_id'   => $hotel->id,
+                'titre'      => $request->titre,
+                'description'=> $request->description,
                 'date_debut' => $request->date_debut,
-                'date_fin' => $request->date_fin,
+                'date_fin'   => $request->date_fin,
                 'code_promo' => $request->code_promo,
-                'statut' => 'active',
+                'remise_pct' => $request->input('remise_pct', 0),
+                'conditions' => array_filter((array) $request->input('conditions', [])),
+                'statut'     => 'active',
                 'created_by' => auth()->id(),
                 'created_at' => now(),
             ]);
@@ -96,6 +104,18 @@ class HotelOffreController extends Controller
                 ]);
             }
 
+            if ($request->hasFile('photo')) {
+                $path = $request->file('photo')->store("offres/{$offre->id}", 's3');
+                Photo::create([
+                    'entite_type'    => 'offre',
+                    'entite_id'      => $offre->id,
+                    'url_photo'      => $path,
+                    'ordre'          => 1,
+                    'est_principale' => true,
+                    'uploaded_by'    => auth()->id(),
+                ]);
+            }
+
             $this->logAction('offer_created', "Offre {$offre->titre} créée");
         });
 
@@ -104,7 +124,7 @@ class HotelOffreController extends Controller
 
     public function edit($id)
     {
-        $offre = Offre::where('id', $id)->where('hotel_id', $this->getHotel()->id)->with('avantages.applications')->firstOrFail();
+        $offre = Offre::where('id', $id)->where('hotel_id', $this->getHotel()->id)->with(['avantages.applications', 'photos'])->firstOrFail();
         $hotel = $this->getHotel();
         $proprietes = $hotel->proprietes()->select('id', 'nom')->get();
         $services = $hotel->services()->select('id', 'nom')->get();
@@ -118,14 +138,21 @@ class HotelOffreController extends Controller
         $offre = Offre::where('id', $id)->where('hotel_id', $this->getHotel()->id)->firstOrFail();
 
         $request->validate([
-            'titre' => 'required|max:200',
-            'description' => 'nullable|string',
-            'date_debut' => 'required|date',
-            'date_fin' => 'required|date|after:date_debut',
-            'code_promo' => 'nullable|string|max:50|unique:offres,code_promo,' . $offre->id,
+            'titre'        => 'required|max:200',
+            'description'  => 'nullable|string',
+            'date_debut'   => 'required|date',
+            'date_fin'     => 'required|date|after:date_debut',
+            'code_promo'   => 'nullable|string|max:50|unique:offres,code_promo,' . $offre->id,
+            'remise_pct'   => 'nullable|integer|min:0|max:100',
+            'conditions'   => 'nullable|array',
+            'conditions.*' => 'string|max:500',
         ]);
 
-        $offre->update($request->only(['titre', 'description', 'date_debut', 'date_fin', 'code_promo']));
+        $offre->update([
+            ...$request->only(['titre', 'description', 'date_debut', 'date_fin', 'code_promo']),
+            'remise_pct' => $request->input('remise_pct', 0),
+            'conditions' => array_filter((array) $request->input('conditions', [])),
+        ]);
 
         $this->logAction('offer_updated', "Offre {$offre->titre} modifiée");
 

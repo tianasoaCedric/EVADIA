@@ -9,7 +9,7 @@ import { getMessages } from 'next-intl/server';
 // Configuration correcte de la police Outfit
 const outfit = Outfit({
   subsets: ['latin'],
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+  weight: ['400', '500', '600', '700'],
   variable: '--font-outfit', // Variable CSS pour utiliser la police
   display: 'swap',
 })

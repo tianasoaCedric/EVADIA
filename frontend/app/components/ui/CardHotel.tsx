@@ -170,7 +170,7 @@ const CardHotel = ({
     `}>
       {/* Image en haut */}
       <div className={`relative h-64 sm:h-64 w-full rounded-xl overflow-hidden bg-gray-200`}>
-        {!imageError ? (
+        {!imageError && imageUrl ? (
           <Image
             src={imageUrl}
             alt={alt || name}

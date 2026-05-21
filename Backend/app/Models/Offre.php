@@ -22,6 +22,8 @@ class Offre extends Model
         'date_debut',
         'date_fin',
         'code_promo',
+        'remise_pct',
+        'conditions',
         'statut',
         'created_at',
         'created_by',
@@ -30,10 +32,18 @@ class Offre extends Model
     protected function casts(): array
     {
         return [
-            'date_debut' => 'date',
-            'date_fin' => 'date',
-            'created_at' => 'datetime',
+            'date_debut'  => 'date',
+            'date_fin'    => 'date',
+            'created_at'  => 'datetime',
+            'remise_pct'  => 'integer',
+            'conditions'  => 'array',
         ];
+    }
+
+    public function photos(): HasMany
+    {
+        return $this->hasMany(Photo::class, 'entite_id')
+            ->where('entite_type', 'offre');
     }
 
     public function hotel(): BelongsTo

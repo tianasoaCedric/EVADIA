@@ -87,17 +87,20 @@ class OffreController extends Controller
         $hotel = $this->getHotel();
 
         $validated = $request->validate([
-            'titre' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'date_debut' => 'required|date',
-            'date_fin' => 'required|date|after:date_debut',
-            'code_promo' => 'nullable|string|max:50|unique:offres,code_promo',
+            'titre'        => 'required|string|max:255',
+            'description'  => 'nullable|string',
+            'date_debut'   => 'required|date',
+            'date_fin'     => 'required|date|after:date_debut',
+            'code_promo'   => 'nullable|string|max:50|unique:offres,code_promo',
+            'remise_pct'   => 'nullable|integer|min:0|max:100',
+            'conditions'   => 'nullable|array',
+            'conditions.*' => 'string|max:500',
         ]);
 
         $offre = Offre::create([
             ...$validated,
-            'hotel_id' => $hotel->id,
-            'statut' => 'active',
+            'hotel_id'   => $hotel->id,
+            'statut'     => 'active',
             'created_by' => auth()->id(),
         ]);
 
