@@ -181,7 +181,7 @@ const Avatar = ({ size = 'md', variant = 'default', className = '', onDeviseChan
             </button>
 
             <button
-              onClick={() => { setIsOpen(false); router.push('/favoris') }}
+              onClick={() => { setIsOpen(false); router.push('/favorite') }}
               className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
             >
               <Heart className="w-4 h-4 text-gray-400" />
