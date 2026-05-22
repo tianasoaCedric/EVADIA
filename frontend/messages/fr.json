@@ -547,5 +547,31 @@
     "discover_hotels": "Découvrir des hôtels",
     "price_per_night": "Prix par nuit",
     "total_price": "Prix total"
+  },
+  "SearchSuggestions": {
+    "loading": "Chargement...",
+    "no_results": "Aucun résultat trouvé",
+    "try_another": "Essayez un autre terme de recherche",
+    "type_destination": "Destination",
+    "type_hotel": "Hôtel",
+    "type_city": "Ville",
+    "type_category": "Catégorie"
+  },
+  "SearchPage": {
+    "meta_title": "Recherche : {query} | Evadia",
+    "meta_title_default": "Recherche | Evadia",
+    "meta_description": "Résultats de recherche sur Evadia"
+  },
+  "Search": {
+    "back": "Retour",
+    "title": "Résultats de recherche",
+    "results_for": "Vos résultats pour : \"{query}\"",
+    "filters": "Filtres",
+    "clear_filters": "Effacer les filtres",
+    "loading": "Chargement...",
+    "no_results": "Aucun résultat trouvé",
+    "no_results_description": "Essayez avec d'autres mots-clés ou consultez nos offres du moment.",
+    "results_singular": "résultat",
+    "results_plural": "résultats"
   }
 }

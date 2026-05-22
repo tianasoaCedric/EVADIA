@@ -3,12 +3,14 @@
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import ToggleLangue from '../ui/ToggleLangue'
 import Avatar from '../ui/Avatar'
 import Input from '../ui/Input'
 import { ChevronDown, Search } from 'lucide-react'
 import { useDevise } from '../../context/DeviseContext'
+import SearchSuggestions, { Suggestion } from '../ui/SearchSuggestions'
 
 const MenuFullscreen = dynamic(() => import('./MenuFullscreen'), { ssr: false })
 
@@ -23,8 +25,6 @@ interface HeaderProps {
     onMenuClick?: () => void
     /** Callback clic sur la recherche */
     onSearchClick?: () => void
-    /** Afficher le champ de recherche (mobile vs desktop) */
-    showSearchInput?: boolean
     /** Mode du header (default ou dark) */
     theme?: 'default' | 'dark'
     /** Callback changement de devise */
@@ -42,10 +42,10 @@ const Header = ({
     onLanguageChange,
     onMenuClick,
     onSearchClick,
-    showSearchInput = true,
     theme = 'default',
     onDeviseChange
 }: HeaderProps) => {
+    const router = useRouter()
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [searchValue, setSearchValue] = useState('')
@@ -53,14 +53,27 @@ const Header = ({
     const [isSliding, setIsSliding] = useState(false)
     const [isScrolled, setIsScrolled] = useState(false)
     const [deviseOpen, setDeviseOpen] = useState(false)
+    const [showSuggestions, setShowSuggestions] = useState(false)
     const { devise: selectedDevise, setDevise } = useDevise()
     const deviseRef = useRef<HTMLDivElement>(null)
+    const searchContainerRef = useRef<HTMLDivElement>(null)
 
     // Fermer le dropdown devise si clic extérieur
     useEffect(() => {
         const handler = (e: MouseEvent) => {
             if (deviseRef.current && !deviseRef.current.contains(e.target as Node)) {
                 setDeviseOpen(false)
+            }
+        }
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [])
+
+    // Fermer les suggestions si clic extérieur
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+                setShowSuggestions(false)
             }
         }
         document.addEventListener('mousedown', handler)
@@ -122,12 +135,26 @@ const Header = ({
 
     const handleSearchToggle = () => {
         setIsSearchOpen(!isSearchOpen)
+        setShowSuggestions(false)
+        setSearchValue('')
         onSearchClick?.()
     }
 
     const handleSearchSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        console.log('Recherche:', searchValue)
+        if (searchValue.trim()) {
+            router.push(`/search?q=${encodeURIComponent(searchValue)}`)
+            setIsSearchOpen(false)
+            setShowSuggestions(false)
+            setSearchValue('')
+        }
+    }
+
+    const handleSelectSuggestion = (suggestion: Suggestion) => {
+        setSearchValue('')
+        setIsSearchOpen(false)
+        setShowSuggestions(false)
+        router.push(suggestion.href)
     }
 
     const handleDeviseChange = (code: string) => {
@@ -275,19 +302,7 @@ const Header = ({
                                     className={`p-2 transition-all duration-200 rounded-full cursor-pointer ${currentTheme.searchButton}`}
                                     aria-label="Rechercher"
                                 >
-                                    <svg
-                                        className="w-5 h-5 md:w-6 md:h-6"
-                                        fill="none"
-                                        stroke={currentTheme.iconColor}
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                                        />
-                                    </svg>
+                                    <Search className="w-5 h-5 md:w-6 md:h-6" stroke={currentTheme.iconColor} />
                                 </button>
 
                                 {/* Sélecteur de devise */}
@@ -328,28 +343,32 @@ const Header = ({
                         </div>
 
                         {/* Champ de recherche expansible */}
-                        {showSearchInput && isSearchOpen && (
-                            <div className={`
-                                    py-3 border-t border-white/20 
-                                    transition-all duration-300 ease-out
-                                    animate-fade-in
-                                    animate-in slide-in-from-top-2 fade-in
-                                    ${showSearchInput ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}
-                                `}>
+                        {isSearchOpen && (
+                            <div className="relative py-3 border-t border-white/20 transition-all duration-300 ease-out" ref={searchContainerRef}>
                                 <form onSubmit={handleSearchSubmit} className="relative">
                                     <Input
                                         type="text"
                                         placeholder="Rechercher..."
                                         value={searchValue}
-                                        onChange={(e) => setSearchValue(e.target.value)}
-                                        icon={
-                                            <Search className="w-5 h-5" />
-                                        }
+                                        onChange={(e) => {
+                                            setSearchValue(e.target.value)
+                                            setShowSuggestions(true)
+                                        }}
+                                        onFocus={() => setShowSuggestions(true)}
+                                        icon={<Search className="w-5 h-5" />}
                                         fullWidth
                                         variant={activeTheme === 'dark' ? 'light' : 'default'}
                                         placeholderPosition="left"
                                     />
                                 </form>
+                                
+                                {/* Suggestions de recherche */}
+                                <SearchSuggestions
+                                    searchQuery={searchValue}
+                                    isOpen={showSuggestions && searchValue.length > 0}
+                                    onSelect={handleSelectSuggestion}
+                                    onClose={() => setShowSuggestions(false)}
+                                />
                             </div>
                         )}
                     </div>
