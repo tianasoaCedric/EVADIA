@@ -12,6 +12,8 @@ class Ville extends Model
 
     protected $fillable = [
         'nom',
+        'image',
+        'description',
         'destination_id',
         'code_postal',
         'latitude',

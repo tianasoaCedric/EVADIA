@@ -7,6 +7,7 @@ use App\Models\Destination;
 use App\Models\Hotel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class VilleController extends Controller
 {
@@ -50,6 +51,8 @@ class VilleController extends Controller
             'id'             => $v->id,
             'nom'            => $v->nom,
             'destination_id' => $v->destination_id,
+            'description'    => $v->description,
+            'image'          => $v->image ? Storage::disk('s3')->url($v->image) : null,
         ]);
 
         return response()->json([

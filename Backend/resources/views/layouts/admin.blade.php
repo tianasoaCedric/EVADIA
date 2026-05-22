@@ -207,6 +207,40 @@
                             <span x-show="!sidebarOpen" class="sidebar-tooltip">Abonnements</span>
                         </a>
 
+                        <a href="{{ route('admin.destinations.index') }}"
+                            class="sidebar-link group {{ request()->routeIs('admin.destinations.*') ? 'active' : '' }}">
+                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg {{ request()->routeIs('admin.destinations.*') ? 'bg-rose-500/20 text-rose-400' : 'text-white/50 group-hover:text-white/80' }} transition-colors">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                                </svg>
+                            </div>
+                            <span x-show="sidebarOpen">Destinations</span>
+                            <span x-show="!sidebarOpen" class="sidebar-tooltip">Destinations</span>
+                        </a>
+
+                        <a href="{{ route('admin.villes.index') }}"
+                            class="sidebar-link group {{ request()->routeIs('admin.villes.*') ? 'active' : '' }}">
+                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg {{ request()->routeIs('admin.villes.*') ? 'bg-cyan-500/20 text-cyan-400' : 'text-white/50 group-hover:text-white/80' }} transition-colors">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5M3.75 21V5.625A2.625 2.625 0 016.375 3h11.25A2.625 2.625 0 0120.25 5.625V21M9 9.75h1.5m0 0H12m-1.5 0v1.5m0-1.5V8.25M6.75 9.75h.008v.008H6.75V9.75zm.375 3h.008v.008h-.008V12.75zm0 3h.008v.008h-.008V15.75zM9.75 9.75h.008v.008H9.75V9.75zm.375 3h.008v.008h-.008V12.75zm0 3h.008v.008h-.008V15.75zM13.5 9.75h.008v.008H13.5V9.75zm.375 3h.008v.008h-.008V12.75zm0 3h.008v.008h-.008V15.75zM16.5 9.75h.008v.008H16.5V9.75zm.375 3h.008v.008h-.008V12.75zm0 3h.008v.008h-.008V15.75z" />
+                                </svg>
+                            </div>
+                            <span x-show="sidebarOpen">Villes</span>
+                            <span x-show="!sidebarOpen" class="sidebar-tooltip">Villes</span>
+                        </a>
+
+                        <a href="{{ route('admin.types-hebergement.index') }}"
+                            class="sidebar-link group {{ request()->routeIs('admin.types-hebergement.*') ? 'active' : '' }}">
+                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg {{ request()->routeIs('admin.types-hebergement.*') ? 'bg-amber-500/20 text-amber-400' : 'text-white/50 group-hover:text-white/80' }} transition-colors">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205l3 1m1.5.5l-1.5-.5M6.75 7.364V3h-3v18m3-13.636l10.5-3.819" />
+                                </svg>
+                            </div>
+                            <span x-show="sidebarOpen">Types d'hébergement</span>
+                            <span x-show="!sidebarOpen" class="sidebar-tooltip">Types héberg.</span>
+                        </a>
+
                         <a href="{{ route('admin.decouverte.villes.index') }}"
                             class="sidebar-link group {{ request()->routeIs('admin.decouverte.*') ? 'active' : '' }}">
                             <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg {{ request()->routeIs('admin.decouverte.*') ? 'bg-teal-500/20 text-teal-400' : 'text-white/50 group-hover:text-white/80' }} transition-colors">

@@ -12,16 +12,6 @@ import type { Destination, Hotel } from '@/lib/types'
 import Header from "../components/molecules/Header"
 
 
-const DESTINATION_IMAGES: Record<string, string> = {
-  'nord':                    '/photos/chambre.jpg',
-  'sud':                     '/photos/test.jpg',
-  'est':                     '/photos/chambre.jpg',
-  'ouest':                   '/photos/test.jpg',
-  'hautes terres centrales': '/photos/chambre.jpg',
-}
-
-const getDestinationImage = (nom: string): string =>
-  DESTINATION_IMAGES[nom.toLowerCase()] ?? '/photos/chambre.jpg'
 
 interface DestinationClientProps {
   destinations: Destination[]
@@ -61,9 +51,16 @@ export default function DestinationClient({ destinations, selectionHotels }: Des
 
   const selectionActiveIndex = getActiveIndex(selectionScrollPos, selectionHotels.length)
 
-  const topSpots    = destinations.slice(0, 2)
-  const middleSpot  = destinations[2]
-  const bottomSpots = destinations.slice(3, 5)
+  const DESTINATION_ORDER = ['nord', 'est', 'hautes terres centrales', 'ouest', 'sud']
+  const sortedDestinations = [...destinations].sort((a, b) => {
+    const ai = DESTINATION_ORDER.indexOf(a.nom.toLowerCase())
+    const bi = DESTINATION_ORDER.indexOf(b.nom.toLowerCase())
+    return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
+  })
+
+  const topSpots    = sortedDestinations.slice(0, 2)
+  const middleSpot  = sortedDestinations[2]
+  const bottomSpots = sortedDestinations.slice(3, 5)
 
   return (
     <main className="min-h-screen">
@@ -94,7 +91,7 @@ export default function DestinationClient({ destinations, selectionHotels }: Des
               {topSpots.map((dest, i) => (
                 <CardDestination
                   key={dest.id}
-                  imageUrl={getDestinationImage(dest.nom)}
+                  imageUrl={dest.image_url ?? '/photos/chambre.jpg'}
                   title={dest.nom}
                   href={`/destination/${createSlug(dest.id, dest.nom)}`}
                   height="h-72"
@@ -120,7 +117,7 @@ export default function DestinationClient({ destinations, selectionHotels }: Des
               {bottomSpots.map((dest) => (
                 <CardDestination
                   key={dest.id}
-                  imageUrl={getDestinationImage(dest.nom)}
+                  imageUrl={dest.image_url ?? '/photos/chambre.jpg'}
                   title={dest.nom}
                   href={`/destination/${createSlug(dest.id, dest.nom)}`}
                   height="h-72"

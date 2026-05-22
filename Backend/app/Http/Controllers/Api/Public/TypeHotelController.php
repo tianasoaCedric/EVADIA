@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Public;
 use App\Http\Controllers\Controller;
 use App\Models\TypesHotel;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Storage;
 
 class TypeHotelController extends Controller
 {
@@ -15,7 +16,13 @@ class TypeHotelController extends Controller
     public function index(): JsonResponse
     {
         $types = TypesHotel::orderBy('nom')
-            ->get(['id', 'nom', 'description']);
+            ->get(['id', 'nom', 'description', 'image'])
+            ->map(fn($t) => [
+                'id'          => $t->id,
+                'nom'         => $t->nom,
+                'description' => $t->description,
+                'image'       => $t->image ? Storage::disk('s3')->url($t->image) : null,
+            ]);
 
         return response()->json(['data' => $types]);
     }

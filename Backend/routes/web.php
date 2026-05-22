@@ -6,6 +6,9 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\HotelController;
 use App\Http\Controllers\Admin\HotelPhotoController;
 use App\Http\Controllers\Admin\AbonnementController;
+use App\Http\Controllers\Admin\DestinationController;
+use App\Http\Controllers\Admin\VilleController;
+use App\Http\Controllers\Admin\TypeHebergementController;
 use App\Http\Controllers\Admin\VilleDecouverteController;
 use App\Http\Controllers\Admin\LieuDecouverteController;
 use App\Http\Controllers\Admin\MessageController;
@@ -75,6 +78,16 @@ Route::middleware(['auth', 'role:super_admin,admin_evadia'])
         Route::resource('subscriptions', AbonnementController::class)->parameters([
             'subscriptions' => 'subscription',
         ]);
+
+        // Destinations
+        Route::resource('destinations', DestinationController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+
+        // Villes (destinations)
+        Route::resource('villes', VilleController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+
+        // Types d'hébergement
+        Route::resource('types-hebergement', TypeHebergementController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy'])
+            ->parameters(['types-hebergement' => 'typesHebergement']);
 
         // Contenu Découverte
         Route::resource('decouverte/villes', VilleDecouverteController::class)->parameters([

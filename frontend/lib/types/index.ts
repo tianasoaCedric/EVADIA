@@ -91,7 +91,9 @@ export interface Photo {
 export interface TypeHotel {
   id: number
   nom: string
-  slug: string
+  slug?: string
+  description?: string | null
+  image?: string | null
 }
 
 export interface Hotel {

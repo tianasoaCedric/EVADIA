@@ -12,6 +12,8 @@ interface Ville {
   id: number
   nom: string
   destination_id: number
+  description?: string | null
+  image?: string | null
 }
 
 interface ApiHotel {

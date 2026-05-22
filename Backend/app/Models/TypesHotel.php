@@ -10,7 +10,7 @@ class TypesHotel extends Model
     protected $table = 'types_hotels';
     public $timestamps = false;
 
-    protected $fillable = ['nom', 'description', 'created_at'];
+    protected $fillable = ['nom', 'image', 'description', 'created_at'];
 
     protected function casts(): array
     {

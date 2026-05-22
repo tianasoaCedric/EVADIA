@@ -15,6 +15,8 @@ interface Ville {
   id: number
   nom: string
   destination_id: number
+  description?: string | null
+  image?: string | null
 }
 
 interface ApiHotel {
@@ -181,7 +183,7 @@ export default function CityClient({
                 {filteredVilles.map((ville, index) => (
                   <div key={ville.id} className="flex-shrink-0 w-[280px] sm:w-[300px] md:w-[320px] p-2">
                     <CardDestination
-                      imageUrl={destinationImage}
+                      imageUrl={ville.image ?? destinationImage}
                       title={ville.nom}
                       href={`/ville/${createSlug(ville.id, ville.nom)}`}
                       height="h-[411px]"
