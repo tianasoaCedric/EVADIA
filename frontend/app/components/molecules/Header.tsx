@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import ToggleLangue from '../ui/ToggleLangue'
 import Avatar from '../ui/Avatar'
@@ -20,9 +21,7 @@ interface HeaderProps {
     isLoggedIn?: boolean
     /** Callback clic sur le menu */
     onMenuClick?: () => void
-    /** Callback clic sur le logo */
-    onLogoClick?: () => void
-    /** Callback clic sur la recherche */
+/** Callback clic sur la recherche */
     onSearchClick?: () => void
     /** Afficher le champ de recherche (mobile vs desktop) */
     showSearchInput?: boolean
@@ -42,7 +41,6 @@ const Header = ({
     currentLang = 'FR',
     onLanguageChange,
     onMenuClick,
-    onLogoClick,
     onSearchClick,
     showSearchInput = false,
     theme = 'default',
@@ -242,8 +240,8 @@ const Header = ({
                             </div>
 
                             {/* Partie centrale : Logo */}
-                            <div
-                                onClick={onLogoClick}
+                            <Link
+                                href="/"
                                 className="absolute left-1/2 transform -translate-x-1/2 cursor-pointer"
                             >
                                 <div className="flex items-center justify-center">
@@ -267,7 +265,7 @@ const Header = ({
                                         priority
                                     />
                                 </div>
-                            </div>
+                            </Link>
 
                             {/* Partie droite : Recherche + Devise + Avatar */}
                             <div className="flex items-center gap-3 md:gap-4">

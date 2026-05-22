@@ -1,25 +1,47 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { ChevronLeft, User, Shield, Heart, Calendar, Settings, CreditCard, Activity } from 'lucide-react'
 import Image from 'next/image'
 import { authService } from '@/lib/services'
 import type { User as UserType } from '@/lib/types'
-import ProfileInfo from './ProfileInfo'
-import ProfileSecurity from './ProfileSecurity'
-import ProfilePreferences from './ProfilePreferences'
-import ProfileBookings from './ProfileBookings'
-import ProfileFavorites from './ProfileFavorites'
-import ProfilePaymentMethods from './ProfilePaymentMethods'
-import ProfileActivity from './ProfileActivity'
 
-interface TabProps {
-    id: string
-    label: string
-    icon: React.ReactNode
-    component: React.ReactNode
+const ProfileInfo = lazy(() => import('./ProfileInfo'))
+const ProfileSecurity = lazy(() => import('./ProfileSecurity'))
+const ProfilePreferences = lazy(() => import('./ProfilePreferences'))
+const ProfileBookings = lazy(() => import('./ProfileBookings'))
+const ProfileFavorites = lazy(() => import('./ProfileFavorites'))
+const ProfilePaymentMethods = lazy(() => import('./ProfilePaymentMethods'))
+const ProfileActivity = lazy(() => import('./ProfileActivity'))
+
+const TAB_IDS = ['info', 'security', 'favorites', 'bookings', 'preferences', 'payments', 'activity'] as const
+type TabId = typeof TAB_IDS[number]
+
+function TabSkeleton() {
+    return (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 animate-pulse">
+            <div className="h-6 bg-gray-200 rounded w-1/3 mb-4" />
+            <div className="space-y-3">
+                <div className="h-10 bg-gray-100 rounded-xl" />
+                <div className="h-10 bg-gray-100 rounded-xl" />
+                <div className="h-10 bg-gray-100 rounded-xl" />
+            </div>
+        </div>
+    )
+}
+
+function ActiveTabContent({ activeTab, user }: { activeTab: TabId; user: UserType }) {
+    switch (activeTab) {
+        case 'info': return <ProfileInfo user={user} />
+        case 'security': return <ProfileSecurity />
+        case 'favorites': return <ProfileFavorites />
+        case 'bookings': return <ProfileBookings />
+        case 'preferences': return <ProfilePreferences />
+        case 'payments': return <ProfilePaymentMethods />
+        case 'activity': return <ProfileActivity />
+    }
 }
 
 export default function ProfileClient() {
@@ -27,30 +49,23 @@ export default function ProfileClient() {
     const t = useTranslations('Profile')
     const [user, setUser] = useState<UserType | null>(null)
     const [isLoading, setIsLoading] = useState(true)
-    const [activeTab, setActiveTab] = useState('info')
+    const [activeTab, setActiveTab] = useState<TabId>('info')
 
     useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const response = await authService.me()
-                setUser(response.user)
-            } catch (error) {
-                console.error(error)
-            } finally {
-                setIsLoading(false)
-            }
-        }
-        fetchUser()
+        authService.me()
+            .then((response) => setUser(response.user))
+            .catch(console.error)
+            .finally(() => setIsLoading(false))
     }, [])
 
-    const tabs: TabProps[] = [
-        { id: 'info', label: t('tabs.info'), icon: <User className="w-4 h-4" />, component: <ProfileInfo user={user} /> },
-        { id: 'security', label: t('tabs.security'), icon: <Shield className="w-4 h-4" />, component: <ProfileSecurity /> },
-        { id: 'favorites', label: t('tabs.favorites'), icon: <Heart className="w-4 h-4" />, component: <ProfileFavorites /> },
-        { id: 'bookings', label: t('tabs.bookings'), icon: <Calendar className="w-4 h-4" />, component: <ProfileBookings /> },
-        { id: 'preferences', label: t('tabs.preferences'), icon: <Settings className="w-4 h-4" />, component: <ProfilePreferences /> },
-        { id: 'payments', label: t('tabs.payments'), icon: <CreditCard className="w-4 h-4" />, component: <ProfilePaymentMethods /> },
-        { id: 'activity', label: t('tabs.activity'), icon: <Activity className="w-4 h-4" />, component: <ProfileActivity /> },
+    const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
+        { id: 'info', label: t('tabs.info'), icon: <User className="w-4 h-4" /> },
+        { id: 'security', label: t('tabs.security'), icon: <Shield className="w-4 h-4" /> },
+        { id: 'favorites', label: t('tabs.favorites'), icon: <Heart className="w-4 h-4" /> },
+        { id: 'bookings', label: t('tabs.bookings'), icon: <Calendar className="w-4 h-4" /> },
+        { id: 'preferences', label: t('tabs.preferences'), icon: <Settings className="w-4 h-4" /> },
+        { id: 'payments', label: t('tabs.payments'), icon: <CreditCard className="w-4 h-4" /> },
+        { id: 'activity', label: t('tabs.activity'), icon: <Activity className="w-4 h-4" /> },
     ]
 
     if (isLoading) {
@@ -69,7 +84,6 @@ export default function ProfileClient() {
         )
     }
 
-    const activeComponent = tabs.find(tab => tab.id === activeTab)?.component
     const getInitials = () => {
         const p = user.prenom?.[0] ?? ''
         const n = user.nom?.[0] ?? ''
@@ -80,16 +94,13 @@ export default function ProfileClient() {
         <main className="min-h-screen pt-24 pb-16 bg-gray-50">
             <div className="container mx-auto px-4">
                 <div className="max-w-5xl mx-auto">
-                    {/* En-tête avec avatar et infos utilisateur */}
                     <div className="rounded-2xl pt-6 mb-8">
                         <div className="flex items-center gap-4">
-                            {/* Avatar */}
                             <button
                                 onClick={() => router.back()}
                                 className="flex items-center gap-2 text-gray-600 hover:text-[#01BDA5] transition-colors cursor-pointer"
                             >
                                 <ChevronLeft className="w-8 h-8" />
-                                {/* <span>{t('back')}</span> */}
                             </button>
                             <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
                                 {user.avatar_url ? (
@@ -105,8 +116,6 @@ export default function ProfileClient() {
                                     </div>
                                 )}
                             </div>
-
-                            {/* Infos utilisateur */}
                             <div>
                                 <h1 className="text-xl md:text-2xl font-bold text-gray-900">
                                     {user.prenom} {user.nom}
@@ -116,7 +125,6 @@ export default function ProfileClient() {
                         </div>
                     </div>
 
-                    {/* Onglets */}
                     <div className="flex flex-wrap gap-2 mb-8 border-b border-gray-200 pb-2">
                         {tabs.map((tab) => (
                             <button
@@ -136,9 +144,10 @@ export default function ProfileClient() {
                         ))}
                     </div>
 
-                    {/* Contenu actif */}
                     <div className="w-full">
-                        {activeComponent}
+                        <Suspense fallback={<TabSkeleton />}>
+                            <ActiveTabContent activeTab={activeTab} user={user} />
+                        </Suspense>
                     </div>
                 </div>
             </div>

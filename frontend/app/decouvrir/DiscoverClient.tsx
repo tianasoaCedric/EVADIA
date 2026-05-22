@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useTranslations } from 'next-intl'
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import { useOnScreen } from '@/hooks/useOnScreen'
@@ -47,7 +47,7 @@ export default function DiscoverClient() {
     document.getElementById('discover-list')?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const renderGrid = () => {
+  const grid = useMemo(() => {
     const rows = []
     for (let i = 0; i < current.length; i += 3) {
       const row = current.slice(i, i + 3)
@@ -69,7 +69,7 @@ export default function DiscoverClient() {
       )
     }
     return rows
-  }
+  }, [current])
 
   if (isLoading) {
     return (
@@ -139,7 +139,7 @@ export default function DiscoverClient() {
           ) : (
             <>
               <div className="transition-all duration-700 ease-out">
-                {renderGrid()}
+                {grid}
               </div>
 
               {totalPages > 1 && (
