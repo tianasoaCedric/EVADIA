@@ -1,487 +1,339 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { ChevronLeft, X, ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRightIcon } from 'lucide-react'
+import { ChevronLeft, X, ChevronLeft as ChevLeft, ChevronRight as ChevRight, MapPin, Building2, BedDouble, Tag, Compass } from 'lucide-react'
 import Header from '../components/molecules/Header'
 import CardHotel from '../components/ui/CardHotel'
 import CardDestination from '../components/ui/CardDestination'
-import OfferCard from '../components/ui/OfferCard'
-import DiscoverCard from '../components/ui/DiscoverCard'
+import { createSlug } from '@/lib/slug'
+import {
+  fetchSearch,
+  createSearchDebounce,
+  type SearchResults,
+  type SearchHotel,
+  type SearchDestination,
+  type SearchVille,
+  type SearchType,
+  type SearchDecouverteVille,
+  type SearchDecouverteLieu,
+} from '@/lib/services/search.service'
 
 interface SearchClientProps {
   searchQuery: string
 }
 
-// Types de résultats
-type ResultType = 'hotel' | 'destination' | 'offer' | 'city' | 'category' | 'discover'
+type FilterType = 'hotel' | 'destination' | 'city' | 'category' | 'discover'
 
-interface SearchResult {
-  id: number
-  type: ResultType
-  title: string
-  subtitle?: string
-  imageUrl: string
-  href: string
-  price?: number
-  rating?: number
-  reviewCount?: number
-  availability?: string
-  discount?: number
-  startDay?: number
-  endDay?: number
-  month?: string
-  hotelName?: string
-  city?: string
-  destination?: string
+const FILTER_CONFIG: Record<FilterType, { label: string; color: string; activeColor: string; Icon: React.ElementType }> = {
+  hotel:       { label: 'Hôtels',               color: 'bg-gray-100 text-gray-600', activeColor: 'bg-green-100 text-green-700',   Icon: BedDouble },
+  destination: { label: 'Destinations',          color: 'bg-gray-100 text-gray-600', activeColor: 'bg-blue-100 text-blue-700',     Icon: MapPin    },
+  city:        { label: 'Villes',                color: 'bg-gray-100 text-gray-600', activeColor: 'bg-purple-100 text-purple-700', Icon: Building2 },
+  category:    { label: "Types d'hébergement",   color: 'bg-gray-100 text-gray-600', activeColor: 'bg-orange-100 text-orange-700', Icon: Tag       },
+  discover:    { label: 'Découverte',            color: 'bg-gray-100 text-gray-600', activeColor: 'bg-teal-100 text-teal-700',     Icon: Compass   },
 }
 
-// Données mock (à remplacer par appel API)
-const getMockResults = (query: string): SearchResult[] => {
-  if (!query) return []
-  
-  const allResults: SearchResult[] = [
-    // Hôtels
-    {
-      id: 1,
-      type: 'hotel',
-      title: 'Hôtel Le Meurice',
-      subtitle: 'Paris, France',
-      imageUrl: '/photos/hotels/ecolodge-1.jpg',
-      href: '/hotel/1-hotel-le-meurice',
-      price: 450000,
-      rating: 4.8,
-      reviewCount: 234,
-      availability: 'Disponible'
-    },
-    {
-      id: 2,
-      type: 'hotel',
-      title: 'Villa de Rêve',
-      subtitle: 'Malé, Maldives',
-      imageUrl: '/photos/hotels/villa-1.jpg',
-      href: '/hotel/4-villa-de-reve',
-      price: 250000,
-      rating: 4.9,
-      reviewCount: 187,
-      availability: 'Disponible'
-    },
-    {
-      id: 3,
-      type: 'hotel',
-      title: 'Palace Hôtel',
-      subtitle: 'Antananarivo, Madagascar',
-      imageUrl: '/photos/hotels/luxe-1.jpg',
-      href: '/hotel/6-palace-hotel',
-      price: 450000,
-      rating: 4.9,
-      reviewCount: 342,
-      availability: '2 places restantes'
-    },
-    {
-      id: 4,
-      type: 'hotel',
-      title: 'Ecolodge de la Forêt',
-      subtitle: 'Antsirabe, Madagascar',
-      imageUrl: '/photos/hotels/ecolodge-2.jpg',
-      href: '/hotel/7-ecolodge',
-      price: 85000,
-      rating: 4.5,
-      reviewCount: 128,
-      availability: 'Disponible'
-    },
-    // Destinations
-    {
-      id: 5,
-      type: 'destination',
-      title: 'Paris',
-      subtitle: 'France',
-      imageUrl: '/photos/destinations/paris.jpg',
-      href: '/destination/paris-1'
-    },
-    {
-      id: 6,
-      type: 'destination',
-      title: 'Maldives',
-      subtitle: 'Océan Indien',
-      imageUrl: '/photos/destinations/maldives.jpg',
-      href: '/destination/maldives-2'
-    },
-    // Offres
-    {
-      id: 7,
-      type: 'offer',
-      title: 'Offre spéciale Paris',
-      subtitle: '-30% sur votre séjour',
-      imageUrl: '/photos/offers/paris.jpg',
-      href: '/offers/paris-offer-1',
-      discount: 30,
-      startDay: 1,
-      endDay: 15,
-      month: 'juin',
-      hotelName: 'Hôtel Le Meurice',
-      city: 'Paris',
-      destination: 'Paris'
-    },
-    {
-      id: 8,
-      type: 'offer',
-      title: 'Offre Maldives',
-      subtitle: '-45% sur votre séjour',
-      imageUrl: '/photos/offers/maldives.jpg',
-      href: '/offers/maldives-offer-2',
-      discount: 45,
-      startDay: 1,
-      endDay: 31,
-      month: 'août',
-      hotelName: 'Maldives Paradise',
-      city: 'Malé',
-      destination: 'les Maldives'
-    },
-    // Villes
-    {
-      id: 9,
-      type: 'city',
-      title: 'Antananarivo',
-      subtitle: 'Madagascar',
-      imageUrl: '/photos/destinations/tananarive.jpg',
-      href: '/ville/antananarivo-1'
-    },
-    {
-      id: 10,
-      type: 'city',
-      title: 'Nosy Be',
-      subtitle: 'Madagascar',
-      imageUrl: '/photos/destinations/nosy-be.jpg',
-      href: '/ville/nosy-be-2'
-    },
-    // Catégories
-    {
-      id: 11,
-      type: 'category',
-      title: 'Ecolodge',
-      subtitle: 'Hébergement écologique',
-      imageUrl: '/photos/categories/ecolodge.jpg',
-      href: '/hebergement/ecolodge-1'
-    },
-    {
-      id: 12,
-      type: 'category',
-      title: 'Villas',
-      subtitle: 'Luxe et intimité',
-      imageUrl: '/photos/categories/villas.jpg',
-      href: '/hebergement/villas-2'
-    },
-    // Découvertes
-    {
-      id: 13,
-      type: 'discover',
-      title: 'Paris, la ville lumière',
-      subtitle: 'Découvrez les merveilles de Paris',
-      imageUrl: '/photos/discover/paris.jpg',
-      href: '/decouvrir/paris-1'
-    },
-    {
-      id: 14,
-      type: 'discover',
-      title: 'Les plus belles plages du monde',
-      subtitle: 'Guide des destinations paradisiaques',
-      imageUrl: '/photos/discover/bali.jpg',
-      href: '/decouvrir/plages-2'
-    }
-  ]
+// Debounce instance stable pour la page
+const debounce = createSearchDebounce(300)
 
-  return allResults.filter(result =>
-    result.title.toLowerCase().includes(query.toLowerCase()) ||
-    result.subtitle?.toLowerCase().includes(query.toLowerCase())
+// ── Skeleton card ────────────────────────────────────────────────────────────
+function SkeletonCard() {
+  return (
+    <div className="rounded-2xl overflow-hidden animate-pulse">
+      <div className="h-48 bg-gray-200" />
+      <div className="p-3 space-y-2">
+        <div className="h-3.5 w-3/4 bg-gray-200 rounded" />
+        <div className="h-3 w-1/2 bg-gray-200 rounded" />
+      </div>
+    </div>
   )
 }
 
-// Configuration des types avec leurs labels et couleurs
-const typeConfig: Record<ResultType, { label: string; color: string }> = {
-  hotel: { label: 'Hôtels', color: 'bg-green-100 text-green-700' },
-  destination: { label: 'Destinations', color: 'bg-blue-100 text-blue-700' },
-  offer: { label: 'Offres', color: 'bg-red-100 text-red-700' },
-  city: { label: 'Villes', color: 'bg-purple-100 text-purple-700' },
-  category: { label: 'Catégories', color: 'bg-orange-100 text-orange-700' },
-  discover: { label: 'Découvertes', color: 'bg-teal-100 text-teal-700' },
+// ── Carousel section ─────────────────────────────────────────────────────────
+function CarouselSection({ title, count, children }: { title: string; count: number; children: React.ReactNode }) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const scroll = (dir: 'left' | 'right') =>
+    scrollRef.current?.scrollBy({ left: dir === 'left' ? -320 : 320, behavior: 'smooth' })
+
+  return (
+    <section>
+      <div className="flex items-center gap-2 mb-4">
+        <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
+        <span className="text-sm text-gray-400">({count})</span>
+      </div>
+
+      {/* Desktop grid */}
+      <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        {children}
+      </div>
+
+      {/* Mobile carousel */}
+      <div className="relative md:hidden">
+        <button
+          onClick={() => scroll('left')}
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white rounded-full p-1.5 shadow-md transition-all hover:scale-110 cursor-pointer"
+          aria-label="Précédent"
+        >
+          <ChevLeft className="w-5 h-5 text-gray-700" />
+        </button>
+        <div
+          ref={scrollRef}
+          className="flex overflow-x-auto scroll-smooth gap-4 pb-4 scrollbar-hide px-1"
+          style={{ scrollbarWidth: 'none' }}
+        >
+          {Array.isArray(children)
+            ? (children as React.ReactNode[]).map((child, i) => (
+                <div key={i} className="flex-shrink-0 w-[260px]">{child}</div>
+              ))
+            : <div className="flex-shrink-0 w-[260px]">{children}</div>}
+        </div>
+        <button
+          onClick={() => scroll('right')}
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white rounded-full p-1.5 shadow-md transition-all hover:scale-110 cursor-pointer"
+          aria-label="Suivant"
+        >
+          <ChevRight className="w-5 h-5 text-gray-700" />
+        </button>
+      </div>
+    </section>
+  )
 }
 
 export default function SearchClient({ searchQuery }: SearchClientProps) {
   const router = useRouter()
   const t = useTranslations('Search')
-  const [results, setResults] = useState<SearchResult[]>([])
-  const [filteredResults, setFilteredResults] = useState<SearchResult[]>([])
-  const [activeFilters, setActiveFilters] = useState<ResultType[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  
-  // Refs pour les sliders
-  const scrollContainerRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
+  const [results, setResults]         = useState<SearchResults | null>(null)
+  const [isLoading, setIsLoading]     = useState(searchQuery.trim().length >= 2)
+  const [activeFilters, setActiveFilters] = useState<FilterType[]>([])
+
+  // Chargement initial (SSR → client hydration avec les vraies données)
   useEffect(() => {
-    const fetchResults = async () => {
-      setIsLoading(true)
-      await new Promise(resolve => setTimeout(resolve, 500))
-      const data = getMockResults(searchQuery)
-      setResults(data)
-      setFilteredResults(data)
-      setIsLoading(false)
-    }
+    if (searchQuery.trim().length < 2) { setResults(null); setIsLoading(false); return }
 
-    fetchResults()
+    setIsLoading(true)
+    fetchSearch(searchQuery, false)
+      .then(setResults)
+      .finally(() => setIsLoading(false))
   }, [searchQuery])
 
-  // Appliquer les filtres
-  useEffect(() => {
-    if (activeFilters.length === 0) {
-      setFilteredResults(results)
-    } else {
-      setFilteredResults(results.filter(result => activeFilters.includes(result.type)))
-    }
-  }, [activeFilters, results])
-
-  const toggleFilter = (type: ResultType) => {
+  const toggleFilter = useCallback((f: FilterType) => {
     setActiveFilters(prev =>
-      prev.includes(type)
-        ? prev.filter(t => t !== type)
-        : [...prev, type]
+      prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]
     )
-  }
+  }, [])
 
-  const clearFilters = () => {
-    setActiveFilters([])
-  }
+  // Totaux par section
+  const counts = useMemo(() => ({
+    hotel:       results?.hotels.length ?? 0,
+    destination: results?.destinations.length ?? 0,
+    city:        results?.villes.length ?? 0,
+    category:    results?.types.length ?? 0,
+    discover:    (results?.decouverte_villes.length ?? 0) + (results?.decouverte_lieux.length ?? 0),
+  }), [results])
 
-  const scrollLeft = (type: string) => {
-    const container = scrollContainerRefs.current[type]
-    if (container) {
-      container.scrollBy({ left: -300, behavior: 'smooth' })
-    }
-  }
+  const totalVisible = useMemo(() => {
+    if (!results) return 0
+    const all = counts.hotel + counts.destination + counts.city + counts.category
+    if (activeFilters.length === 0) return all
+    return activeFilters.reduce((s, f) => s + counts[f], 0)
+  }, [results, counts, activeFilters])
 
-  const scrollRight = (type: string) => {
-    const container = scrollContainerRefs.current[type]
-    if (container) {
-      container.scrollBy({ left: 300, behavior: 'smooth' })
-    }
-  }
-
-  // Grouper les résultats par type
-  const groupedResults = filteredResults.reduce((acc, result) => {
-    if (!acc[result.type]) {
-      acc[result.type] = []
-    }
-    acc[result.type].push(result)
-    return acc
-  }, {} as Record<ResultType, SearchResult[]>)
-
-  const renderResultCard = (result: SearchResult) => {
-    switch (result.type) {
-      case 'hotel':
-        return (
-          <CardHotel
-            key={result.id}
-            imageUrl={result.imageUrl}
-            name={result.title}
-            hotelId={result.id}
-            availability={result.availability || 'Disponible'}
-            price={result.price || 0}
-            rating={result.rating || 0}
-            reviewCount={result.reviewCount}
-          />
-        )
-      case 'destination':
-        return (
-          <CardDestination
-            key={result.id}
-            imageUrl={result.imageUrl}
-            title={result.title}
-            href={result.href}
-            height="h-64"
-            width="w-full"
-            hoverEffect="zoom"
-          />
-        )
-      case 'offer':
-        return (
-          <OfferCard
-            key={result.id}
-            imageUrl={result.imageUrl}
-            discount={result.discount || 0}
-            startDay={result.startDay || 1}
-            endDay={result.endDay || 1}
-            month={result.month || ''}
-            hotelName={result.hotelName || result.title}
-            city={result.city || ''}
-            destination={result.destination || ''}
-            href={result.href}
-          />
-        )
-      case 'city':
-        return (
-          <CardDestination
-            key={result.id}
-            imageUrl={result.imageUrl}
-            title={result.title}
-            href={result.href}
-            height="h-64"
-            width="w-full"
-            hoverEffect="zoom"
-          />
-        )
-      case 'category':
-        return (
-          <CardDestination
-            key={result.id}
-            imageUrl={result.imageUrl}
-            title={result.title}
-            href={result.href}
-            height="h-64"
-            width="w-full"
-            hoverEffect="zoom"
-          />
-        )
-      case 'discover':
-        return (
-          <DiscoverCard
-            key={result.id}
-            imageUrl={result.imageUrl}
-            title={result.title}
-            href={result.href}
-          />
-        )
-      default:
-        return null
-    }
-  }
+  const show = useCallback((type: FilterType) =>
+    activeFilters.length === 0 || activeFilters.includes(type), [activeFilters])
 
   return (
     <>
       <Header theme="dark" />
       <main className="min-h-screen pt-24 pb-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-7xl mx-auto">
-            {/* Titre */}
-            <div className="mb-8">
-              <div className='flex mb-4'>
-                <button
-                  onClick={() => router.back()}
-                  className="flex items-center gap-2 text-gray-900 hover:text-[#01BDA5] transition-colors cursor-pointer"
-                >
-                  <ChevronLeft className="w-8 h-8" />
-                </button>
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-                  {t('title')}
-                </h1>
-              </div>
-              <p className="text-gray-500 mt-1">
-                {t('results_for', { query: searchQuery })}
-              </p>
-            </div>
+        <div className="container mx-auto px-4 max-w-7xl">
 
-            {/* Filtres */}
-            <div className="flex flex-col gap-4 mb-6">
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(typeConfig).map(([type, config]) => (
+          {/* En-tête */}
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-2">
+              <button
+                onClick={() => router.back()}
+                className="text-gray-900 hover:text-[#01BDA5] transition-colors cursor-pointer"
+                aria-label="Retour"
+              >
+                <ChevronLeft className="w-8 h-8" />
+              </button>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                {t('title')}
+              </h1>
+            </div>
+            <p className="text-gray-500 pl-10">
+              {t('results_for', { query: searchQuery })}
+            </p>
+          </div>
+
+          {/* Filtres */}
+          <div className="mb-6 space-y-3">
+            <div className="flex flex-wrap gap-2">
+              {(Object.entries(FILTER_CONFIG) as [FilterType, typeof FILTER_CONFIG[FilterType]][]).map(([type, cfg]) => {
+                const active = activeFilters.includes(type)
+                const n = counts[type]
+                if (n === 0) return null
+                return (
                   <button
                     key={type}
-                    onClick={() => toggleFilter(type as ResultType)}
-                    className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                      activeFilters.includes(type as ResultType)
-                        ? config.color + ' shadow-sm'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    onClick={() => toggleFilter(type)}
+                    className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-150 cursor-pointer ${
+                      active ? cfg.activeColor + ' shadow-sm' : cfg.color + ' hover:bg-gray-200'
                     }`}
                   >
-                    <span>{config.label}</span>
-                    {activeFilters.includes(type as ResultType) && (
-                      <X className="w-3 h-3 ml-0.5" />
-                    )}
+                    <cfg.Icon className="w-3.5 h-3.5" />
+                    <span>{cfg.label}</span>
+                    <span className="opacity-60">({n})</span>
+                    {active && <X className="w-3 h-3 ml-0.5" />}
                   </button>
-                ))}
-                
-                {activeFilters.length > 0 && (
-                  <button
-                    onClick={clearFilters}
-                    className="px-4 py-2 rounded-full text-sm font-medium text-gray-500 hover:text-red-500 transition-colors"
-                  >
-                    {t('clear_filters')}
-                  </button>
-                )}
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <p className="text-sm text-gray-500">
-                  {filteredResults.length} {filteredResults.length > 1 ? t('results_plural') : t('results_singular')}
-                </p>
-              </div>
+                )
+              })}
+              {activeFilters.length > 0 && (
+                <button
+                  onClick={() => setActiveFilters([])}
+                  className="px-4 py-2 rounded-full text-sm text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
+                >
+                  {t('clear_filters')}
+                </button>
+              )}
             </div>
-
-            {/* Résultats par catégorie */}
-            {isLoading ? (
-              <div className="flex justify-center py-12">
-                <div className="animate-pulse text-gray-500">{t('loading')}</div>
-              </div>
-            ) : filteredResults.length === 0 ? (
-              <div className="bg-white rounded-2xl p-12 text-center">
-                <div className="text-6xl mb-4">🔍</div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">{t('no_results')}</h3>
-                <p className="text-gray-500">{t('no_results_description')}</p>
-              </div>
-            ) : (
-              <div className="space-y-12">
-                {Object.entries(groupedResults).map(([type, items]) => (
-                  <div key={type}>
-                    <div className="flex items-center gap-2 mb-4">
-                      <h2 className="text-xl font-semibold text-gray-800">
-                        {typeConfig[type as ResultType].label}
-                      </h2>
-                      <span className="text-sm text-gray-400">({items.length})</span>
-                    </div>
-                    
-                    {/* Version desktop : grille */}
-                    <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                      {items.map(item => renderResultCard(item))}
-                    </div>
-                    
-                    {/* Version mobile : slider */}
-                    <div className="relative md:hidden">
-                      {items.length > 2 && (
-                        <>
-                          <button
-                            onClick={() => scrollLeft(type)}
-                            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 hover:scale-110 cursor-pointer"
-                            aria-label="Défiler vers la gauche"
-                          >
-                            <ChevronLeftIcon className="w-5 h-5 text-gray-700" />
-                          </button>
-                          <button
-                            onClick={() => scrollRight(type)}
-                            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 hover:scale-110 cursor-pointer"
-                            aria-label="Défiler vers la droite"
-                          >
-                            <ChevronRightIcon className="w-5 h-5 text-gray-700" />
-                          </button>
-                        </>
-                      )}
-                      
-                      <div
-                        ref={(el) => { scrollContainerRefs.current[type] = el }}
-                        className="flex overflow-x-auto scroll-smooth gap-4 pb-4 scrollbar-hide"
-                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                      >
-                        {items.map(item => (
-                          <div key={item.id} className="flex-shrink-0 w-[280px]">
-                            {renderResultCard(item)}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            {!isLoading && results && (
+              <p className="text-sm text-gray-400">
+                {totalVisible} {totalVisible > 1 ? t('results_plural') : t('results_singular')}
+              </p>
             )}
           </div>
+
+          {/* Contenu */}
+          {isLoading ? (
+            <div className="space-y-12">
+              {[4, 3].map((n, si) => (
+                <section key={si}>
+                  <div className="h-6 w-32 bg-gray-200 animate-pulse rounded mb-4" />
+                  <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    {[...Array(n)].map((_, i) => <SkeletonCard key={i} />)}
+                  </div>
+                </section>
+              ))}
+            </div>
+          ) : !results || totalVisible === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-5xl mb-4">🔍</p>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">{t('no_results')}</h3>
+              <p className="text-gray-400 text-sm">{t('no_results_description')}</p>
+            </div>
+          ) : (
+            <div className="space-y-12">
+
+              {/* Destinations */}
+              {show('destination') && results.destinations.length > 0 && (
+                <CarouselSection title={FILTER_CONFIG.destination.label} count={results.destinations.length}>
+                  {results.destinations.map((d: SearchDestination) => (
+                    <CardDestination
+                      key={d.id}
+                      imageUrl={d.image_url ?? '/photos/chambre.jpg'}
+                      title={d.nom}
+                      href={`/destination/${createSlug(d.id, d.nom)}`}
+                      height="h-52"
+                      width="w-full"
+                      hoverEffect="zoom"
+                    />
+                  ))}
+                </CarouselSection>
+              )}
+
+              {/* Villes */}
+              {show('city') && results.villes.length > 0 && (
+                <CarouselSection title={FILTER_CONFIG.city.label} count={results.villes.length}>
+                  {results.villes.map((v: SearchVille) => (
+                    <CardDestination
+                      key={v.id}
+                      imageUrl={v.image ?? '/photos/chambre.jpg'}
+                      title={v.nom}
+                      href={`/ville/${createSlug(v.id, v.nom)}`}
+                      height="h-52"
+                      width="w-full"
+                      hoverEffect="zoom"
+                    />
+                  ))}
+                </CarouselSection>
+              )}
+
+              {/* Hôtels */}
+              {show('hotel') && results.hotels.length > 0 && (
+                <CarouselSection title={FILTER_CONFIG.hotel.label} count={results.hotels.length}>
+                  {results.hotels.map((h: SearchHotel) => (
+                    <CardHotel
+                      key={h.id}
+                      imageUrl={h.photo_principale ?? ''}
+                      name={h.nom}
+                      hotelId={h.id}
+                      availability="Disponible"
+                      price={h.prix_min_mga ?? 0}
+                      prixMga={h.prix_min_mga ?? undefined}
+                      prixEur={h.prix_min_eur ?? undefined}
+                      etoiles={h.etoiles ?? undefined}
+                      rating={h.note_moyenne ?? 0}
+                    />
+                  ))}
+                </CarouselSection>
+              )}
+
+              {/* Types d'hébergement */}
+              {show('category') && results.types.length > 0 && (
+                <CarouselSection title={FILTER_CONFIG.category.label} count={results.types.length}>
+                  {results.types.map((ty: SearchType) => (
+                    <CardDestination
+                      key={ty.id}
+                      imageUrl={ty.image ?? '/photos/chambre.jpg'}
+                      title={ty.nom}
+                      href={`/hebergement/${createSlug(ty.id, ty.nom)}`}
+                      height="h-52"
+                      width="w-full"
+                      hoverEffect="zoom"
+                    />
+                  ))}
+                </CarouselSection>
+              )}
+
+              {/* Découverte — villes */}
+              {show('discover') && results.decouverte_villes.length > 0 && (
+                <CarouselSection title="Destinations à découvrir" count={results.decouverte_villes.length}>
+                  {results.decouverte_villes.map((v: SearchDecouverteVille) => (
+                    <CardDestination
+                      key={`dv-${v.id}`}
+                      imageUrl={v.image ?? '/photos/chambre.jpg'}
+                      title={v.nom}
+                      href={`/decouvrir/${v.slug}`}
+                      height="h-52"
+                      width="w-full"
+                      hoverEffect="zoom"
+                    />
+                  ))}
+                </CarouselSection>
+              )}
+
+              {/* Découverte — lieux */}
+              {show('discover') && results.decouverte_lieux.length > 0 && (
+                <CarouselSection title="Lieux à découvrir" count={results.decouverte_lieux.length}>
+                  {results.decouverte_lieux.map((l: SearchDecouverteLieu) => (
+                    <CardDestination
+                      key={`dl-${l.id}`}
+                      imageUrl={l.image ?? '/photos/chambre.jpg'}
+                      title={l.nom}
+                      href={`/decouvrir/${l.ville_slug ?? ''}`}
+                      height="h-52"
+                      width="w-full"
+                      hoverEffect="zoom"
+                    />
+                  ))}
+                </CarouselSection>
+              )}
+
+            </div>
+          )}
         </div>
       </main>
     </>

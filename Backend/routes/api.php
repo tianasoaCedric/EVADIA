@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\Public\DecouverteController;
 use App\Http\Controllers\Api\Public\OffreController as PublicOffreController;
 use App\Http\Controllers\Api\Public\DestinationController;
 use App\Http\Controllers\Api\Public\ProprieteController as PublicProprieteController;
+use App\Http\Controllers\Api\Public\SearchController;
 use App\Http\Controllers\Api\Public\TypeHotelController;
 use App\Http\Controllers\Api\Public\VilleController;
 use App\Http\Controllers\Api\Hotel\CalendarController;
@@ -54,6 +55,7 @@ Route::get('/offres/{id}', [PublicOffreController::class, 'show']);
 Route::get('/types-hotels', [TypeHotelController::class, 'index']);
 Route::get('/proprietes/{id}', [PublicProprieteController::class, 'show']);
 Route::get('/hotels/{id}/reviews', [AvisController::class, 'byHotel']);
+Route::get('/search', SearchController::class)->middleware('throttle:60,1');
 Route::get('/decouverte/villes', [DecouverteController::class, 'villes']);
 Route::get('/decouverte/villes/{slug}/lieux', [DecouverteController::class, 'lieux']);
 
