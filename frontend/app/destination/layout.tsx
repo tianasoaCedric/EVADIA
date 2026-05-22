@@ -1,5 +1,4 @@
 // app/(dark)/layout.tsx
-import Header from "../components/molecules/Header"
 
 export default function DarkLayout({
   children,

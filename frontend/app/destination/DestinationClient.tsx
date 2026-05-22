@@ -9,6 +9,8 @@ import CardHotel from '../components/ui/CardHotel'
 import { useOnScreen } from '@/hooks/useOnScreen'
 import { createSlug } from '@/lib/slug'
 import type { Destination, Hotel } from '@/lib/types'
+import Header from "../components/molecules/Header"
+
 
 const DESTINATION_IMAGES: Record<string, string> = {
   'nord':                    '/photos/chambre.jpg',
@@ -65,6 +67,7 @@ export default function DestinationClient({ destinations, selectionHotels }: Des
 
   return (
     <main className="min-h-screen">
+      <Header />
       <HeroSection
         title={t('hero_title')}
         subtitle={t('hero_subtitle')}

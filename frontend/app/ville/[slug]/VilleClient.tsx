@@ -8,6 +8,7 @@ import { useOnScreen } from '@/hooks/useOnScreen'
 import CardHotel from '../../components/ui/CardHotel'
 import Input from '../../components/ui/Input'
 import { apiClient } from '@/lib/api-client'
+import HotelPhoto from '@/app/components/ui/HotelPhoto'
 
 interface VilleClientProps {
   villeId: number
@@ -129,7 +130,7 @@ export default function VilleClient({
   }
 
   return (
-    <main className="min-h-screen pt-24 pb-16">
+    <main className="min-h-screen pt-8 pb-16">
       <div className="container mx-auto px-4">
 
         {/* Header */}
@@ -144,6 +145,14 @@ export default function VilleClient({
           <h1 className="text-xl md:text-3xl lg:text-4xl font-medium text-gray-800">
             {villeName}
           </h1>
+        </div>
+        {/* Photo de la destination */}
+        <div className="py-4">
+          <HotelPhoto
+            imageUrl={['/photos/destinations/nord.jpg', '/photos/destinations/nord.jpg']}
+            autoPlayInterval={5000}
+            className="mb-4"
+          />
         </div>
 
         {/* Barre de recherche */}
