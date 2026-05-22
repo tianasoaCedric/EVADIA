@@ -8,7 +8,6 @@ export default function DarkLayout({
 }) {
   return (
     <>
-      <Header theme="default" />
       <main className="min-h-screen">
         {children}
       </main>

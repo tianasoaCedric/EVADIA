@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import { apiClient } from '@/lib/api-client'
 import type { Destination, Hotel } from '@/lib/types'
 import DestinationClient from './DestinationClient'
+import Header from '../components/molecules/Header'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('DestinationPage')
@@ -32,9 +33,12 @@ export default async function DestinationPage() {
   ])
 
   return (
-    <DestinationClient
-      destinations={destRes.data}
-      selectionHotels={selectionRes.data}
-    />
+    <>
+      <Header theme="default" />
+      <DestinationClient
+        destinations={destRes.data}
+        selectionHotels={selectionRes.data}
+      />
+    </>
   )
 }

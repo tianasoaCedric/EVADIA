@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic'
 import ToggleLangue from '../ui/ToggleLangue'
 import Avatar from '../ui/Avatar'
 import Input from '../ui/Input'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Search } from 'lucide-react'
 import { useDevise } from '../../context/DeviseContext'
 
 const MenuFullscreen = dynamic(() => import('./MenuFullscreen'), { ssr: false })
@@ -21,7 +21,7 @@ interface HeaderProps {
     isLoggedIn?: boolean
     /** Callback clic sur le menu */
     onMenuClick?: () => void
-/** Callback clic sur la recherche */
+    /** Callback clic sur la recherche */
     onSearchClick?: () => void
     /** Afficher le champ de recherche (mobile vs desktop) */
     showSearchInput?: boolean
@@ -42,7 +42,7 @@ const Header = ({
     onLanguageChange,
     onMenuClick,
     onSearchClick,
-    showSearchInput = false,
+    showSearchInput = true,
     theme = 'default',
     onDeviseChange
 }: HeaderProps) => {
@@ -164,7 +164,6 @@ const Header = ({
 
     const currentTheme = themeStyles[activeTheme]
 
-    // Récupérer le symbole de la devise sélectionnée
     return (
         <>
             {/* Menu plein écran */}
@@ -344,9 +343,7 @@ const Header = ({
                                         value={searchValue}
                                         onChange={(e) => setSearchValue(e.target.value)}
                                         icon={
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                            </svg>
+                                            <Search className="w-5 h-5" />
                                         }
                                         fullWidth
                                         variant={activeTheme === 'dark' ? 'light' : 'default'}
