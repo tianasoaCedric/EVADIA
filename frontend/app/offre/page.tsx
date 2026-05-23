@@ -1,8 +1,10 @@
 import { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import OfferClient from './OfferClient'
+import { offreService } from '@/lib/services'
 
-// Métadonnées dynamiques avec traduction
+export const revalidate = 60
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('OfferPage')
   
@@ -25,7 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-// Composant serveur qui importe le composant client
-export default function RegisterPage() {
-  return <OfferClient />
+export default async function OfferPage() {
+  const initialData = await offreService.list({ page: 1 }).catch(() => undefined)
+  return <OfferClient initialData={initialData} />
 }

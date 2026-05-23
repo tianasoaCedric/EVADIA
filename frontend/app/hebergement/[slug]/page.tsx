@@ -2,6 +2,9 @@ import { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import HebergementName from './HebergementName'
 import { decodeIdFromSlug, getNameFromSlug } from '@/lib/slug'
+import { hotelService } from '@/lib/services'
+
+export const revalidate = 60
 
 interface PageProps {
   params: Promise<{
@@ -42,6 +45,7 @@ export default async function HebergementSlugPage({ params }: PageProps) {
   const { slug } = await params
   const categoryId = decodeIdFromSlug(slug)
   const categoryName = getNameFromSlug(slug)
-  
-  return <HebergementName categoryId={categoryId} categoryName={categoryName} slug={slug} />
+  const initialData = await hotelService.list({ type_id: categoryId, page: 1 }).catch(() => undefined)
+
+  return <HebergementName categoryId={categoryId} categoryName={categoryName} slug={slug} initialData={initialData} />
 }

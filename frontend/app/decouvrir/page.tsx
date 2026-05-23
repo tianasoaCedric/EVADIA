@@ -1,6 +1,9 @@
 import { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import DiscoverClient from './DiscoverClient'
+import { decouverteService } from '@/lib/services'
+
+export const revalidate = 300
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('DiscoverPage')
@@ -24,6 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-export default function DiscoverPage() {
-  return <DiscoverClient />
+export default async function DiscoverPage() {
+  const initialVilles = await decouverteService.getVilles().catch(() => [])
+  return <DiscoverClient initialVilles={initialVilles} />
 }

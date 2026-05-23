@@ -11,7 +11,6 @@ import RoomCard from '../../components/ui/RoomCard'
 import dynamic from 'next/dynamic'
 const AvisClient = dynamic(() => import('@/app/components/ui/AvisClient'), { ssr: false })
 import HotelInfo from '@/app/components/ui/HotelInfo'
-import { hotelService } from '@/lib/services/hotel.service'
 import { favoriService } from '@/lib/services/favori.service'
 import { authService } from '@/lib/services/auth.service'
 import type { HotelDetail } from '@/lib/types'
@@ -20,13 +19,14 @@ interface HotelClientProps {
   hotelId: number
   hotelName: string
   slug: string
+  initialHotelData: HotelDetail | null
 }
 
-export default function HotelClient({ hotelId, hotelName, slug }: HotelClientProps) {
+export default function HotelClient({ hotelId, hotelName, slug, initialHotelData }: HotelClientProps) {
   const router = useRouter()
   const t = useTranslations('HotelClient')
-  const [isLoading, setIsLoading] = useState(true)
-  const [hotelData, setHotelData] = useState<HotelDetail | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [hotelData, setHotelData] = useState<HotelDetail | null>(initialHotelData)
   const [isSaved, setIsSaved] = useState(false)
   const [scrollPosition, setScrollPosition] = useState(0)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -34,23 +34,12 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
   const [setRoomsRef, isRoomsVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
 
   useEffect(() => {
-    const fetchAll = async () => {
-      setIsLoading(true)
-      try {
-        const isAuth = authService.isAuthenticated()
-        const [data, favoris] = await Promise.all([
-          hotelService.get(hotelId),
-          isAuth ? favoriService.list().catch(() => ({ data: [] })) : Promise.resolve({ data: [] }),
-        ])
-        setHotelData(data)
+    // Données hôtel déjà chargées côté serveur — vérifier uniquement les favoris
+    if (authService.isAuthenticated()) {
+      favoriService.list().catch(() => ({ data: [] })).then(favoris => {
         setIsSaved((favoris as { data: { hotel_id: number }[] }).data.some(f => f.hotel_id === hotelId))
-      } catch (error) {
-        console.error(error)
-      } finally {
-        setIsLoading(false)
-      }
+      })
     }
-    fetchAll()
   }, [hotelId])
 
   // Scroll pour le carrousel des chambres
@@ -123,14 +112,6 @@ export default function HotelClient({ hotelId, hotelName, slug }: HotelClientPro
       navigator.clipboard.writeText(window.location.href)
       alert(t('share_alert'))
     }
-  }
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-gray-500">{t('loading')}</div>
-      </div>
-    )
   }
 
   const hotel = hotelData?.hotel

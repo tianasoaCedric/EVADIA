@@ -2,6 +2,9 @@ import { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import OfferDetailClient from './OfferDetailClient'
 import { decodeIdFromSlug, getNameFromSlug } from '@/lib/slug'
+import { offreService } from '@/lib/services'
+
+export const revalidate = 60
 
 interface PageProps {
   params: Promise<{
@@ -31,6 +34,7 @@ export default async function OfferDetailPage({ params }: PageProps) {
   const { slug } = await params
   const offerId = decodeIdFromSlug(slug)
   const offerName = getNameFromSlug(slug)
-  
-  return <OfferDetailClient offerId={offerId} offerName={offerName} slug={slug} />
+  const initialOffer = await offreService.get(offerId).catch(() => null)
+
+  return <OfferDetailClient offerId={offerId} offerName={offerName} slug={slug} initialOffer={initialOffer} />
 }

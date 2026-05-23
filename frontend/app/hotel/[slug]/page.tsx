@@ -1,7 +1,9 @@
 import { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
-import * as React from 'react'
 import HotelClient from './HotelClient'
+import { hotelService } from '@/lib/services'
+
+export const revalidate = 60
 
 interface PageProps {
   params: Promise<{
@@ -49,10 +51,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default function HotelPage({ params }: PageProps) {
-  const { slug } = React.use(params)
+export default async function HotelPage({ params }: PageProps) {
+  const { slug } = await params
   const hotelId = decodeIdFromSlug(slug)
   const hotelName = getHotelNameFromSlug(slug)
-  
-  return <HotelClient hotelId={hotelId} hotelName={hotelName} slug={slug} />
+  const initialHotelData = await hotelService.get(hotelId).catch(() => null)
+
+  return <HotelClient hotelId={hotelId} hotelName={hotelName} slug={slug} initialHotelData={initialHotelData} />
 }

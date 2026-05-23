@@ -1,30 +1,33 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import HeroSection from '../../components/ui/HeroSection'
 import Input from '../../components/ui/Input'
 import CardHotel from '../../components/ui/CardHotel'
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { hotelService } from '@/lib/services'
-import type { Hotel } from '@/lib/types'
+import type { Hotel, PaginatedResponse } from '@/lib/types'
 
 interface HebergementNameProps {
     categoryId: number
     categoryName: string
     slug: string
+    initialData?: PaginatedResponse<Hotel>
 }
 
-export default function HebergementName({ categoryId, categoryName }: HebergementNameProps) {
+export default function HebergementName({ categoryId, categoryName, initialData }: HebergementNameProps) {
     const t = useTranslations('HebergementName')
     const commonT = useTranslations('Common')
 
     const [searchQuery, setSearchQuery] = useState('')
-    const [hotels, setHotels] = useState<Hotel[]>([])
-    const [isLoading, setIsLoading] = useState(true)
+    const [hotels, setHotels] = useState<Hotel[]>(initialData?.data ?? [])
+    const [isLoading, setIsLoading] = useState(false)
     const [currentPage, setCurrentPage] = useState(1)
-    const [totalPages, setTotalPages] = useState(1)
-    const [total, setTotal] = useState(0)
+    const [totalPages, setTotalPages] = useState(initialData?.last_page ?? 1)
+    const [total, setTotal] = useState(initialData?.total ?? 0)
+    const skipFirstFetch = useRef(!!initialData)
+    const mounted = useRef(false)
 
     const fetchHotels = useCallback(async (page: number, search: string) => {
         setIsLoading(true)
@@ -44,13 +47,15 @@ export default function HebergementName({ categoryId, categoryName }: Hebergemen
         }
     }, [categoryId])
 
-    // Chargement initial et changement de page
+    // Page change — skip sur le premier rendu si données serveur disponibles
     useEffect(() => {
+        if (skipFirstFetch.current) { skipFirstFetch.current = false; return }
         fetchHotels(currentPage, searchQuery)
     }, [currentPage, fetchHotels])
 
-    // Recherche avec debounce — repart à la page 1
+    // Recherche avec debounce — skip sur mount
     useEffect(() => {
+        if (!mounted.current) { mounted.current = true; return }
         const timer = setTimeout(() => {
             setCurrentPage(1)
             fetchHotels(1, searchQuery)

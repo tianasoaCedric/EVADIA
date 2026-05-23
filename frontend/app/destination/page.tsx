@@ -3,6 +3,8 @@ import { getTranslations } from 'next-intl/server'
 import { apiClient } from '@/lib/api-client'
 import type { Destination, Hotel } from '@/lib/types'
 import DestinationClient from './DestinationClient'
+
+export const revalidate = 300
 import Header from '../components/molecules/Header'
 
 export async function generateMetadata(): Promise<Metadata> {

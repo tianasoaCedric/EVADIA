@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useOnScreen } from '@/hooks/useOnScreen'
@@ -9,25 +9,30 @@ import Input from '../components/ui/Input'
 import OfferCard from '../components/ui/OfferCard'
 import { createSlug } from '@/lib/slug'
 import { offreService } from '@/lib/services'
-import type { Offre } from '@/lib/services'
+import type { Offre, PaginatedOffres } from '@/lib/services'
 
 const getMonthName = (monthNum: number, locale: string): string => {
   const date = new Date(2000, monthNum - 1, 1)
   return date.toLocaleDateString(locale, { month: 'long' })
 }
 
-export default function OfferClient() {
+interface OfferClientProps {
+  initialData?: PaginatedOffres
+}
+
+export default function OfferClient({ initialData }: OfferClientProps) {
   const t = useTranslations('OfferClient')
   const locale = useLocale()
 
-  const [offers, setOffers] = useState<Offre[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [offers, setOffers] = useState<Offre[]>(initialData?.data ?? [])
+  const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [currentPage, setCurrentPage] = useState(1)
-  const [lastPage, setLastPage] = useState(1)
-  const [total, setTotal] = useState(0)
+  const [currentPage, setCurrentPage] = useState(initialData?.current_page ?? 1)
+  const [lastPage, setLastPage] = useState(initialData?.last_page ?? 1)
+  const [total, setTotal] = useState(initialData?.total ?? 0)
 
   const [setMainRef, isMainVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
+  const mounted = useRef(false)
 
   const fetchOffers = async (page: number, search: string) => {
     setIsLoading(true)
@@ -44,15 +49,10 @@ export default function OfferClient() {
     }
   }
 
+  // Debounced search — skip on mount (initial data comes from server)
   useEffect(() => {
-    fetchOffers(1, '')
-  }, [])
-
-  // Debounced search
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchOffers(1, searchQuery)
-    }, 300)
+    if (!mounted.current) { mounted.current = true; return }
+    const timer = setTimeout(() => fetchOffers(1, searchQuery), 300)
     return () => clearTimeout(timer)
   }, [searchQuery])
 

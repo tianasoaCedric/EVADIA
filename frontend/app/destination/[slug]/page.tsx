@@ -4,6 +4,8 @@ import CityClient from './CityClient'
 import { decodeIdFromSlug, getNameFromSlug } from '@/lib/slug'
 import { apiClient } from '@/lib/api-client'
 
+export const revalidate = 300
+
 interface PageProps {
   params: Promise<{ slug: string }>
 }

@@ -1,6 +1,9 @@
 import { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import DiscoverArticleClient from './DiscoverArticleClient'
+import { decouverteService } from '@/lib/services'
+
+export const revalidate = 300
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -25,5 +28,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function DiscoverArticlePage({ params }: PageProps) {
   const { slug } = await params
-  return <DiscoverArticleClient slug={slug} />
+  const initialData = await decouverteService.getLieux(slug).catch(() => null)
+
+  return <DiscoverArticleClient slug={slug} initialVille={initialData?.ville ?? null} initialLieux={initialData?.lieux ?? []} />
 }

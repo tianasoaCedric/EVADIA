@@ -7,31 +7,23 @@ import { useOnScreen } from '@/hooks/useOnScreen'
 import HeroSection from '../components/ui/HeroSection'
 import DiscoverCard from '../components/ui/DiscoverCard'
 import Input from '../components/ui/Input'
-import { decouverteService } from '@/lib/services'
 import type { VilleDecouverte } from '@/lib/types'
 
-export default function DiscoverClient() {
+interface DiscoverClientProps {
+  initialVilles: VilleDecouverte[]
+}
+
+export default function DiscoverClient({ initialVilles }: DiscoverClientProps) {
   const t = useTranslations('DiscoverClient')
-  const [villes, setVilles] = useState<VilleDecouverte[]>([])
-  const [filtered, setFiltered] = useState<VilleDecouverte[]>([])
+  const [villes] = useState<VilleDecouverte[]>(initialVilles)
+  const [filtered, setFiltered] = useState<VilleDecouverte[]>(initialVilles)
   const [searchQuery, setSearchQuery] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 15
 
   const [setHeroRef, isHeroVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
   const [setTitleRef, isTitleVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
   const [setSearchRef, isSearchVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
-
-  useEffect(() => {
-    decouverteService.getVilles()
-      .then((data) => {
-        setVilles(data)
-        setFiltered(data)
-      })
-      .catch(console.error)
-      .finally(() => setIsLoading(false))
-  }, [])
 
   useEffect(() => {
     const q = searchQuery.trim().toLowerCase()
@@ -70,14 +62,6 @@ export default function DiscoverClient() {
     }
     return rows
   }, [current])
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-gray-500">{t('loading')}</div>
-      </div>
-    )
-  }
 
   return (
     <main className="min-h-screen">

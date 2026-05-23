@@ -1,46 +1,30 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { ChevronLeft } from 'lucide-react'
 import { useOnScreen } from '@/hooks/useOnScreen'
 import HeroSection from '../../components/ui/HeroSection'
 import DiscoverCardArticle from '../../components/ui/DiscoverCardArticle'
-import { decouverteService } from '@/lib/services'
 import type { VilleDecouverte, LieuDecouverte } from '@/lib/types'
 
 interface Props {
   slug: string
+  initialVille: VilleDecouverte | null
+  initialLieux: LieuDecouverte[]
 }
 
-export default function DiscoverArticleClient({ slug }: Props) {
+export default function DiscoverArticleClient({ slug, initialVille, initialLieux }: Props) {
   const router = useRouter()
   const t = useTranslations('DiscoverArticleClient')
-  const [ville, setVille] = useState<VilleDecouverte | null>(null)
-  const [lieux, setLieux] = useState<LieuDecouverte[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [ville] = useState<VilleDecouverte | null>(initialVille)
+  const [lieux] = useState<LieuDecouverte[]>(initialLieux)
 
   const [setHeroRef, isHeroVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
   const [setTitleRef, isTitleVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
 
-  useEffect(() => {
-    decouverteService.getLieux(slug)
-      .then(({ ville, lieux }) => {
-        setVille(ville)
-        setLieux(lieux)
-      })
-      .catch(console.error)
-      .finally(() => setIsLoading(false))
-  }, [slug])
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-gray-500">{t('loading')}</div>
-      </div>
-    )
-  }
+  void slug
 
   if (!ville) {
     return (

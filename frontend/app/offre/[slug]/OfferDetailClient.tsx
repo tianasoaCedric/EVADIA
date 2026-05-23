@@ -1,19 +1,19 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations, useLocale } from 'next-intl'
 import { ChevronLeft, Phone, Mail, CheckCircle, AlertCircle } from 'lucide-react'
 import HeroSection from '../../components/ui/HeroSection'
 import Bouton from '../../components/ui/Bouton'
 import { useOnScreen } from '@/hooks/useOnScreen'
-import { offreService } from '@/lib/services'
 import type { OffreDetail } from '@/lib/services'
 
 interface OfferDetailClientProps {
   offerId: number
   offerName: string
   slug: string
+  initialOffer: OffreDetail | null
 }
 
 const getMonthName = (monthNum: number, locale: string): string => {
@@ -21,13 +21,13 @@ const getMonthName = (monthNum: number, locale: string): string => {
   return date.toLocaleDateString(locale, { month: 'long' })
 }
 
-export default function OfferDetailClient({ offerId, offerName, slug }: OfferDetailClientProps) {
+export default function OfferDetailClient({ offerId, offerName, slug, initialOffer }: OfferDetailClientProps) {
   const router = useRouter()
   const t = useTranslations('OfferDetailClient')
   const locale = useLocale()
 
-  const [offer, setOffer] = useState<OffreDetail | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [offer] = useState<OffreDetail | null>(initialOffer)
+  const [isLoading] = useState(false)
   const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -35,22 +35,7 @@ export default function OfferDetailClient({ offerId, offerName, slug }: OfferDet
   const [setMainRef, isMainVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
 
   void slug
-
-  useEffect(() => {
-    const fetchOffer = async () => {
-      setIsLoading(true)
-      try {
-        const data = await offreService.get(offerId)
-        setOffer(data)
-      } catch (error) {
-        console.error(error)
-        setOffer(null)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    fetchOffer()
-  }, [offerId])
+  void offerId
 
   const handleReservation = async () => {
     if (!acceptedTerms || !offer) return
