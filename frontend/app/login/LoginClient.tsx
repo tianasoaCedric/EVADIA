@@ -139,20 +139,18 @@ export default function LoginClient() {
             <div>
               <div className="relative">
                 <Input
-                  type={showPassword ? 'text' : 'password'}
+                  type="password"
                   placeholder={t('password')}
                   value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value)
-                    setFieldErrors((prev) => ({ ...prev, password: undefined }))
-                  }}
+                  onChange={(e) => setPassword(e.target.value)}
                   icon={<Shield className="w-5 h-5 text-white" />}
                   fullWidth
                   variant="default"
                   placeholderPosition="left"
                   sizes='medium'
+                  showPasswordToggle={true}  // Optionnel, true par défaut
                 />
-                <button
+                {/* <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
@@ -162,7 +160,7 @@ export default function LoginClient() {
                   ) : (
                     <Eye className="w-5 h-5 text-white hover:text-white" />
                   )}
-                </button>
+                </button> */}
               </div>
               {fieldErrors.password && (
                 <p className="mt-1 text-xs text-red-300">{fieldErrors.password}</p>

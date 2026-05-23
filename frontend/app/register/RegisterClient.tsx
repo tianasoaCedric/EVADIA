@@ -203,17 +203,6 @@ export default function RegisterClient() {
                   placeholderPosition="left"
                   sizes="medium"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5 text-white" />
-                  ) : (
-                    <Eye className="w-5 h-5 text-white" />
-                  )}
-                </button>
               </div>
               {fieldErrors.password && (
                 <p className="mt-1 text-xs text-red-300">{fieldErrors.password}</p>
@@ -237,17 +226,6 @@ export default function RegisterClient() {
                   placeholderPosition="left"
                   sizes="medium"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="w-5 h-5 text-white" />
-                  ) : (
-                    <Eye className="w-5 h-5 text-white" />
-                  )}
-                </button>
               </div>
               {fieldErrors.password_confirmation && (
                 <p className="mt-1 text-xs text-red-300">{fieldErrors.password_confirmation}</p>

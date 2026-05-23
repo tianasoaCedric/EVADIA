@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, forwardRef, InputHTMLAttributes, ReactNode } from 'react'
-// import { clsx } from 'clsx' // Optionnel, mais recommandé pour gérer les classes conditionnelles
+import { Eye, EyeOff } from 'lucide-react'
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   /** Icône à afficher à gauche du champ */
@@ -24,8 +24,8 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   sizes?: 'small' | 'medium' | 'large'
   /** Largeur complète */
   fullWidth?: boolean
-
-
+  /** Afficher le bouton d'affichage du mot de passe (pour type password) */
+  showPasswordToggle?: boolean
 }
 
 /**
@@ -46,40 +46,43 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     onChange,
     type = "text",
     sizes = "small",
+    showPasswordToggle = true,
     ...props
   }, ref) => {
     const [isFocused, setIsFocused] = useState(false)
     const [isHovered, setIsHovered] = useState(false)
+    const [showPassword, setShowPassword] = useState(false)
+
+    // Déterminer le type réel de l'input
+    const isPasswordType = type === 'password'
+    const inputType = isPasswordType && showPassword ? 'text' : type
 
     /**
      * Styles selon la variante
-     * - light : fond #F5F5F5 avec opacité 100%, texte gris foncé
-     * - default : fond #F5F5F5 avec opacité 20%, texte #F5F5F5
      */
     const variantStyles = {
       light: {
         background: "bg-[#F5F5F5]",
         backgroundHover: "hover:bg-[#E8E8E8]",
-        text: "font-light text-gray-800",           // Texte gris foncé
-        placeholder: "font-light placeholder:text-gray-800",
-        iconColor: "font-light text-gray-800",      // Icône grise pour le mode light
+        text: "font-light text-gray-800",
+        placeholder: "font-light placeholder:text-gray-800 placeholder:text-xs",
+        iconColor: "font-light text-gray-800",
+        eyeColor: "text-gray-500 hover:text-gray-700",
         border: "border border-white/10",
         focusRing: "focus:ring-1 focus:ring-[#F5F5F5] focus:ring-opacity-50"
       },
       default: {
-        background: "bg-[#F5F5F5]/20",   // 20% d'opacité
+        background: "bg-[#F5F5F5]/20",
         backgroundHover: "hover:bg-[#F5F5F5]/30",
-        text: "font-light text-[#F5F5F5]",          // Texte blanc/crème
-        placeholder: "font-light placeholder:text-[#F5F5F5]",
-        iconColor: "text-[#F5F5F5]",     // Icône de la même couleur que le texte
+        text: "font-light text-[#F5F5F5]",
+        placeholder: "font-light placeholder:text-[#F5F5F5] placeholder:text-xs",
+        iconColor: "text-[#F5F5F5]",
+        eyeColor: "text-white/70 hover:text-white",
         border: "border border-white/10",
         focusRing: "focus:ring-1 focus:ring-[#F5F5F5] focus:ring-opacity-50"
       }
     }
 
-    /**
-     * Styles pour le placeholder selon sa position
-     */
     const placeholderStyles = {
       left: "text-left",
       center: "text-center",
@@ -87,35 +90,50 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     }
 
     const sizeStyles: Record<string, string> = {
-    small: "px-3 py-1 text-sm",     // Petit : moins d'espacement
-    medium: "px-6 py-2 text-base",  // Moyen : espacement standard
-    large: "px-8 py-3 text-lg"      // Grand : plus d'espacement
-  }
+      small: "px-3 py-1 text-sm",
+      medium: "px-6 py-2 text-base",
+      large: "px-8 py-3 text-lg"
+    }
 
-    /**
-     * Styles de padding selon la présence de l'icône
-     */
-    const paddingStyles = icon 
-      ? "pl-10 pr-4"  // Espace pour l'icône à gauche
-      : "px-4"        // Padding standard
+    const getPaddingStyles = () => {
+      let padding = ""
+      if (icon) {
+        padding = "pl-12"
+      } else {
+        padding = "pl-4"
+      }
+      if (isPasswordType && showPasswordToggle) {
+        padding += " pr-10"
+      } else {
+        padding += " pr-4"
+      }
+      return padding
+    }
 
-    /**
-     * Styles de base du conteneur
-     */
     const containerStyles = `
       relative
       ${fullWidth ? 'w-full' : 'w-auto'}
       ${className}
     `
 
-    /**
-     * Styles de l'input
-     */
+    // Classes pour masquer l'icône native du navigateur sur les champs password
+    const hideNativePasswordIcon = `
+      [&::-ms-reveal]:hidden
+      [&::-ms-clear]:hidden
+      [&::-webkit-clear-button]:hidden
+      [&::-webkit-credentials-auto-fill-button]:hidden
+      [&::-webkit-textfield-decoration-container]:hidden
+      [&::-webkit-search-cancel-button]:hidden
+      [&::-webkit-search-decoration]:hidden
+      [&::-webkit-search-results-button]:hidden
+      [&::-webkit-search-results-decoration]:hidden
+    `
+
     const inputStyles = `
       ${fullWidth ? 'w-full' : 'w-auto'}
       rounded-full
       py-2.5
-      ${paddingStyles}
+      ${getPaddingStyles()}
       ${variantStyles[variant].background}
       ${!disabled && variantStyles[variant].backgroundHover}
       ${variantStyles[variant].text}
@@ -132,11 +150,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-text'}
       ${error ? 'ring-2 ring-red-500 ring-opacity-50' : ''}
       ${success ? 'ring-2 ring-green-500 ring-opacity-50' : ''}
+      ${isPasswordType ? hideNativePasswordIcon : ''}
     `
 
-    /**
-     * Styles de l'icône - maintenant synchronisée avec la couleur du texte
-     */
     const iconStyles = `
       absolute
       left-3
@@ -150,9 +166,19 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       pointer-events-none
     `
 
-    /**
-     * Styles du message d'erreur/succès
-     */
+    const eyeButtonStyles = `
+      absolute
+      right-3
+      top-1/2
+      transform -translate-y-1/2
+      flex items-center justify-center
+      cursor-pointer
+      transition-all duration-200
+      hover:scale-110
+      ${variantStyles[variant].eyeColor}
+      focus:outline-none
+    `
+
     const messageStyles = `
       mt-1
       text-sm
@@ -165,17 +191,15 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className={containerStyles}>
         <div className="relative">
-          {/* Icône à gauche avec la même couleur que le texte */}
           {icon && (
             <div className={iconStyles}>
               {icon}
             </div>
           )}
           
-          {/* Champ input */}
           <input
             ref={ref}
-            type={type}
+            type={inputType}
             value={value}
             onChange={onChange}
             placeholder={placeholder}
@@ -187,9 +211,23 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             className={inputStyles}
             {...props}
           />
+
+          {isPasswordType && showPasswordToggle && (
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className={eyeButtonStyles}
+              aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+            >
+              {showPassword ? (
+                <EyeOff className="w-5 h-5" />
+              ) : (
+                <Eye className="w-5 h-5" />
+              )}
+            </button>
+          )}
         </div>
         
-        {/* Message d'erreur ou de succès */}
         {(error || success) && (
           <div className={messageStyles}>
             {error || (success && "✓ Valide")}
