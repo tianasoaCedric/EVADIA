@@ -69,7 +69,7 @@ class SearchController extends Controller
             ->map(fn($d) => [
                 'id'        => $d->id,
                 'nom'       => $d->nom,
-                'image_url' => $d->image_url,
+                'image_url' => $d->image_url ? Storage::disk('s3')->url($d->image_url) : null,
             ]);
 
         // ── Villes ───────────────────────────────────────────────────────────

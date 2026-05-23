@@ -61,7 +61,7 @@ class VilleController extends Controller
                     'id'          => $destination->id,
                     'nom'         => $destination->nom,
                     'description' => $destination->description,
-                    'image_url'   => $destination->image_url,
+                    'image_url'   => $destination->image_url ? Storage::disk('s3')->url($destination->image_url) : null,
                 ],
                 'villes' => $villes,
             ],

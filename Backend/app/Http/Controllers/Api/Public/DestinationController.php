@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Public;
 use App\Http\Controllers\Controller;
 use App\Models\Destination;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Storage;
 
 class DestinationController extends Controller
 {
@@ -26,7 +27,7 @@ class DestinationController extends Controller
             'id'           => $d->id,
             'nom'          => $d->nom,
             'description'  => $d->description,
-            'image_url'    => $d->image_url,
+            'image_url'    => $d->image_url ? Storage::disk('s3')->url($d->image_url) : null,
             'hotels_count' => $d->hotels_count,
         ]);
 

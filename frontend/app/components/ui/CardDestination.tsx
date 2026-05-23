@@ -37,8 +37,10 @@ const CardDestination = ({
   hoverEffect = 'zoom',
   priority = false
 }: CardDestinationProps) => {
+  const FALLBACK = '/photos/chambre.jpg'
+  const validSrc = (imageUrl?.startsWith('http') || imageUrl?.startsWith('/')) ? imageUrl : FALLBACK
   const [imageError, setImageError] = useState(false)
-  
+
   const hoverStyles = {
     zoom: 'group-hover:scale-110',
     darken: 'group-hover:brightness-75',
@@ -69,7 +71,7 @@ const CardDestination = ({
       <div className="relative w-full h-full overflow-hidden bg-gray-200">
         {!imageError ? (
           <Image
-            src={imageUrl}
+            src={imageError ? FALLBACK : validSrc}
             alt={alt || title}
             fill
             className={`

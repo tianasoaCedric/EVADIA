@@ -23,26 +23,14 @@ export const hotelService = {
     return apiClient.get<PaginatedResponse<Hotel>>(`/hotels${query ? `?${query}` : ''}`)
   },
 
-  /**
-   * Hôtels avec abonnement Signature actif — toutes destinations
-   * GET /hotels?selection=1
-   */
   selection(): Promise<PaginatedResponse<Hotel>> {
     return apiClient.get<PaginatedResponse<Hotel>>('/hotels?selection=1')
   },
 
-  /**
-   * Hôtels les plus réservés — toutes destinations
-   * GET /hotels?popular=1
-   */
   popular(): Promise<{ data: Hotel[] }> {
     return apiClient.get<{ data: Hotel[] }>('/hotels?popular=1')
   },
 
-  /**
-   * Détail complet d'un hôtel — public (photos, chambres, avis)
-   * GET /hotels/{id}
-   */
   get(id: number): Promise<HotelDetail> {
     return apiClient.get<HotelDetail>(`/hotels/${id}`)
   },

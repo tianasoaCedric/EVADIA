@@ -27,6 +27,8 @@ interface HeroSectionProps {
     downloadText?: string
     /** Afficher l'indicateur de scroll */
     showScrollIndicator?: boolean
+    /** Vidéo de fond (remplace l'image si fournie) */
+    videoSrc?: string
     /** Classes supplémentaires */
     className?: string
 }
@@ -42,6 +44,7 @@ const HeroSection = ({
     androidText = "Android",
     downloadText = "Téléchargez l'application",
     showScrollIndicator = true,
+    videoSrc,
     className = ""
 }: HeroSectionProps) => {
     const heroRef = useRef<HTMLDivElement>(null)
@@ -51,16 +54,28 @@ const HeroSection = ({
 
     return (
         <section className={`relative min-h-screen ${className}`}>
-            {/* Image de fond */}
+            {/* Fond : vidéo ou image */}
             <div className="absolute inset-0 z-0">
-                <Image
-                    src={backgroundImage}
-                    alt="Evadia - Découvrez le monde"
-                    fill
-                    className="object-cover"
-                    priority
-                    quality={80}
-                />
+                {videoSrc ? (
+                    <video
+                        src={videoSrc}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        poster={backgroundImage}
+                        className="absolute inset-0 w-full h-full object-cover"
+                    />
+                ) : (
+                    <Image
+                        src={backgroundImage}
+                        alt="Evadia - Découvrez le monde"
+                        fill
+                        className="object-cover"
+                        priority
+                        quality={80}
+                    />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/40 to-transparent" />
             </div>
 

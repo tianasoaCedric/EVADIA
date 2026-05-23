@@ -14,9 +14,10 @@ interface HebergementNameProps {
     categoryName: string
     slug: string
     initialData?: PaginatedResponse<Hotel>
+    categoryDescription?: string | null
 }
 
-export default function HebergementName({ categoryId, categoryName, initialData }: HebergementNameProps) {
+export default function HebergementName({ categoryId, categoryName, initialData, categoryDescription }: HebergementNameProps) {
     const t = useTranslations('HebergementName')
     const commonT = useTranslations('Common')
 
@@ -84,7 +85,7 @@ const heroTitle = capitalizeWords(categoryName)
         <>
             <HeroSection
                 title={t('hero_title', { category: heroTitle })}
-                subtitle={t('hero_subtitle', { category: categoryName.toLowerCase() })}
+                subtitle={categoryDescription ?? t('hero_subtitle', { category: categoryName.toLowerCase() })}
                 backgroundImage="/photos/bc.png"
                 showDownload={false}
                 showScrollIndicator={true}
