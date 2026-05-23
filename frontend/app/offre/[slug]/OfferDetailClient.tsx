@@ -32,7 +32,7 @@ export default function OfferDetailClient({ offerId, offerName, slug, initialOff
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
-  const [setMainRef, isMainVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
+  const [setMainRef, isMainVisible] = useOnScreen({ threshold: 0.2,  })
 
   void slug
   void offerId

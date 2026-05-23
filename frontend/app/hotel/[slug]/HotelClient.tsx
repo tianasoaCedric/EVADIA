@@ -31,7 +31,7 @@ export default function HotelClient({ hotelId, hotelName, slug, initialHotelData
   const [scrollPosition, setScrollPosition] = useState(0)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-  const [setRoomsRef, isRoomsVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
+  const [setRoomsRef, isRoomsVisible] = useOnScreen({ threshold: 0.2,  })
 
   useEffect(() => {
     // Données hôtel déjà chargées côté serveur — vérifier uniquement les favoris

@@ -86,7 +86,7 @@ const CardHotel = ({
 
   const [setCardRef, isCardVisible] = useOnScreen({
         threshold: 0.2,
-        triggerOnce: false
+        
     })
 
   // Générer le lien automatiquement si hotelId est fourni

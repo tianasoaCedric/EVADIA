@@ -21,9 +21,9 @@ export default function DiscoverClient({ initialVilles }: DiscoverClientProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 15
 
-  const [setHeroRef, isHeroVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
-  const [setTitleRef, isTitleVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
-  const [setSearchRef, isSearchVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
+  const [setHeroRef, isHeroVisible] = useOnScreen({ threshold: 0.2,  })
+  const [setTitleRef, isTitleVisible] = useOnScreen({ threshold: 0.2,  })
+  const [setSearchRef, isSearchVisible] = useOnScreen({ threshold: 0.2,  })
 
   useEffect(() => {
     const q = searchQuery.trim().toLowerCase()

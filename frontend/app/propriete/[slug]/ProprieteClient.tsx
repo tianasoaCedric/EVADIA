@@ -59,7 +59,7 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [propriete, setPropriete] = useState<ProprietePublic | null>(null)
 
-  const [setMainRef, isMainVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
+  const [setMainRef, isMainVisible] = useOnScreen({ threshold: 0.2,  })
 
   useEffect(() => {
     const fetchPropriete = async () => {

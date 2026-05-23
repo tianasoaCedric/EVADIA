@@ -68,12 +68,12 @@ export default function HotelInfo({
   const displayedEquipments = showAllEquipments ? equipments : equipments.slice(0, 8)
 
   // Refs pour chaque section
-  const [setLocationRef, isLocationVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
-  const [setCategoryRef, isCategoryVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
-  const [setAboutRef, isAboutVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
-  const [setFeaturesRef, isFeaturesVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
-  const [setIncludedRef, isIncludedVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
-  const [setEquipmentsRef, isEquipmentsVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
+  const [setLocationRef, isLocationVisible] = useOnScreen({ threshold: 0.2,  })
+  const [setCategoryRef, isCategoryVisible] = useOnScreen({ threshold: 0.2,  })
+  const [setAboutRef, isAboutVisible] = useOnScreen({ threshold: 0.2,  })
+  const [setFeaturesRef, isFeaturesVisible] = useOnScreen({ threshold: 0.2,  })
+  const [setIncludedRef, isIncludedVisible] = useOnScreen({ threshold: 0.2,  })
+  const [setEquipmentsRef, isEquipmentsVisible] = useOnScreen({ threshold: 0.2,  })
 
   const renderStars = () => {
     const fullStars = Math.floor(rating)

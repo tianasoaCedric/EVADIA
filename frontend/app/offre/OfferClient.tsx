@@ -31,7 +31,7 @@ export default function OfferClient({ initialData }: OfferClientProps) {
   const [lastPage, setLastPage] = useState(initialData?.last_page ?? 1)
   const [total, setTotal] = useState(initialData?.total ?? 0)
 
-  const [setMainRef, isMainVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
+  const [setMainRef, isMainVisible] = useOnScreen({ threshold: 0.2,  })
   const mounted = useRef(false)
 
   const fetchOffers = async (page: number, search: string) => {

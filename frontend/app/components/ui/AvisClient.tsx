@@ -112,9 +112,9 @@ export default function AvisClient({ hotelId, title }: AvisClientProps) {
 
   const isAuthenticated = authService.isAuthenticated()
 
-  const [setTitleRef, isTitleVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
-  const [setGridRef, isGridVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
-  const [setFormRef, isFormVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
+  const [setTitleRef, isTitleVisible] = useOnScreen({ threshold: 0.2,  })
+  const [setGridRef, isGridVisible] = useOnScreen({ threshold: 0.2,  })
+  const [setFormRef, isFormVisible] = useOnScreen({ threshold: 0.2,  })
 
   useEffect(() => {
     if (!hotelId) return

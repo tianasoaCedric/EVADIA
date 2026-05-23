@@ -63,7 +63,7 @@ export default function Reservation({
     const [isClient, setIsClient] = useState(false)
 
     // Animation au scroll
-    const [setReservationRef, isReservationVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
+    const [setReservationRef, isReservationVisible] = useOnScreen({ threshold: 0.2,  })
 
     useEffect(() => {
         setIsClient(true)

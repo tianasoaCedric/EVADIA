@@ -21,8 +21,8 @@ export default function DiscoverArticleClient({ slug, initialVille, initialLieux
   const [ville] = useState<VilleDecouverte | null>(initialVille)
   const [lieux] = useState<LieuDecouverte[]>(initialLieux)
 
-  const [setHeroRef, isHeroVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
-  const [setTitleRef, isTitleVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
+  const [setHeroRef, isHeroVisible] = useOnScreen({ threshold: 0.2,  })
+  const [setTitleRef, isTitleVisible] = useOnScreen({ threshold: 0.2,  })
 
   void slug
 

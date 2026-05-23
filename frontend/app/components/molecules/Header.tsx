@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import ToggleLangue from '../ui/ToggleLangue'
 import Avatar from '../ui/Avatar'
 import Input from '../ui/Input'
@@ -44,6 +45,7 @@ const Header = ({
     onDeviseChange
 }: HeaderProps) => {
     const router = useRouter()
+    const t = useTranslations('Header')
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [searchValue, setSearchValue] = useState('')
@@ -181,10 +183,11 @@ const Header = ({
                 isOpen={isMenuOpen}
                 onClose={handleMenuClose}
                 theme="light"
+                currentLang={currentLang}
+                onLanguageChange={onLanguageChange}
             />
 
             <header className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${currentTheme.header} ${isScrolled ? 'shadow-sm' : ''}`}>
-                {/* Conteneur qui glisse de bas en haut */}
                 <div className={`
                     transition-transform duration-300 ease-out
                     ${isSliding ? 'shadow-md':''}
@@ -193,15 +196,13 @@ const Header = ({
                     <div className="container mx-auto px-4">
                         <div className="flex items-center justify-between h-16 md:h-20">
 
-                            {/* Partie gauche : MENU (devient X quand ouvert) + ToggleLangue */}
+                            {/* Partie gauche : MENU */}
                             <div className="flex items-center gap-4 md:gap-6">
-                                {/* Bouton MENU / X - change selon l'état du menu */}
                                 <button
                                     onClick={handleMenuClick}
                                     className={`flex items-center gap-2 transition-colors duration-200 font-medium group ${currentTheme.menuButton} cursor-pointer`}
-                                    aria-label={isMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+                                    aria-label={isMenuOpen ? t('close_menu') : t('open_menu')}
                                 >
-                                    {/* cône X quand menu ouvert */}
                                     {isMenuOpen && (
                                         <svg
                                             className="w-5 h-5 md:w-6 md:h-6"
@@ -217,36 +218,36 @@ const Header = ({
                                             />
                                         </svg>
                                     )}
-                                    {/* Icône MENU quand fermé */}
-                                    {isMobile && !isMenuOpen && (<svg
-                                        className=" w-5 h-5 lg:w-6 lg:h-6"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M4 6h16M4 12h16M4 18h16"
-                                        />
-                                    </svg>)}
-
+                                    {isMobile && !isMenuOpen && (
+                                        <svg
+                                            className="w-5 h-5 lg:w-6 lg:h-6"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M4 6h16M4 12h16M4 18h16"
+                                            />
+                                        </svg>
+                                    )}
                                     <span className="hidden sm:inline text-sm md:text-base">
-                                        {isMenuOpen ? '' : 'MENU'}
+                                        {isMenuOpen ? '' : t('menu')}
                                     </span>
                                 </button>
-
-                                {/* Toggle Langue - caché sur mobile */}
-                                {!isMobile && (
-                                <ToggleLangue
-                                    variant={activeTheme === 'default' ? 'default' : 'dark'}
-                                    currentLang={currentLang}
-                                    onToggle={onLanguageChange}
-                                    size={isMenuOpen ? 'sm' : 'md'}
-                                />
-                            )}
+                                {/* Toggle Langue - UNIQUEMENT SUR DESKTOP */}
+                                <div className="flex items-center">
+                                    <ToggleLangue
+                                        variant={activeTheme === 'default' ? 'default' : 'dark'}
+                                        currentLang={currentLang}
+                                        onToggle={onLanguageChange}
+                                        size={isMenuOpen ? 'sm' : 'md'}
+                                    />
+                                </div>
                             </div>
+                            
 
                             {/* Partie centrale : Logo */}
                             <Link
@@ -254,19 +255,17 @@ const Header = ({
                                 className="absolute left-1/2 transform -translate-x-1/2 cursor-pointer"
                             >
                                 <div className="flex items-center justify-center">
-                                    {/* Logo pour mobile */}
                                     <Image
                                         src={`/Evadia_Logo 4${activeTheme === 'dark' ? '_dark' : ''}.png`}
-                                        alt="Evadia"
+                                        alt={t('logo_alt')}
                                         className="block md:hidden"
                                         width={40}
                                         height={40}
                                         priority
                                     />
-                                    {/* Logo pour desktop */}
                                     <Image
                                         src={`/Evadia_Logo 2${activeTheme === 'dark' ? '_dark' : ''}.png`}
-                                        alt="Evadia"
+                                        alt={t('logo_alt')}
                                         className="hidden md:block"
                                         width={180}
                                         height={40}
@@ -276,24 +275,24 @@ const Header = ({
                                 </div>
                             </Link>
 
-                            {/* Partie droite : Recherche + Devise + Avatar */}
+                            {/* Partie droite : Recherche + Devise (desktop) + Avatar */}
                             <div className="flex items-center gap-3 md:gap-4">
 
                                 {/* Icône de recherche */}
                                 <button
                                     onClick={handleSearchToggle}
                                     className={`p-2 transition-all duration-200 rounded-full cursor-pointer ${currentTheme.searchButton}`}
-                                    aria-label="Rechercher"
+                                    aria-label={t('search')}
                                 >
                                     <Search className="w-5 h-5 md:w-6 md:h-6" stroke={currentTheme.iconColor} />
                                 </button>
 
-                                {/* Sélecteur de devise */}
-                                <div className="relative" ref={deviseRef}>
+                                {/* Sélecteur de devise - UNIQUEMENT SUR DESKTOP */}
+                                <div className="hidden md:block relative" ref={deviseRef}>
                                     <button
                                         onClick={() => setDeviseOpen(!deviseOpen)}
-                                        className={`flex items-center gap-2 px-2 py-1.5 rounded-full transition-colors duration-200 ${currentTheme.deviseButton}`}
-                                        aria-label="Changer de devise"
+                                        className={`flex items-center gap-2 px-2 py-1.5 rounded-full cursor-pointer transition-colors duration-200 ${currentTheme.deviseButton}`}
+                                        aria-label={t('change_currency')}
                                     >
                                         <span className="text-sm md:text-base font-medium">{selectedDevise}</span>
                                         <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${deviseOpen ? 'rotate-180' : ''}`} />
@@ -317,8 +316,10 @@ const Header = ({
                                     )}
                                 </div>
 
+                                
+
                                 {/* Avatar utilisateur */}
-                                 <Avatar
+                                <Avatar
                                     variant={activeTheme === 'default' ? 'default' : 'dark'}
                                     size={isMenuOpen ? 'sm' : 'md'}
                                 />
@@ -331,7 +332,7 @@ const Header = ({
                                 <form onSubmit={handleSearchSubmit} className="relative">
                                     <Input
                                         type="text"
-                                        placeholder="Rechercher..."
+                                        placeholder={t('search_placeholder')}
                                         value={searchValue}
                                         onChange={(e) => {
                                             setSearchValue(e.target.value)
@@ -345,7 +346,6 @@ const Header = ({
                                     />
                                 </form>
                                 
-                                {/* Suggestions de recherche */}
                                 <SearchSuggestions
                                     searchQuery={searchValue}
                                     isOpen={showSuggestions && searchValue.length > 0}

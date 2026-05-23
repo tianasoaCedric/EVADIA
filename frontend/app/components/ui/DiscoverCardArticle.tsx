@@ -36,7 +36,7 @@ const DiscoverCardArticle = ({
     const hasMultipleImages = images.length > 1
 
     // Animation au scroll
-    const [setCardRef, isCardVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
+    const [setCardRef, isCardVisible] = useOnScreen({ threshold: 0.2,  })
 
     const handlePrevImage = (e: React.MouseEvent) => {
         e.preventDefault()

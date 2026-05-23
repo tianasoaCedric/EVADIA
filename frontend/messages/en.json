@@ -3,8 +3,8 @@
     "meta_title": "Evadia - Discover the world and book your trips",
     "meta_description": "Book your hotels, find the best deals and enjoy unforgettable experiences around the world with Evadia.",
     "meta_keywords": "travel, hotel, reservation, Evadia, destination, offer",
-    "hero_title": "Discover the world with Evadia",
-    "hero_subtitle": "Book your hotels, find the best deals and enjoy unforgettable experiences across the globe.",
+    "hero_title": "Plan easily and smile",
+    "hero_subtitle": "A few clicks and you're good to go.",
     "download_app": "Download the app",
     "ios": "iOS",
     "android": "Android",
@@ -16,7 +16,7 @@
   },
   "Login": {
     "title": "Log in",
-    "subtitle": "Access your Evadia account",
+    "subtitle": "for more experiences",
     "email": "Enter your email address",
     "email_placeholder": "you@example.com",
     "password": "Enter your password",
@@ -37,6 +37,7 @@
   },
   "Register": {
     "title": "Register",
+    "subtitle": "for more experiences",
     "first_name": "First name",
     "last_name": "Name",
     "email": "Enter your email address",
@@ -55,11 +56,11 @@
   },
   "Hebergement": {
     "meta_title": "Accommodation in Madagascar - Evadia",
-    "meta_description": "Discover our selection of accommodation for all your trips to Madagascar",
+    "meta_description": "Find any type of accommodation with confidence in Madagascar",
     "meta_keywords": "accommodation, hotel, Madagascar, travel, reservation",
-    "section_title": "Our accommodation",
-    "title": "Hotels in Madagascar",
-    "subtitle": "Discover our selection of accommodation for all your trips"
+    "section_title": "Your stay starts here",
+    "title": "The best accommodation in Madagascar",
+    "subtitle": "Find any type of accommodation with confidence"
   },
   "Bouton": {
     "login": "Log in",
@@ -85,7 +86,7 @@
     "meta_description": "Discover our selection of the best {category} in Madagascar. Book your accommodation online at the best prices.",
     "meta_keywords": "{category}, Madagascar, accommodation, reservation, travel, hotel.",
     "hotels_luxe_title": "Luxury hotels",
-    "hero_title": "{category} in Madagascar",
+    "hero_title": "{category}",
     "hero_subtitle": "Discover our selection of the best {category} for your vacation",
     "search_placeholder": "Search for a hotel...",
     "no_results": "No hotels found",
@@ -218,8 +219,8 @@
     "meta_keywords": "destinations, travel, Evadia, vacation"
   },
   "DestinationClient": {
-    "hero_title": "Dream destinations",
-    "hero_subtitle": "Discover the regions of Madagascar and their exceptional accommodation",
+    "hero_title": "MADAGASCAR",
+    "hero_subtitle": "A heavenly destination",
     "where_to_go": "Where do you want to go?",
     "our_selection": "Our selection of accommodation",
     "popular_hotels": "Popular accommodations",
@@ -279,8 +280,8 @@
     "meta_keywords": "offers, promotions, discounts, Evadia, travel, hotel"
   },
   "OfferClient": {
-    "hero_title": "Special offers",
-    "hero_subtitle": "Take advantage of exceptional discounts on our accommodation",
+    "hero_title": "The best of travel, in an exclusive version.",
+    "hero_subtitle": "Be among the first to benefit.",
     "search_placeholder": "Search for an offer by hotel, city or destination...",
     "loading": "Loading...",
     "no_results": "No offers found",
@@ -349,12 +350,12 @@
   },
   "DiscoverClient": {
     "loading": "Loading...",
-    "hero_title": "Discover the world",
-    "hero_subtitle": "Explore the most beautiful destinations and enjoy unique experiences",
+    "hero_title": "Madagascar Experiences",
+    "hero_subtitle": "#Adventure #Experience #Discovery",
     "section_title": "Make every trip magical & memorable",
     "section_description": "Discover our selection of the most beautiful destinations in the world. Whether you're looking for adventure, relaxation or culture, find inspiration for your next trip. Each destination has been carefully chosen to offer you unique and unforgettable experiences.",
     "search_placeholder": "Search for a destination...",
-    "no_results": "No destinations found",
+    "no_results": "No destination found",
     "clear_search": "Clear search",
     "previous_page": "Previous page",
     "next_page": "Next page",
@@ -484,7 +485,7 @@
     "add_card": "Add a card",
     "add_card_title": "Add a new card",
     "card_number": "Card number",
-    "expiry_month": "Expiry month",
+    "expiry_month": "Expiration month",
     "expiry_year": "Expiration year",
     "cvv": "CVV",
     "save_card": "Save",
@@ -555,7 +556,8 @@
     "type_destination": "Destination",
     "type_hotel": "Hotel",
     "type_city": "City",
-    "type_category": "Category"
+    "type_category": "Category",
+    "type_discover": "Discovery"
   },
   "SearchPage": {
     "meta_title": "Search: {query} | Evadia",
@@ -573,5 +575,43 @@
     "no_results_description": "Try with other keywords or check out our current offers.",
     "results_singular": "result",
     "results_plural": "results"
+  },
+  "Footer": {
+    "accommodations": "Accommodations",
+    "destination": "Destination",
+    "offers": "Offers",
+    "discover": "To discover",
+    "collaborate_title": "Collaborate with us",
+    "contact": "Contact",
+    "pro_email": "Mail Pro",
+    "follow_us": "Follow us",
+    "facebook": "Facebook",
+    "linkedin": "LinkedIn",
+    "instagram": "Instagram",
+    "tiktok": "TikTok",
+    "copyright": "© Copyright {year}",
+    "legal_notice": "Legal notices",
+    "privacy_policy": "Privacy policies"
+  },
+  "Header": {
+    "menu": "MENU",
+    "open_menu": "Open menu",
+    "close_menu": "Close menu",
+    "search": "To research",
+    "search_placeholder": "To research...",
+    "change_currency": "Change currency",
+    "logo_alt": "Evadia"
+  },
+  "MenuFullscreen": {
+    "accommodations": "Accommodations",
+    "all_accommodations": "All accommodations",
+    "destinations": "Destinations",
+    "all_destinations": "All destinations",
+    "offers": "Offers",
+    "all_offers": "All offers",
+    "discover": "Discover",
+    "discover_madagascar": "Discover Madagascar",
+    "language": "Language",
+    "currency": "Currency"
   }
 }

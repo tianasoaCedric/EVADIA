@@ -47,7 +47,6 @@ const HeroSection = ({
     const heroRef = useRef<HTMLDivElement>(null)
     const [setHeroRef, isHeroVisible] = useOnScreen({
         threshold: 0.2,
-        triggerOnce: false
     })
 
     return (
@@ -77,10 +76,10 @@ const HeroSection = ({
                         <div className="lg:flex items-end justify-between">
                             {/* Texte */}
                             <div className='mb-4'>
-                                <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-medium text-white mb-4 max-w-2xl leading-tight">
+                                <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-medium text-white mb-4 max-w-2xl leading-tight">
                                     {title}
                                 </h1>
-                                <p className="text-base sm:text-lg md:text-xl text-white/90 max-w-xl leading-relaxed">
+                                <p className="text-xl sm:text-xl md:text-2xl text-white/90 max-w-xl leading-relaxed">
                                     {subtitle}
                                 </p>
                             </div>

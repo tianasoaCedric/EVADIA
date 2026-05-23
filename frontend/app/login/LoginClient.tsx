@@ -100,6 +100,9 @@ export default function LoginClient() {
             <h1 className="text-3xl md:text-4xl font-semibold text-white">
               {t('title')}
             </h1>
+            <p className="text-white/80 mt-2">
+              {t('subtitle')}
+            </p>
           </div>
 
           {/* Erreur globale */}

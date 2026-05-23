@@ -69,7 +69,16 @@ export default function HebergementName({ categoryId, categoryName, initialData 
         document.getElementById('hotels-list')?.scrollIntoView({ behavior: 'smooth' })
     }
 
-    const heroTitle = categoryName === 'Hôtel de luxe' ? t('hotels_luxe_title') : categoryName
+const capitalizeWords = (str: string): string => {
+  return str
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
+// Utilisation
+const heroTitle = capitalizeWords(categoryName)
 
     return (
         <>

@@ -67,9 +67,9 @@ export default function CityClient({
   const [hotelsScrollPosition,  setHotelsScrollPosition]  = useState(0)
   const [popularScrollPosition, setPopularScrollPosition] = useState(0)
 
-  const [setCitiesRef,  isCitiesVisible]  = useOnScreen({ threshold: 0.2, triggerOnce: false })
-  const [setHotelsRef,  isHotelsVisible]  = useOnScreen({ threshold: 0.2, triggerOnce: false })
-  const [setPopularRef, isPopularVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
+  const [setCitiesRef,  isCitiesVisible]  = useOnScreen({ threshold: 0.2,  })
+  const [setHotelsRef,  isHotelsVisible]  = useOnScreen({ threshold: 0.2,  })
+  const [setPopularRef, isPopularVisible] = useOnScreen({ threshold: 0.2,  })
 
   // Filtrage local des villes (pas de fetch)
   useEffect(() => {
@@ -83,7 +83,13 @@ export default function CityClient({
       )
     }
   }, [searchQuery, initialData.villes])
-
+const capitalizeWords = (str: string): string => {
+  return str
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
   // Scroll listeners carrousels
   useEffect(() => {
     const refs = [
@@ -131,7 +137,7 @@ export default function CityClient({
               <ChevronLeft className="w-8 h-8 text-gray-600 hover:text-[#01BDA5] transition-colors" />
             </button>
             <h1 className="text-xl md:text-3xl lg:text-4xl font-medium text-gray-800">
-              {cityName}
+              {capitalizeWords(cityName)}
             </h1>
           </div>
         </div>

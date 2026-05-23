@@ -20,7 +20,7 @@ export default function HebergementClient({ initialCategories }: HebergementClie
 
     const [setCategoriesRef, isCategoriesVisible] = useOnScreen({
         threshold: 0.2,
-        triggerOnce: false
+        
     })
 
     const desktopColumns = useMemo(() => [

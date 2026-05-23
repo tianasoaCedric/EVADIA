@@ -3,8 +3,8 @@
     "meta_title": "Evadia - Découvrez le monde et réservez vos voyages",
     "meta_description": "Réservez vos hôtels, trouvez les meilleures offres et vivez des expériences inoubliables aux quatre coins du globe avec Evadia.",
     "meta_keywords": "voyage, hôtel, réservation, Evadia, destination, offre",
-    "hero_title": "Découvrez le monde avec Evadia",
-    "hero_subtitle": "Réservez vos hôtels, trouvez les meilleures offres et vivez des expériences inoubliables aux quatre coins du globe.",
+    "hero_title": "Planifiez facilement et souriez",
+    "hero_subtitle": "Quelques clics et c’est tout bon.",
     "download_app": "Téléchargez l'application",
     "ios": "iOS",
     "android": "Android",
@@ -16,7 +16,7 @@
   },
   "Login": {
     "title": "Se connecter",
-    "subtitle": "Accédez à votre compte Evadia",
+    "subtitle": "pour plus d'expériences",
     "email": "Entrez votre adresse email",
     "email_placeholder": "vous@exemple.com",
     "password": "Entrez votre mot de passe",
@@ -37,6 +37,7 @@
   },
   "Register": {
     "title": "S'inscrire",
+    "subtitle": "pour plus d'expériences",
     "first_name": "Prénom",
     "last_name": "Nom",
     "email": "Entrez votre adresse email",
@@ -55,11 +56,11 @@
   },
   "Hebergement": {
     "meta_title": "Les Hébergements à Madagascar - Evadia",
-    "meta_description": "Découvrez notre sélection d'hébergements pour tous vos voyages à Madagascar",
+    "meta_description": "Trouvez tout type d’hébergement en toute confiance à Madagascar",
     "meta_keywords": "hébergement, hotel, Madagascar, voyage, réservation",
-    "section_title": "Nos hébergements",
-    "title": "Les Hôtels à Madagascar",
-    "subtitle": "Découvrez notre sélection d'hébergements pour tous vos voyages"
+    "section_title": "Votre séjour commence ici",
+    "title": "Les meilleurs logements à Madagascar",
+    "subtitle": "Trouvez tout type d’hébergement en toute confiance"
   },
   "Bouton": {
     "login": "Se connecter",
@@ -85,7 +86,7 @@
     "meta_description": "Découvrez notre sélection des meilleurs {category} à Madagascar. Réservez votre hébergement en ligne aux meilleurs prix.",
     "meta_keywords": "{category}, Madagascar, hébergement, réservation, voyage, hôtel.",
     "hotels_luxe_title": "Hôtels de luxe",
-    "hero_title": "{category} à Madagascar",
+    "hero_title": "{category}",
     "hero_subtitle": "Découvrez notre sélection des meilleurs {category} pour vos vacances",
     "search_placeholder": "Rechercher un hôtel...",
     "no_results": "Aucun hôtel trouvé",
@@ -218,8 +219,8 @@
     "meta_keywords": "destinations, voyage, Evadia, vacances"
   },
   "DestinationClient": {
-    "hero_title": "Destinations de rêve",
-    "hero_subtitle": "Découvrez les régions de Madagascar et leurs hébergements d'exception",
+    "hero_title": "MADAGASCAR",
+    "hero_subtitle": "Une destination paradisiaque",
     "where_to_go": "Où voulez-vous partir ?",
     "our_selection": "Notre sélection d'hébergements",
     "popular_hotels": "Hébergements populaires",
@@ -279,8 +280,8 @@
     "meta_keywords": "offres, promotions, réductions, Evadia, voyage, hôtel"
   },
   "OfferClient": {
-    "hero_title": "Offres spéciales",
-    "hero_subtitle": "Profitez de réductions exceptionnelles sur nos hébergements",
+    "hero_title": "Le meilleur du voyage, en version exclusive.",
+    "hero_subtitle": "Soyez parmi les premiers à en profiter.",
     "search_placeholder": "Rechercher une offre par hôtel, ville ou destination...",
     "loading": "Chargement...",
     "no_results": "Aucune offre trouvée",
@@ -349,8 +350,8 @@
   },
   "DiscoverClient": {
     "loading": "Chargement...",
-    "hero_title": "Découvrir le monde",
-    "hero_subtitle": "Explorez les plus belles destinations et vivez des expériences uniques",
+    "hero_title": "Madagascar Experiences",
+    "hero_subtitle": "#Aventure  #Expérience  #Découverte",
     "section_title": "Rendez chaque voyage magique & mémorable",
     "section_description": "Découvrez notre sélection des plus belles destinations du monde. Que vous soyez à la recherche d'aventure, de détente ou de culture, trouvez l'inspiration pour votre prochain voyage. Chaque destination a été soigneusement choisie pour vous offrir des expériences uniques et inoubliables.",
     "search_placeholder": "Rechercher une destination...",
@@ -555,7 +556,8 @@
     "type_destination": "Destination",
     "type_hotel": "Hôtel",
     "type_city": "Ville",
-    "type_category": "Catégorie"
+    "type_category": "Catégorie",
+    "type_discover": "Découverte"
   },
   "SearchPage": {
     "meta_title": "Recherche : {query} | Evadia",
@@ -573,5 +575,43 @@
     "no_results_description": "Essayez avec d'autres mots-clés ou consultez nos offres du moment.",
     "results_singular": "résultat",
     "results_plural": "résultats"
+  },
+"Footer": {
+    "accommodations": "Hébergements",
+    "destination": "Destination",
+    "offers": "Offres",
+    "discover": "A découvrir",
+    "collaborate_title": "Collaborez avec nous",
+    "contact": "Contact",
+    "pro_email": "Mail Pro",
+    "follow_us": "Suivez - nous",
+    "facebook": "Facebook",
+    "linkedin": "LinkedIn",
+    "instagram": "Instagram",
+    "tiktok": "TikTok",
+    "copyright": "© Copyright {year}",
+    "legal_notice": "Mentions légales",
+    "privacy_policy": "Politiques de confidentialités"
+  },
+  "Header": {
+    "menu": "MENU",
+    "open_menu": "Ouvrir le menu",
+    "close_menu": "Fermer le menu",
+    "search": "Rechercher",
+    "search_placeholder": "Rechercher...",
+    "change_currency": "Changer de devise",
+    "logo_alt": "Evadia"
+  },
+  "MenuFullscreen": {
+    "accommodations": "Hébergements",
+    "all_accommodations": "Tous les hébergements",
+    "destinations": "Destinations",
+    "all_destinations": "Toutes les destinations",
+    "offers": "Offres",
+    "all_offers": "Toutes les offres",
+    "discover": "Découvrir",
+    "discover_madagascar": "Découvrir Madagascar",
+    "language": "Langue",
+    "currency": "Devise"
   }
 }

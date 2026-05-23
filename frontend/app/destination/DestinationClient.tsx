@@ -9,7 +9,6 @@ import CardHotel from '../components/ui/CardHotel'
 import { useOnScreen } from '@/hooks/useOnScreen'
 import { createSlug } from '@/lib/slug'
 import type { Destination, Hotel } from '@/lib/types'
-import Header from "../components/molecules/Header"
 
 
 
@@ -24,8 +23,8 @@ export default function DestinationClient({ destinations, selectionHotels }: Des
   const selectionScrollRef = useRef<HTMLDivElement>(null)
   const [selectionScrollPos, setSelectionScrollPos] = useState(0)
 
-  const [setSpotsRef,     isSpotsVisible]     = useOnScreen({ threshold: 0.2, triggerOnce: false })
-  const [setSelectionRef, isSelectionVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
+  const [setSpotsRef,     isSpotsVisible]     = useOnScreen({ threshold: 0.2,  })
+  const [setSelectionRef, isSelectionVisible] = useOnScreen({ threshold: 0.2,  })
 
   useEffect(() => {
     const el = selectionScrollRef.current
@@ -64,7 +63,6 @@ export default function DestinationClient({ destinations, selectionHotels }: Des
 
   return (
     <main className="min-h-screen">
-      <Header />
       <HeroSection
         title={t('hero_title')}
         subtitle={t('hero_subtitle')}

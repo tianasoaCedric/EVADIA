@@ -32,6 +32,15 @@ interface SearchSuggestionsProps {
   isOpen: boolean
 }
 
+// Configuration des types pour l'affichage
+const getTypeConfig = (t: ReturnType<typeof useTranslations>) => ({
+  destination: { label: t('type_destination'), color: 'bg-blue-100 text-blue-700',     Icon: MapPin    },
+  hotel:       { label: t('type_hotel'),        color: 'bg-green-100 text-green-700',   Icon: BedDouble },
+  city:        { label: t('type_city'),        color: 'bg-purple-100 text-purple-700', Icon: Building2 },
+  category:    { label: t('type_category'),   color: 'bg-orange-100 text-orange-700',  Icon: Tag       },
+  discover:    { label: t('type_discover'),  color: 'bg-teal-100 text-teal-700',      Icon: Compass   },
+})
+
 // Stable debounce instance — created once per component mount
 const debounce = createSearchDebounce(250)
 
@@ -92,14 +101,6 @@ function toSuggestions(results: SearchResults): Suggestion[] {
   return [...destinations, ...villes, ...hotels, ...types, ...decVilles, ...decLieux]
 }
 
-const TYPE_CONFIG = {
-  destination: { label: 'Destination', color: 'bg-blue-100 text-blue-700',     Icon: MapPin    },
-  hotel:       { label: 'Hôtel',        color: 'bg-green-100 text-green-700',   Icon: BedDouble },
-  city:        { label: 'Ville',        color: 'bg-purple-100 text-purple-700', Icon: Building2 },
-  category:    { label: 'Catégorie',   color: 'bg-orange-100 text-orange-700',  Icon: Tag       },
-  discover:    { label: 'Découverte',  color: 'bg-teal-100 text-teal-700',      Icon: Compass   },
-} as const
-
 export default function SearchSuggestions({
   searchQuery,
   onSelect,
@@ -107,6 +108,7 @@ export default function SearchSuggestions({
   isOpen,
 }: SearchSuggestionsProps) {
   const t = useTranslations('SearchSuggestions')
+  const typeConfig = getTypeConfig(t)
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [isLoading, setIsLoading]     = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
@@ -185,7 +187,7 @@ export default function SearchSuggestions({
         ) : (
           <div ref={listRef} className="max-h-80 overflow-y-auto divide-y divide-gray-50">
             {suggestions.map((s, i) => {
-              const cfg = TYPE_CONFIG[s.type]
+              const cfg = typeConfig[s.type]
               return (
                 <button
                   key={`${s.type}-${s.id}`}

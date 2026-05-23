@@ -38,7 +38,7 @@ const HotelPhoto = ({
     const containerRef = useRef<HTMLDivElement>(null)
 
     // Animation au scroll
-    const [setPhotoRef, isPhotoVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
+    const [setPhotoRef, isPhotoVisible] = useOnScreen({ threshold: 0.2,  })
 
     const images = Array.isArray(imageUrl) ? imageUrl : [imageUrl]
     // Limiter l'affichage à 5 photos dans le carrousel principal

@@ -23,19 +23,19 @@ export default function HomePage() {
     
     const [setDestinationsRef, isDestinationsVisible] = useOnScreen({
         threshold: 0.2,
-        triggerOnce: false
+        
     })
     const [setHeroRef, isHeroVisible] = useOnScreen({
         threshold: 0.2,
-        triggerOnce: false
+        
     })
     const [setOffersRef, isOffersVisible] = useOnScreen({
         threshold: 0.2,
-        triggerOnce: false
+        
     })
     const [setDiscoverRef, isDiscoverVisible] = useOnScreen({
         threshold: 0.2,
-        triggerOnce: false
+        
     })
 
     // Calculer la position du scroll et le maxScroll pour les destinations

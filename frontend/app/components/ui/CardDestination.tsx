@@ -47,7 +47,7 @@ const CardDestination = ({
 
   const [setCardRef, isCardVisible] = useOnScreen({
         threshold: 0.2,
-        triggerOnce: false
+        
     })
 
   const cardContent = (

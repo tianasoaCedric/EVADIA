@@ -66,8 +66,8 @@ export default function VilleClient({
   const selectionScrollRef = useRef<HTMLDivElement | null>(null)
   const [selectionScrollPos, setSelectionScrollPos] = useState(0)
 
-  const [setSelectionRef, isSelectionVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
-  const [setHotelsRef, isHotelsVisible]       = useOnScreen({ threshold: 0.2, triggerOnce: false })
+  const [setSelectionRef, isSelectionVisible] = useOnScreen({ threshold: 0.2,  })
+  const [setHotelsRef, isHotelsVisible]       = useOnScreen({ threshold: 0.2,  })
 
   const fetchHotels = async (page: number, search: string) => {
     const params = new URLSearchParams({ page: String(page) })
@@ -83,6 +83,13 @@ export default function VilleClient({
       setIsSearching(false)
     }
   }
+  const capitalizeWords = (str: string): string => {
+  return str
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
 
   // Re-fetch uniquement sur changement de recherche (debounce 400ms)
   useEffect(() => {
@@ -143,7 +150,7 @@ export default function VilleClient({
             <ChevronLeft className="w-8 h-8 text-gray-600 hover:text-[#01BDA5] transition-colors" />
           </button>
           <h1 className="text-xl md:text-3xl lg:text-4xl font-medium text-gray-800">
-            {villeName}
+            {capitalizeWords(villeName)}
           </h1>
         </div>
         {/* Photo de la destination */}
@@ -249,7 +256,7 @@ export default function VilleClient({
           }`}
         >
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-medium text-gray-800 mb-8">
-            {t('hotels_title', { name: villeName })}
+            {t('hotels_title', { name: capitalizeWords(villeName) })}
           </h2>
 
           {isSearching ? (

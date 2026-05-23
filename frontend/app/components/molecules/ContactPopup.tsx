@@ -20,7 +20,7 @@ export default function ContactPopup({ isOpen, onClose }: ContactPopupProps) {
   const [formMessage, setFormMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const [setPopupRef, isPopupVisible] = useOnScreen({ threshold: 0.2, triggerOnce: false })
+  const [setPopupRef, isPopupVisible] = useOnScreen({ threshold: 0.2,  })
 
   const handleSubmit = async () => {
     if (!formName.trim() || !formEmail.trim() || !formMessage.trim()) return
