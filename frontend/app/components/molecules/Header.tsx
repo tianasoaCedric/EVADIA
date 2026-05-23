@@ -4,15 +4,13 @@ import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import dynamic from 'next/dynamic'
 import ToggleLangue from '../ui/ToggleLangue'
 import Avatar from '../ui/Avatar'
 import Input from '../ui/Input'
 import { ChevronDown, Search } from 'lucide-react'
 import { useDevise } from '../../context/DeviseContext'
 import SearchSuggestions, { Suggestion } from '../ui/SearchSuggestions'
-
-const MenuFullscreen = dynamic(() => import('./MenuFullscreen'), { ssr: false })
+import MenuFullscreen from './MenuFullscreen'
 
 interface HeaderProps {
     /** Langue actuelle */
@@ -58,20 +56,12 @@ const Header = ({
     const deviseRef = useRef<HTMLDivElement>(null)
     const searchContainerRef = useRef<HTMLDivElement>(null)
 
-    // Fermer le dropdown devise si clic extérieur
+    // Fermer le dropdown devise et les suggestions si clic extérieur
     useEffect(() => {
         const handler = (e: MouseEvent) => {
             if (deviseRef.current && !deviseRef.current.contains(e.target as Node)) {
                 setDeviseOpen(false)
             }
-        }
-        document.addEventListener('mousedown', handler)
-        return () => document.removeEventListener('mousedown', handler)
-    }, [])
-
-    // Fermer les suggestions si clic extérieur
-    useEffect(() => {
-        const handler = (e: MouseEvent) => {
             if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
                 setShowSuggestions(false)
             }
@@ -99,12 +89,11 @@ const Header = ({
 
     // Détecter la taille de l'écran pour le responsive
     useEffect(() => {
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth < 768)
-        }
-        checkMobile()
-        window.addEventListener('resize', checkMobile)
-        return () => window.removeEventListener('resize', checkMobile)
+        const mq = window.matchMedia('(max-width: 767px)')
+        const update = () => setIsMobile(mq.matches)
+        update()
+        mq.addEventListener('change', update)
+        return () => mq.removeEventListener('change', update)
     }, [])
 
     // Déterminer le thème actif
@@ -117,15 +106,9 @@ const Header = ({
     const activeTheme = getActiveTheme()
 
     const handleMenuClick = () => {
-        if (!isMenuOpen) {
-            setIsSliding(true)
-            setIsMenuOpen(true)
-            setTimeout(() => setIsSliding(false), 300)
-        } else {
-            setIsSliding(true)
-            setIsMenuOpen(false)
-            setTimeout(() => setIsSliding(false), 300)
-        }
+        setIsSliding(true)
+        setIsMenuOpen(prev => !prev)
+        setTimeout(() => setIsSliding(false), 300)
         onMenuClick?.()
     }
 
@@ -197,7 +180,7 @@ const Header = ({
             <MenuFullscreen
                 isOpen={isMenuOpen}
                 onClose={handleMenuClose}
-                theme={theme === 'default' ? 'light' : 'light'}
+                theme="light"
             />
 
             <header className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${currentTheme.header} ${isScrolled ? 'shadow-sm' : ''}`}>

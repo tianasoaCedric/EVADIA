@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { typeHotelService } from '@/lib/services'
-import { destinationService } from '@/lib/services'
+import { ChevronDown } from 'lucide-react'
+import { typeHotelService, destinationService } from '@/lib/services'
 import { createSlug } from '@/lib/slug'
 
 interface MenuFullscreenProps {
@@ -17,39 +17,56 @@ interface MenuColumn {
     items: { label: string; href: string }[]
 }
 
-const MenuFullscreen = ({ isOpen, onClose, theme = 'light' }: MenuFullscreenProps) => {
-    const [menuStructure, setMenuStructure] = useState<MenuColumn[]>([
-        { title: 'Hébergements', items: [] },
-        { title: 'Destinations',  items: [] },
-        { title: 'Offres',        items: [{ label: 'Toutes les offres', href: '/offre' }] },
-        { title: 'Découvrir',    items: [{ label: 'Découvrir Madagascar', href: '/decouvrir' }] },
-    ])
+type MenuData = [Awaited<ReturnType<typeof typeHotelService.list>>, Awaited<ReturnType<typeof destinationService.list>>]
 
-    // Charger les types d'hôtels et destinations depuis l'API
-    useEffect(() => {
-        Promise.all([
+// Fetch démarre dès que le module se charge (pas au montage du composant)
+let _menuDataPromise: Promise<MenuData> | null = null
+function prefetchMenuData(): Promise<MenuData> {
+    if (!_menuDataPromise) {
+        _menuDataPromise = Promise.all([
             typeHotelService.list(),
             destinationService.list(),
-        ]).then(([types, destResponse]) => {
-            setMenuStructure([
-                {
-                    title: 'Hébergements',
-                    items: [
-                        { label: 'Tous les hébergements', href: '/hebergement' },
-                        ...types.map(t => ({ label: t.nom, href: `/hebergement/${createSlug(t.id, t.nom)}` })),
-                    ]
-                },
-                {
-                    title: 'Destinations',
-                    items: [
-                        { label: 'Toutes les destinations', href: '/destination' },
-                        ...destResponse.data.map(d => ({ label: d.nom, href: `/destination/${createSlug(d.id, d.nom)}` })),
-                    ]
-                },
-                { title: 'Offres',    items: [{ label: 'Toutes les offres', href: '/offre' }] },
-                { title: 'Découvrir', items: [{ label: 'Découvrir Madagascar', href: '/decouvrir' }] },
-            ])
-        }).catch(() => {})
+        ]).catch(() => [[], { data: [] }] as unknown as MenuData)
+    }
+    return _menuDataPromise
+}
+if (typeof window !== 'undefined') prefetchMenuData()
+
+function buildMenuStructure(types: MenuData[0], destResponse: MenuData[1]): MenuColumn[] {
+    return [
+        {
+            title: 'Hébergements',
+            items: [
+                { label: 'Tous les hébergements', href: '/hebergement' },
+                ...types.map(t => ({ label: t.nom, href: `/hebergement/${createSlug(t.id, t.nom)}` })),
+            ]
+        },
+        {
+            title: 'Destinations',
+            items: [
+                { label: 'Toutes les destinations', href: '/destination' },
+                ...destResponse.data.map(d => ({ label: d.nom, href: `/destination/${createSlug(d.id, d.nom)}` })),
+            ]
+        },
+        { title: 'Offres',    items: [{ label: 'Toutes les offres', href: '/offre' }] },
+        { title: 'Découvrir', items: [{ label: 'Découvrir Madagascar', href: '/decouvrir' }] },
+    ]
+}
+
+const DEFAULT_MENU: MenuColumn[] = [
+    { title: 'Hébergements', items: [] },
+    { title: 'Destinations',  items: [] },
+    { title: 'Offres',        items: [{ label: 'Toutes les offres', href: '/offre' }] },
+    { title: 'Découvrir',    items: [{ label: 'Découvrir Madagascar', href: '/decouvrir' }] },
+]
+
+const MenuFullscreen = ({ isOpen, onClose, theme = 'light' }: MenuFullscreenProps) => {
+    const [menuStructure, setMenuStructure] = useState<MenuColumn[]>(DEFAULT_MENU)
+
+    useEffect(() => {
+        prefetchMenuData().then(([types, destResponse]) => {
+            setMenuStructure(buildMenuStructure(types, destResponse))
+        })
     }, [])
 
     // État pour les sections ouvertes/déroulées sur mobile
@@ -182,22 +199,7 @@ const MenuFullscreen = ({ isOpen, onClose, theme = 'light' }: MenuFullscreenProp
                                                     {column.title}
                                                 </h3>
                                                 
-                                                {/* Icône chevron */}
-                                                <svg
-                                                    className={`w-5 h-5 text-[#01BDA5] transition-transform duration-300 ${
-                                                        isOpenSection ? 'rotate-180' : ''
-                                                    }`}
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M19 9l-7 7-7-7"
-                                                    />
-                                                </svg>
+                                                <ChevronDown className={`w-5 h-5 text-[#01BDA5] transition-transform duration-300 ${isOpenSection ? 'rotate-180' : ''}`} />
                                             </button>
                                             
                                             {/* Liste des liens (accordéon) */}

@@ -61,6 +61,9 @@ const EMPTY: SearchResults = {
   decouverte_villes: [], decouverte_lieux: [],
 }
 
+// Cache mémoire par session (clé = "q|suggest")
+const searchCache = new Map<string, SearchResults>()
+
 /** Fetch sans le cache Next.js — utilisé côté client uniquement */
 export async function fetchSearch(
   q: string,
@@ -68,6 +71,9 @@ export async function fetchSearch(
   signal?: AbortSignal,
 ): Promise<SearchResults> {
   if (q.trim().length < 2) return EMPTY
+
+  const key = `${q.trim().toLowerCase()}|${suggest}`
+  if (searchCache.has(key)) return searchCache.get(key)!
 
   const url = `${API_BASE}/search?q=${encodeURIComponent(q.trim())}${suggest ? '&suggest=1' : ''}`
 
@@ -78,7 +84,9 @@ export async function fetchSearch(
   })
 
   if (!res.ok) return EMPTY
-  return res.json() as Promise<SearchResults>
+  const data = await res.json() as SearchResults
+  searchCache.set(key, data)
+  return data
 }
 
 /** Crée une fonction debounce qui annule la requête précédente automatiquement */

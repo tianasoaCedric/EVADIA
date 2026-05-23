@@ -1,47 +1,33 @@
 'use client'
 import HeroSection from "../components/ui/HeroSection"
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import CardDestination from "../components/ui/CardDestination"
 import { useOnScreen } from '@/hooks/useOnScreen'
 import { useTranslations } from "next-intl"
 import { createSlug } from '@/lib/slug'
-import { typeHotelService, TypeHotelWithImage } from '@/lib/services'
+import { TypeHotelWithImage } from '@/lib/services'
 
-export default function HebergementClient() {
+interface HebergementClientProps {
+    initialCategories: TypeHotelWithImage[]
+}
+
+export default function HebergementClient({ initialCategories }: HebergementClientProps) {
     const t = useTranslations('Hebergement')
     const [scrollPosition, setScrollPosition] = useState(0)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
-    const [categories, setCategories] = useState<TypeHotelWithImage[]>([])
-    const [isLoading, setIsLoading] = useState(true)
+    const categories = initialCategories
 
     const [setCategoriesRef, isCategoriesVisible] = useOnScreen({
         threshold: 0.2,
         triggerOnce: false
     })
 
-    // Chargement des types d'hôtels depuis l'API
-    useEffect(() => {
-        typeHotelService.list()
-            .then(setCategories)
-            .finally(() => setIsLoading(false))
-    }, [])
-
-    // Organisation des colonnes pour desktop (3 colonnes, hauteurs alternées)
-    const desktopColumns = [
-        {
-            items: [categories[0], categories[3]],
-            heights: ['h-128', 'h-164']
-        },
-        {
-            items: [categories[1], categories[4]],
-            heights: ['h-164', 'h-128']
-        },
-        {
-            items: [categories[2], categories[5]],
-            heights: ['h-128', 'h-164']
-        }
-    ]
+    const desktopColumns = useMemo(() => [
+        { items: [categories[0], categories[3]], heights: ['h-128', 'h-164'] },
+        { items: [categories[1], categories[4]], heights: ['h-164', 'h-128'] },
+        { items: [categories[2], categories[5]], heights: ['h-128', 'h-164'] },
+    ], [categories])
 
     // Gestion du scroll
     useEffect(() => {
@@ -62,33 +48,23 @@ export default function HebergementClient() {
         }
     }, [])
 
-    const getActiveIndex = () => {
-        if (!scrollContainerRef.current) return 0
+    const activeIndex = useMemo(() => {
         const cardWidth = 280
-        const activeIndex = Math.round(scrollPosition / cardWidth)
-        return Math.min(activeIndex, categories.length - 1)
-    }
+        const index = Math.round(scrollPosition / cardWidth)
+        return Math.min(index, categories.length - 1)
+    }, [scrollPosition, categories.length])
 
-    const activeIndex = getActiveIndex()
+    const scrollLeft = useCallback(() => {
+        scrollContainerRef.current?.scrollBy({ left: -280, behavior: 'smooth' })
+    }, [])
 
-    const scrollLeft = () => {
-        if (scrollContainerRef.current) {
-            scrollContainerRef.current.scrollBy({ left: -280, behavior: 'smooth' })
-        }
-    }
+    const scrollRight = useCallback(() => {
+        scrollContainerRef.current?.scrollBy({ left: 280, behavior: 'smooth' })
+    }, [])
 
-    const scrollRight = () => {
-        if (scrollContainerRef.current) {
-            scrollContainerRef.current.scrollBy({ left: 280, behavior: 'smooth' })
-        }
-    }
-
-    const scrollToDot = (index: number) => {
-        if (scrollContainerRef.current) {
-            const cardWidth = 280
-            scrollContainerRef.current.scrollTo({ left: index * cardWidth, behavior: 'smooth' })
-        }
-    }
+    const scrollToDot = useCallback((index: number) => {
+        scrollContainerRef.current?.scrollTo({ left: index * 280, behavior: 'smooth' })
+    }, [])
 
     return (
         <>
@@ -113,28 +89,7 @@ export default function HebergementClient() {
                         </h2>
                     </div>
 
-                    {/* Skeleton loading */}
-                    {isLoading && (
-                        <>
-                            {/* Mobile */}
-                            <div className="md:hidden flex gap-5 pb-6 overflow-hidden px-8">
-                                {[...Array(3)].map((_, i) => (
-                                    <div key={i} className="flex-shrink-0 w-[280px] h-[411px] rounded-2xl bg-gray-200 animate-pulse" />
-                                ))}
-                            </div>
-                            {/* Desktop */}
-                            <div className="hidden md:grid md:grid-cols-3 gap-6 mb-8">
-                                {[...Array(3)].map((_, col) => (
-                                    <div key={col} className="space-y-6">
-                                        <div className="rounded-2xl bg-gray-200 animate-pulse h-128" />
-                                        <div className="rounded-2xl bg-gray-200 animate-pulse h-164" />
-                                    </div>
-                                ))}
-                            </div>
-                        </>
-                    )}
-
-                    {!isLoading && categories.length > 0 && (
+                    {categories.length > 0 && (
                         <>
                             {/* Version mobile : carrousel horizontal */}
                             <div className="md:hidden">
