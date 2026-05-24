@@ -12,6 +12,7 @@ import ReservationFilters from '../components/ui/ReservationFilters'
 import ReservationDetailsModal from '../components/ui/ReservationDetailsModal'
 import Bouton from '../components/ui/Bouton'
 import HeroSection from '../components/ui/HeroSection'
+import Loading from '../components/ui/Loading'
 
 interface Reservation {
   id: number
@@ -180,7 +181,7 @@ export default function ReservationsClient() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-gray-500">{t('loading')}</div>
+        <Loading />
       </div>
     )
   }

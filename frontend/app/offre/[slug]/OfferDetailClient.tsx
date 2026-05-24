@@ -8,6 +8,7 @@ import HeroSection from '../../components/ui/HeroSection'
 import Bouton from '../../components/ui/Bouton'
 import { useOnScreen } from '@/hooks/useOnScreen'
 import type { OffreDetail } from '@/lib/services'
+import Loading from '@/app/components/ui/Loading'
 
 interface OfferDetailClientProps {
   offerId: number
@@ -52,7 +53,7 @@ export default function OfferDetailClient({ offerId, offerName, slug, initialOff
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-gray-500">{t('loading')}</div>
+        <Loading />
       </div>
     )
   }

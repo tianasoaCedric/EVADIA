@@ -10,6 +10,7 @@ import Bouton from '../components/ui/Bouton'
 import Input from '../components/ui/Input'
 import { favoriService } from '@/lib/services'
 import type { Favori } from '@/lib/types'
+import Loading from '../components/ui/Loading'
 
 export default function FavoriteClient() {
     const router = useRouter()
@@ -94,7 +95,7 @@ export default function FavoriteClient() {
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-pulse text-gray-500">{t('loading')}</div>
+                <Loading />
             </div>
         )
     }

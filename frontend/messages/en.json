@@ -160,8 +160,8 @@
   },
   "HotelClient": {
     "loading": "Loading...",
-    "save": "Save",
-    "saved": "Registered",
+    "save": "Add to favorites",
+    "saved": "Added to favorites",
     "share": "Share",
     "share_text": "Discover {hotelName} on Evadia",
     "share_alert": "Link copied to clipboard!",
@@ -194,7 +194,13 @@
     "service_fees": "Service fees",
     "discount": "Reduction ({percent}%)",
     "total": "Total",
-    "book_button": "To book"
+    "book_button": "To book",
+    "select_dates": "Select your dates",
+    "selected": "Selected",
+    "in_range": "In the period",
+    "booked": "Already booked",
+    "today": "Today",
+    "nights_count": "Number of nights"
   },
   "ProprietePage": {
     "meta_title": "{name} | Evadia",
@@ -389,10 +395,12 @@
   "Avatar": {
     "my_profile": "My profile",
     "my_bookings": "My reservations",
-    "currency": "Currency",
-    "my_favorites": "Your favorites",
+    "my_favorites": "My favorites",
     "logout": "Log out",
-    "logging_out": "Disconnect..."
+    "logging_out": "Disconnect...",
+    "login": "Log in",
+    "register": "Register",
+    "continue_with_google": "Continue with Google"
   },
   "ProfilePage": {
     "meta_title": "My profile | Evadia",

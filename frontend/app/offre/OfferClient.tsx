@@ -10,6 +10,7 @@ import OfferCard from '../components/ui/OfferCard'
 import { createSlug } from '@/lib/slug'
 import { offreService } from '@/lib/services'
 import type { Offre, PaginatedOffres } from '@/lib/services'
+import Loading from '../components/ui/Loading'
 
 const getMonthName = (monthNum: number, locale: string): string => {
   const date = new Date(2000, monthNum - 1, 1)
@@ -98,7 +99,7 @@ export default function OfferClient({ initialData }: OfferClientProps) {
         <div id="offers-list">
           {isLoading ? (
             <div className="flex justify-center py-16">
-              <div className="animate-pulse text-gray-500">{t('loading')}</div>
+              <Loading />
             </div>
           ) : offers.length === 0 ? (
             <div className="text-center py-16">

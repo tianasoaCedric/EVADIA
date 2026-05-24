@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { authService } from '@/lib/services'
+import Loading from '@/app/components/ui/Loading'
 
 export default function AuthCallbackPage() {
   const router = useRouter()
@@ -56,7 +57,7 @@ export default function AuthCallbackPage() {
         {error ? (
           <p className="text-red-300">{error}</p>
         ) : (
-          <p className="text-lg">Connexion en cours...</p>
+          <Loading />
         )}
       </div>
     </main>

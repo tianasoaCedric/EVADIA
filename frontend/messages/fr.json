@@ -160,8 +160,8 @@
   },
   "HotelClient": {
     "loading": "Chargement...",
-    "save": "Enregistrer",
-    "saved": "Enregistré",
+    "save": "Ajouter aux favoris",
+    "saved": "Ajouté aux favoris",
     "share": "Partager",
     "share_text": "Découvrez {hotelName} sur Evadia",
     "share_alert": "Lien copié dans le presse-papier !",
@@ -389,10 +389,12 @@
   "Avatar": {
     "my_profile": "Mon profil",
     "my_bookings": "Mes réservations",
-    "currency": "Devise",
-    "my_favorites": "Vos favoris",
+    "my_favorites": "Mes favoris",
     "logout": "Se déconnecter",
-    "logging_out": "Déconnexion..."
+    "logging_out": "Déconnexion...",
+    "login": "Se connecter",
+    "register": "S'inscrire",
+    "continue_with_google": "Continuer avec Google"
   },
   "ProfilePage": {
     "meta_title": "Mon profil | Evadia",

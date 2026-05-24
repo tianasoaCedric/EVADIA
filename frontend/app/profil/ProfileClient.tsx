@@ -7,6 +7,7 @@ import { ChevronLeft, User, Shield, Heart, Calendar, Settings, CreditCard, Activ
 import Image from 'next/image'
 import { authService } from '@/lib/services'
 import type { User as UserType } from '@/lib/types'
+import Loading from '../components/ui/Loading'
 
 const ProfileInfo = lazy(() => import('./ProfileInfo'))
 const ProfileSecurity = lazy(() => import('./ProfileSecurity'))
@@ -71,7 +72,7 @@ export default function ProfileClient() {
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-pulse text-gray-500">{t('loading')}</div>
+                <Loading />
             </div>
         )
     }

@@ -18,6 +18,7 @@ import { proprieteService } from '@/lib/services/propriete.service'
 import { reservationService } from '@/lib/services/reservation.service'
 import { authService } from '@/lib/services/auth.service'
 import type { ProprietePublic } from '@/lib/types'
+import Loading from '../../components/ui/Loading'
 
 interface ProprieteClientProps {
   proprieteId: number
@@ -114,7 +115,7 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-gray-500">{t('loading')}</div>
+        <Loading />
       </div>
     )
   }
@@ -162,10 +163,7 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
           </div>
 
           <div className="flex items-center gap-3">
-            <Bouton size="medium" onClick={handleSave} className="flex items-center gap-2">
-              <Heart className={`w-5 h-5 ${isSaved ? 'fill-current' : ''}`} />
-              <span className="hidden sm:inline">{isSaved ? t('saved') : t('save')}</span>
-            </Bouton>
+
             <Bouton size="medium" onClick={handleShare} className="flex items-center gap-2">
               <Share className="w-5 h-5" />
               <span className="hidden sm:inline">{t('share')}</span>
