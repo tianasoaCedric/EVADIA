@@ -6,6 +6,7 @@ import Footer from './components/molecules/Footer'
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { DeviseProvider } from './context/DeviseContext';
+import { FavorisProvider } from './context/FavorisContext';
 
 // Configuration correcte de la police Outfit
 const outfit = Outfit({
@@ -35,8 +36,10 @@ export default async function RootLayout({
       <body className="font-outfit">
         <NextIntlClientProvider messages={messages}>
           <DeviseProvider>
-            {children}
-            <Footer/>
+            <FavorisProvider>
+              {children}
+              <Footer/>
+            </FavorisProvider>
           </DeviseProvider>
         </NextIntlClientProvider>
       </body>

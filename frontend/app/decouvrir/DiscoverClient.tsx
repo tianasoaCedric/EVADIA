@@ -41,22 +41,27 @@ export default function DiscoverClient({ initialVilles }: DiscoverClientProps) {
 
   const grid = useMemo(() => {
     const rows = []
+    let cardIndex = 0
     for (let i = 0; i < current.length; i += 3) {
       const row = current.slice(i, i + 3)
       rows.push(
         <div key={i} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 justify-items-center">
-          {row.map((ville, index) => (
-            <div
-              key={ville.id}
-              className={`w-full max-w-[320px] transition-all duration-300 ${index === 1 && row.length === 3 ? 'md:mt-12' : ''}`}
-            >
-              <DiscoverCard
-                imageUrl={ville.image ?? '/photos/discover/hero-discover.jpg'}
-                title={ville.nom}
-                href={`/decouvrir/${ville.slug}`}
-              />
-            </div>
-          ))}
+          {row.map((ville, index) => {
+            const idx = cardIndex++
+            return (
+              <div
+                key={ville.id}
+                className={`w-full max-w-[320px] transition-[transform] duration-300 ${index === 1 && row.length === 3 ? 'md:mt-12' : ''}`}
+              >
+                <DiscoverCard
+                  imageUrl={ville.image ?? '/photos/discover/hero-discover.jpg'}
+                  title={ville.nom}
+                  href={`/decouvrir/${ville.slug}`}
+                  priority={idx < 3}
+                />
+              </div>
+            )
+          })}
         </div>
       )
     }

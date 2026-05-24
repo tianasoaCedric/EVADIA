@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { Lock, Eye, EyeOff, Shield } from 'lucide-react'
 import Input from '../components/ui/Input'
 import Bouton from '../components/ui/Bouton'
+import { profileService } from '@/lib/services/profile.service'
 
 export default function ProfileSecurity() {
   const t = useTranslations('ProfileSecurity')
@@ -12,6 +13,7 @@ export default function ProfileSecurity() {
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [formData, setFormData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -20,14 +22,24 @@ export default function ProfileSecurity() {
 
   const handleSubmit = async () => {
     if (formData.newPassword !== formData.confirmPassword) {
-      alert(t('password_mismatch'))
+      setMessage({ type: 'error', text: t('password_mismatch') })
       return
     }
     setIsLoading(true)
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setIsLoading(false)
-    setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' })
-    alert(t('success'))
+    setMessage(null)
+    try {
+      await profileService.updatePassword({
+        current_password: formData.currentPassword,
+        password: formData.newPassword,
+        password_confirmation: formData.confirmPassword,
+      })
+      setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' })
+      setMessage({ type: 'success', text: t('success') })
+    } catch {
+      setMessage({ type: 'error', text: t('error') })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -36,6 +48,12 @@ export default function ProfileSecurity() {
         <Shield className="w-5 h-5 text-[#01BDA5]" />
         <h2 className="text-xl font-semibold text-gray-800">{t('title')}</h2>
       </div>
+
+      {message && (
+        <p className={`text-sm mb-4 ${message.type === 'success' ? 'text-green-600' : 'text-red-500'}`}>
+          {message.text}
+        </p>
+      )}
 
       <div className="space-y-4">
         <div className="relative">

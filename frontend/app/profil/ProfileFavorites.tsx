@@ -1,48 +1,36 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { Heart } from 'lucide-react'
 import Link from 'next/link'
 import CardHotel from '../components/ui/CardHotel'
-
-// Données mock
-const mockFavorites = [
-  {
-    id: 1,
-    imageUrl: '/photos/hotels/ecolodge-1.jpg',
-    name: 'Ecolodge de la Forêt',
-    availability: 'Disponible',
-    price: 85000,
-    rating: 4.5,
-    reviewCount: 128,
-  },
-  {
-    id: 2,
-    imageUrl: '/photos/hotels/villa-1.jpg',
-    name: 'Villa de Rêve',
-    availability: 'Disponible',
-    price: 250000,
-    rating: 4.9,
-    reviewCount: 234,
-  },
-  {
-    id: 3,
-    imageUrl: '/photos/hotels/luxe-1.jpg',
-    name: 'Palace Hôtel',
-    availability: 'Disponible',
-    price: 450000,
-    rating: 4.9,
-    reviewCount: 342,
-  },
-]
+import { favoriService } from '@/lib/services'
+import type { Favori } from '@/lib/types'
+import Loading from '../components/ui/Loading'
 
 export default function ProfileFavorites() {
   const t = useTranslations('ProfileFavorites')
-  const [favorites, setFavorites] = useState(mockFavorites)
+  const [favorites, setFavorites] = useState<Favori[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    favoriService.list()
+      .then(res => setFavorites(res.data))
+      .catch(() => setFavorites([]))
+      .finally(() => setIsLoading(false))
+  }, [])
 
   const handleRemoveFavorite = (hotelId: number) => {
-    setFavorites(favorites.filter(h => h.id !== hotelId))
+    setFavorites(prev => prev.filter(f => f.hotel_id !== hotelId))
+  }
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex justify-center py-12">
+        <Loading />
+      </div>
+    )
   }
 
   return (
@@ -58,18 +46,20 @@ export default function ProfileFavorites() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {favorites.slice(0, 4).map((hotel) => (
+        {favorites.slice(0, 4).map((favori) => (
           <CardHotel
-            key={hotel.id}
-            imageUrl={hotel.imageUrl}
-            name={hotel.name}
-            hotelId={hotel.id}
-            availability={hotel.availability}
-            price={hotel.price}
-            rating={hotel.rating}
-            reviewCount={hotel.reviewCount}
+            key={favori.id}
+            imageUrl={favori.hotel.photo_principale ?? ''}
+            name={favori.hotel.nom}
+            hotelId={favori.hotel_id}
+            availability="Disponible"
+            price={favori.hotel.prix_min ?? 0}
+            prixMga={favori.hotel.prix_min_mga}
+            prixEur={favori.hotel.prix_min_eur}
+            rating={favori.hotel.note_moyenne ?? 0}
+            initialIsFavorite={true}
             onFavoriteToggle={(isFavorite) => {
-              if (!isFavorite) handleRemoveFavorite(hotel.id)
+              if (!isFavorite) handleRemoveFavorite(favori.hotel_id)
             }}
           />
         ))}

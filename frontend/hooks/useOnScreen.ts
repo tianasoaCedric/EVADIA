@@ -1,64 +1,56 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 interface UseOnScreenOptions {
   root?: Element | null
   rootMargin?: string
   threshold?: number
+  /**
+   * Une fois visible, rester visible (idéal pour les animations d'entrée).
+   * Par défaut true.
+   */
+  once?: boolean
 }
 
 export function useOnScreen<T extends HTMLElement = HTMLElement>(
   options: UseOnScreenOptions = {}
 ): [(node: T | null) => void, boolean] {
-  const { root = null, rootMargin = '0px', threshold = 0.1 } = options
-  
+  const { root = null, rootMargin = '50px', threshold = 0.05, once = true } = options
+
   const [ref, setRef] = useState<T | null>(null)
+  // Démarre visible côté serveur pour éviter le flash au chargement
   const [isVisible, setIsVisible] = useState(false)
+  const observerRef = useRef<IntersectionObserver | null>(null)
 
   useEffect(() => {
     if (!ref) return
 
-    let lastScrollY = window.scrollY
-    let isVisibleState = false
-
-    const handleScroll = () => {
-      if (!ref) return
-      const rect = ref.getBoundingClientRect()
-      const windowHeight = window.innerHeight
-      
-      // L'élément est visible quand il est dans l'écran
-      const isInViewport = rect.top < windowHeight && rect.bottom > 0
-      
-      // Détecter la direction du scroll
-      const isScrollingDown = window.scrollY > lastScrollY
-      lastScrollY = window.scrollY
-      
-      // Si l'élément est dans l'écran, il devient visible
-      if (isInViewport) {
-        if (!isVisibleState) {
-          isVisibleState = true
-          setIsVisible(true)
-        }
-      } 
-      // Si l'élément sort par le bas (scroll vers le bas)
-      else if (isScrollingDown && rect.top > windowHeight && isVisibleState) {
-        isVisibleState = false
-        setIsVisible(false)
-      }
-      // Si on scroll vers le haut, on garde visible
-      else if (!isScrollingDown && isVisibleState) {
-        setIsVisible(true)
-      }
+    // Pas de support → visible directement
+    if (typeof IntersectionObserver === 'undefined') {
+      setIsVisible(true)
+      return
     }
 
-    handleScroll()
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    window.addEventListener('resize', handleScroll)
+    // Nettoyage de l'observer précédent
+    observerRef.current?.disconnect()
+
+    observerRef.current = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          if (once) observerRef.current?.disconnect()
+        } else if (!once) {
+          setIsVisible(false)
+        }
+      },
+      { root, rootMargin, threshold }
+    )
+
+    observerRef.current.observe(ref)
 
     return () => {
-      window.removeEventListener('scroll', handleScroll)
-      window.removeEventListener('resize', handleScroll)
+      observerRef.current?.disconnect()
     }
-  }, [ref])
+  }, [ref, root, rootMargin, threshold, once])
 
   return [setRef, isVisible]
 }

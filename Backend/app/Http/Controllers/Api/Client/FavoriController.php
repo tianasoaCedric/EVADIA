@@ -41,12 +41,41 @@ class FavoriController extends Controller
     )]
     public function index(): JsonResponse
     {
-        $favoris = Favori::with(['hotel.photoPrincipale', 'hotel.adresse'])
+        $favoris = Favori::with([
+                'hotel' => fn($q) => $q->with([
+                    'photos'    => fn($q) => $q->where('est_principale', true),
+                    'adresse',
+                    'proprietes' => fn($q) => $q->whereHas('currentPrix')->with('currentPrix'),
+                ]),
+            ])
             ->where('user_id', auth()->id())
             ->latest('created_at')
             ->get();
 
-        return response()->json(['data' => $favoris]);
+        $data = $favoris->map(function ($favori) {
+            $hotel     = $favori->hotel;
+            $photo     = $hotel?->photos->first();
+            $proprietes = $hotel?->proprietes ?? collect();
+
+            return [
+                'id'         => $favori->id,
+                'hotel_id'   => $favori->hotel_id,
+                'created_at' => $favori->created_at,
+                'hotel'      => $hotel ? [
+                    'id'               => $hotel->id,
+                    'nom'              => $hotel->nom,
+                    'etoiles'          => $hotel->etoiles,
+                    'note_moyenne'     => $hotel->note_moyenne,
+                    'photo_principale' => $photo?->url ?? null,
+                    'prix_min'         => $proprietes->min(fn($p) => $p->currentPrix?->prix),
+                    'prix_min_mga'     => $proprietes->min(fn($p) => $p->currentPrix?->prix_mga),
+                    'prix_min_eur'     => $proprietes->min(fn($p) => $p->currentPrix?->prix_eur),
+                    'adresse'          => $hotel->adresse,
+                ] : null,
+            ];
+        });
+
+        return response()->json(['data' => $data]);
     }
 
     #[OA\Post(

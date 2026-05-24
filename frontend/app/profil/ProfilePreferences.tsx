@@ -4,10 +4,13 @@ import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { Globe, DollarSign, Bell, Mail as MailIcon, Save } from 'lucide-react'
 import Bouton from '../components/ui/Bouton'
+import { profileService } from '@/lib/services'
 
 export default function ProfilePreferences() {
   const t = useTranslations('ProfilePreferences')
   const [isLoading, setIsLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState(false)
   const [preferences, setPreferences] = useState({
     language: 'FR',
     currency: 'EUR',
@@ -24,11 +27,23 @@ export default function ProfilePreferences() {
 
   const handleSubmit = async () => {
     setIsLoading(true)
-    localStorage.setItem('selectedLang', preferences.language)
-    localStorage.setItem('selectedDevise', preferences.currency)
-    await new Promise(resolve => setTimeout(resolve, 500))
-    setIsLoading(false)
-    alert(t('success'))
+    setSuccess(false)
+    setError(false)
+    try {
+      await profileService.update({
+        langue_preferee: preferences.language,
+        devise_preferee: preferences.currency,
+      })
+      localStorage.setItem('selectedLang', preferences.language)
+      localStorage.setItem('selectedDevise', preferences.currency)
+      setSuccess(true)
+      setTimeout(() => setSuccess(false), 3000)
+    } catch {
+      setError(true)
+      setTimeout(() => setError(false), 3000)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const languages = [
@@ -88,7 +103,7 @@ export default function ProfilePreferences() {
         {/* Notifications */}
         <div className="border-t border-gray-100 pt-4">
           <h3 className="font-medium text-gray-800 mb-3">{t('notifications')}</h3>
-          
+
           <label className="flex items-center justify-between py-2 cursor-pointer">
             <div className="flex items-center gap-2">
               <Bell className="w-4 h-4 text-gray-500" />
@@ -123,6 +138,13 @@ export default function ProfilePreferences() {
             </div>
           </label>
         </div>
+
+        {success && (
+          <p className="text-sm text-green-600 text-center">{t('success')}</p>
+        )}
+        {error && (
+          <p className="text-sm text-red-500 text-center">{t('error')}</p>
+        )}
 
         <Bouton
           variant="primary"

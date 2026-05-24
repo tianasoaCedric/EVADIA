@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Client;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -41,7 +42,9 @@ class ProfileController extends Controller
     )]
     public function show(): JsonResponse
     {
-        return response()->json(['data' => auth()->user()->load('profilClient')]);
+        /** @var User $user */
+        $user = auth()->user();
+        return response()->json(['data' => $user->load('profilClient')]);
     }
 
     #[OA\Put(
@@ -81,9 +84,11 @@ class ProfileController extends Controller
             'langue_preferee' => 'nullable|string|max:10',
         ]);
 
-        auth()->user()->update($validated);
+        /** @var User $user */
+        $user = auth()->user();
+        $user->update($validated);
 
-        return response()->json(['message' => 'Profil mis à jour.', 'data' => auth()->user()]);
+        return response()->json(['message' => 'Profil mis à jour.', 'data' => $user]);
     }
 
     #[OA\Put(
@@ -114,6 +119,7 @@ class ProfileController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
+        /** @var User $user */
         $user = auth()->user();
 
         if (!Hash::check($request->current_password, $user->password_hash)) {

@@ -8,11 +8,11 @@
     "download_app": "Téléchargez l'application",
     "ios": "iOS",
     "android": "Android",
-    "popular":"Les destinations populaires",
-    "offer" : "NOS OFFRES EXCLUSIVES",
-    "see_offer" : "Voir toutes les offres",
-    "discover" : "MADAGASCAR Experiences",
-    "discover_description" : "Découvrez et expérimentez les biodiversités uniques de Madagascar"
+    "popular": "Les destinations populaires",
+    "offer": "NOS OFFRES EXCLUSIVES",
+    "see_offer": "Voir toutes les offres",
+    "discover": "MADAGASCAR Experiences",
+    "discover_description": "Découvrez et expérimentez les biodiversités uniques de Madagascar"
   },
   "Login": {
     "title": "Se connecter",
@@ -70,8 +70,8 @@
     "offer": "Offres spéciales",
     "description": "Offre non remboursable du"
   },
-  "SpecialDiscover" : {
-    "cta" : "En savoir plus"
+  "SpecialDiscover": {
+    "cta": "En savoir plus"
   },
   "HotelsByCategory": {
     "meta_title": "Hôtels | {category}",
@@ -194,7 +194,9 @@
     "service_fees": "Frais de services",
     "discount": "Réduction ({percent}%)",
     "total": "Total",
-    "book_button": "Réserver"
+    "book_button": "Réserver",
+    "booked": "Réservé",
+    "selected": "Sélectionné"
   },
   "ProprietePage": {
     "meta_title": "{name} | Evadia",
@@ -369,7 +371,8 @@
   "DiscoverArticleClient": {
     "loading": "Chargement...",
     "not_found": "Article non trouvé",
-    "back_button": "Retour aux découvertes"
+    "back_button": "Retour aux découvertes",
+    "no_places": "Aucun lieu disponible pour cette ville."
   },
   "ContactPopup": {
     "title": "Prendre contact",
@@ -427,7 +430,8 @@
     "phone": "Téléphone",
     "birth_date": "Date de naissance",
     "country": "Pays",
-    "city": "Ville"
+    "city": "Ville",
+    "save_error": "Erreur lors de la mise à jour du profil."
   },
   "ProfileSecurity": {
     "title": "Sécurité",
@@ -437,7 +441,8 @@
     "change_password": "Changer le mot de passe",
     "password_mismatch": "Les mots de passe ne correspondent pas",
     "success": "Mot de passe changé avec succès",
-    "password_tip": "Utilisez au moins 8 caractères avec des lettres, chiffres et symboles"
+    "password_tip": "Utilisez au moins 8 caractères avec des lettres, chiffres et symboles",
+    "error": "Une erreur est survenue. Veuillez réessayer."
   },
   "ProfilePreferences": {
     "title": "Préférences",
@@ -447,7 +452,8 @@
     "email_notifications": "Notifications par email",
     "newsletter": "Newsletter",
     "save": "Enregistrer les préférences",
-    "success": "Préférences enregistrées"
+    "success": "Préférences enregistrées",
+    "error": "Erreur lors de la sauvegarde"
   },
   "ProfileBookings": {
     "title": "Mes réservations",
@@ -456,9 +462,11 @@
     "filter_confirmed": "Confirmées",
     "filter_pending": "En attente",
     "filter_cancelled": "Annulées",
+    "filter_terminated": "Terminées",
     "status_confirmed": "Confirmée",
     "status_pending": "En attente",
     "status_cancelled": "Annulée",
+    "status_terminated": "Terminée",
     "nights": "nuit(s)",
     "details": "Détails",
     "no_bookings": "Aucune réservation",
@@ -578,7 +586,7 @@
     "results_singular": "résultat",
     "results_plural": "résultats"
   },
-"Footer": {
+  "Footer": {
     "accommodations": "Hébergements",
     "destination": "Destination",
     "offers": "Offres",

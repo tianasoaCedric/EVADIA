@@ -69,7 +69,7 @@ export default function DiscoverArticleClient({ slug, initialVille, initialLieux
 
         {lieux.length === 0 ? (
           <div className="text-center py-16 text-gray-400">
-            Aucun lieu disponible pour cette ville.
+            {t('no_places')}
           </div>
         ) : (
           <div className="space-y-16">

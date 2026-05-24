@@ -7,6 +7,7 @@ import type { User as UserType } from '@/lib/types'
 import Input from '@/app/components/ui/Input'
 import Bouton from '@/app/components/ui/Bouton'
 import Image from 'next/image'
+import { profileService } from '@/lib/services/profile.service'
 
 interface ProfileInfoProps {
   user: UserType
@@ -16,6 +17,7 @@ export default function ProfileInfo({ user }: ProfileInfoProps) {
   const t = useTranslations('ProfileInfo')
   const [isEditing, setIsEditing] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     firstName: user.prenom || '',
     lastName: user.nom || '',
@@ -28,10 +30,19 @@ export default function ProfileInfo({ user }: ProfileInfoProps) {
 
   const handleSubmit = async () => {
     setIsLoading(true)
-    // Appel API pour mettre à jour le profil
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setIsLoading(false)
-    setIsEditing(false)
+    setSaveError(null)
+    try {
+      await profileService.update({
+        prenom: formData.firstName,
+        nom: formData.lastName,
+        telephone: formData.phone,
+      })
+      setIsEditing(false)
+    } catch {
+      setSaveError(t('save_error'))
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,6 +83,10 @@ export default function ProfileInfo({ user }: ProfileInfoProps) {
           </div>
         )}
       </div>
+
+      {saveError && (
+        <p className="text-sm text-red-500 mb-4">{saveError}</p>
+      )}
 
       {/* Avatar */}
       <div className="flex justify-center mb-6">

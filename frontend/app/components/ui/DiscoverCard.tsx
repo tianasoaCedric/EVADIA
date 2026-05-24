@@ -14,6 +14,7 @@ interface DiscoverCardProps {
   className?: string
   width?: string
   onClick?: () => void
+  priority?: boolean
 }
 
 const DiscoverCard = ({
@@ -23,7 +24,8 @@ const DiscoverCard = ({
   alt = '',
   className = '',
   width = 'w-full sm:w-80 md:w-72',
-  onClick
+  onClick,
+  priority = false
 }: DiscoverCardProps) => {
   const [imageError, setImageError] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
@@ -54,11 +56,11 @@ const DiscoverCard = ({
     <div
       ref={setCardRef}
       className={`
-        group bg-white rounded-2xl overflow-hidden 
-        transition-all duration-700 ease-out
-        cursor-pointer
+        group bg-white rounded-2xl overflow-hidden
+        transition-[opacity,transform] duration-500 ease-out
+        cursor-pointer will-change-[opacity,transform]
         ${width}
-        ${isCardVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}
+        ${isCardVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}
       `}
     >
       {/* Image en haut */}
@@ -71,6 +73,7 @@ const DiscoverCard = ({
             className="object-cover transition-transform duration-500 group-hover:scale-110"
             onError={() => setImageError(true)}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority={priority}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gray-300">

@@ -4,7 +4,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Download, Apple, Smartphone } from 'lucide-react'
 import { useOnScreen } from '@/hooks/useOnScreen'
-import { useRef } from 'react'
 
 interface HeroSectionProps {
     /** Titre principal */
@@ -47,7 +46,6 @@ const HeroSection = ({
     videoSrc,
     className = ""
 }: HeroSectionProps) => {
-    const heroRef = useRef<HTMLDivElement>(null)
     const [setHeroRef, isHeroVisible] = useOnScreen({
         threshold: 0.2,
     })

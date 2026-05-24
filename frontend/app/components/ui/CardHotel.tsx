@@ -1,11 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useOnScreen } from '@/hooks/useOnScreen'
 import { useTranslations } from 'next-intl'
 import { useDevise } from '@/app/context/DeviseContext'
+import { useFavoris } from '@/app/context/FavorisContext'
+import { favoriService } from '@/lib/services/favori.service'
+import { authService } from '@/lib/services/auth.service'
 
 interface CardHotelProps {
   /** URL de l'image de l'hôtel */
@@ -38,7 +42,9 @@ interface CardHotelProps {
   className?: string
   /** Largeur de la carte */
   width?: string
-  /** Fonction callback pour le favori */
+  /** État favori initial */
+  initialIsFavorite?: boolean
+  /** Fonction callback pour le favori (optionnel — si absent, l'API est appelée directement) */
   onFavoriteToggle?: (isFavorite: boolean) => void
 }
 
@@ -76,12 +82,23 @@ const CardHotel = ({
   className = '',
   width = 'w-[260px]',
   priority = false,
+  initialIsFavorite = false,
   onFavoriteToggle
 }: CardHotelProps) => {
   const t = useTranslations('CardHotel')
+  const router = useRouter()
   const { getPrix, symbole } = useDevise()
+  const { favoriteIds, toggle: toggleContext } = useFavoris()
   const displayPrice = getPrix(prixMga, prixEur) ?? price
-  const [isFavorite, setIsFavorite] = useState(false)
+
+  const [isFavorite, setIsFavorite] = useState(initialIsFavorite)
+
+  // Sync avec le contexte global une fois les favoris chargés (si pas de prop explicite)
+  useEffect(() => {
+    if (!initialIsFavorite && hotelId) {
+      setIsFavorite(favoriteIds.has(hotelId))
+    }
+  }, [favoriteIds, hotelId, initialIsFavorite])
   const [imageError, setImageError] = useState(false)
 
   const [setCardRef, isCardVisible] = useOnScreen({
@@ -96,12 +113,41 @@ const CardHotel = ({
     return '#'
   }
 
-  const handleFavoriteClick = (e: React.MouseEvent) => {
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    const newFavoriteState = !isFavorite
-    setIsFavorite(newFavoriteState)
-    onFavoriteToggle?.(newFavoriteState)
+
+    if (onFavoriteToggle) {
+      const newState = !isFavorite
+      setIsFavorite(newState)
+      onFavoriteToggle(newState)
+      return
+    }
+
+    if (!hotelId) return
+
+    if (!authService.isAuthenticated()) {
+      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`)
+      return
+    }
+
+    const newState = !isFavorite
+    setIsFavorite(newState)
+    toggleContext(hotelId, newState)
+    try {
+      if (newState) {
+        await favoriService.add(hotelId)
+      } else {
+        await favoriService.remove(hotelId)
+      }
+    } catch (err) {
+      // Revert uniquement si l'erreur n'est pas 401 (déjà géré par api-client)
+      const status = (err as { status?: number })?.status
+      if (status !== 401) {
+        setIsFavorite(!newState)
+        toggleContext(hotelId, !newState)
+      }
+    }
   }
 
   // Fonction pour traduire la disponibilité
@@ -170,18 +216,13 @@ const CardHotel = ({
     )
   }
 
-  const cardContent = (
-    <div
-    ref={setCardRef}
-    className={`
-      bg-white rounded-xl overflow-hidden 
-      transition-all duration-300 hover:-translate-y-1 hover:shadow-xl
-      flex flex-col
-      ${isCardVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}
-      ${width}
-    `}>
-      {/* Image en haut */}
-      <div className={`relative h-64 sm:h-64 w-full rounded-xl overflow-hidden bg-gray-200`}>
+  const linkHref = generateHref()
+
+  // Contenu interne de la carte (sans le bouton favori)
+  const cardInner = (
+    <>
+      {/* Image */}
+      <div className="relative h-64 w-full rounded-xl overflow-hidden bg-gray-200">
         {!imageError && imageUrl ? (
           <Image
             src={imageUrl}
@@ -200,42 +241,14 @@ const CardHotel = ({
             </svg>
           </div>
         )}
-
-        {/* Bouton favoris (cœur) */}
-        <button
-          onClick={handleFavoriteClick}
-          className={`
-            absolute top-2 right-2 sm:top-3 sm:right-3 p-1.5 sm:p-2rounded-full cursor-pointer
-            
-            transition-all duration-200 hover:scale-110
-            ${isFavorite ? 'text-red-500' : 'text-gray-300 hover:text-red-400'}
-          `}
-          aria-label={isFavorite ? t('remove_favorite') : t('add_favorite')}
-        >
-          <svg
-            className="w-6 h-6 sm:w-8 sm:h-8"
-            fill={isFavorite ? 'currentColor' : 'currentColor'}
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-            />
-          </svg>
-        </button>
       </div>
 
       {/* Contenu de la carte */}
       <div className="flex flex-col flex-1 p-1 sm:p-2">
-        {/* Nom de l'hôtel (non traduit) */}
         <h3 className="font-semibold text-base sm:text-lg text-gray-900 line-clamp-1 mb-1">
           {name}
         </h3>
 
-        {/* Disponibilité traduite */}
         <div className="mb-1">
           <span className={`
             text-xs sm:text-sm font-medium
@@ -250,7 +263,6 @@ const CardHotel = ({
           </span>
         </div>
 
-        {/* Prix */}
         <div className="mb-1">
           <span className="text-lg sm:text-xl font-bold text-gray-900">
             {displayPrice.toLocaleString('fr-FR')} {symbole}
@@ -258,7 +270,6 @@ const CardHotel = ({
           <span className="text-xs sm:text-sm text-gray-500"> {t('per_night')}</span>
         </div>
 
-        {/* Note clients */}
         <div className="flex items-center gap-1.5 mt-auto pt-2 border-t border-gray-100">
           <svg className="w-4 h-4 text-yellow-400 fill-current flex-shrink-0" viewBox="0 0 20 20">
             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -271,22 +282,64 @@ const CardHotel = ({
           )}
         </div>
       </div>
-    </div>
+    </>
   )
 
-  const linkHref = generateHref()
-  
+  // Bouton favori — hors du <a> pour éviter <button> dans <a> (HTML invalide)
+  const favoriteButton = (
+    <button
+      type="button"
+      onClick={handleFavoriteClick}
+      className={`
+        absolute top-2 right-2 sm:top-3 sm:right-3 p-1.5 sm:p-2 rounded-full cursor-pointer z-20
+        transition-all duration-200 hover:scale-110
+        ${isFavorite ? 'text-red-500' : 'text-gray-300 hover:text-red-400'}
+      `}
+      aria-label={isFavorite ? t('remove_favorite') : t('add_favorite')}
+    >
+      <svg
+        className="w-6 h-6 sm:w-8 sm:h-8"
+        fill="currentColor"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+        />
+      </svg>
+    </button>
+  )
+
+  // Wrapper commun
+  const wrapperClass = `
+    relative bg-white rounded-xl overflow-hidden
+    transition-[opacity,transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-xl
+    flex flex-col
+    ${isCardVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}
+    ${width}
+  `
+
   if (linkHref !== '#') {
     return (
-      <Link href={linkHref} className={`block group ${className}`}>
-        {cardContent}
-      </Link>
+      <div ref={setCardRef} className={`relative group ${className}`}>
+        {favoriteButton}
+        <Link href={linkHref} className={wrapperClass}>
+          {cardInner}
+        </Link>
+      </div>
     )
   }
 
+  // Cas sans lien
   return (
-    <div className={`group ${className}`}>
-      {cardContent}
+    <div ref={setCardRef} className={`relative group ${className}`}>
+      {favoriteButton}
+      <div className={wrapperClass}>
+        {cardInner}
+      </div>
     </div>
   )
 }

@@ -59,6 +59,7 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
   const [isSaved, setIsSaved] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [propriete, setPropriete] = useState<ProprietePublic | null>(null)
+  const [bookedDates, setBookedDates] = useState<string[]>([])
 
   const [setMainRef, isMainVisible] = useOnScreen({ threshold: 0.2,  })
 
@@ -66,8 +67,12 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
     const fetchPropriete = async () => {
       setIsLoading(true)
       try {
-        const data = await proprieteService.get(proprieteId)
+        const [data, dates] = await Promise.all([
+          proprieteService.get(proprieteId),
+          proprieteService.getBookedDates(proprieteId),
+        ])
         setPropriete(data)
+        setBookedDates(dates)
       } catch (error) {
         console.error(error)
       } finally {
@@ -210,6 +215,7 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
                 discountPercent={0}
                 serviceFees={0}
                 roomName={propriete.nom}
+                bookedDates={bookedDates}
                 onReserve={handleReservation}
               />
             </div>

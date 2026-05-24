@@ -195,12 +195,8 @@
     "discount": "Reduction ({percent}%)",
     "total": "Total",
     "book_button": "To book",
-    "select_dates": "Select your dates",
-    "selected": "Selected",
-    "in_range": "In the period",
-    "booked": "Already booked",
-    "today": "Today",
-    "nights_count": "Number of nights"
+    "booked": "Reserve",
+    "selected": "Selected"
   },
   "ProprietePage": {
     "meta_title": "{name} | Evadia",
@@ -375,7 +371,8 @@
   "DiscoverArticleClient": {
     "loading": "Loading...",
     "not_found": "Item not found",
-    "back_button": "Back to discoveries"
+    "back_button": "Back to discoveries",
+    "no_places": "No locations available for this city."
   },
   "ContactPopup": {
     "title": "Get in touch",
@@ -433,7 +430,8 @@
     "phone": "Phone",
     "birth_date": "Date of birth",
     "country": "Country",
-    "city": "City"
+    "city": "City",
+    "save_error": "Error updating profile."
   },
   "ProfileSecurity": {
     "title": "Security",
@@ -443,7 +441,8 @@
     "change_password": "Change password",
     "password_mismatch": "Passwords do not match",
     "success": "Password changed successfully",
-    "password_tip": "Use at least 8 characters with letters, numbers and symbols"
+    "password_tip": "Use at least 8 characters with letters, numbers and symbols",
+    "error": "An error has occurred. Please try again."
   },
   "ProfilePreferences": {
     "title": "Preferences",
@@ -453,7 +452,8 @@
     "email_notifications": "Email notifications",
     "newsletter": "Newsletter",
     "save": "Save preferences",
-    "success": "Saved preferences"
+    "success": "Saved preferences",
+    "error": "Error while saving"
   },
   "ProfileBookings": {
     "title": "My reservations",
@@ -462,9 +462,11 @@
     "filter_confirmed": "Confirmed",
     "filter_pending": "On hold",
     "filter_cancelled": "Canceled",
+    "filter_terminated": "Completed",
     "status_confirmed": "Confirmed",
     "status_pending": "On hold",
     "status_cancelled": "Canceled",
+    "status_terminated": "Completed",
     "nights": "night(s)",
     "details": "Details",
     "no_bookings": "No reservations",

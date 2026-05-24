@@ -98,11 +98,11 @@ const RoomCard = ({
     <div
       ref={setCardRef}
       className={`
-        bg-white rounded-2xl overflow-hidden 
-        transition-all duration-700 ease-out
-        flex flex-col
+        bg-white rounded-2xl overflow-hidden
+        transition-[opacity,transform] duration-500 ease-out
+        flex flex-col will-change-[opacity,transform]
         ${width}
-        ${isCardVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}
+        ${isCardVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}
       `}
     >
       {/* Carrousel d'images */}

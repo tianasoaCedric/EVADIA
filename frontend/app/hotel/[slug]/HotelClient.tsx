@@ -96,12 +96,19 @@ export default function HotelClient({ hotelId, hotelName, slug, initialHotelData
     try {
       if (isSaved) {
         await favoriService.remove(hotelId)
+        setIsSaved(false)
       } else {
         await favoriService.add(hotelId)
+        setIsSaved(true)
       }
-      setIsSaved(!isSaved)
     } catch (error) {
-      console.error(error)
+      const status = (error as { status?: number })?.status
+      if (status === 409) {
+        // Déjà en favoris — on synchronise le state
+        setIsSaved(true)
+      } else {
+        console.error(error)
+      }
     }
   }
 

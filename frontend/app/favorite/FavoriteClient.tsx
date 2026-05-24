@@ -178,7 +178,7 @@ export default function FavoriteClient() {
                         ) : (
                             <>
                                 <div className="flex flex-wrap justify-start items-start gap-11">
-                                    {currentFavorites.map((favori) => (
+                                    {currentFavorites.map((favori, idx) => (
                                         <div key={favori.id} className="w-[260px]">
                                             <CardHotel
                                                 imageUrl={favori.hotel.photo_principale ?? ''}
@@ -190,6 +190,8 @@ export default function FavoriteClient() {
                                                 prixEur={favori.hotel.prix_min_eur}
                                                 etoiles={favori.hotel.etoiles ?? undefined}
                                                 rating={favori.hotel.note_moyenne ?? 0}
+                                                initialIsFavorite={true}
+                                                priority={idx < 4}
                                                 onFavoriteToggle={(isFavorite) => {
                                                     if (!isFavorite) {
                                                         handleRemoveFavorite(favori.hotel_id)

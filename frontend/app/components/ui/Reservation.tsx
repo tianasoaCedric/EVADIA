@@ -81,10 +81,18 @@ export default function Reservation({
         return date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
     }
 
+    const isDatePast = (date: Date) => {
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        return date < today
+    }
+
     const isDateBooked = (date: Date) => {
         const dateStr = date.toISOString().split('T')[0]
         return bookedDates.includes(dateStr)
     }
+
+    const isDateUnavailable = (date: Date) => isDatePast(date) || isDateBooked(date)
 
     const isDateInRange = (date: Date) => {
         if (!selectedCheckIn || !selectedCheckOut) return false
@@ -98,7 +106,7 @@ export default function Reservation({
     }
 
     const handleDateClick = (date: Date) => {
-        if (isDateBooked(date)) return
+        if (isDateUnavailable(date)) return
         
         if (!selectedCheckIn || (selectedCheckIn && selectedCheckOut)) {
             setSelectedCheckIn(date)
@@ -115,10 +123,11 @@ export default function Reservation({
 
     const getDayClass = (date: Date | null) => {
         if (!date) return 'invisible'
-        if (isDateBooked(date)) return 'text-gray-300 line-through cursor-not-allowed'
+        if (isDatePast(date)) return 'text-gray-300 cursor-not-allowed'
+        if (isDateBooked(date)) return 'text-red-300 line-through cursor-not-allowed bg-red-50 rounded-full'
         if (isSelected(date)) return 'bg-[#01BDA5] text-white rounded-full font-semibold'
         if (isDateInRange(date)) return 'bg-[#01BDA5]/10 text-gray-800 rounded-full'
-        return 'hover:bg-gray-100 rounded-full'
+        return 'hover:bg-gray-100 rounded-full cursor-pointer'
     }
 
     const previousMonth = () => {
@@ -226,7 +235,7 @@ export default function Reservation({
                         <button
                             key={index}
                             onClick={() => date && handleDateClick(date)}
-                            disabled={date ? isDateBooked(date) : true}
+                            disabled={date ? isDateUnavailable(date) : true}
                             className={`
                                 text-[11px] w-10 h-10 aspect-square flex items-center justify-center
                                 transition-all duration-150
@@ -238,6 +247,20 @@ export default function Reservation({
                     ))}
                 </div>
             </div>
+
+            {/* Légende */}
+            {bookedDates.length > 0 && (
+                <div className="flex items-center gap-3 mb-3 text-[10px] text-gray-400">
+                    <span className="flex items-center gap-1">
+                        <span className="w-3 h-3 rounded-full bg-red-100 border border-red-200 inline-block" />
+                        {t('booked')}
+                    </span>
+                    <span className="flex items-center gap-1">
+                        <span className="w-3 h-3 rounded-full bg-[#01BDA5] inline-block" />
+                        {t('selected')}
+                    </span>
+                </div>
+            )}
 
             {/* Dates sélectionnées */}
             <div className="flex items-center justify-between bg-gray-50 rounded-lg p-2 mb-3">

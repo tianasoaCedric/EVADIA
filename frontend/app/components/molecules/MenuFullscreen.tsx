@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ChevronDown, Globe, DollarSign } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { typeHotelService, destinationService } from '@/lib/services'
+import { decouverteService } from '@/lib/services/decouverte.service'
 import { createSlug } from '@/lib/slug'
 import ToggleLangue from '../ui/ToggleLangue'
 import { useDevise } from '../../context/DeviseContext'
@@ -22,7 +23,7 @@ interface MenuColumn {
     items: { label: string; href: string }[]
 }
 
-type MenuData = [Awaited<ReturnType<typeof typeHotelService.list>>, Awaited<ReturnType<typeof destinationService.list>>]
+type MenuData = [Awaited<ReturnType<typeof typeHotelService.list>>, Awaited<ReturnType<typeof destinationService.list>>, Awaited<ReturnType<typeof decouverteService.getVilles>>]
 
 // Liste des devises disponibles
 const devises = [
@@ -37,13 +38,14 @@ function prefetchMenuData(): Promise<MenuData> {
         _menuDataPromise = Promise.all([
             typeHotelService.list(),
             destinationService.list(),
-        ]).catch(() => [[], { data: [] }] as unknown as MenuData)
+            decouverteService.getVilles(),
+        ]).catch(() => [[], { data: [] }, []] as unknown as MenuData)
     }
-    return _menuDataPromise
+    return _menuDataPromise as Promise<MenuData>
 }
 if (typeof window !== 'undefined') prefetchMenuData()
 
-function buildMenuStructure(types: MenuData[0], destResponse: MenuData[1], t: ReturnType<typeof useTranslations>): MenuColumn[] {
+function buildMenuStructure(types: MenuData[0], destResponse: MenuData[1], villes: MenuData[2], t: ReturnType<typeof useTranslations>): MenuColumn[] {
     return [
         {
             title: t('accommodations'),
@@ -60,7 +62,13 @@ function buildMenuStructure(types: MenuData[0], destResponse: MenuData[1], t: Re
             ]
         },
         { title: t('offers'), items: [{ label: t('all_offers'), href: '/offre' }] },
-        { title: t('discover'), items: [{ label: t('discover_madagascar'), href: '/decouvrir' }] },
+        {
+            title: t('discover'),
+            items: [
+                { label: t('discover_madagascar'), href: '/decouvrir' },
+                ...villes.slice(0, 5).map(v => ({ label: v.nom, href: `/decouvrir/${v.slug}` })),
+            ]
+        },
     ]
 }
 
@@ -85,8 +93,8 @@ const MenuFullscreen = ({
     const { devise: selectedDevise, setDevise } = useDevise()
 
     useEffect(() => {
-        prefetchMenuData().then(([types, destResponse]) => {
-            setMenuStructure(buildMenuStructure(types, destResponse, t))
+        prefetchMenuData().then(([types, destResponse, villes]) => {
+            setMenuStructure(buildMenuStructure(types, destResponse, villes, t))
         })
     }, [t])
 

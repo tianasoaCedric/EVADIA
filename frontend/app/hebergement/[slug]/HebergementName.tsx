@@ -132,7 +132,7 @@ const heroTitle = capitalizeWords(categoryName)
                         {!isLoading && hotels.length > 0 && (
                             <>
                                 <div className="flex flex-wrap justify-start items-start gap-11">
-                                    {hotels.map((hotel) => (
+                                    {hotels.map((hotel, idx) => (
                                         <div key={hotel.id} className="w-[260px]">
                                             <CardHotel
                                                 hotelId={hotel.id}
@@ -144,6 +144,7 @@ const heroTitle = capitalizeWords(categoryName)
                                                 prixEur={hotel.prix_min_eur}
                                                 etoiles={hotel.etoiles ?? undefined}
                                                 rating={hotel.note_moyenne ?? 0}
+                                                priority={idx < 4}
                                             />
                                         </div>
                                     ))}
