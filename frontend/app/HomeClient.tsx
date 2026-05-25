@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Header from './components/molecules/Header'
@@ -75,27 +75,27 @@ export default function HomePage({ popularVilles, offres, villes }: HomePageProp
         return () => container.removeEventListener('scroll', handler)
     }, [villes.length])
 
-    // Destinations populaires : villes avec le plus de réservations
-    const destinations = popularVilles.map(v => ({
+    const destinations = useMemo(() => popularVilles.map(v => ({
         id: v.id,
         imageUrl: v.image ?? '/photos/bc.png',
         title: v.nom,
         href: `/ville/${createSlug(v.id, v.nom)}`,
-    }))
+    })), [popularVilles])
 
-    // Offres : formater les données API
-    const formattedOffers = offres.map((o, i) => ({
-        id: o.id,
-        imageUrl: o.photo ?? '/photos/bc.png',
-        discount: o.discount,
-        startDay: o.start_day,
-        endDay: o.end_day,
-        month: MONTHS_SHORT[(o.month_num - 1) % 12] ?? 'jan',
-        hotelName: o.hotel_nom,
-        city: o.city,
-        href: `/offre/${createSlug(o.id, o.titre)}`,
-        borderRadius: BORDER_RADIUS_CYCLE[i % 3],
-    }))
+    const formattedOffers = useMemo(() => {
+        return offres.map((o, i) => ({
+            id: o.id,
+            imageUrl: o.photo ?? '/photos/bc.png',
+            discount: o.discount,
+            startDay: o.start_day,
+            endDay: o.end_day,
+            month: MONTHS_SHORT[(o.month_num - 1) % 12] ?? 'jan',
+            hotelName: o.hotel_nom,
+            city: o.city,
+            href: `/offre/${createSlug(o.id, o.titre)}`,
+            borderRadius: BORDER_RADIUS_CYCLE[i % 3],
+        }))
+    }, [offres])
 
     const activeIndex = Math.min(Math.floor(scrollPosition / 320), Math.max(0, destinations.length - 2))
 

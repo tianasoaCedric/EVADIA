@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import DiscoverArticleClient from './DiscoverArticleClient'
 import { decouverteService } from '@/lib/services'
 
-export const revalidate = 300
+export const revalidate = 3600
 
 interface PageProps {
   params: Promise<{ slug: string }>

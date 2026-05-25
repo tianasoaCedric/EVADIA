@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import HotelClient from './HotelClient'
 import { hotelService } from '@/lib/services'
 
-export const revalidate = 60
+export const revalidate = 3600
 
 interface PageProps {
   params: Promise<{

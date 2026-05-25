@@ -4,7 +4,7 @@ import { apiClient } from '@/lib/api-client'
 import type { Destination, Hotel } from '@/lib/types'
 import DestinationClient from './DestinationClient'
 
-export const revalidate = 300
+export const revalidate = 3600
 import Header from '../components/molecules/Header'
 
 export async function generateMetadata(): Promise<Metadata> {

@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import DiscoverClient from './DiscoverClient'
 import { decouverteService } from '@/lib/services'
 
-export const revalidate = 300
+export const revalidate = 3600
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('DiscoverPage')

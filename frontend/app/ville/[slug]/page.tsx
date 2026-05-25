@@ -4,6 +4,8 @@ import VilleClient from './VilleClient'
 import { decodeIdFromSlug, getNameFromSlug } from '@/lib/slug'
 import { apiClient } from '@/lib/api-client'
 
+export const revalidate = 3600
+
 interface PageProps {
   params: Promise<{ slug: string }>
 }

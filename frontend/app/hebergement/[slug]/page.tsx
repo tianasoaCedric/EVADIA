@@ -4,7 +4,7 @@ import HebergementName from './HebergementName'
 import { decodeIdFromSlug, getNameFromSlug } from '@/lib/slug'
 import { hotelService, typeHotelService } from '@/lib/services'
 
-export const revalidate = 60
+export const revalidate = 3600
 
 interface PageProps {
   params: Promise<{

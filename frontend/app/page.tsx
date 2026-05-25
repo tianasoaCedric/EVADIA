@@ -8,6 +8,8 @@ import type { VillePopulaire } from '@/lib/services/hotel.service'
 import type { Offre } from '@/lib/services/offre.service'
 import type { VilleDecouverte } from '@/lib/types'
 
+export const revalidate = 3600
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('HomePage')
   return {

@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import HebergementClient from './HebergementClient'
 import { typeHotelService } from '@/lib/services'
 
-export const revalidate = 300
+export const revalidate = 3600
 
 export async function generateMetadata(): Promise<Metadata> {
     const t = await getTranslations('Hebergement')

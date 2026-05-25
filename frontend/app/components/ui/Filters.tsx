@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { Search, MapPin, DollarSign, Calendar, Star, Building2, Tag, X, Filter, Percent } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Input from './Input'
@@ -189,17 +189,24 @@ export default function Filters({
         return count
     }, [filters])
 
-    const updateFilter = <K extends keyof FilterValues>(key: K, value: FilterValues[K]) => {
+    const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+    const updateFilter = useCallback(<K extends keyof FilterValues>(key: K, value: FilterValues[K]) => {
         const newFilters = { ...filters, [key]: value }
         setFilters(newFilters)
-        onFilterChange(newFilters)
-    }
+        if (key === 'search') {
+            if (searchTimer.current) clearTimeout(searchTimer.current)
+            searchTimer.current = setTimeout(() => onFilterChange(newFilters), 350)
+        } else {
+            onFilterChange(newFilters)
+        }
+    }, [filters, onFilterChange])
 
-    const updateFilters = (partial: Partial<FilterValues>) => {
+    const updateFilters = useCallback((partial: Partial<FilterValues>) => {
         const newFilters = { ...filters, ...partial }
         setFilters(newFilters)
         onFilterChange(newFilters)
-    }
+    }, [filters, onFilterChange])
 
     const clearFilters = () => {
         setFilters(defaultFilters)

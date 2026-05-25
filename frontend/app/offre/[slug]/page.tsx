@@ -4,7 +4,7 @@ import OfferDetailClient from './OfferDetailClient'
 import { decodeIdFromSlug, getNameFromSlug } from '@/lib/slug'
 import { offreService } from '@/lib/services'
 
-export const revalidate = 60
+export const revalidate = 300
 
 interface PageProps {
   params: Promise<{

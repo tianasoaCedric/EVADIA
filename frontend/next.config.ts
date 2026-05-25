@@ -3,8 +3,11 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 const nextConfig: NextConfig = {
   images: {
-    // Images externes sur CloudFront/S3 : servies directement sans traitement Next.js
-    unoptimized: true,
+    remotePatterns: [
+      { protocol: 'http', hostname: 'localhost', port: '8000', pathname: '/**' },
+      { protocol: 'https', hostname: '**.amazonaws.com', pathname: '/**' },
+      { protocol: 'https', hostname: '**.cloudfront.net', pathname: '/**' },
+    ],
   },
 };
  

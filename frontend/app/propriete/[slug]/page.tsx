@@ -3,6 +3,8 @@ import { getTranslations } from 'next-intl/server'
 import ProprieteClient from './ProprieteClient'
 import { decodeIdFromSlug, getNameFromSlug } from '@/lib/slug'
 
+export const revalidate = 3600
+
 interface PageProps {
   params: Promise<{
     slug: string
