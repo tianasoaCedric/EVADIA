@@ -12,6 +12,35 @@ use Illuminate\Support\Facades\Storage;
 class VilleController extends Controller
 {
     /**
+     * Villes avec le plus de réservations (destinations populaires homepage).
+     * GET /api/villes/popular
+     */
+    public function popular(): JsonResponse
+    {
+        $villes = \App\Models\Ville::query()
+            ->select('villes.id', 'villes.nom', 'villes.image')
+            ->addSelect(DB::raw('(
+                SELECT COUNT(r.id)
+                FROM reservations r
+                INNER JOIN proprietes p ON r.propriete_id = p.id
+                INNER JOIN hotels h ON p.hotel_id = h.id
+                INNER JOIN adresses a ON a.hotel_id = h.id
+                WHERE LOWER(a.ville) = LOWER(villes.nom)
+                AND r.statut IN (\'confirmee\', \'terminee\')
+            ) as nb_reservations'))
+            ->orderByDesc('nb_reservations')
+            ->limit(10)
+            ->get()
+            ->map(fn($v) => [
+                'id'    => $v->id,
+                'nom'   => $v->nom,
+                'image' => $v->image ? Storage::disk('s3')->url($v->image) : null,
+            ]);
+
+        return response()->json(['data' => $villes]);
+    }
+
+    /**
      * Recherche de villes par nom (autocomplete).
      * GET /api/villes/search?q=nos&destination_id=1
      */

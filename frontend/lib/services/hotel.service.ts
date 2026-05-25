@@ -1,6 +1,12 @@
 import { apiClient } from '@/lib/api-client'
 import type { Hotel, HotelDetail, HotelFilters, PaginatedResponse } from '@/lib/types'
 
+export interface VillePopulaire {
+  id: number
+  nom: string
+  image: string | null
+}
+
 export const hotelService = {
   /**
    * Recherche publique d'hôtels — accessible sans compte (booking.com style)
@@ -29,6 +35,10 @@ export const hotelService = {
 
   popular(): Promise<{ data: Hotel[] }> {
     return apiClient.get<{ data: Hotel[] }>('/hotels?popular=1')
+  },
+
+  popularVilles(): Promise<{ data: VillePopulaire[] }> {
+    return apiClient.get<{ data: VillePopulaire[] }>('/villes/popular')
   },
 
   get(id: number): Promise<HotelDetail> {

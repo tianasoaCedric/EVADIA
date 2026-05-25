@@ -10,8 +10,10 @@ import { useOnScreen } from '@/hooks/useOnScreen'
 import SpecialOfferCard from './components/ui/SpecialOfferCard'
 import SpecialDiscoverCard from './components/ui/SpecialDiscoverCard'
 import HeroSection from './components/ui/HeroSection'
-import type { Hotel, VilleDecouverte } from '@/lib/types'
+import type { VilleDecouverte } from '@/lib/types'
 import type { Offre } from '@/lib/services/offre.service'
+import type { VillePopulaire } from '@/lib/services/hotel.service'
+import { createSlug } from '@/lib/slug'
 
 const BORDER_RADIUS_CYCLE = [
   'rounded-top-left-bottom-right',
@@ -22,12 +24,12 @@ const BORDER_RADIUS_CYCLE = [
 const MONTHS_SHORT = ['jan', 'fév', 'mar', 'avr', 'mai', 'juin', 'juil', 'aoû', 'sep', 'oct', 'nov', 'déc']
 
 interface HomePageProps {
-  popularHotels: Hotel[]
+  popularVilles: VillePopulaire[]
   offres: Offre[]
   villes: VilleDecouverte[]
 }
 
-export default function HomePage({ popularHotels, offres, villes }: HomePageProps) {
+export default function HomePage({ popularVilles, offres, villes }: HomePageProps) {
     const t = useTranslations('HomePage')
     const [scrollPosition, setScrollPosition] = useState(0)
     const [activeOfferIndex, setActiveOfferIndex] = useState(1)
@@ -73,12 +75,12 @@ export default function HomePage({ popularHotels, offres, villes }: HomePageProp
         return () => container.removeEventListener('scroll', handler)
     }, [villes.length])
 
-    // Destinations : depuis les hôtels populaires
-    const destinations = popularHotels.map(h => ({
-        id: h.id,
-        imageUrl: h.photo_principale ?? '/photos/bc.png',
-        title: h.adresse?.ville ?? h.nom,
-        href: `/hotel/${h.id}`,
+    // Destinations populaires : villes avec le plus de réservations
+    const destinations = popularVilles.map(v => ({
+        id: v.id,
+        imageUrl: v.image ?? '/photos/bc.png',
+        title: v.nom,
+        href: `/ville/${createSlug(v.id, v.nom)}`,
     }))
 
     // Offres : formater les données API
@@ -91,17 +93,11 @@ export default function HomePage({ popularHotels, offres, villes }: HomePageProp
         month: MONTHS_SHORT[(o.month_num - 1) % 12] ?? 'jan',
         hotelName: o.hotel_nom,
         city: o.city,
-        href: `/offres/${o.id}`,
+        href: `/offre/${createSlug(o.id, o.titre)}`,
         borderRadius: BORDER_RADIUS_CYCLE[i % 3],
     }))
 
-    const activeIndex = (() => {
-        if (!scrollContainerRef.current) return 0
-        const c = scrollContainerRef.current
-        const scrollWidth = c.scrollWidth - c.clientWidth
-        if (scrollWidth === 0) return 0
-        return Math.min(Math.floor(scrollPosition / 320), destinations.length - 2)
-    })()
+    const activeIndex = Math.min(Math.floor(scrollPosition / 320), Math.max(0, destinations.length - 2))
 
     const totalDots = Math.max(1, destinations.length - 2)
 
