@@ -7,6 +7,8 @@ const nextConfig: NextConfig = {
       { protocol: 'http', hostname: 'localhost', port: '8000', pathname: '/**' },
       { protocol: 'https', hostname: '**.amazonaws.com', pathname: '/**' },
       { protocol: 'https', hostname: '**.cloudfront.net', pathname: '/**' },
+      { protocol: 'https', hostname: '**.googleusercontent.com', pathname: '/**' },
+      { protocol: 'https', hostname: '**.googleapis.com', pathname: '/**' },
     ],
   },
 };
