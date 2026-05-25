@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import HeroSection from '../../components/ui/HeroSection'
-import Input from '../../components/ui/Input'
 import CardHotel from '../../components/ui/CardHotel'
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { hotelService } from '@/lib/services'
 import type { Hotel, PaginatedResponse } from '@/lib/types'
+import Filters, { FilterValues } from '../../components/ui/Filters'
 
 interface HebergementNameProps {
     categoryId: number
@@ -21,7 +21,22 @@ export default function HebergementName({ categoryId, categoryName, initialData,
     const t = useTranslations('HebergementName')
     const commonT = useTranslations('Common')
 
-    const [searchQuery, setSearchQuery] = useState('')
+    // États pour les filtres
+    const [filters, setFilters] = useState<FilterValues>({
+        search: '',
+        destinationId: null,
+        priceMin: null,
+        priceMax: null,
+        availability: 'all',
+        stars: 0,
+        minRating: 0,
+        typeHebergementId: null,
+        checkIn: null,
+        checkOut: null,
+        offreType: 'all'
+    })
+    
+    // États pour les données
     const [hotels, setHotels] = useState<Hotel[]>(initialData?.data ?? [])
     const [isLoading, setIsLoading] = useState(false)
     const [currentPage, setCurrentPage] = useState(1)
@@ -30,13 +45,19 @@ export default function HebergementName({ categoryId, categoryName, initialData,
     const skipFirstFetch = useRef(!!initialData)
     const mounted = useRef(false)
 
-    const fetchHotels = useCallback(async (page: number, search: string) => {
+    const fetchHotels = useCallback(async (page: number, currentFilters: FilterValues) => {
         setIsLoading(true)
         try {
             const res = await hotelService.list({
                 type_id: categoryId,
                 page,
-                search: search.trim() || undefined,
+                search: currentFilters.search.trim() || undefined,
+                destination_id: currentFilters.destinationId || undefined,
+                prix_min: currentFilters.priceMin || undefined,
+                prix_max: currentFilters.priceMax || undefined,
+                disponible: currentFilters.availability === 'disponible' ? true : currentFilters.availability === 'complet' ? false : undefined,
+                etoiles: currentFilters.stars || undefined,
+                note_min: currentFilters.minRating || undefined,
             })
             setHotels(res.data)
             setTotalPages(res.last_page)
@@ -48,21 +69,27 @@ export default function HebergementName({ categoryId, categoryName, initialData,
         }
     }, [categoryId])
 
+    const handleFilterChange = (newFilters: FilterValues) => {
+        setFilters(newFilters)
+        setCurrentPage(1)
+        fetchHotels(1, newFilters)
+    }
+
     // Page change — skip sur le premier rendu si données serveur disponibles
     useEffect(() => {
         if (skipFirstFetch.current) { skipFirstFetch.current = false; return }
-        fetchHotels(currentPage, searchQuery)
-    }, [currentPage, fetchHotels])
+        fetchHotels(currentPage, filters)
+    }, [currentPage, fetchHotels, filters])
 
-    // Recherche avec debounce — skip sur mount
+    // Recharger quand les filtres changent (après le premier rendu)
     useEffect(() => {
-        if (!mounted.current) { mounted.current = true; return }
-        const timer = setTimeout(() => {
+        if (mounted.current) {
             setCurrentPage(1)
-            fetchHotels(1, searchQuery)
-        }, 400)
-        return () => clearTimeout(timer)
-    }, [searchQuery])
+            fetchHotels(1, filters)
+        } else {
+            mounted.current = true
+        }
+    }, [filters, fetchHotels])
 
     const goToPage = (page: number) => {
         const next = Math.max(1, Math.min(page, totalPages))
@@ -70,16 +97,15 @@ export default function HebergementName({ categoryId, categoryName, initialData,
         document.getElementById('hotels-list')?.scrollIntoView({ behavior: 'smooth' })
     }
 
-const capitalizeWords = (str: string): string => {
-  return str
-    .toLowerCase()
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
-}
+    const capitalizeWords = (str: string): string => {
+        return str
+            .toLowerCase()
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ')
+    }
 
-// Utilisation
-const heroTitle = capitalizeWords(categoryName)
+    const heroTitle = capitalizeWords(categoryName)
 
     return (
         <>
@@ -93,24 +119,27 @@ const heroTitle = capitalizeWords(categoryName)
 
             <main className="min-h-screen py-12">
                 <div className="container mx-auto px-6">
-                    {/* Barre de recherche */}
-                    <div className="max-w-md mx-auto mb-10">
-                        <Input
-                            type="text"
-                            placeholder={t('search_placeholder')}
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            icon={<Search className="w-5 h-5 text-gray-400" />}
-                            fullWidth
-                            variant="light"
-                            placeholderPosition="left"
-                        />
-                    </div>
+                    {/* 
+                        Composant Filters avec uniquement les filtres demandés :
+                        - search : barre de recherche
+                        - destination : filtre par destination
+                        - price : fourchette de prix
+                        - availability : disponibilité
+                        - stars : classification (étoiles)
+                        - rating : note minimale (avis)
+                    */}
+                    <Filters 
+                        onFilterChange={handleFilterChange}
+                        initialFilters={filters}
+                        enabledFilters={['destination', 'price', 'availability', 'stars', 'rating']}
+                        className="mb-8"
+                    />
 
+                    {/* Résultats */}
                     <div id="hotels-list">
                         {/* Skeleton */}
                         {isLoading && (
-                            <div className="flex flex-wrap justify-start items-start gap-11">
+                            <div className="flex flex-wrap justify-start items-start gap-6">
                                 {[...Array(6)].map((_, i) => (
                                     <div key={i} className="w-[260px] flex flex-col gap-3">
                                         <div className="h-64 rounded-xl bg-gray-200 animate-pulse" />
@@ -131,7 +160,7 @@ const heroTitle = capitalizeWords(categoryName)
                         {/* Liste des hôtels */}
                         {!isLoading && hotels.length > 0 && (
                             <>
-                                <div className="flex flex-wrap justify-start items-start gap-11">
+                                <div className="flex flex-wrap justify-start items-start gap-6">
                                     {hotels.map((hotel, idx) => (
                                         <div key={hotel.id} className="w-[260px]">
                                             <CardHotel

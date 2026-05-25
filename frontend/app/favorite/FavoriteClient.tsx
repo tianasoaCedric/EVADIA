@@ -3,27 +3,41 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { ChevronLeft, Heart, Trash2, ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRightIcon, Search } from 'lucide-react'
+import { ChevronLeft, Heart, Trash2, ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRightIcon } from 'lucide-react'
 import HeroSection from '../components/ui/HeroSection'
 import CardHotel from '../components/ui/CardHotel'
 import Bouton from '../components/ui/Bouton'
-import Input from '../components/ui/Input'
 import { favoriService } from '@/lib/services'
 import type { Favori } from '@/lib/types'
 import Loading from '../components/ui/Loading'
+import Filters, { FilterValues } from '../components/ui/Filters'
 
 export default function FavoriteClient() {
     const router = useRouter()
     const t = useTranslations('FavoriteClient')
     const [favorites, setFavorites] = useState<Favori[]>([])
     const [filteredFavorites, setFilteredFavorites] = useState<Favori[]>([])
-    const [searchQuery, setSearchQuery] = useState('')
     const [isLoading, setIsLoading] = useState(true)
+
+    // État pour les filtres
+    const [filters, setFilters] = useState<FilterValues>({
+        search: '',
+        destinationId: null,
+        priceMin: null,
+        priceMax: null,
+        availability: 'all',
+        stars: 0,
+        minRating: 0,
+        typeHebergementId: null,
+        checkIn: null,
+        checkOut: null,
+        offreType: 'all',
+        discountMin: null
+    })
 
     // État pour la pagination
     const [currentPage, setCurrentPage] = useState(1)
     const itemsPerPage = 15
-
 
     useEffect(() => {
         const fetchFavorites = async () => {
@@ -43,18 +57,74 @@ export default function FavoriteClient() {
         fetchFavorites()
     }, [])
 
-    // Filtrer les favoris par recherche
+    // Appliquer les filtres sur les favoris
     useEffect(() => {
-        if (searchQuery.trim() === '') {
-            setFilteredFavorites(favorites)
-        } else {
-            const filtered = favorites.filter(favori =>
-                favori.hotel.nom.toLowerCase().includes(searchQuery.toLowerCase())
+        let filtered = [...favorites]
+        
+        // Filtre par recherche (nom d'hôtel)
+        if (filters.search) {
+            filtered = filtered.filter(favori =>
+                favori.hotel.nom.toLowerCase().includes(filters.search.toLowerCase())
             )
-            setFilteredFavorites(filtered)
         }
+        
+        // Filtre par destination
+        if (filters.destinationId) {
+            filtered = filtered.filter(favori => 
+                favori.hotel.destination_id === filters.destinationId
+            )
+        }
+        
+        // Filtre par type d'hébergement
+        if (filters.typeHebergementId) {
+            filtered = filtered.filter(favori => 
+                favori.hotel.type_hebergement_id === filters.typeHebergementId
+            )
+        }
+        
+        // Filtre par prix
+        if (filters.priceMin) {
+            filtered = filtered.filter(favori => (favori.hotel.prix_min ?? 0) >= filters.priceMin!)
+        }
+        if (filters.priceMax) {
+            filtered = filtered.filter(favori => (favori.hotel.prix_min ?? 0) <= filters.priceMax!)
+        }
+        
+        // Filtre par disponibilité
+        if (filters.availability === 'disponible') {
+            filtered = filtered.filter(favori => (favori.hotel.nb_avis ?? 0) > 0)
+        } else if (filters.availability === 'complet') {
+            filtered = filtered.filter(favori => (favori.hotel.nb_avis ?? 0) === 0)
+        }
+        
+        // Filtre par étoiles
+        if (filters.stars > 0) {
+            filtered = filtered.filter(favori => (favori.hotel.etoiles ?? 0) >= filters.stars)
+        }
+        
+        // Filtre par note minimale
+        if (filters.minRating > 0) {
+            filtered = filtered.filter(favori => (favori.hotel.note_moyenne ?? 0) >= filters.minRating)
+        }
+        
+        // Filtre par type d'offre
+        if (filters.offreType !== 'all') {
+            // À adapter selon votre logique métier
+            filtered = filtered.filter(favori => favori.hotel.offre_type === filters.offreType)
+        }
+        
+        // Filtre par réduction
+        if (filters.discountMin) {
+            filtered = filtered.filter(favori => (favori.hotel.discount ?? 0) >= filters.discountMin!)
+        }
+        
+        setFilteredFavorites(filtered)
         setCurrentPage(1)
-    }, [searchQuery, favorites])
+    }, [filters, favorites])
+
+    const handleFilterChange = (newFilters: FilterValues) => {
+        setFilters(newFilters)
+    }
 
     // Pagination
     const totalPages = Math.ceil(filteredFavorites.length / itemsPerPage)
@@ -86,7 +156,20 @@ export default function FavoriteClient() {
             setFavorites([])
             setFilteredFavorites([])
             setCurrentPage(1)
-            setSearchQuery('')
+            setFilters({
+                search: '',
+                destinationId: null,
+                priceMin: null,
+                priceMax: null,
+                availability: 'all',
+                stars: 0,
+                minRating: 0,
+                typeHebergementId: null,
+                checkIn: null,
+                checkOut: null,
+                offreType: 'all',
+                discountMin: null
+            })
         } catch (error) {
             console.error(error)
         }
@@ -112,9 +195,7 @@ export default function FavoriteClient() {
             />
 
             <div className="container mx-auto px-6 py-12">
-                <div
-                    className="transition-all duration-700 ease-out"
-                >
+                <div className="transition-all duration-700 ease-out">
                     {/* En-tête */}
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
                         <button
@@ -122,7 +203,9 @@ export default function FavoriteClient() {
                             className="flex items-center gap-2 text-gray-800 hover:text-[#01BDA5] transition-colors cursor-pointer"
                         >
                             <ChevronLeft className="w-8 h-8" />
-                            <span className="text-2xl md:text-3xl font-bold text-gray-900 ">{filteredFavorites.length} {filteredFavorites.length > 1 ? t('favorites_plural') : t('favorites_singular')}</span>
+                            <span className="text-2xl md:text-3xl font-bold text-gray-900">
+                                {filteredFavorites.length} {filteredFavorites.length > 1 ? t('favorites_plural') : t('favorites_singular')}
+                            </span>
                         </button>
                         {filteredFavorites.length > 0 && (
                             <Bouton
@@ -137,19 +220,13 @@ export default function FavoriteClient() {
                         )}
                     </div>
 
-                    {/* Barre de recherche */}
-                    <div className="max-w-md mx-auto mb-8">
-                        <Input
-                            type="text"
-                            placeholder={t('search_placeholder')}
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            icon={<Search className="w-5 h-5 text-gray-400" />}
-                            fullWidth
-                            variant="light"
-                            placeholderPosition="left"
-                        />
-                    </div>
+                    {/* Composant Filters */}
+                    <Filters 
+                        onFilterChange={handleFilterChange}
+                        initialFilters={filters}
+                        enabledFilters={['type', 'destination', 'price', 'availability', 'stars', 'rating', 'offre']}
+                        className="mb-8"
+                    />
 
                     {/* Liste des favoris */}
                     <div id="favorites-list">
@@ -157,11 +234,26 @@ export default function FavoriteClient() {
                             <div className="text-center py-16">
                                 <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                                 <p className="text-gray-500 text-lg">
-                                    {searchQuery ? t('no_search_results') : t('no_favorites')}
+                                    {filters.search || filters.destinationId || filters.priceMin || filters.priceMax || filters.availability !== 'all' || filters.stars > 0 || filters.minRating > 0 || filters.offreType !== 'all'
+                                        ? t('no_search_results') 
+                                        : t('no_favorites')}
                                 </p>
-                                {searchQuery ? (
+                                {(filters.search || filters.destinationId || filters.priceMin || filters.priceMax || filters.availability !== 'all' || filters.stars > 0 || filters.minRating > 0 || filters.offreType !== 'all') ? (
                                     <button
-                                        onClick={() => setSearchQuery('')}
+                                        onClick={() => setFilters({
+                                            search: '',
+                                            destinationId: null,
+                                            priceMin: null,
+                                            priceMax: null,
+                                            availability: 'all',
+                                            stars: 0,
+                                            minRating: 0,
+                                            typeHebergementId: null,
+                                            checkIn: null,
+                                            checkOut: null,
+                                            offreType: 'all',
+                                            discountMin: null
+                                        })}
                                         className="mt-4 px-6 py-2 rounded-full border border-[#01BDA5] text-[#01BDA5] hover:bg-[#01BDA5] hover:text-white transition-colors cursor-pointer"
                                     >
                                         {t('clear_search')}

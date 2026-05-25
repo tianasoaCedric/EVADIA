@@ -3,12 +3,12 @@
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { ChevronLeft, Search, ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRightIcon } from 'lucide-react'
+import { ChevronLeft, ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRightIcon } from 'lucide-react'
 import { useOnScreen } from '@/hooks/useOnScreen'
 import CardHotel from '../../components/ui/CardHotel'
-import Input from '../../components/ui/Input'
 import { apiClient } from '@/lib/api-client'
 import HotelPhoto from '@/app/components/ui/HotelPhoto'
+import Filters, { FilterValues } from '../../components/ui/Filters'
 
 interface VilleClientProps {
   villeId: number
@@ -58,10 +58,27 @@ export default function VilleClient({
   const [hotels, setHotels]               = useState<ApiHotel[]>(initialHotels)
   const [selectionHotels]                 = useState<ApiHotel[]>(initialSelectionHotels)
   const [isSearching, setIsSearching]     = useState(false)
-  const [searchQuery, setSearchQuery]     = useState('')
   const [currentPage, setCurrentPage]     = useState(initialCurrentPage)
   const [lastPage, setLastPage]           = useState(initialLastPage)
   const [total, setTotal]                 = useState(initialTotal)
+  
+  // États pour les filtres
+  const [filters, setFilters] = useState<FilterValues>({
+    search: '',
+    destinationId: null,
+    priceMin: null,
+    priceMax: null,
+    availability: 'all',
+    stars: 0,
+    minRating: 0,
+    typeHebergementId: null,
+    checkIn: null,
+    checkOut: null,
+    offreType: 'all'
+  })
+  
+  // Hôtels filtrés localement
+  const [filteredHotels, setFilteredHotels] = useState<ApiHotel[]>(initialHotels)
 
   const selectionScrollRef = useRef<HTMLDivElement | null>(null)
   const [selectionScrollPos, setSelectionScrollPos] = useState(0)
@@ -69,44 +86,66 @@ export default function VilleClient({
   const [setSelectionRef, isSelectionVisible] = useOnScreen({ threshold: 0.2,  })
   const [setHotelsRef, isHotelsVisible]       = useOnScreen({ threshold: 0.2,  })
 
-  const fetchHotels = async (page: number, search: string) => {
-    const params = new URLSearchParams({ page: String(page) })
-    if (search.trim()) params.set('search', search.trim())
-    setIsSearching(true)
-    try {
-      const res = await apiClient.get<PaginatedHotels>(`/villes/${villeId}/hotels?${params}`)
-      setHotels(res.data)
-      setCurrentPage(res.current_page)
-      setLastPage(res.last_page)
-      setTotal(res.total)
-    } finally {
-      setIsSearching(false)
+  // Appliquer les filtres localement
+  useEffect(() => {
+    let filtered = [...initialHotels]
+    
+    // Filtre par prix
+    if (filters.priceMin) {
+      filtered = filtered.filter(hotel => (hotel.prix_min ?? 0) >= filters.priceMin!)
     }
+    if (filters.priceMax) {
+      filtered = filtered.filter(hotel => (hotel.prix_min ?? 0) <= filters.priceMax!)
+    }
+    
+    // Filtre par étoiles
+    if (filters.stars > 0) {
+      filtered = filtered.filter(hotel => (hotel.etoiles ?? 0) >= filters.stars)
+    }
+    
+    // Filtre par note minimale
+    if (filters.minRating > 0) {
+      filtered = filtered.filter(hotel => (hotel.note_moyenne ?? 0) >= filters.minRating)
+    }
+    
+    // Filtre par disponibilité (simulé)
+    if (filters.availability === 'disponible') {
+      filtered = filtered.filter(hotel => (hotel.nb_avis ?? 0) > 0)
+    } else if (filters.availability === 'complet') {
+      filtered = filtered.filter(hotel => (hotel.nb_avis ?? 0) === 0)
+    }
+    
+    // Filtre par recherche
+    if (filters.search) {
+      filtered = filtered.filter(hotel => 
+        hotel.nom.toLowerCase().includes(filters.search.toLowerCase())
+      )
+    }
+    
+    setFilteredHotels(filtered)
+    setCurrentPage(1)
+    setLastPage(Math.ceil(filtered.length / 12))
+    setTotal(filtered.length)
+  }, [filters, initialHotels])
+
+  const handleFilterChange = (newFilters: FilterValues) => {
+    setFilters(newFilters)
   }
+
   const capitalizeWords = (str: string): string => {
-  return str
-    .toLowerCase()
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
-}
+    return str
+      .toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ')
+  }
 
-  // Re-fetch uniquement sur changement de recherche (debounce 400ms)
-  useEffect(() => {
-    if (searchQuery === '') return
-    const timer = setTimeout(() => fetchHotels(1, searchQuery), 400)
-    return () => clearTimeout(timer)
-  }, [searchQuery]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Reset sur effacement de recherche
-  useEffect(() => {
-    if (searchQuery === '') {
-      setHotels(initialHotels)
-      setCurrentPage(initialCurrentPage)
-      setLastPage(initialLastPage)
-      setTotal(initialTotal)
-    }
-  }, [searchQuery]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Pagination locale
+  const itemsPerPage = 12
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const currentHotels = filteredHotels.slice(startIndex, endIndex)
+  const totalPages = Math.ceil(filteredHotels.length / itemsPerPage)
 
   useEffect(() => {
     const el = selectionScrollRef.current
@@ -131,8 +170,8 @@ export default function VilleClient({
     ref.current?.scrollTo({ left: index * (320 + 24), behavior: 'smooth' })
 
   const goToPage = (page: number) => {
-    const p = Math.max(1, Math.min(page, lastPage))
-    fetchHotels(p, searchQuery)
+    const p = Math.max(1, Math.min(page, totalPages))
+    setCurrentPage(p)
     document.getElementById('hotels-list')?.scrollIntoView({ behavior: 'smooth' })
   }
 
@@ -153,6 +192,7 @@ export default function VilleClient({
             {capitalizeWords(villeName)}
           </h1>
         </div>
+
         {/* Photo de la destination */}
         <div className="py-4">
           <HotelPhoto
@@ -162,21 +202,16 @@ export default function VilleClient({
           />
         </div>
 
-        {/* Barre de recherche */}
-        <div className="max-w-md mx-auto mb-12">
-          <Input
-            type="text"
-            placeholder={t('search_placeholder')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            icon={<Search className="w-5 h-5 text-gray-400" />}
-            fullWidth
-            variant="light"
-            placeholderPosition="left"
+        {/* Composant Filters - remplace la barre de recherche */}
+        <div className="mb-12">
+          <Filters 
+            onFilterChange={handleFilterChange}
+            initialFilters={filters}
+            enabledFilters={['type', 'price', 'availability', 'stars', 'rating']}
           />
         </div>
 
-        {/* Section sélection */}
+        {/* Section sélection (carrousel) */}
         {selectionHotels.length > 0 && (
           <div
             ref={setSelectionRef}
@@ -247,7 +282,7 @@ export default function VilleClient({
           </div>
         )}
 
-        {/* Grille hôtels */}
+        {/* Grille hôtels avec filtres */}
         <div
           ref={setHotelsRef}
           id="hotels-list"
@@ -265,14 +300,14 @@ export default function VilleClient({
                 <div key={i} className="h-72 rounded-xl bg-gray-200 animate-pulse" />
               ))}
             </div>
-          ) : hotels.length === 0 ? (
+          ) : currentHotels.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-gray-500 text-lg">{t('no_results')}</p>
             </div>
           ) : (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {hotels.map((hotel, index) => (
+                {currentHotels.map((hotel, index) => (
                   <CardHotel
                     key={hotel.id}
                     imageUrl={hotel.photo_principale ?? ''}
@@ -290,7 +325,7 @@ export default function VilleClient({
                 ))}
               </div>
 
-              {lastPage > 1 && (
+              {totalPages > 1 && (
                 <div className="flex justify-center items-center gap-2 mt-10">
                   <button
                     onClick={() => goToPage(currentPage - 1)}
@@ -304,8 +339,8 @@ export default function VilleClient({
                   </button>
 
                   <div className="flex gap-1">
-                    {Array.from({ length: lastPage }, (_, i) => i + 1).map((page) => {
-                      if (page === 1 || page === lastPage || (page >= currentPage - 1 && page <= currentPage + 1)) {
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                      if (page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)) {
                         return (
                           <button
                             key={page}
@@ -326,9 +361,9 @@ export default function VilleClient({
 
                   <button
                     onClick={() => goToPage(currentPage + 1)}
-                    disabled={currentPage === lastPage}
+                    disabled={currentPage === totalPages}
                     className={`p-2 rounded-full transition-all duration-200 ${
-                      currentPage === lastPage ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'
+                      currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'
                     }`}
                     aria-label={t('next_page')}
                   >
