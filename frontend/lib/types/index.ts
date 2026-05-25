@@ -180,6 +180,10 @@ export interface HotelFilters {
   date_fin?: string
   nb_adultes?: number
   sort?: 'prix_asc' | 'prix_desc' | 'note_desc' | 'etoiles_desc'
+  prix_min?: number
+  prix_max?: number
+  disponible?: boolean
+  note_min?: number
 }
 
 // ─── Chambre / Propriété ──────────────────────────────────────────────────────

@@ -24,6 +24,10 @@ export const hotelService = {
     if (filters.date_fin) params.set('date_fin', filters.date_fin)
     if (filters.nb_adultes) params.set('nb_adultes', String(filters.nb_adultes))
     if (filters.sort) params.set('sort', filters.sort)
+    if (filters.prix_min) params.set('prix_min', String(filters.prix_min))
+    if (filters.prix_max) params.set('prix_max', String(filters.prix_max))
+    if (filters.disponible !== undefined) params.set('disponible', filters.disponible ? '1' : '0')
+    if (filters.note_min) params.set('note_min', String(filters.note_min))
 
     const query = params.toString()
     return apiClient.get<PaginatedResponse<Hotel>>(`/hotels${query ? `?${query}` : ''}`)

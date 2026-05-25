@@ -63,13 +63,9 @@ export default async function VillePage({ params }: PageProps) {
 
   return (
     <VilleClient
-      villeId={villeId}
       villeName={villeName}
       slug={slug}
       initialHotels={hotelsRes.data}
-      initialCurrentPage={hotelsRes.current_page}
-      initialLastPage={hotelsRes.last_page}
-      initialTotal={hotelsRes.total}
       initialSelectionHotels={selectionRes.data}
     />
   )

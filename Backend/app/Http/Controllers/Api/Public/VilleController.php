@@ -173,6 +173,30 @@ class VilleController extends Controller
             return response()->json(['data' => $this->formatHotels($hotels)]);
         }
 
+        if ($search = request()->input('search')) {
+            $query->where('nom', 'ilike', "%{$search}%");
+        }
+
+        if ($etoilesMin = request()->input('etoiles_min')) {
+            $query->where('etoiles', '>=', $etoilesMin);
+        }
+
+        if ($prixMin = request()->integer('prix_min')) {
+            $query->whereHas('proprietes', fn($q) => $q->whereHas('currentPrix', fn($q2) => $q2->where('prix_mga', '>=', $prixMin)));
+        }
+
+        if ($prixMax = request()->integer('prix_max')) {
+            $query->whereHas('proprietes', fn($q) => $q->whereHas('currentPrix', fn($q2) => $q2->where('prix_mga', '<=', $prixMax)));
+        }
+
+        if ($noteMin = request()->input('note_min')) {
+            $query->whereRaw('(
+                SELECT AVG(a.note) FROM avis a
+                INNER JOIN proprietes p ON a.propriete_id = p.id
+                WHERE p.hotel_id = hotels.id
+            ) >= ?', [$noteMin]);
+        }
+
         $hotels = $query->paginate(12);
         $hotels->getCollection()->transform(fn($h) => $this->formatHotel($h));
 

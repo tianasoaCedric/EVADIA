@@ -44,8 +44,10 @@ interface RequestOptions {
 
 // ─── Fonction de requête centrale ────────────────────────────────────────────
 
+const REQUEST_TIMEOUT_MS = 15_000
+
 async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-  const { method = 'GET', body, token, requiresAuth = false, revalidate } = options
+  const { method = 'GET', body, token, revalidate } = options
 
   const authToken = token ?? tokenStorage.get()
 
@@ -64,12 +66,26 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
       ? { next: { revalidate: 300 } }
       : { cache: 'no-store' as RequestCache }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    method,
-    headers,
-    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
-    ...nextCache,
-  })
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+
+  let response: Response
+  try {
+    response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method,
+      headers,
+      signal: controller.signal,
+      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+      ...nextCache,
+    })
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new ApiError(408, 'La requête a pris trop de temps')
+    }
+    throw err
+  } finally {
+    clearTimeout(timeoutId)
+  }
 
   // 401 — session expirée ou action nécessitant un compte
   if (response.status === 401) {

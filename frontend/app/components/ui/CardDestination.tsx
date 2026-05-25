@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useOnScreen } from '@/hooks/useOnScreen'
+import { setHeroImage } from '@/lib/heroImage'
 
 interface CardDestinationProps {
   /** URL de l'image de fond */
@@ -104,10 +105,9 @@ const CardDestination = ({
     </div>
   )
 
-  // Si un lien est fourni, on enveloppe avec Link
   if (href) {
     return (
-      <Link href={href} className={`block ${className}`}>
+      <Link href={href} className={`block ${className}`} onClick={() => setHeroImage(validSrc)}>
         {cardContent}
       </Link>
     )

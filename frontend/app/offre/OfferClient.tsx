@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useOnScreen } from '@/hooks/useOnScreen'
@@ -43,21 +43,23 @@ export default function OfferClient({ initialData }: OfferClientProps) {
     typeHebergementId: null,
     checkIn: null,
     checkOut: null,
-    offreType: 'all'
+    offreType: 'all',
+    discountMin: null,
   })
 
   const [setMainRef, isMainVisible] = useOnScreen({ threshold: 0.2 })
-  const mounted = useRef(false)
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const fetchOffers = async (page: number, currentFilters: FilterValues) => {
     setIsLoading(true)
     try {
-      const res = await offreService.list({ 
+      const res = await offreService.list({
         page,
         search: currentFilters.search.trim() || undefined,
         start_date: currentFilters.checkIn ? currentFilters.checkIn.toISOString().split('T')[0] : undefined,
         end_date: currentFilters.checkOut ? currentFilters.checkOut.toISOString().split('T')[0] : undefined,
-        offre_type: currentFilters.offreType !== 'all' ? currentFilters.offreType : undefined
+        offre_type: currentFilters.offreType !== 'all' ? currentFilters.offreType : undefined,
+        discount_min: currentFilters.discountMin ?? undefined,
       })
       setOffers(res.data)
       setCurrentPage(res.current_page)
@@ -72,15 +74,13 @@ export default function OfferClient({ initialData }: OfferClientProps) {
 
   const handleFilterChange = (newFilters: FilterValues) => {
     setFilters(newFilters)
-    fetchOffers(1, newFilters)
+    if (newFilters.search !== filters.search) {
+      if (searchTimer.current) clearTimeout(searchTimer.current)
+      searchTimer.current = setTimeout(() => fetchOffers(1, newFilters), 300)
+    } else {
+      fetchOffers(1, newFilters)
+    }
   }
-
-  // Debounced search — skip on mount (initial data comes from server)
-  useEffect(() => {
-    if (!mounted.current) { mounted.current = true; return }
-    const timer = setTimeout(() => fetchOffers(1, filters), 300)
-    return () => clearTimeout(timer)
-  }, [filters.search])
 
   const goToPage = (page: number) => {
     const p = Math.max(1, Math.min(page, lastPage))

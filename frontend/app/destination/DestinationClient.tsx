@@ -19,7 +19,6 @@ interface DestinationClientProps {
 
 export default function DestinationClient({ destinations, selectionHotels }: DestinationClientProps) {
   const t = useTranslations('DestinationClient')
-
   const selectionScrollRef = useRef<HTMLDivElement>(null)
   const [selectionScrollPos, setSelectionScrollPos] = useState(0)
 

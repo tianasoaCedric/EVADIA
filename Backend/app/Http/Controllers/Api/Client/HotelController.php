@@ -75,6 +75,22 @@ class HotelController extends Controller
             $query->where('etoiles', '>=', $etoilesMin);
         }
 
+        if ($prixMin = $request->integer('prix_min')) {
+            $query->whereHas('proprietes', fn($q) => $q->whereHas('currentPrix', fn($q2) => $q2->where('prix_mga', '>=', $prixMin)));
+        }
+
+        if ($prixMax = $request->integer('prix_max')) {
+            $query->whereHas('proprietes', fn($q) => $q->whereHas('currentPrix', fn($q2) => $q2->where('prix_mga', '<=', $prixMax)));
+        }
+
+        if ($noteMin = $request->input('note_min')) {
+            $query->whereRaw('(
+                SELECT AVG(a.note) FROM avis a
+                INNER JOIN proprietes p ON a.propriete_id = p.id
+                WHERE p.hotel_id = hotels.id
+            ) >= ?', [$noteMin]);
+        }
+
         // Sélection : hôtels avec abonnement Signature actif
         if ($request->boolean('selection')) {
             $query->whereHas('abonnements', fn($q) => $q

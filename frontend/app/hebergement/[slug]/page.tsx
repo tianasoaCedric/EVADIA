@@ -49,7 +49,9 @@ export default async function HebergementSlugPage({ params }: PageProps) {
     hotelService.list({ type_id: categoryId, page: 1 }).catch(() => undefined),
     typeHotelService.list().catch(() => []),
   ])
-  const categoryDescription = types.find(t => t.id === categoryId)?.description ?? null
+  const categoryType = types.find(t => t.id === categoryId)
+  const categoryDescription = categoryType?.description ?? null
+  const categoryImage = categoryType?.imageUrl ?? '/photos/bc.png'
 
-  return <HebergementName categoryId={categoryId} categoryName={categoryName} slug={slug} initialData={initialData} categoryDescription={categoryDescription} />
+  return <HebergementName categoryId={categoryId} categoryName={categoryName} slug={slug} initialData={initialData} categoryDescription={categoryDescription} categoryImage={categoryImage} />
 }

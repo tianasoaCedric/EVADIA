@@ -15,9 +15,10 @@ interface HebergementNameProps {
     slug: string
     initialData?: PaginatedResponse<Hotel>
     categoryDescription?: string | null
+    categoryImage?: string
 }
 
-export default function HebergementName({ categoryId, categoryName, initialData, categoryDescription }: HebergementNameProps) {
+export default function HebergementName({ categoryId, categoryName, initialData, categoryDescription, categoryImage = '/photos/bc.png' }: HebergementNameProps) {
     const t = useTranslations('HebergementName')
     const commonT = useTranslations('Common')
 
@@ -33,9 +34,10 @@ export default function HebergementName({ categoryId, categoryName, initialData,
         typeHebergementId: null,
         checkIn: null,
         checkOut: null,
-        offreType: 'all'
+        offreType: 'all',
+        discountMin: null,
     })
-    
+
     // États pour les données
     const [hotels, setHotels] = useState<Hotel[]>(initialData?.data ?? [])
     const [isLoading, setIsLoading] = useState(false)
@@ -43,7 +45,6 @@ export default function HebergementName({ categoryId, categoryName, initialData,
     const [totalPages, setTotalPages] = useState(initialData?.last_page ?? 1)
     const [total, setTotal] = useState(initialData?.total ?? 0)
     const skipFirstFetch = useRef(!!initialData)
-    const mounted = useRef(false)
 
     const fetchHotels = useCallback(async (page: number, currentFilters: FilterValues) => {
         setIsLoading(true)
@@ -52,11 +53,11 @@ export default function HebergementName({ categoryId, categoryName, initialData,
                 type_id: categoryId,
                 page,
                 search: currentFilters.search.trim() || undefined,
-                destination_id: currentFilters.destinationId || undefined,
-                prix_min: currentFilters.priceMin || undefined,
-                prix_max: currentFilters.priceMax || undefined,
+                destination_id: currentFilters.destinationId ?? undefined,
+                prix_min: currentFilters.priceMin ?? undefined,
+                prix_max: currentFilters.priceMax ?? undefined,
                 disponible: currentFilters.availability === 'disponible' ? true : currentFilters.availability === 'complet' ? false : undefined,
-                etoiles: currentFilters.stars || undefined,
+                etoiles_min: currentFilters.stars || undefined,
                 note_min: currentFilters.minRating || undefined,
             })
             setHotels(res.data)
@@ -75,21 +76,12 @@ export default function HebergementName({ categoryId, categoryName, initialData,
         fetchHotels(1, newFilters)
     }
 
-    // Page change — skip sur le premier rendu si données serveur disponibles
+    // Page change uniquement — skip le premier rendu si données serveur disponibles
     useEffect(() => {
         if (skipFirstFetch.current) { skipFirstFetch.current = false; return }
         fetchHotels(currentPage, filters)
-    }, [currentPage, fetchHotels, filters])
-
-    // Recharger quand les filtres changent (après le premier rendu)
-    useEffect(() => {
-        if (mounted.current) {
-            setCurrentPage(1)
-            fetchHotels(1, filters)
-        } else {
-            mounted.current = true
-        }
-    }, [filters, fetchHotels])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentPage])
 
     const goToPage = (page: number) => {
         const next = Math.max(1, Math.min(page, totalPages))
@@ -112,7 +104,7 @@ export default function HebergementName({ categoryId, categoryName, initialData,
             <HeroSection
                 title={t('hero_title', { category: heroTitle })}
                 subtitle={categoryDescription ?? t('hero_subtitle', { category: categoryName.toLowerCase() })}
-                backgroundImage="/photos/bc.png"
+                backgroundImage={categoryImage}
                 showDownload={false}
                 showScrollIndicator={true}
             />

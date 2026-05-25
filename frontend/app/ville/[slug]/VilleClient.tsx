@@ -1,23 +1,18 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { ChevronLeft, ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRightIcon } from 'lucide-react'
 import { useOnScreen } from '@/hooks/useOnScreen'
 import CardHotel from '../../components/ui/CardHotel'
-import { apiClient } from '@/lib/api-client'
 import HotelPhoto from '@/app/components/ui/HotelPhoto'
 import Filters, { FilterValues } from '../../components/ui/Filters'
 
 interface VilleClientProps {
-  villeId: number
   villeName: string
   slug: string
   initialHotels: ApiHotel[]
-  initialCurrentPage: number
-  initialLastPage: number
-  initialTotal: number
   initialSelectionHotels: ApiHotel[]
 }
 
@@ -34,36 +29,19 @@ export interface ApiHotel {
   nb_avis: number
 }
 
-interface PaginatedHotels {
-  data: ApiHotel[]
-  current_page: number
-  last_page: number
-  total: number
-}
-
 export default function VilleClient({
-  villeId,
   villeName,
   slug,
   initialHotels,
-  initialCurrentPage,
-  initialLastPage,
-  initialTotal,
   initialSelectionHotels,
 }: VilleClientProps) {
   const router = useRouter()
   const t = useTranslations('VilleClient')
   void slug
 
-  const [hotels, setHotels]               = useState<ApiHotel[]>(initialHotels)
-  const [selectionHotels]                 = useState<ApiHotel[]>(initialSelectionHotels)
-  const [isSearching, setIsSearching]     = useState(false)
-  const [currentPage, setCurrentPage]     = useState(initialCurrentPage)
-  const [lastPage, setLastPage]           = useState(initialLastPage)
-  const [total, setTotal]                 = useState(initialTotal)
-  
-  // États pour les filtres
-  const [filters, setFilters] = useState<FilterValues>({
+  const [selectionHotels]             = useState<ApiHotel[]>(initialSelectionHotels)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [filters, setFilters]         = useState<FilterValues>({
     search: '',
     destinationId: null,
     priceMin: null,
@@ -74,78 +52,44 @@ export default function VilleClient({
     typeHebergementId: null,
     checkIn: null,
     checkOut: null,
-    offreType: 'all'
+    offreType: 'all',
+    discountMin: null,
   })
-  
-  // Hôtels filtrés localement
-  const [filteredHotels, setFilteredHotels] = useState<ApiHotel[]>(initialHotels)
 
   const selectionScrollRef = useRef<HTMLDivElement | null>(null)
   const [selectionScrollPos, setSelectionScrollPos] = useState(0)
 
-  const [setSelectionRef, isSelectionVisible] = useOnScreen({ threshold: 0.2,  })
-  const [setHotelsRef, isHotelsVisible]       = useOnScreen({ threshold: 0.2,  })
+  const [setSelectionRef, isSelectionVisible] = useOnScreen({ threshold: 0.2 })
+  const [setHotelsRef, isHotelsVisible]       = useOnScreen({ threshold: 0.2 })
 
-  // Appliquer les filtres localement
-  useEffect(() => {
-    let filtered = [...initialHotels]
-    
-    // Filtre par prix
-    if (filters.priceMin) {
-      filtered = filtered.filter(hotel => (hotel.prix_min ?? 0) >= filters.priceMin!)
-    }
-    if (filters.priceMax) {
-      filtered = filtered.filter(hotel => (hotel.prix_min ?? 0) <= filters.priceMax!)
-    }
-    
-    // Filtre par étoiles
-    if (filters.stars > 0) {
-      filtered = filtered.filter(hotel => (hotel.etoiles ?? 0) >= filters.stars)
-    }
-    
-    // Filtre par note minimale
-    if (filters.minRating > 0) {
-      filtered = filtered.filter(hotel => (hotel.note_moyenne ?? 0) >= filters.minRating)
-    }
-    
-    // Filtre par disponibilité (simulé)
-    if (filters.availability === 'disponible') {
-      filtered = filtered.filter(hotel => (hotel.nb_avis ?? 0) > 0)
-    } else if (filters.availability === 'complet') {
-      filtered = filtered.filter(hotel => (hotel.nb_avis ?? 0) === 0)
-    }
-    
-    // Filtre par recherche
-    if (filters.search) {
-      filtered = filtered.filter(hotel => 
-        hotel.nom.toLowerCase().includes(filters.search.toLowerCase())
-      )
-    }
-    
-    setFilteredHotels(filtered)
-    setCurrentPage(1)
-    setLastPage(Math.ceil(filtered.length / 12))
-    setTotal(filtered.length)
+  // Filtrage calculé au render — pas de setState dans useEffect
+  const filteredHotels = useMemo(() => {
+    let result = initialHotels
+    if (filters.priceMin) result = result.filter(h => (h.prix_min ?? 0) >= filters.priceMin!)
+    if (filters.priceMax) result = result.filter(h => (h.prix_min ?? 0) <= filters.priceMax!)
+    if (filters.stars > 0) result = result.filter(h => (h.etoiles ?? 0) >= filters.stars)
+    if (filters.minRating > 0) result = result.filter(h => (h.note_moyenne ?? 0) >= filters.minRating)
+    if (filters.search) result = result.filter(h => h.nom.toLowerCase().includes(filters.search.toLowerCase()))
+    return result
   }, [filters, initialHotels])
 
-  const handleFilterChange = (newFilters: FilterValues) => {
-    setFilters(newFilters)
+  // Remettre à la page 1 quand les filtres changent
+  const prevFilters = useRef(filters)
+  if (prevFilters.current !== filters) {
+    prevFilters.current = filters
+    if (currentPage !== 1) setCurrentPage(1)
   }
 
-  const capitalizeWords = (str: string): string => {
-    return str
-      .toLowerCase()
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ')
-  }
+  const handleFilterChange = (newFilters: FilterValues) => setFilters(newFilters)
 
-  // Pagination locale
+  const capitalizeWords = (str: string) =>
+    str.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+
+  // Pagination
   const itemsPerPage = 12
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const currentHotels = filteredHotels.slice(startIndex, endIndex)
-  const totalPages = Math.ceil(filteredHotels.length / itemsPerPage)
+  const totalPages   = Math.ceil(filteredHotels.length / itemsPerPage)
+  const currentHotels = filteredHotels.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+  const total         = filteredHotels.length
 
   useEffect(() => {
     const el = selectionScrollRef.current
@@ -207,7 +151,7 @@ export default function VilleClient({
           <Filters 
             onFilterChange={handleFilterChange}
             initialFilters={filters}
-            enabledFilters={['type', 'price', 'availability', 'stars', 'rating']}
+            enabledFilters={['price', 'stars', 'rating']}
           />
         </div>
 
@@ -294,13 +238,7 @@ export default function VilleClient({
             {t('hotels_title', { name: capitalizeWords(villeName) })}
           </h2>
 
-          {isSearching ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="h-72 rounded-xl bg-gray-200 animate-pulse" />
-              ))}
-            </div>
-          ) : currentHotels.length === 0 ? (
+          {currentHotels.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-gray-500 text-lg">{t('no_results')}</p>
             </div>

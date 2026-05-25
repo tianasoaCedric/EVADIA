@@ -34,6 +34,18 @@ class OffreController extends Controller
             });
         }
 
+        if ($discountMin = $request->integer('discount_min')) {
+            $query->where('remise_pct', '>=', $discountMin);
+        }
+
+        if ($startDate = $request->input('start_date')) {
+            $query->where('date_fin', '>=', $startDate);
+        }
+
+        if ($endDate = $request->input('end_date')) {
+            $query->where('date_debut', '<=', $endDate);
+        }
+
         $offres = $query->latest('created_at')->paginate(12);
         $offres->getCollection()->transform(fn($o) => $this->formatOffre($o));
 

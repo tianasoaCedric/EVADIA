@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Search, MapPin, DollarSign, Calendar, Star, Building2, Tag, X, Filter, Percent } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Input from './Input'
@@ -157,7 +157,6 @@ export default function Filters({
     const [filters, setFilters] = useState<FilterValues>({ ...defaultFilters, ...initialFilters })
     const [destinations, setDestinations] = useState<Destination[]>([])
     const [typeHebergements, setTypeHebergements] = useState<TypeHotel[]>([])
-    const [activeFiltersCount, setActiveFiltersCount] = useState(0)
 
     // Charger les destinations et types d'hébergement
     useEffect(() => {
@@ -176,8 +175,7 @@ export default function Filters({
         fetchData()
     }, [])
 
-    // Compter les filtres actifs
-    useEffect(() => {
+    const activeFiltersCount = useMemo(() => {
         let count = 0
         if (filters.destinationId) count++
         if (filters.priceMin || filters.priceMax) count++
@@ -188,11 +186,17 @@ export default function Filters({
         if (filters.checkIn || filters.checkOut) count++
         if (filters.offreType !== 'all') count++
         if (filters.discountMin) count++
-        setActiveFiltersCount(count)
+        return count
     }, [filters])
 
     const updateFilter = <K extends keyof FilterValues>(key: K, value: FilterValues[K]) => {
         const newFilters = { ...filters, [key]: value }
+        setFilters(newFilters)
+        onFilterChange(newFilters)
+    }
+
+    const updateFilters = (partial: Partial<FilterValues>) => {
+        const newFilters = { ...filters, ...partial }
         setFilters(newFilters)
         onFilterChange(newFilters)
     }
@@ -412,14 +416,67 @@ export default function Filters({
                     {/* Filtres actifs (pills) */}
                     {activeFiltersCount > 0 && (
                         <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100">
-                            {/* ... existing pills ... */}
+                            {filters.destinationId && (
+                                <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#01BDA5]/10 text-[#01BDA5] text-sm">
+                                    <MapPin className="w-3 h-3" />
+                                    <span>{destinations.find(d => d.id === filters.destinationId)?.nom ?? 'Destination'}</span>
+                                    <button onClick={() => updateFilter('destinationId', null)} className="ml-1 hover:opacity-70"><X className="w-3 h-3" /></button>
+                                </div>
+                            )}
+                            {filters.typeHebergementId && (
+                                <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#01BDA5]/10 text-[#01BDA5] text-sm">
+                                    <Building2 className="w-3 h-3" />
+                                    <span>{typeHebergements.find(t => t.id === filters.typeHebergementId)?.nom ?? 'Type'}</span>
+                                    <button onClick={() => updateFilter('typeHebergementId', null)} className="ml-1 hover:opacity-70"><X className="w-3 h-3" /></button>
+                                </div>
+                            )}
+                            {(filters.priceMin || filters.priceMax) && (
+                                <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#01BDA5]/10 text-[#01BDA5] text-sm">
+                                    <DollarSign className="w-3 h-3" />
+                                    <span>{filters.priceMin ?? '0'} – {filters.priceMax ?? '∞'} Ar</span>
+                                    <button onClick={() => updateFilters({ priceMin: null, priceMax: null })} className="ml-1 hover:opacity-70"><X className="w-3 h-3" /></button>
+                                </div>
+                            )}
+                            {filters.availability !== 'all' && (
+                                <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#01BDA5]/10 text-[#01BDA5] text-sm">
+                                    <Calendar className="w-3 h-3" />
+                                    <span>{filters.availability === 'disponible' ? 'Disponible' : 'Complet'}</span>
+                                    <button onClick={() => updateFilter('availability', 'all')} className="ml-1 hover:opacity-70"><X className="w-3 h-3" /></button>
+                                </div>
+                            )}
+                            {filters.stars > 0 && (
+                                <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#01BDA5]/10 text-[#01BDA5] text-sm">
+                                    <Star className="w-3 h-3 fill-current" />
+                                    <span>{filters.stars}★ minimum</span>
+                                    <button onClick={() => updateFilter('stars', 0)} className="ml-1 hover:opacity-70"><X className="w-3 h-3" /></button>
+                                </div>
+                            )}
+                            {filters.minRating > 0 && (
+                                <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#01BDA5]/10 text-[#01BDA5] text-sm">
+                                    <Star className="w-3 h-3" />
+                                    <span>Note ≥ {filters.minRating}</span>
+                                    <button onClick={() => updateFilter('minRating', 0)} className="ml-1 hover:opacity-70"><X className="w-3 h-3" /></button>
+                                </div>
+                            )}
+                            {(filters.checkIn || filters.checkOut) && (
+                                <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#01BDA5]/10 text-[#01BDA5] text-sm">
+                                    <Calendar className="w-3 h-3" />
+                                    <span>{filters.checkIn?.toLocaleDateString('fr-FR') ?? '?'} → {filters.checkOut?.toLocaleDateString('fr-FR') ?? '?'}</span>
+                                    <button onClick={() => updateFilters({ checkIn: null, checkOut: null })} className="ml-1 hover:opacity-70"><X className="w-3 h-3" /></button>
+                                </div>
+                            )}
+                            {filters.offreType !== 'all' && (
+                                <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#01BDA5]/10 text-[#01BDA5] text-sm">
+                                    <Tag className="w-3 h-3" />
+                                    <span>{filters.offreType === 'promo' ? 'Promotions' : filters.offreType === 'last_minute' ? 'Dernière minute' : 'Early bird'}</span>
+                                    <button onClick={() => updateFilter('offreType', 'all')} className="ml-1 hover:opacity-70"><X className="w-3 h-3" /></button>
+                                </div>
+                            )}
                             {filters.discountMin && (
                                 <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#01BDA5]/10 text-[#01BDA5] text-sm">
                                     <Percent className="w-3 h-3" />
                                     <span>≥ {filters.discountMin}% de réduction</span>
-                                    <button onClick={() => updateFilter('discountMin', null)} className="ml-1 hover:opacity-70">
-                                        <X className="w-3 h-3" />
-                                    </button>
+                                    <button onClick={() => updateFilter('discountMin', null)} className="ml-1 hover:opacity-70"><X className="w-3 h-3" /></button>
                                 </div>
                             )}
                             <button onClick={clearFilters} className="px-3 py-1 text-sm text-gray-500 hover:text-red-500 transition-colors">
