@@ -226,6 +226,7 @@ const capitalizeWords = (str: string): string => {
                     <CardHotel
                       imageUrl={hotel.photo_principale ?? ''}
                       name={hotel.nom}
+                      ville={hotel.ville ?? undefined}
                       hotelId={hotel.id}
                       availability="Disponible"
                       price={hotel.prix_min ?? 0}
@@ -264,6 +265,7 @@ const capitalizeWords = (str: string): string => {
                     <CardHotel
                       imageUrl={hotel.photo_principale ?? ''}
                       name={hotel.nom}
+                      ville={hotel.ville ?? undefined}
                       hotelId={hotel.id}
                       availability="Disponible"
                       price={hotel.prix_min ?? 0}

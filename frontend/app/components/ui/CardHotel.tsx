@@ -15,6 +15,7 @@ interface CardHotelProps {
   imageUrl: string
   priority?: boolean
   name: string
+  ville?: string
   availability: string
   price: number
   prixMga?: number
@@ -51,6 +52,7 @@ const createSlug = (id: number, name: string): string => {
 const CardHotel = ({
   imageUrl,
   name,
+  ville,
   availability,
   price,
   prixMga,
@@ -200,7 +202,7 @@ const CardHotel = ({
   const cardInner = (
     <div className="flex flex-col flex-1 p-2">
       <h3 className="font-semibold text-base sm:text-lg text-gray-900 line-clamp-1 mb-1">
-        {name}
+        {name}{ville ? `, ${ville}` : ''}
       </h3>
 
       <div className="mb-1">

@@ -159,6 +159,7 @@ export default function HebergementName({ categoryId, categoryName, initialData,
                                                 hotelId={hotel.id}
                                                 imageUrl={hotel.photo_principale ?? '/photos/bc.png'}
                                                 name={hotel.nom}
+                                                ville={hotel.adresse?.ville}
                                                 availability="Disponible"
                                                 price={hotel.prix_min ?? 0}
                                                 prixMga={hotel.prix_min_mga}

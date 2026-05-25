@@ -1,6 +1,6 @@
 import HideHeader from '@/app/components/ui/HideHeader'
 
-export default function VilleLayout({ children }: { children: React.ReactNode }) {
+export default function ProprieteLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <HideHeader />

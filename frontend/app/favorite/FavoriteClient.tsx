@@ -275,6 +275,7 @@ export default function FavoriteClient() {
                                             <CardHotel
                                                 imageUrl={favori.hotel.photo_principale ?? ''}
                                                 name={favori.hotel.nom}
+                                                ville={favori.hotel.adresse?.ville}
                                                 hotelId={favori.hotel_id}
                                                 availability="Disponible"
                                                 price={favori.hotel.prix_min ?? 0}

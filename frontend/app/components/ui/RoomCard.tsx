@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Bed, Bath, Users, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -27,6 +27,8 @@ interface RoomCardProps {
   hotelId?: number
 }
 
+const MAX_VISIBLE_DOTS = 7
+
 const RoomCard = ({
   imageUrl,
   name,
@@ -49,7 +51,8 @@ const RoomCard = ({
   const displayPrice = getPrix(prixMga, prixEur) ?? price
   const [imageError, setImageError] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  
+  const touchStartX = useRef<number | null>(null)
+
   const images = Array.isArray(imageUrl) ? imageUrl : [imageUrl]
   const hasMultipleImages = images.length > 1
 
@@ -74,6 +77,34 @@ const RoomCard = ({
     e.preventDefault()
     e.stopPropagation()
     onBookClick?.()
+  }
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return
+    const diff = touchStartX.current - e.changedTouches[0].clientX
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) {
+        setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
+      } else {
+        setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
+      }
+    }
+    touchStartX.current = null
+  }
+
+  const getVisibleDots = () => {
+    const total = images.length
+    if (total <= MAX_VISIBLE_DOTS) return { start: 0, end: total }
+    const half = Math.floor(MAX_VISIBLE_DOTS / 2)
+    let start = currentImageIndex - half
+    let end = currentImageIndex + half + 1
+    if (start < 0) { end -= start; start = 0 }
+    if (end > total) { start -= end - total; end = total }
+    return { start: Math.max(0, start), end }
   }
 
   const getTranslatedAvailability = (availabilityText: string): string => {
@@ -106,7 +137,11 @@ const RoomCard = ({
       `}
     >
       {/* Carrousel d'images */}
-      <div className="relative rounded-2xl h-48 sm:h-56 w-full overflow-hidden bg-gray-200">
+      <div
+        className="relative rounded-2xl h-48 sm:h-56 w-full overflow-hidden bg-gray-200"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         {!imageError ? (
           <Image
             src={images[currentImageIndex]}
@@ -144,23 +179,32 @@ const RoomCard = ({
         )}
 
         {hasMultipleImages && (
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-            {images.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  setCurrentImageIndex(idx)
-                }}
-                className={`w-1.5 h-1.5 rounded-full transition-all duration-200 cursor-pointer ${
-                  currentImageIndex === idx
-                    ? 'bg-white w-3'
-                    : 'bg-white/50 hover:bg-white/80'
-                }`}
-                aria-label={t('go_to_image', { index: idx + 1 })}
-              />
-            ))}
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1">
+            {images.length > MAX_VISIBLE_DOTS && getVisibleDots().start > 0 && (
+              <span className="w-1 h-1 rounded-full bg-white/40" />
+            )}
+            {images.slice(getVisibleDots().start, getVisibleDots().end).map((_, i) => {
+              const idx = getVisibleDots().start + i
+              return (
+                <button
+                  key={idx}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setCurrentImageIndex(idx)
+                  }}
+                  className={`h-1.5 rounded-full transition-all duration-200 cursor-pointer ${
+                    currentImageIndex === idx
+                      ? 'bg-white w-3'
+                      : 'bg-white/50 w-1.5 hover:bg-white/80'
+                  }`}
+                  aria-label={t('go_to_image', { index: idx + 1 })}
+                />
+              )
+            })}
+            {images.length > MAX_VISIBLE_DOTS && getVisibleDots().end < images.length && (
+              <span className="w-1 h-1 rounded-full bg-white/40" />
+            )}
           </div>
         )}
         

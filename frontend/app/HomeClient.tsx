@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import Header from './components/molecules/Header'
 import { useTranslations } from 'next-intl'
 import CardDestination from './components/ui/CardDestination'
 import { useOnScreen } from '@/hooks/useOnScreen'
@@ -115,7 +114,6 @@ export default function HomePage({ popularVilles, offres, villes }: HomePageProp
 
     return (
         <>
-            <Header theme="default" />
             <main className="relative min-h-screen">
                 <HeroSection
                     title={t('hero_title')}

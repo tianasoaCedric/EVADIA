@@ -12,6 +12,7 @@ import { ChevronDown, Search } from 'lucide-react'
 import { useDevise } from '../../context/DeviseContext'
 import SearchSuggestions, { Suggestion } from '../ui/SearchSuggestions'
 import MenuFullscreen from './MenuFullscreen'
+import { useHeaderTheme } from '../../context/HeaderThemeContext'
 
 interface HeaderProps {
     /** Langue actuelle */
@@ -24,7 +25,7 @@ interface HeaderProps {
     onMenuClick?: () => void
     /** Callback clic sur la recherche */
     onSearchClick?: () => void
-    /** Mode du header (default ou dark) */
+    /** Mode du header — si absent, lu depuis HeaderThemeContext */
     theme?: 'default' | 'dark'
     /** Callback changement de devise */
     onDeviseChange?: (devise: string) => void
@@ -41,10 +42,14 @@ const Header = ({
     onLanguageChange,
     onMenuClick,
     onSearchClick,
-    theme = 'default',
+    theme: themeProp,
     onDeviseChange
 }: HeaderProps) => {
     const router = useRouter()
+    const { theme: themeCtx, hidden } = useHeaderTheme()
+    const theme = themeProp ?? themeCtx
+
+    if (hidden) return null
     const t = useTranslations('Header')
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [isSearchOpen, setIsSearchOpen] = useState(false)

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { ChevronLeft, X, ChevronLeft as ChevLeft, ChevronRight as ChevRight, MapPin, Building2, BedDouble, Tag, Compass } from 'lucide-react'
-import Header from '../components/molecules/Header'
+import SetHeaderTheme from '../components/ui/SetHeaderTheme'
 import CardHotel from '../components/ui/CardHotel'
 import CardDestination from '../components/ui/CardDestination'
 import { createSlug } from '@/lib/slug'
@@ -145,7 +145,7 @@ export default function SearchClient({ searchQuery }: SearchClientProps) {
 
   return (
     <>
-      <Header theme="dark" />
+      <SetHeaderTheme theme="dark" />
       <main className="min-h-screen pt-24 pb-16 bg-white">
         <div className="container mx-auto px-4 max-w-7xl">
 
@@ -269,6 +269,7 @@ export default function SearchClient({ searchQuery }: SearchClientProps) {
                       key={h.id}
                       imageUrl={h.photo_principale ?? ''}
                       name={h.nom}
+                      ville={h.ville ?? undefined}
                       hotelId={h.id}
                       availability="Disponible"
                       price={h.prix_min_mga ?? 0}

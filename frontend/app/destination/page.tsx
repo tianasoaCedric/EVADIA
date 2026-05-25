@@ -5,7 +5,6 @@ import type { Destination, Hotel } from '@/lib/types'
 import DestinationClient from './DestinationClient'
 
 export const revalidate = 3600
-import Header from '../components/molecules/Header'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('DestinationPage')
@@ -35,12 +34,9 @@ export default async function DestinationPage() {
   ])
 
   return (
-    <>
-      <Header theme="default" />
-      <DestinationClient
-        destinations={destRes.data}
-        selectionHotels={selectionRes.data}
-      />
-    </>
+    <DestinationClient
+      destinations={destRes.data}
+      selectionHotels={selectionRes.data}
+    />
   )
 }

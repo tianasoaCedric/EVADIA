@@ -186,6 +186,7 @@ export default function VilleClient({
                     <CardHotel
                       imageUrl={hotel.photo_principale ?? ''}
                       name={hotel.nom}
+                      ville={hotel.ville ?? undefined}
                       hotelId={hotel.id}
                       availability="Disponible"
                       price={hotel.prix_min ?? 0}
@@ -250,6 +251,7 @@ export default function VilleClient({
                     key={hotel.id}
                     imageUrl={hotel.photo_principale ?? ''}
                     name={hotel.nom}
+                    ville={hotel.ville ?? undefined}
                     hotelId={hotel.id}
                     availability="Disponible"
                     price={hotel.prix_min ?? 0}

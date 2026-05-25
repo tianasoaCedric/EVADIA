@@ -157,6 +157,7 @@ export default function DestinationClient({ destinations, selectionHotels }: Des
                     <CardHotel
                       imageUrl={hotel.photo_principale ?? ''}
                       name={hotel.nom}
+                      ville={hotel.adresse?.ville}
                       hotelId={hotel.id}
                       availability="Disponible"
                       price={hotel.prix_min ?? 0}

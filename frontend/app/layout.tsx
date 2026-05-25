@@ -3,10 +3,12 @@ import type { Metadata } from 'next'
 import { Outfit, Rubik_Distressed } from 'next/font/google'
 import './globals.css'
 import Footer from './components/molecules/Footer'
+import Header from './components/molecules/Header'
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { DeviseProvider } from './context/DeviseContext';
 import { FavorisProvider } from './context/FavorisContext';
+import { HeaderThemeProvider } from './context/HeaderThemeContext';
 
 // Configuration correcte de la police Outfit
 const outfit = Outfit({
@@ -37,8 +39,11 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <DeviseProvider>
             <FavorisProvider>
-              {children}
-              <Footer/>
+              <HeaderThemeProvider>
+                <Header />
+                {children}
+                <Footer/>
+              </HeaderThemeProvider>
             </FavorisProvider>
           </DeviseProvider>
         </NextIntlClientProvider>
