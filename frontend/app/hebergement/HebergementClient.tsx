@@ -72,6 +72,7 @@ export default function HebergementClient({ initialCategories }: HebergementClie
                 title={t('title')}
                 subtitle={t('subtitle')}
                 backgroundImage="/photos/bc.png"
+                videoSrc="/videos/hebergement.mp4"
                 showDownload={false}
             />
 

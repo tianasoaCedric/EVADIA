@@ -243,7 +243,7 @@ const CardHotel = ({
   // Wrapper commun - séparation des animations
   const wrapperClass = `
     relative
-    bg-white rounded-xl overflow-hidden
+    bg-white rounded-2xl overflow-hidden
     transition-[box-shadow] duration-300 hover:-translate-y-1 hover:shadow-xl
     flex flex-col
     ${width}
@@ -259,7 +259,7 @@ const CardHotel = ({
   const cardWithImage = (
     <>
       {/* Conteneur de l'image avec position relative */}
-      <div className="relative h-64 w-full rounded-t-xl overflow-hidden bg-gray-200">
+      <div className="relative h-64 w-full rounded-2xl overflow-hidden bg-gray-200">
         {!imageError && imageUrl ? (
           <Image
             src={imageUrl}

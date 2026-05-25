@@ -77,7 +77,8 @@ export default function DiscoverClient({ initialVilles }: DiscoverClientProps) {
         <HeroSection
           title={t('hero_title')}
           subtitle={t('hero_subtitle')}
-          backgroundImage="/photos/discover/hero-discover.jpg"
+          backgroundImage='/photos/bc.png'
+          videoSrc="/videos/decouvrir.mp4"
           showDownload={false}
           showScrollIndicator={true}
         />

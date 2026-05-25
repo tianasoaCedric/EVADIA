@@ -130,7 +130,7 @@ const RoomCard = ({
       ref={setCardRef}
       className={`
         bg-white rounded-2xl overflow-hidden
-        transition-[opacity,transform] duration-500 ease-out
+        transition-[opacity,transform] duration-500 ease-out hover:-translate-y-1 hover:shadow-xl transition-[box-shadow] duration-300
         flex flex-col will-change-[opacity,transform]
         ${width}
         ${isCardVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}

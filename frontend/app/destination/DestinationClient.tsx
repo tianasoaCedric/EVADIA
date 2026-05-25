@@ -65,7 +65,8 @@ export default function DestinationClient({ destinations, selectionHotels }: Des
       <HeroSection
         title={t('hero_title')}
         subtitle={t('hero_subtitle')}
-        backgroundImage="/photos/chambre.jpg"
+        backgroundImage="/photos/bc.jpg"
+        videoSrc="/videos/destination.mp4"
         showDownload={false}
         showScrollIndicator={true}
       />

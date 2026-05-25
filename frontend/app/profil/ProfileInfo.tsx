@@ -72,7 +72,7 @@ export default function ProfileInfo({ user }: ProfileInfoProps) {
               {t('cancel')}
             </button>
             <Bouton
-              size="small"
+              size="medium"
               onClick={handleSubmit}
               isLoading={isLoading}
               className="flex items-center gap-1"
