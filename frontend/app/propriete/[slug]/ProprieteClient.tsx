@@ -174,7 +174,7 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
         </div>
 
         {/* Photos */}
-        <div className="py-4">
+        <div className="py-4 z-10">
           <HotelPhoto
             imageUrl={photos.length > 0 ? photos : ['/photos/bc.png']}
             autoPlayInterval={5000}
@@ -184,7 +184,7 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
 
         {/* Infos + Réservation */}
         <div className="mt-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-[70%_30%] gap-8 lg:gap-12 items-start">
 
             {/* Colonne gauche : détails */}
             <div>

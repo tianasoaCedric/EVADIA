@@ -123,7 +123,7 @@ const capitalizeWords = (str: string): string => {
   const destinationImage = initialData.destination.image_url || '/photos/destinations/nord.jpg'
 
   return (
-    <main className="min-h-screen pt-8 pb-16">
+    <main className="min-h-screen pt-24 pb-16">
       <div className="container mx-auto px-4">
 
         {/* Header */}

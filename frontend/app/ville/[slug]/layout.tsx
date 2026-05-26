@@ -1,9 +1,9 @@
-import HideHeader from '@/app/components/ui/HideHeader'
+import Header from '@/app/components/molecules/Header'
 
 export default function VilleLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <HideHeader />
+      <Header theme="dark" />
       {children}
     </>
   )

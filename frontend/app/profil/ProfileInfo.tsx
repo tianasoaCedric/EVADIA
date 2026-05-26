@@ -23,9 +23,6 @@ export default function ProfileInfo({ user }: ProfileInfoProps) {
     lastName: user.nom || '',
     email: user.email || '',
     phone: user.telephone || '',
-    birthDate: user.date_naissance || '',
-    country: user.pays || '',
-    city: user.ville || '',
   })
 
   const handleSubmit = async () => {
@@ -159,40 +156,6 @@ export default function ProfileInfo({ user }: ProfileInfoProps) {
           fullWidth
           disabled={!isEditing}
         />
-
-        <Input
-        variant="light"
-          type="date"
-          placeholder={t('birth_date')}
-          value={formData.birthDate}
-          onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
-          icon={<Calendar className="w-5 h-5 text-gray-800" />}
-          fullWidth
-          disabled={!isEditing}
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Input
-          variant="light"
-            type="text"
-            placeholder={t('country')}
-            value={formData.country}
-            onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-            icon={<MapPin className="w-5 h-5 text-gray-800" />}
-            fullWidth
-            disabled={!isEditing}
-          />
-          <Input
-          variant="light"
-            type="text"
-            placeholder={t('city')}
-            value={formData.city}
-            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-            icon={<MapPin className="w-5 h-5 text-gray-800" />}
-            fullWidth
-            disabled={!isEditing}
-          />
-        </div>
       </div>
     </div>
   )

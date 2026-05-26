@@ -98,7 +98,7 @@ const CardDestination = ({
       
       {/* Nom de la destination en bas à gauche */}
       <div className="absolute bottom-0 left-0 p-4">
-        <h3 className="text-white font-regular text-lg md:text-md lg:text-xl drop-shadow-lg transition-transform duration-300 group-hover:translate-y-[-2px]">
+        <h3 className="text-white font-regular text-lg md:text-xl lg:text-2xl drop-shadow-lg transition-transform duration-300 group-hover:translate-y-[-2px]">
           {title}
         </h3>
       </div>
