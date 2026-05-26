@@ -177,7 +177,7 @@ export default function HotelClient({ hotelId, hotelName, slug, initialHotelData
             reviewCount={hotelData?.nb_avis ?? 0}
             category={category}
             description={hotel?.description ?? ''}
-            includedItems={includedItems.length > 0 ? includedItems : undefined}
+            includedItems={includedItems}
           />
         </div>
 

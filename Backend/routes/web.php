@@ -20,6 +20,7 @@ use App\Http\Controllers\Hotel\DashboardController as HotelDashboardController;
 use App\Http\Controllers\Hotel\ProfileController as HotelProfileController;
 use App\Http\Controllers\Hotel\HotelContentController;
 use App\Http\Controllers\Hotel\RoomController;
+use App\Http\Controllers\Hotel\HotelEquipementController;
 use App\Http\Controllers\Hotel\RoomPhotoController;
 use App\Http\Controllers\Hotel\ReservationController;
 use App\Http\Controllers\Hotel\CalendarController;
@@ -152,6 +153,8 @@ Route::middleware(['auth:hotel', 'role:admin_hotel,gestionnaire_hotel', 'passwor
         Route::put('profile/password', [HotelProfileController::class, 'updatePassword'])->name('profile.password');
 
         // Hotel Content
+        Route::get('services', [HotelContentController::class, 'services'])->name('services.index');
+
         Route::get('content', [HotelContentController::class, 'show'])->name('content.show');
         Route::get('content/edit', [HotelContentController::class, 'edit'])->name('content.edit');
         Route::put('content', [HotelContentController::class, 'update'])->name('content.update');
@@ -161,6 +164,13 @@ Route::middleware(['auth:hotel', 'role:admin_hotel,gestionnaire_hotel', 'passwor
         Route::post('content/services', [HotelContentController::class, 'storeService'])->name('content.services.store');
         Route::put('content/services/{service}', [HotelContentController::class, 'updateService'])->name('content.services.update');
         Route::delete('content/services/{service}', [HotelContentController::class, 'deleteService'])->name('content.services.destroy');
+
+        // Équipements de l'hôtel
+        Route::get('equipements', [HotelEquipementController::class, 'index'])->name('equipements.index');
+        Route::post('equipements', [HotelEquipementController::class, 'store'])->name('equipements.store');
+        Route::delete('equipements/{equipement}', [HotelEquipementController::class, 'destroy'])->name('equipements.destroy');
+        Route::get('equipements/search', [HotelEquipementController::class, 'search'])->name('equipements.search');
+        Route::post('equipements/ajax', [HotelEquipementController::class, 'storeAjax'])->name('equipements.store-ajax');
 
         // Rooms (Chambres)
         Route::resource('rooms', RoomController::class);

@@ -98,7 +98,7 @@ class HotelContentController extends Controller
                 'url_photo' => $path,
                 'ordre' => $maxOrdre + $i + 1,
                 'est_principale' => $isFirst && $i === 0,
-                'uploaded_by' => auth()->id(),
+                'uploaded_by' => auth('hotel')->id(),
             ]);
         }
 
@@ -133,6 +133,19 @@ class HotelContentController extends Controller
         }
 
         return response()->json(['success' => true]);
+    }
+
+    public function services()
+    {
+        $hotel = $this->getHotel();
+        $hotel->load('services');
+        $services        = $hotel->services->sortBy('type_service')->groupBy('type_service');
+        $types           = $hotel->services->pluck('type_service')->filter()->unique()->sort()->values();
+        $allEquipements  = \App\Models\Equipement::orderBy('categorie')->orderBy('nom')
+                            ->get(['id', 'nom', 'categorie'])
+                            ->groupBy('categorie');
+
+        return view('hotel.services.index', compact('hotel', 'services', 'types', 'allEquipements'));
     }
 
     public function storeService(Request $request)

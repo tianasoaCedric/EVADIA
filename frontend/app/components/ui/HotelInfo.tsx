@@ -27,26 +27,9 @@ interface Equipment {
   icon: React.ReactNode
 }
 
-const defaultEquipments: Equipment[] = [
-  { id: 1, name: 'Wi-Fi gratuit', icon: <Wifi className="w-5 h-5" /> },
-  { id: 2, name: 'Parking gratuit', icon: <ParkingMeter className="w-5 h-5" /> },
-  { id: 3, name: 'Climatisation', icon: <Snowflake className="w-5 h-5" /> },
-  { id: 4, name: 'Télévision', icon: <Tv className="w-5 h-5" /> },
-  { id: 5, name: 'Salle de bain privée', icon: <Bath className="w-5 h-5" /> },
-  { id: 6, name: 'Petit-déjeuner', icon: <Coffee className="w-5 h-5" /> },
-  { id: 7, name: 'Restaurant', icon: <Utensils className="w-5 h-5" /> },
-  { id: 8, name: 'Salle de sport', icon: <Dumbbell className="w-5 h-5" /> },
-  { id: 9, name: 'Service de chambre', icon: <Bell className="w-5 h-5" /> },
-]
+const defaultEquipments: Equipment[] = []
 
-const defaultIncluded = [
-  'Wi-Fi haut débit',
-  'Serviettes de bain',
-  'Gel douche et shampooing',
-  'Sèche-cheveux',
-  'Machine à café',
-  'Eau minérale offerte'
-]
+const defaultIncluded: string[] = []
 
 export default function HotelInfo({
   hotelName,
@@ -209,6 +192,7 @@ export default function HotelInfo({
         <div className='h-full flex flex-col justify-between'>
           <div className="space-y-8">
             {/* Inclus dans le logement */}
+            {includedItems.length > 0 && (
             <div
               ref={setIncludedRef}
               className={`transition-all duration-700 ease-out ${
@@ -225,6 +209,7 @@ export default function HotelInfo({
                 ))}
               </div>
             </div>
+            )}
 
             {/* Équipements */}
             <div
@@ -319,6 +304,7 @@ export default function HotelInfo({
       </div>
 
       {/* Ligne 3 : Inclus dans le logement */}
+      {includedItems.length > 0 && (
       <div
         ref={setIncludedRef}
         className={`transition-all duration-700 ease-out ${
@@ -335,6 +321,7 @@ export default function HotelInfo({
           ))}
         </div>
       </div>
+      )}
 
       {/* Ligne 4 : Équipements */}
       <div

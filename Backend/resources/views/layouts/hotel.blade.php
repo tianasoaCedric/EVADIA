@@ -185,7 +185,7 @@
                         </a>
 
                         <a href="{{ route('hotel.content.show') }}"
-                            class="sidebar-link group {{ request()->routeIs('hotel.content.*') ? 'active' : '' }}">
+                            class="sidebar-link group {{ request()->routeIs('hotel.content.*') && !request()->routeIs('hotel.services.*') ? 'active' : '' }}">
                             <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg {{ request()->routeIs('hotel.content.*') ? 'bg-amber-500/20 text-amber-400' : 'text-white/50 group-hover:text-white/80' }} transition-colors">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -194,6 +194,17 @@
                             </div>
                             <span x-show="sidebarOpen">Mon Hôtel</span>
                             <span x-show="!sidebarOpen" class="sidebar-tooltip">Mon Hôtel</span>
+                        </a>
+
+                        <a href="{{ route('hotel.services.index') }}"
+                            class="sidebar-link group {{ request()->routeIs('hotel.services.*') ? 'active' : '' }}">
+                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg {{ request()->routeIs('hotel.services.*') ? 'bg-emerald-500/20 text-emerald-400' : 'text-white/50 group-hover:text-white/80' }} transition-colors">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z"/>
+                                </svg>
+                            </div>
+                            <span x-show="sidebarOpen">Équipements & Services</span>
+                            <span x-show="!sidebarOpen" class="sidebar-tooltip">Équipements</span>
                         </a>
                     </div>
                 </div>
