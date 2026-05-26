@@ -144,7 +144,7 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
     <>
         <main
       ref={setMainRef}
-      className={`min-h-screen pt-8 pb-16 transition-all duration-700 ease-out ${
+      className={`min-h-screen pt-24 pb-16 transition-all duration-700 ease-out ${
         isMainVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
       }`}
     >
