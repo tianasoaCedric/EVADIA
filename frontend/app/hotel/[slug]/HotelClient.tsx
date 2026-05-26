@@ -14,6 +14,7 @@ import HotelInfo from '@/app/components/ui/HotelInfo'
 import { favoriService } from '@/lib/services/favori.service'
 import { authService } from '@/lib/services/auth.service'
 import type { HotelDetail } from '@/lib/types'
+import SharePopup from '@/app/components/ui/SharePopup'
 
 interface HotelClientProps {
   hotelId: number
@@ -30,6 +31,7 @@ export default function HotelClient({ hotelId, hotelName, slug, initialHotelData
   const [isSaved, setIsSaved] = useState(false)
   const [scrollPosition, setScrollPosition] = useState(0)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [isShareOpen, setIsShareOpen] = useState(false)
 
   const [setRoomsRef, isRoomsVisible] = useOnScreen({ threshold: 0.2,  })
 
@@ -113,12 +115,7 @@ export default function HotelClient({ hotelId, hotelName, slug, initialHotelData
   }
 
   const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({ title: hotelName, text: t('share_text', { hotelName }), url: window.location.href })
-    } else {
-      navigator.clipboard.writeText(window.location.href)
-      alert(t('share_alert'))
-    }
+    setIsShareOpen(true)
   }
 
   const hotel = hotelData?.hotel
@@ -130,7 +127,8 @@ export default function HotelClient({ hotelId, hotelName, slug, initialHotelData
   const includedItems = hotelData?.services.map(s => s.nom) ?? []
 
   return (
-    <main className="min-h-screen pt-8 pb-16">
+    <>
+        <main className="min-h-screen pt-8 pb-16">
       <div className="container mx-auto px-4">
 
         {/* Header */}
@@ -321,5 +319,14 @@ export default function HotelClient({ hotelId, hotelName, slug, initialHotelData
         </div>
       </div>
     </main>
+          {/* Popup de partage */}
+                <SharePopup
+                  isOpen={isShareOpen}
+                  onClose={() => setIsShareOpen(false)}
+                  title={hotel?.nom ?? hotelName}
+                  text={t('share', { name: hotel?.nom ?? hotelName })}
+                  url={typeof window !== 'undefined' ? window.location.href : ''}
+                />
+    </>
   )
 }

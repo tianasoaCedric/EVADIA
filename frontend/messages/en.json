@@ -247,7 +247,7 @@
     "go_to_hotel": "Go to hotel {number}",
     "previous_popular": "Scroll left",
     "next_popular": "Scroll right",
-    "go_to_popular": "Go to hosting {number}"
+    "go_to_popular": "Go to accommodation {number}"
   },
   "CityPage": {
     "meta_title": "{name} | Evadia",
@@ -270,7 +270,7 @@
     "no_results": "No hotels found",
     "previous_popular": "Scroll left",
     "next_popular": "Scroll right",
-    "go_to_popular": "Go to hosting {number}",
+    "go_to_popular": "Go to accommodation {number}",
     "previous_page": "Previous page",
     "next_page": "Next page",
     "results_singular": "hotel found",
@@ -357,7 +357,7 @@
     "section_title": "Make every trip magical & memorable",
     "section_description": "Discover our selection of the most beautiful destinations in the world. Whether you're looking for adventure, relaxation or culture, find inspiration for your next trip. Each destination has been carefully chosen to offer you unique and unforgettable experiences.",
     "search_placeholder": "Search for a destination...",
-    "no_results": "No destination found",
+    "no_results": "No destinations found",
     "clear_search": "Clear search",
     "previous_page": "Previous page",
     "next_page": "Next page",
@@ -671,5 +671,13 @@
     "error_code_incomplete": "Incomplete code (6 digits required)",
     "error_invalid_code": "Invalid code",
     "error_resend": "Unable to resend code, please try again."
+  },
+  "SharePopup": {
+    "title": "Share",
+    "subtitle": "Share this link with your friends",
+    "copy_link": "Copy link",
+    "click_to_copy": "Click to copy",
+    "copied": "Copied!",
+    "close": "Close"
   }
 }

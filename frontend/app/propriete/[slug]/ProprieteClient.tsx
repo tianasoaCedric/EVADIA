@@ -14,6 +14,7 @@ import Bouton from '../../components/ui/Bouton'
 import HotelPhoto from '../../components/ui/HotelPhoto'
 import Reservation from '../../components/ui/Reservation'
 import HotelInfo from '../../components/ui/HotelInfo'
+import SharePopup from '../../components/ui/SharePopup'
 import { proprieteService } from '@/lib/services/propriete.service'
 import { reservationService } from '@/lib/services/reservation.service'
 import { authService } from '@/lib/services/auth.service'
@@ -60,6 +61,7 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [propriete, setPropriete] = useState<ProprietePublic | null>(null)
   const [bookedDates, setBookedDates] = useState<string[]>([])
+  const [isShareOpen, setIsShareOpen] = useState(false)
 
   const [setMainRef, isMainVisible] = useOnScreen({ threshold: 0.2,  })
 
@@ -87,12 +89,7 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
   }
 
   const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({ title: proprieteName, text: t('share_text', { name: proprieteName }), url: window.location.href })
-    } else {
-      navigator.clipboard.writeText(window.location.href)
-      alert(t('share_alert'))
-    }
+    setIsShareOpen(true)
   }
 
   const handleReservation = async (data: any) => {
@@ -144,7 +141,8 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
   }))
 
   return (
-    <main
+    <>
+        <main
       ref={setMainRef}
       className={`min-h-screen pt-8 pb-16 transition-all duration-700 ease-out ${
         isMainVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
@@ -168,7 +166,6 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
           </div>
 
           <div className="flex items-center gap-3">
-
             <Bouton size="medium" onClick={handleShare} className="flex items-center gap-2">
               <Share className="w-5 h-5" />
               <span className="hidden sm:inline">{t('share')}</span>
@@ -222,6 +219,17 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
           </div>
         </div>
       </div>
+
+      
     </main>
+  {/* Popup de partage */}
+      <SharePopup
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+        title={propriete.nom}
+        text={t('share_text', { name: propriete.nom })}
+        url={typeof window !== 'undefined' ? window.location.href : ''}
+      />
+    </>
   )
 }

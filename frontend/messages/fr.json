@@ -671,5 +671,13 @@
     "error_code_incomplete": "Code incomplet (6 chiffres requis)",
     "error_invalid_code": "Code invalide",
     "error_resend": "Impossible de renvoyer le code, veuillez réessayer."
-  }
+  },
+  "SharePopup": {
+        "title": "Partager",
+        "subtitle": "Partagez ce lien avec vos amis",
+        "copy_link": "Copier le lien",
+        "click_to_copy": "Cliquez pour copier",
+        "copied": "Copié !",
+        "close": "Fermer"
+    }
 }
