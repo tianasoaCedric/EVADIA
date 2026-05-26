@@ -199,7 +199,7 @@ export default function ReservationsClient() {
       <HeroSection
         title={t('title')}
         subtitle={t('subtitle')}
-        backgroundImage="/images/hero-reservations.jpg"
+        backgroundImage="/photos/reservation.jpg"
         showDownload={false}
       />
       <div className="container mx-auto px-4">

@@ -152,9 +152,9 @@ export default function HebergementName({ categoryId, categoryName, initialData,
                         {/* Liste des hôtels */}
                         {!isLoading && hotels.length > 0 && (
                             <>
-                                <div className="flex flex-wrap justify-start items-start gap-6">
+                                <div className="flex flex-wrap justify-start items-start gap-12">
                                     {hotels.map((hotel, idx) => (
-                                        <div key={hotel.id} className="w-[260px]">
+                                        <div key={hotel.id}>
                                             <CardHotel
                                                 hotelId={hotel.id}
                                                 imageUrl={hotel.photo_principale ?? '/photos/bc.png'}
