@@ -150,7 +150,7 @@ class RoomController extends Controller
         $propriete = Propriete::where('id', $id)->where('hotel_id', $hotel->id)
             ->with(['photos', 'equipements', 'currentStatut', 'currentPrix'])
             ->firstOrFail();
-        $equipements = Equipement::all()->groupBy('categorie');
+        $equipements = Equipement::orderBy('categorie')->orderBy('nom')->get()->unique('id')->groupBy('categorie');
 
         return view('hotel.rooms.edit', compact('propriete', 'hotel', 'equipements'));
     }

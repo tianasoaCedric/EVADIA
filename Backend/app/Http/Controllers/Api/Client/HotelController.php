@@ -224,7 +224,7 @@ class HotelController extends Controller
             ->with([
                 'currentPrix',
                 'currentStatut',
-                'photos' => fn($q) => $q->where('est_principale', true),
+                'photos' => fn($q) => $q->orderBy('ordre'),
             ])
             ->whereHas('currentStatut', fn($q) => $q->where('statut', 'disponible'))
             ->get()
@@ -241,7 +241,7 @@ class HotelController extends Controller
                 'devise' => $p->currentPrix?->devise,
                 'prix_mga' => $p->currentPrix?->prix_mga,
                 'prix_eur' => $p->currentPrix?->prix_eur,
-                'photo' => $p->photos->first()?->url,
+                'photos' => $p->photos->map(fn($ph) => $ph->url)->filter()->values()->all(),
             ]);
 
         $avis = $hotel->proprietes()->withCount('avis')->withAvg('avis', 'note')->get();

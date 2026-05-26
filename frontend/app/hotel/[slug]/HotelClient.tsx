@@ -214,7 +214,7 @@ export default function HotelClient({ hotelId, hotelName, slug, initialHotelData
                   <div key={room.id} className="flex-shrink-0 w-[320px] sm:w-[320px] md:w-[340px] lg:w-[360px] xl:w-[380px]">
                     <RoomCard
                       hotelId={room.id}
-                      imageUrl={room.photo ?? '/photos/bc.png'}
+                      imageUrl={room.photos && room.photos.length > 0 ? room.photos : '/photos/bc.png'}
                       name={room.nom}
                       beds={room.nb_lits ?? 1}
                       bathrooms={room.nb_salles_bain ?? 1}
@@ -264,7 +264,7 @@ export default function HotelClient({ hotelId, hotelName, slug, initialHotelData
                       <div key={room.id} className="flex-shrink-0 w-[320px]">
                         <RoomCard
                           hotelId={room.id}
-                          imageUrl={room.photo ?? '/photos/bc.png'}
+                          imageUrl={room.photos && room.photos.length > 0 ? room.photos : '/photos/bc.png'}
                           name={room.nom}
                           beds={room.nb_lits ?? 1}
                           bathrooms={room.nb_salles_bain ?? 1}
@@ -298,7 +298,7 @@ export default function HotelClient({ hotelId, hotelName, slug, initialHotelData
                   <RoomCard
                     key={room.id}
                     hotelId={room.id}
-                    imageUrl={room.photo ?? '/photos/bc.png'}
+                    imageUrl={room.photos && room.photos.length > 0 ? room.photos : '/photos/bc.png'}
                     name={room.nom}
                     beds={room.nb_lits ?? 1}
                     bathrooms={room.nb_salles_bain ?? 1}

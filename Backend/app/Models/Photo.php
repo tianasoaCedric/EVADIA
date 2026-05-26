@@ -12,7 +12,6 @@ class Photo extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'propriete_id',
         'entite_type',
         'entite_id',
         'url_photo',
@@ -61,10 +60,7 @@ class Photo extends Model
 
     public function scopeForHotel(Builder $query, int $hotelId): Builder
     {
-        return $query->where(fn ($q) =>
-            $q->where(fn ($q) => $q->where('entite_type', 'hotel')->where('entite_id', $hotelId))
-              ->orWhere('propriete_id', $hotelId) // legacy support
-        );
+        return $query->where('entite_type', 'hotel')->where('entite_id', $hotelId);
     }
 
     public function scopeForOffre(Builder $query, int $offreId): Builder
@@ -74,10 +70,7 @@ class Photo extends Model
 
     public function scopeForPropriete(Builder $query, int $proprieteId): Builder
     {
-        return $query->where(fn ($q) =>
-            $q->where(fn ($q) => $q->where('entite_type', 'propriete')->where('entite_id', $proprieteId))
-              ->orWhere('propriete_id', $proprieteId) // legacy support
-        );
+        return $query->where('entite_type', 'propriete')->where('entite_id', $proprieteId);
     }
 
     // ─── Relations ─────────────────────────────────────

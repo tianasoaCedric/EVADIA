@@ -129,7 +129,7 @@ export interface ChambrePublic {
   devise?: string
   prix_mga?: number
   prix_eur?: number
-  photo?: string | null
+  photos?: string[]
 }
 
 /** Détail complet d'une chambre — GET /proprietes/{id} */
