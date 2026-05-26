@@ -83,32 +83,56 @@
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            padding: 0.625rem 0.75rem;
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
+            padding: 0.5rem 0.625rem;
+            border-radius: 0.625rem;
+            font-size: 0.8125rem;
             font-weight: 500;
-            color: rgba(255,255,255,0.6);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            color: rgba(255,255,255,0.5);
+            transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.01em;
         }
         .sidebar-link:hover {
-            color: #fff;
-            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.06);
         }
         .sidebar-link.active {
             color: #fff;
-            background: rgba(255,255,255,0.12);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            background: rgba(1,153,133,0.12);
         }
         .sidebar-link.active::before {
             content: '';
             position: absolute;
-            left: -0.75rem;
+            left: 0;
             top: 50%;
             transform: translateY(-50%);
             width: 3px;
-            height: 60%;
-            background: #019985;
-            border-radius: 0 3px 3px 0;
+            height: 55%;
+            background: #01BDA5;
+            border-radius: 0 2px 2px 0;
+            box-shadow: 0 0 8px rgba(1,189,165,0.55);
+        }
+
+        /* Section separator */
+        .sidebar-section-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0 0.5rem;
+            margin-bottom: 0.375rem;
+        }
+        .sidebar-section-label span {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.22);
+            white-space: nowrap;
+        }
+        .sidebar-section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.06);
         }
 
         /* Tooltip for collapsed sidebar */
@@ -125,7 +149,7 @@
             font-weight: 500;
             border-radius: 0.375rem;
             white-space: nowrap;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
             z-index: 60;
             pointer-events: none;
         }
@@ -138,6 +162,14 @@
             border: 5px solid transparent;
             border-right-color: #1e293b;
         }
+
+        /* Collapsed sidebar: center icons */
+        .sidebar-collapsed .sidebar-link {
+            justify-content: center;
+            padding-left: 0;
+            padding-right: 0;
+        }
+        .sidebar-collapsed .sidebar-link::before { display: none; }
     </style>
     @stack('styles')
 </head>
@@ -156,13 +188,14 @@
         <!-- ═══════════════ SIDEBAR ═══════════════ -->
         <aside
             class="fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-gradient-to-b from-slate-900 via-hotel-950 to-slate-950 shadow-2xl transition-all duration-300 ease-in-out"
-            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0 lg:w-[4.5rem]'">
+            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0 lg:w-[4.5rem] sidebar-collapsed'">
 
             <!-- Logo -->
-            <div class="flex h-16 items-center px-4 border-b border-white/[0.06]">
-                <a href="{{ route('hotel.dashboard') }}" class="flex items-center">
-                    <img x-show="sidebarOpen" src="{{ asset('images/Evadia_Logo BW 1.png') }}" alt="EVADIA" class="h-9">
-                    <img x-show="!sidebarOpen" src="{{ asset('images/Evadia_Logo BW 4.png') }}" alt="EVADIA" class="h-9 mx-auto">
+            <div class="flex h-16 items-center gap-3 px-4 border-b border-white/[0.06]">
+                <a href="{{ route('hotel.dashboard') }}" class="flex items-center gap-3 min-w-0">
+                    <img x-show="sidebarOpen" src="{{ asset('images/Evadia_Logo BW 1.png') }}" alt="EVADIA" class="h-8 shrink-0">
+                    <img x-show="!sidebarOpen" src="{{ asset('images/Evadia_Logo BW 4.png') }}" alt="EVADIA" class="h-8 mx-auto shrink-0">
+                    <span x-show="sidebarOpen" class="text-[10px] font-bold uppercase tracking-widest text-hotel-400/70 shrink-0">Hôtel</span>
                 </a>
             </div>
 
@@ -170,7 +203,7 @@
             <nav class="flex-1 overflow-y-auto sidebar-scroll py-5 px-3 space-y-6">
                 <!-- Section: Principal -->
                 <div>
-                    <p x-show="sidebarOpen" class="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-white/30">Principal</p>
+                    <div x-show="sidebarOpen" class="sidebar-section-label"><span>Principal</span></div>
                     <div class="space-y-0.5">
                         <a href="{{ route('hotel.dashboard') }}"
                             class="sidebar-link group {{ request()->routeIs('hotel.dashboard') ? 'active' : '' }}">
@@ -211,7 +244,7 @@
 
                 <!-- Section: Hébergement -->
                 <div>
-                    <p x-show="sidebarOpen" class="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-white/30">Hébergement</p>
+                    <div x-show="sidebarOpen" class="sidebar-section-label"><span>Hébergement</span></div>
                     <div class="space-y-0.5">
                         <a href="{{ route('hotel.rooms.index') }}"
                             class="sidebar-link group {{ request()->routeIs('hotel.rooms.*') ? 'active' : '' }}">
@@ -253,7 +286,7 @@
 
                 <!-- Section: Commercial -->
                 <div>
-                    <p x-show="sidebarOpen" class="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-white/30">Commercial</p>
+                    <div x-show="sidebarOpen" class="sidebar-section-label"><span>Commercial</span></div>
                     <div class="space-y-0.5">
                         <a href="{{ route('hotel.pricing.index') }}"
                             class="sidebar-link group {{ request()->routeIs('hotel.pricing.*') || request()->routeIs('hotel.offers.*') ? 'active' : '' }}">
@@ -296,7 +329,7 @@
 
                 <!-- Section: Communication -->
                 <div>
-                    <p x-show="sidebarOpen" class="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-white/30">Communication</p>
+                    <div x-show="sidebarOpen" class="sidebar-section-label"><span>Communication</span></div>
                     <div class="space-y-0.5">
                         @php $unreadMsgCount = \App\Models\Message::where('destinataire_id', auth('hotel')->id())->where('lu', false)->count() @endphp
                         <a href="{{ route('hotel.messages.index') }}"
@@ -332,21 +365,33 @@
                 </div>
             </nav>
 
-            <!-- Sidebar Footer - User info -->
-            <div class="border-t border-white/[0.06] p-3">
+            <!-- Sidebar Footer - User info + logout -->
+            <div class="border-t border-white/[0.06] p-3 space-y-1">
                 <a href="{{ route('hotel.profile.edit') }}"
-                    class="flex items-center gap-3 rounded-lg px-2 py-2.5 hover:bg-white/[0.06] transition-colors">
-                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-hotel-400 to-hotel-600 text-white text-xs font-bold shadow-lg shadow-hotel-500/20">
+                    class="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-white/[0.05] transition-colors">
+                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-hotel-400 to-hotel-600 text-white text-xs font-bold shadow-lg shadow-hotel-500/20">
                         {{ substr(auth('hotel')->user()->prenom, 0, 1) }}{{ substr(auth('hotel')->user()->nom, 0, 1) }}
                     </div>
                     <div x-show="sidebarOpen" class="min-w-0 flex-1">
-                        <p class="text-sm font-medium text-white/90 truncate">{{ auth('hotel')->user()->prenom }} {{ auth('hotel')->user()->nom }}</p>
-                        <p class="text-[10px] text-white/40 truncate">Mon profil</p>
-                    </div>
-                    <div x-show="sidebarOpen" class="shrink-0">
-                        <div class="h-2 w-2 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50"></div>
+                        <p class="text-xs font-semibold text-white/85 truncate">{{ auth('hotel')->user()->prenom }} {{ auth('hotel')->user()->nom }}</p>
+                        <p class="text-[10px] text-white/35 truncate flex items-center gap-1">
+                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 inline-block"></span>
+                            Mon profil
+                        </p>
                     </div>
                 </a>
+                <form method="POST" action="{{ route('hotel.logout') }}">
+                    @csrf
+                    <button type="submit" class="sidebar-link w-full group">
+                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-white/40 group-hover:text-red-400 transition-colors">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/>
+                            </svg>
+                        </div>
+                        <span x-show="sidebarOpen" class="group-hover:text-red-400 transition-colors">Déconnexion</span>
+                        <span x-show="!sidebarOpen" class="sidebar-tooltip">Déconnexion</span>
+                    </button>
+                </form>
             </div>
         </aside>
 
