@@ -7,25 +7,38 @@ use App\Models\AuthProvider;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 
 class GoogleAuthController extends Controller
 {
-    public function redirect(): RedirectResponse
+    public function redirect(Request $request): RedirectResponse
     {
         /** @var \Laravel\Socialite\Two\AbstractProvider $driver */
         $driver = Socialite::driver('google');
+
+        // Transmettre le paramètre platform dans le state OAuth
+        if ($request->query('platform') === 'mobile') {
+            $driver = $driver->with(['state' => 'mobile']);
+        }
+
         return $driver->stateless()->redirect();
     }
 
-    public function callback(): RedirectResponse
+    public function callback(Request $request): RedirectResponse
     {
+        $isMobile = $request->query('platform') === 'mobile'
+            || $request->query('state') === 'mobile';
+
         try {
             /** @var \Laravel\Socialite\Two\AbstractProvider $driver */
             $driver = Socialite::driver('google');
             $googleUser = $driver->stateless()->user();
         } catch (\Throwable) {
+            if ($isMobile) {
+                return redirect("evadia://auth/callback?error=google_failed");
+            }
             $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
             return redirect("{$frontendUrl}/login?error=google_failed");
         }
@@ -85,6 +98,10 @@ class GoogleAuthController extends Controller
         $user->load('roles');
 
         $token = $user->createToken('google-auth')->plainTextToken;
+
+        if ($isMobile) {
+            return redirect("evadia://auth/callback?token={$token}");
+        }
 
         $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
         return redirect("{$frontendUrl}/auth/callback?token={$token}");

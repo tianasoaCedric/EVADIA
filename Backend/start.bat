@@ -57,7 +57,7 @@ if exist "%REDIS_PATH%" (
 )
 
 echo [2/5] Demarrage du serveur Laravel (port 8000)...
-start "EVADIA - Laravel" cmd /k "cd /d %~dp0 && php artisan serve"
+start "EVADIA - Laravel" cmd /k "cd /d %~dp0 && php artisan serve --host=0.0.0.0 --port=8000"
 
 echo [3/5] Demarrage de Vite (hot-reload)...
 start "EVADIA - Vite" cmd /k "cd /d %~dp0 && npm run dev"
