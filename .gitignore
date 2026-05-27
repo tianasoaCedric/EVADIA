@@ -1,0 +1,36 @@
+# Videos
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# Gros fichiers médias
+*.psd
+*.ai
+
+# Redis dump
+dump.rdb
+*.rdb
+
+# Node
+node_modules/
+mobile/node_modules/
+frontend/node_modules/
+
+# Laravel
+Backend/vendor/
+Backend/.env
+Backend/storage/logs/
+Backend/storage/framework/cache/
+Backend/storage/framework/sessions/
+Backend/storage/framework/views/
+
+# Build
+frontend/.next/
+frontend/dist/
+mobile/.expo/
+mobile/dist/
+
+# OS
+.DS_Store
+Thumbs.db
