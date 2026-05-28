@@ -110,7 +110,7 @@ class VilleController extends Controller
         $popular   = request()->boolean('popular');
         $selection = request()->boolean('selection');
 
-        $query = Hotel::with(['photos' => fn($q) => $q->where('est_principale', true), 'adresse'])
+        $query = Hotel::with(['photos' => fn($q) => $q->where('est_principale', true), 'adresse', 'types'])
             ->whereHas('currentStatut', fn($q) => $q->where('statut', 'actif'))
             ->whereHas('destinations', fn($q) => $q->where('destinations.id', $id));
 
@@ -160,7 +160,7 @@ class VilleController extends Controller
 
         $selection = request()->boolean('selection');
 
-        $query = Hotel::with(['photos' => fn($q) => $q->where('est_principale', true), 'adresse'])
+        $query = Hotel::with(['photos' => fn($q) => $q->where('est_principale', true), 'adresse', 'types'])
             ->whereHas('currentStatut', fn($q) => $q->where('statut', 'actif'))
             ->whereHas('adresse', fn($q) => $q->where('ville', 'ilike', $ville->nom));
 
@@ -235,6 +235,7 @@ class VilleController extends Controller
             'prix_min_eur'     => $prixMinEur,
             'note_moyenne'     => $noteMoyenne ? round($noteMoyenne, 1) : null,
             'nb_avis'          => $hotel->proprietes()->withCount('avis')->get()->sum('avis_count'),
+            'types'            => $hotel->types->map(fn($t) => ['id' => $t->id, 'nom' => $t->nom])->values(),
         ];
     }
 }

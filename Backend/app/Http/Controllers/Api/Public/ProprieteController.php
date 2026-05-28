@@ -4,10 +4,35 @@ namespace App\Http\Controllers\Api\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Propriete;
+use App\Models\Reservation;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ProprieteController extends Controller
 {
+    /**
+     * GET /proprietes/{id}/indisponibilites?mois=2026-06
+     * Retourne les plages de dates réservées (indisponibles) pour les 2 prochains mois.
+     */
+    public function indisponibilites(Request $request, int $id): JsonResponse
+    {
+        $from = now()->startOfDay();
+        $to   = now()->addMonths(3)->endOfDay();
+
+        $reservations = Reservation::where('propriete_id', $id)
+            ->whereIn('statut', ['en_attente', 'confirmee'])
+            ->where('date_fin', '>=', $from)
+            ->where('date_debut', '<=', $to)
+            ->get(['date_debut', 'date_fin']);
+
+        $plages = $reservations->map(fn($r) => [
+            'debut' => $r->date_debut,
+            'fin'   => $r->date_fin,
+        ]);
+
+        return response()->json(['data' => $plages]);
+    }
+
     /**
      * GET /proprietes/{id}
      * Détail public d'une chambre/propriété avec photos, équipements et hôtel parent.

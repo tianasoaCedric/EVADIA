@@ -56,7 +56,7 @@ class HotelController extends Controller
     )]
     public function index(Request $request): JsonResponse
     {
-        $query = Hotel::with(['photos' => fn($q) => $q->where('est_principale', true), 'adresse', 'currentStatut'])
+        $query = Hotel::with(['photos' => fn($q) => $q->where('est_principale', true), 'adresse', 'currentStatut', 'types'])
             ->whereHas('currentStatut', fn($q) => $q->where('statut', 'actif'));
 
         if ($search = $request->input('search')) {
@@ -162,6 +162,7 @@ class HotelController extends Controller
             'prix_min_mga'     => $prixMinMga,
             'prix_min_eur'     => $prixMinEur,
             'note_moyenne'     => $noteMoyenne ? round($noteMoyenne, 1) : null,
+            'types'            => $hotel->types->map(fn($t) => ['id' => $t->id, 'nom' => $t->nom])->values(),
         ];
     }
 

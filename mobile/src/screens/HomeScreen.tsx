@@ -1,129 +1,270 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
+  ActivityIndicator,
   Image,
+  ScrollView,
   StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import SearchHeader from "../components/molecules/SearchHeader";
+import {
+  HotelItem,
+  VilleItem,
+  getPopularVilles,
+  getSelectionHotels,
+  getTypesHotels,
+  getVilleHotels,
+} from "../services/homeService";
 
-const FILTERS = ["Hotel de Luxe", "Ecolodge", "Bungalows", "Lodge", "Villa"];
+function filterByType(hotels: HotelItem[], activeFilter: string): HotelItem[] {
+  if (activeFilter === "Tous") return hotels;
+  return hotels.filter((h) =>
+    h.types.some((t) => t.nom.toLowerCase() === activeFilter.toLowerCase())
+  );
+}
 
-const MOCK_HOTELS = Array(8).fill(null).map((_, i) => ({
-  id: String(i + 1),
-  name: "Aara Antananarivo",
-  subtitle: "Disponibilité",
-  price: "225.000Ar/nuité",
-  rating: 4.25,
-  stars: [true, true, true, true, false],
-  isFavorite: false,
-}));
+interface VilleSection {
+  ville: VilleItem;
+  hotels: HotelItem[];
+}
 
-const SECTIONS = [
-  { title: "Selection d'hebergement a Nosy Be", hotels: MOCK_HOTELS },
-  { title: "Selection d'hebergement a Isalo", hotels: MOCK_HOTELS },
-  { title: "Selection d'hebergement a Morondava", hotels: MOCK_HOTELS },
-];
-
-function StarRating({ stars }: { stars: boolean[] }) {
+function StarRating({ rating }: { rating: number | null }) {
+  const filled = rating ? Math.round(rating) : 0;
   return (
     <View style={styles.starsRow}>
-      {stars.map((filled, i) => (
+      {[1, 2, 3, 4, 5].map((i) => (
         <Ionicons
           key={i}
           name="star"
           size={13}
-          color={filled ? "#FFE100" : "#E0E0E0"}
+          color={i <= filled ? "#FFE100" : "#E0E0E0"}
         />
       ))}
     </View>
   );
 }
 
-function HotelCard({ hotel, onFavPress }: { hotel: any; onFavPress: () => void }) {
+function HotelCard({
+  hotel,
+  isFavorite,
+  onFavPress,
+  onPress,
+}: {
+  hotel: HotelItem;
+  isFavorite: boolean;
+  onFavPress: () => void;
+  onPress: () => void;
+}) {
   return (
-    <View style={styles.card}>
-      {/* Image */}
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
       <View style={styles.cardImageBox}>
         <Image
-          source={require("../assets/images/hotel.jpg")}
+          source={
+            hotel.photo
+              ? { uri: hotel.photo }
+              : require("../assets/images/hotel.jpg")
+          }
           style={styles.cardImage}
           resizeMode="cover"
         />
         <TouchableOpacity style={styles.favBtn} onPress={onFavPress}>
           <Ionicons
-            name={hotel.isFavorite ? "heart" : "heart-outline"}
+            name={isFavorite ? "heart" : "heart-outline"}
             size={16}
-            color={hotel.isFavorite ? "#EF4444" : "#C7C7C7"}
+            color={isFavorite ? "#EF4444" : "#C7C7C7"}
           />
         </TouchableOpacity>
       </View>
 
-      {/* Info */}
       <View style={styles.cardInfo}>
-        <Text style={styles.cardName}>
-          {hotel.name}{"\n"}{hotel.subtitle}{"\n"}{hotel.price}
+        <Text style={styles.cardName} numberOfLines={1}>
+          {hotel.nom}, {hotel.ville}
+        </Text>
+        <Text style={styles.cardSubtitle}>Disponibilité</Text>
+        <Text style={styles.cardPrice}>
+          {hotel.prix_min.toLocaleString()} {hotel.devise}/nuité
         </Text>
         <View style={styles.cardDivider} />
         <View style={styles.ratingRow}>
-          <StarRating stars={hotel.stars} />
-          <Text style={styles.ratingText}>{hotel.rating}</Text>
+          <StarRating rating={hotel.note_moyenne} />
+          {hotel.note_moyenne !== null && (
+            <Text style={styles.ratingText}>{hotel.note_moyenne.toFixed(2)}</Text>
+          )}
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
+  );
+}
+
+function HotelCarousel({
+  hotels,
+  sectionIdx,
+  navigation,
+}: {
+  hotels: HotelItem[];
+  sectionIdx: number;
+  navigation: any;
+}) {
+  const [favorites, setFavorites] = useState<Record<string, boolean>>({});
+  const toggleFav = (id: string) =>
+    setFavorites((prev) => ({ ...prev, [id]: !prev[id] }));
+
+  if (hotels.length === 0) {
+    return (
+      <Text style={styles.emptyText}>
+        Aucun hébergement disponible pour ce filtre.
+      </Text>
+    );
+  }
+
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.carousel}
+    >
+      {hotels.map((hotel) => (
+        <HotelCard
+          key={hotel.id}
+          hotel={hotel}
+          isFavorite={favorites[`${sectionIdx}-${hotel.id}`] ?? false}
+          onFavPress={() => toggleFav(`${sectionIdx}-${hotel.id}`)}
+          onPress={() => navigation.navigate("HotelDetail", { id: hotel.id, name: hotel.nom })}
+        />
+      ))}
+    </ScrollView>
   );
 }
 
 export default function HomeScreen({ navigation }: any) {
   const [search, setSearch] = useState("");
-  const [activeFilter, setActiveFilter] = useState("Hotel de Luxe");
-  const [favorites, setFavorites] = useState<Record<string, boolean>>({});
+  const [activeFilter, setActiveFilter] = useState("Tous");
 
-  const toggleFav = (sectionIdx: number, hotelId: string) => {
-    const key = `${sectionIdx}-${hotelId}`;
-    setFavorites((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
+  const [filters, setFilters] = useState<string[]>(["Tous"]);
+  const [selectionHotels, setSelectionHotels] = useState<HotelItem[]>([]);
+  const [villeSections, setVilleSections] = useState<VilleSection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const [selection, villes, types] = await Promise.all([
+        getSelectionHotels(),
+        getPopularVilles(4),
+        getTypesHotels(),
+      ]);
+
+      setFilters(["Tous", ...types.map((t) => t.nom)]);
+
+      setSelectionHotels(selection);
+
+      const sections = await Promise.all(
+        villes.map(async (ville) => ({
+          ville,
+          hotels: await getVilleHotels(ville.id),
+        }))
+      );
+
+      setVilleSections(sections);
+    } catch {
+      setError("Impossible de charger les hébergements.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const filteredSelection = filterByType(selectionHotels, activeFilter);
+  const filteredSections = villeSections
+    .map((s) => ({ ...s, hotels: filterByType(s.hotels, activeFilter) }))
+    .filter((s) => s.hotels.length > 0);
+
+  const isEmpty = filteredSelection.length === 0 && filteredSections.length === 0;
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <SearchHeader
         search={search}
         onSearchChange={setSearch}
-        filters={FILTERS}
+        filters={filters}
         activeFilter={activeFilter}
         onFilterChange={setActiveFilter}
+        onSearchPress={() => navigation.navigate("Search")}
       />
 
-      {/* CONTENU */}
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
-        {SECTIONS.map((section, sIdx) => (
-          <View key={sIdx} style={styles.section}>
-            {/* Titre section */}
-            <TouchableOpacity>
-              <Text style={styles.sectionTitle}>{section.title} {">"}</Text>
-            </TouchableOpacity>
+      {loading ? (
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color="#01BDA5" />
+        </View>
+      ) : error ? (
+        <View style={styles.centered}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryBtn} onPress={loadData}>
+            <Text style={styles.retryText}>Réessayer</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingBottom: 24 }}
+        >
+          {/* Sélection par abonnement groupée par ville */}
+          {Object.entries(
+            filteredSelection.reduce<Record<string, HotelItem[]>>((acc, h) => {
+              const key = h.ville || "Autre";
+              acc[key] = [...(acc[key] ?? []), h];
+              return acc;
+            }, {})
+          ).map(([ville, hotels], idx) => (
+            <View key={`sel-${ville}`} style={styles.section}>
+              <TouchableOpacity>
+                <Text style={styles.sectionTitle}>
+                  Sélection d'hébergement à {ville} {">"}
+                </Text>
+              </TouchableOpacity>
+              <HotelCarousel hotels={hotels} sectionIdx={idx} navigation={navigation} />
+            </View>
+          ))}
 
-            {/* Carrousel */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.carousel}
-            >
-              {section.hotels.map((hotel, hIdx) => (
-                <HotelCard
-                  key={hIdx}
-                  hotel={{ ...hotel, isFavorite: favorites[`${sIdx}-${hotel.id}`] }}
-                  onFavPress={() => toggleFav(sIdx, hotel.id)}
-                />
-              ))}
-            </ScrollView>
-          </View>
-        ))}
-      </ScrollView>
+          {/* Sections par ville populaire (triées par nb réservations) */}
+          {filteredSections.map(({ ville, hotels }, idx) => (
+            <View key={ville.id} style={styles.section}>
+              <TouchableOpacity
+                onPress={() =>
+                  navigation?.navigate("DestinationHotels", {
+                    villeId: ville.id,
+                    villeName: ville.nom,
+                  })
+                }
+              >
+                <Text style={styles.sectionTitle}>
+                  Hébergements à {ville.nom} {">"}
+                </Text>
+              </TouchableOpacity>
+              <HotelCarousel hotels={hotels} sectionIdx={filteredSelection.length + idx} navigation={navigation} />
+            </View>
+          ))}
+
+          {isEmpty && !loading && (
+            <View style={styles.centered}>
+              <Text style={styles.emptyText}>
+                Aucun hébergement de type « {activeFilter} » disponible.
+              </Text>
+            </View>
+          )}
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 }
@@ -131,11 +272,12 @@ export default function HomeScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFFFFF" },
 
-  // SECTIONS
-  section: {
-    marginTop: 24,
-    gap: 12,
-  },
+  centered: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24, gap: 12 },
+  errorText: { fontFamily: "Outfit_400Regular", fontSize: 14, color: "#6B7280", textAlign: "center" },
+  retryBtn: { backgroundColor: "#01BDA5", paddingHorizontal: 24, paddingVertical: 10, borderRadius: 12 },
+  retryText: { fontFamily: "Outfit_600SemiBold", color: "#FFFFFF" },
+
+  section: { marginTop: 24, gap: 12 },
   sectionTitle: {
     fontFamily: "Outfit_700Bold",
     fontSize: 16,
@@ -144,30 +286,11 @@ const styles = StyleSheet.create({
     color: "#000000",
     marginLeft: 17,
   },
-  carousel: {
-    paddingHorizontal: 22,
-    paddingVertical: 6,
-    gap: 12,
-  },
+  carousel: { paddingHorizontal: 22, paddingVertical: 6, gap: 12 },
 
-  // CARD
-  card: {
-    width: 150,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 15,
-    paddingBottom: 10,
-    gap: 5,
-  },
-  cardImageBox: {
-    width: 150,
-    height: 150,
-    borderRadius: 15,
-    overflow: "hidden",
-  },
-  cardImage: {
-    width: 150,
-    height: 150,
-  },
+  card: { width: 150, backgroundColor: "#FFFFFF", borderRadius: 15, paddingBottom: 10, gap: 5 },
+  cardImageBox: { width: 150, height: 150, borderRadius: 15, overflow: "hidden" },
+  cardImage: { width: 150, height: 150 },
   favBtn: {
     position: "absolute",
     top: 9,
@@ -179,35 +302,13 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.75)",
     borderRadius: 12,
   },
-  cardInfo: {
-    paddingHorizontal: 6,
-    gap: 6,
-  },
-  cardName: {
-    fontFamily: "Outfit_600SemiBold",
-    fontSize: 12,
-    lineHeight: 15,
-    letterSpacing: 0.24,
-    color: "#000000",
-  },
-  cardDivider: {
-    height: 1,
-    backgroundColor: "#D9D9D9",
-    width: "100%",
-  },
-  ratingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-  },
-  starsRow: {
-    flexDirection: "row",
-    gap: 2,
-  },
-  ratingText: {
-    fontFamily: "Outfit_400Regular",
-    fontSize: 11,
-    lineHeight: 14,
-    color: "#434343",
-  },
+  cardInfo: { paddingHorizontal: 6, gap: 2 },
+  cardName: { fontFamily: "Outfit_600SemiBold", fontSize: 12, lineHeight: 15, letterSpacing: 0.24, color: "#000000" },
+  cardSubtitle: { fontFamily: "Outfit_400Regular", fontSize: 11, color: "#6B7280" },
+  cardPrice: { fontFamily: "Outfit_600SemiBold", fontSize: 11, color: "#01BDA5" },
+  cardDivider: { height: 1, backgroundColor: "#D9D9D9", width: "100%", marginVertical: 2 },
+  ratingRow: { flexDirection: "row", alignItems: "center", gap: 3 },
+  starsRow: { flexDirection: "row", gap: 2 },
+  ratingText: { fontFamily: "Outfit_400Regular", fontSize: 11, lineHeight: 14, color: "#434343" },
+  emptyText: { fontFamily: "Outfit_400Regular", fontSize: 13, color: "#9CA3AF", marginHorizontal: 22 },
 });

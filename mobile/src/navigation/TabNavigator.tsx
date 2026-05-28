@@ -2,7 +2,7 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MainTabParamList } from "./types";
 
-import HomeScreen from "../screens/HomeScreen";
+import HomeNavigator from "./HomeNavigator";
 import DestinationNavigator from "./DestinationNavigator";
 import FavoritesScreen from "../screens/FavoritesScreen";
 import OffersNavigator from "./OffersNavigator";
@@ -52,7 +52,7 @@ export default function TabNavigator() {
     >
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
+        component={HomeNavigator}
         options={{
           tabBarLabel: "Accueil",
           tabBarIcon: ({ color }) => <HomeTabIcon color={color} size={30} />,

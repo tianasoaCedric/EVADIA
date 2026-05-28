@@ -61,14 +61,23 @@ start "Traduction Auto" cmd /c "npm run translate:watch"
 :: Attendre 2 secondes pour que le script de traduction se lance
 timeout /t 2 /nobreak >nul
 
+:: Récupérer l'IP locale
+for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr /R /C:"Adresse IPv4"') do (
+    set "LOCAL_IP=%%a"
+    goto :found_ip
+)
+:found_ip
+set "LOCAL_IP=%LOCAL_IP: =%"
+
 :: Lancer Next.js
 echo [INFO] Demarrage du serveur Next.js...
-echo [INFO] Acceder a http://localhost:3000
+echo [INFO] Acceder localement    : http://localhost:3000
+echo [INFO] Acceder sur le reseau : http://%LOCAL_IP%:3000
 echo.
 echo [INFO] Appuyez sur Ctrl+C pour arreter l'application
 echo.
 
-npm run dev
+npx next dev -H 0.0.0.0
 
 :: Quand on ferme le terminal principal, fermer aussi le terminal de traduction
 taskkill /FI "WINDOWTITLE eq Traduction Auto" /T >nul 2>nul

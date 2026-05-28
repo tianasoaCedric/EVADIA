@@ -8,24 +8,29 @@ type Props = {
   filters: string[];
   activeFilter: string;
   onFilterChange: (f: string) => void;
+  onSearchPress?: () => void;
 };
 
-export default function SearchHeader({ search, onSearchChange, filters, activeFilter, onFilterChange }: Props) {
+export default function SearchHeader({ search, onSearchChange, filters, activeFilter, onFilterChange, onSearchPress }: Props) {
   return (
     <View style={styles.head}>
       <View style={styles.row}>
-        <View style={styles.searchBar}>
+        <TouchableOpacity style={styles.searchBar} activeOpacity={onSearchPress ? 0.7 : 1} onPress={onSearchPress}>
           <Ionicons name="search-outline" size={20} color="#626262" />
-          <TextInput
-            style={styles.input}
-            placeholder="Recherche"
-            placeholderTextColor="#464646"
-            value={search}
-            onChangeText={onSearchChange}
-            textAlignVertical="center"
-            textAlign="center"
-          />
-        </View>
+          {onSearchPress ? (
+            <Text style={[styles.input, { color: "#464646", textAlign: "center" }]}>Recherche</Text>
+          ) : (
+            <TextInput
+              style={styles.input}
+              placeholder="Recherche"
+              placeholderTextColor="#464646"
+              value={search}
+              onChangeText={onSearchChange}
+              textAlignVertical="center"
+              textAlign="center"
+            />
+          )}
+        </TouchableOpacity>
         <View style={styles.bell}>
           <Ionicons name="notifications-outline" size={24} color="#000" />
         </View>

@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   View,
   Text,
   ScrollView,
@@ -11,39 +12,13 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
+import { OffreItem, getOffres } from "../services/offreService";
 
-const MOCK_OFFERS = [
-  {
-    id: "1",
-    badge: "Offres -20% du 01 au 05 Nov",
-    name: "Ylang, Nosy Be",
-    description: "Profitez de l'offre exclusive : la côte vous appelle.",
-  },
-  {
-    id: "2",
-    badge: "Offres -15% du 10 au 20 Nov",
-    name: "Sakamanga, Tana",
-    description: "Séjour urbain à prix réduit au cœur de la capitale.",
-  },
-  {
-    id: "3",
-    badge: "Offres -30% du 01 au 15 Déc",
-    name: "Le Relais de la Reine, Isalo",
-    description: "Escapade dans les canyons rouges avec réduction exclusive.",
-  },
-  {
-    id: "4",
-    badge: "Offres -25% du 20 au 31 Déc",
-    name: "Princesse Bora, Sainte Marie",
-    description: "Fêtez les fêtes de fin d'année les pieds dans l'eau.",
-  },
-];
-
-function OfferCard({ offer, onPress }: { offer: (typeof MOCK_OFFERS)[0]; onPress: () => void }) {
+function OfferCard({ offer, onPress }: { offer: OffreItem; onPress: () => void }) {
   return (
     <TouchableOpacity activeOpacity={0.9} style={s.offerCard} onPress={onPress}>
       <ImageBackground
-        source={require("../assets/images/hotel.jpg")}
+        source={offer.photo ? { uri: offer.photo } : require("../assets/images/hotel.jpg")}
         style={s.offerBg}
         imageStyle={s.offerImg}
         resizeMode="cover"
@@ -56,7 +31,7 @@ function OfferCard({ offer, onPress }: { offer: (typeof MOCK_OFFERS)[0]; onPress
           <View style={s.offerBadge}>
             <Text style={s.offerBadgeText}>{offer.badge}</Text>
           </View>
-          <Text style={s.offerName}>{offer.name}</Text>
+          <Text style={s.offerName}>{offer.hotel_nom}{offer.city ? `, ${offer.city}` : ""}</Text>
           <Text style={s.offerDesc}>{offer.description}</Text>
         </LinearGradient>
       </ImageBackground>
@@ -67,11 +42,16 @@ function OfferCard({ offer, onPress }: { offer: (typeof MOCK_OFFERS)[0]; onPress
 export default function OffersScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const { width: SW } = useWindowDimensions();
+  const [offres, setOffres] = useState<OffreItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getOffres().then(setOffres).finally(() => setLoading(false));
+  }, []);
 
   return (
     <View style={s.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.scroll}>
-        {/* ── HERO plein largeur depuis le haut ── */}
         <ImageBackground
           source={require("../assets/images/hotel.jpg")}
           style={[s.hero, { width: SW }]}
@@ -87,30 +67,32 @@ export default function OffersScreen({ navigation }: any) {
           </LinearGradient>
         </ImageBackground>
 
-        {/* ── SOUS-TITRE ── */}
         <View style={s.subtitleBox}>
           <Text style={s.subtitleText}>Découvrez toutes les offres exclusives</Text>
           <View style={s.subtitleLine} />
         </View>
 
-        {/* ── LISTE OFFRES ── */}
-        <View style={s.list}>
-          {MOCK_OFFERS.map((offer) => (
-            <OfferCard
-              key={offer.id}
-              offer={offer}
-              onPress={() => navigation.navigate("OfferDetail", {
-                id: offer.id,
-                badge: offer.badge,
-                name: offer.name,
-                description: offer.description,
-              })}
-            />
-          ))}
-        </View>
+        {loading ? (
+          <ActivityIndicator size="large" color="#01BDA5" style={{ marginTop: 40 }} />
+        ) : (
+          <View style={s.list}>
+            {offres.map((offer) => (
+              <OfferCard
+                key={offer.id}
+                offer={offer}
+                onPress={() => navigation.navigate("OfferDetail", {
+                  id: offer.id,
+                  badge: offer.badge,
+                  name: `${offer.hotel_nom}${offer.city ? `, ${offer.city}` : ""}`,
+                  description: offer.description,
+                  photo: offer.photo,
+                })}
+              />
+            ))}
+          </View>
+        )}
       </ScrollView>
 
-      {/* ── HEADER en overlay par-dessus le hero ── */}
       <View style={[s.headerOverlay, { paddingTop: insets.top + 40 }]} pointerEvents="box-none">
         <View style={s.searchBar}>
           <Ionicons name="search-outline" size={20} color="#626262" />
@@ -126,140 +108,33 @@ export default function OffersScreen({ navigation }: any) {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFFFFF" },
-
   scroll: { paddingBottom: 32 },
-
-  // HEADER OVERLAY
   headerOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingHorizontal: 20,
-    paddingBottom: 12,
+    position: "absolute", top: 0, left: 0, right: 0,
+    flexDirection: "row", alignItems: "center", gap: 10,
+    paddingHorizontal: 20, paddingBottom: 12,
   },
   searchBar: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F5F5F5",
-    borderRadius: 32,
-    paddingHorizontal: 16,
-    height: 40,
-    gap: 10,
+    flex: 1, flexDirection: "row", alignItems: "center",
+    backgroundColor: "#F5F5F5", borderRadius: 32,
+    paddingHorizontal: 16, height: 40, gap: 10,
   },
-  searchPlaceholder: {
-    fontFamily: "Outfit_300Light",
-    fontSize: 12,
-    letterSpacing: 0.24,
-    color: "#464646",
-    textAlign: "center",
-    flex: 1,
-  },
-  bell: {
-    width: 40,
-    height: 40,
-    backgroundColor: "#F5F5F5",
-    borderRadius: 38,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  // HERO
-  hero: {
-    height: 298,
-    overflow: "hidden",
-  },
-  heroImg: {
-    borderBottomLeftRadius: 15,
-    borderBottomRightRadius: 15,
-  },
-  heroGradient: {
-    flex: 1,
-    justifyContent: "flex-end",
-    borderBottomLeftRadius: 15,
-    borderBottomRightRadius: 15,
-    paddingHorizontal: 21,
-    paddingBottom: 21,
-  },
-  heroTitle: {
-    fontFamily: "Outfit_400Regular",
-    fontSize: 24,
-    lineHeight: 23,
-    letterSpacing: 0.48,
-    color: "#FFFFFF",
-  },
-
-  // SOUS-TITRE
-  subtitleBox: {
-    paddingHorizontal: 21,
-    marginTop: 18,
-    marginBottom: 18,
-    gap: 2,
-  },
-  subtitleText: {
-    fontFamily: "Outfit_400Regular",
-    fontSize: 12,
-    lineHeight: 23,
-    color: "#464646",
-  },
-  subtitleLine: {
-    width: 191,
-    height: 1,
-    backgroundColor: "#464646",
-    marginLeft: 13,
-  },
-
-  // LISTE
-  list: {
-    paddingHorizontal: 20,
-    gap: 20,
-  },
-
-  // OFFER CARD
-  offerCard: {
-    width: "100%",
-    height: 193,
-    borderRadius: 15,
-    overflow: "hidden",
-  },
+  searchPlaceholder: { fontFamily: "Outfit_300Light", fontSize: 12, letterSpacing: 0.24, color: "#464646", textAlign: "center", flex: 1 },
+  bell: { width: 40, height: 40, backgroundColor: "#F5F5F5", borderRadius: 38, alignItems: "center", justifyContent: "center" },
+  hero: { height: 298, overflow: "hidden" },
+  heroImg: { borderBottomLeftRadius: 15, borderBottomRightRadius: 15 },
+  heroGradient: { flex: 1, justifyContent: "flex-end", borderBottomLeftRadius: 15, borderBottomRightRadius: 15, paddingHorizontal: 21, paddingBottom: 21 },
+  heroTitle: { fontFamily: "Outfit_400Regular", fontSize: 24, lineHeight: 23, letterSpacing: 0.48, color: "#FFFFFF" },
+  subtitleBox: { paddingHorizontal: 21, marginTop: 18, marginBottom: 18, gap: 2 },
+  subtitleText: { fontFamily: "Outfit_400Regular", fontSize: 12, lineHeight: 23, color: "#464646" },
+  subtitleLine: { width: 191, height: 1, backgroundColor: "#464646", marginLeft: 13 },
+  list: { paddingHorizontal: 20, gap: 20 },
+  offerCard: { width: "100%", height: 193, borderRadius: 15, overflow: "hidden" },
   offerBg: { flex: 1 },
   offerImg: { borderRadius: 15 },
-  offerGradient: {
-    flex: 1,
-    justifyContent: "flex-end",
-    padding: 15,
-    gap: 8,
-  },
-  offerBadge: {
-    backgroundColor: "#01BDA5",
-    borderRadius: 50,
-    paddingHorizontal: 15,
-    alignSelf: "flex-start",
-    height: 23,
-    justifyContent: "center",
-  },
-  offerBadgeText: {
-    fontFamily: "Outfit_500Medium",
-    fontSize: 11,
-    lineHeight: 23,
-    letterSpacing: 0.88,
-    color: "#FFFFFF",
-    textAlign: "center",
-  },
-  offerName: {
-    fontFamily: "Outfit_700Bold",
-    fontSize: 12,
-    lineHeight: 12,
-    color: "#FFFFFF",
-  },
-  offerDesc: {
-    fontFamily: "Outfit_400Regular",
-    fontSize: 12,
-    lineHeight: 15,
-    color: "#FFFFFF",
-  },
+  offerGradient: { flex: 1, justifyContent: "flex-end", padding: 15, gap: 8 },
+  offerBadge: { backgroundColor: "#01BDA5", borderRadius: 50, paddingHorizontal: 15, alignSelf: "flex-start", height: 23, justifyContent: "center" },
+  offerBadgeText: { fontFamily: "Outfit_500Medium", fontSize: 11, lineHeight: 23, letterSpacing: 0.88, color: "#FFFFFF", textAlign: "center" },
+  offerName: { fontFamily: "Outfit_700Bold", fontSize: 12, lineHeight: 12, color: "#FFFFFF" },
+  offerDesc: { fontFamily: "Outfit_400Regular", fontSize: 12, lineHeight: 15, color: "#FFFFFF" },
 });

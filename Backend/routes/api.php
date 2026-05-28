@@ -63,6 +63,7 @@ Route::get('/offres', [PublicOffreController::class, 'index']);
 Route::get('/offres/{id}', [PublicOffreController::class, 'show']);
 Route::get('/types-hotels', [TypeHotelController::class, 'index']);
 Route::get('/proprietes/{id}', [PublicProprieteController::class, 'show']);
+Route::get('/proprietes/{id}/indisponibilites', [PublicProprieteController::class, 'indisponibilites']);
 Route::get('/hotels/{id}/reviews', [AvisController::class, 'byHotel']);
 Route::get('/search', SearchController::class)->middleware('throttle:60,1');
 Route::get('/decouverte/villes', [DecouverteController::class, 'villes']);
