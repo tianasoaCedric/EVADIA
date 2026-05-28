@@ -14,6 +14,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { AvisItem, HotelDetail, getHotelAvis, getHotelDetail } from "../services/homeService";
 import { API_BASE_URL } from "../lib/api";
+import { s as sc, vs, ms } from "../lib/scale";
 
 function normalizeUrl(url: string | null | undefined): string | undefined {
   if (!url) return undefined;
@@ -245,7 +246,7 @@ export default function HotelDetailScreen({ route, navigation }: any) {
           {avis.length > 0 && (
             <View style={s.section}>
               <Text style={s.sectionTitle}>Avis des voyageurs</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 25 }}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: sc(25) }}>
                 {avis.map((a) => (
                   <View key={a.id} style={s.avisCard}>
                     <View style={s.avisHeader}>
@@ -281,91 +282,91 @@ export default function HotelDetailScreen({ route, navigation }: any) {
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000" },
 
-  photoBox: { height: 359 },
-  photo: { height: 359 },
+  photoBox: { height: vs(359) },
+  photo: { height: vs(359) },
   photoDots: {
     position: "absolute", bottom: 16,
     alignSelf: "center", flexDirection: "row", gap: 3,
   },
   photoHeader: {
-    position: "absolute", top: 61, left: 20, right: 20,
+    position: "absolute", top: vs(61), left: sc(20), right: sc(20),
     flexDirection: "row", justifyContent: "space-between", alignItems: "center",
   },
   headerRight: { flexDirection: "row", gap: 8 },
   iconBtn: {
-    width: 42, height: 42, borderRadius: 38,
+    width: sc(42), height: sc(42), borderRadius: sc(38),
     alignItems: "center", justifyContent: "center",
   },
 
-  dot: { width: 8, height: 8, borderRadius: 100, backgroundColor: "#FFFFFF" },
-  dotActive: { width: 28, backgroundColor: "#01BDA5" },
+  dot: { width: sc(8), height: sc(8), borderRadius: 100, backgroundColor: "#FFFFFF" },
+  dotActive: { width: sc(28), backgroundColor: "#01BDA5" },
 
   sheet: {
     flex: 1, backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 32, borderTopRightRadius: 32,
-    marginTop: -32, paddingTop: 10,
+    borderTopLeftRadius: sc(32), borderTopRightRadius: sc(32),
+    marginTop: -vs(32), paddingTop: 10,
   },
   handle: {
-    width: 61, height: 8, borderRadius: 100,
+    width: sc(61), height: vs(8), borderRadius: 100,
     backgroundColor: "#D7D7D7", marginBottom: 10,
     alignSelf: "center",
   },
-  sheetContent: { paddingHorizontal: 20, paddingBottom: 40, gap: 30 },
+  sheetContent: { paddingHorizontal: sc(20), paddingBottom: vs(40), gap: vs(30) },
 
-  section: { gap: 10, width: "100%" },
+  section: { gap: vs(10), width: "100%" },
   sectionTitle: {
-    fontFamily: "Outfit_600SemiBold", fontSize: 15,
+    fontFamily: "Outfit_600SemiBold", fontSize: ms(15),
     lineHeight: 19, color: "#000000",
   },
 
   hotelName: {
-    fontFamily: "Outfit_600SemiBold", fontSize: 15,
+    fontFamily: "Outfit_600SemiBold", fontSize: ms(15),
     lineHeight: 17, letterSpacing: 0.3, color: "#000000",
   },
   infoRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   infoText: {
-    fontFamily: "Outfit_400Regular", fontSize: 13,
+    fontFamily: "Outfit_400Regular", fontSize: ms(13),
     lineHeight: 17, letterSpacing: 0.26, color: "#000000",
   },
   ratingBold: {
-    fontFamily: "Outfit_700Bold", fontSize: 15,
+    fontFamily: "Outfit_700Bold", fontSize: ms(15),
     lineHeight: 17, letterSpacing: 0.3, color: "#000000",
   },
   ratingLight: { fontFamily: "Outfit_400Regular", fontWeight: "400" },
 
   body: {
-    fontFamily: "Outfit_400Regular", fontSize: 13,
+    fontFamily: "Outfit_400Regular", fontSize: ms(13),
     lineHeight: 17, letterSpacing: 0.26, color: "#464646",
   },
 
-  roomCard: { flexDirection: "row", alignItems: "center", gap: 16 },
-  roomImg: { width: 95, height: 95, borderRadius: 15 },
-  roomInfo: { flex: 1, height: 95, justifyContent: "space-between" },
+  roomCard: { flexDirection: "row", alignItems: "center", gap: sc(16) },
+  roomImg: { width: sc(95), height: vs(95), borderRadius: sc(15) },
+  roomInfo: { flex: 1, height: vs(95), justifyContent: "space-between" },
   roomTopRow: { flexDirection: "row", justifyContent: "space-between" },
   roomName: {
-    fontFamily: "Outfit_500Medium", fontSize: 13,
+    fontFamily: "Outfit_500Medium", fontSize: ms(13),
     lineHeight: 16, color: "#4B4D42", flex: 1, marginRight: 4,
   },
   roomPrice: {
-    fontFamily: "Outfit_600SemiBold", fontSize: 11,
+    fontFamily: "Outfit_600SemiBold", fontSize: ms(11),
     lineHeight: 16, color: "#434343",
   },
   roomMeta: { flexDirection: "row", justifyContent: "space-between" },
   metaItem: { flexDirection: "row", alignItems: "center", gap: 4 },
   metaLabel: {
-    fontFamily: "Outfit_300Light", fontSize: 13,
+    fontFamily: "Outfit_300Light", fontSize: ms(13),
     lineHeight: 16, color: "#383838",
   },
   metaVal: {
-    fontFamily: "Outfit_400Regular", fontSize: 13,
+    fontFamily: "Outfit_400Regular", fontSize: ms(13),
     lineHeight: 16, color: "#000000",
   },
   reserveBtn: {
     backgroundColor: "#01BDA5", borderRadius: 50,
-    height: 29, alignItems: "center", justifyContent: "center",
+    height: vs(29), alignItems: "center", justifyContent: "center",
   },
   reserveBtnText: {
-    fontFamily: "Outfit_400Regular", fontSize: 15,
+    fontFamily: "Outfit_400Regular", fontSize: ms(15),
     lineHeight: 15, color: "#FFFFFF", letterSpacing: 0.3,
   },
   roomDots: { flexDirection: "row", gap: 3, alignSelf: "center", marginTop: 6 },
@@ -373,24 +374,24 @@ const s = StyleSheet.create({
   equipRow: { flexDirection: "row", gap: 10 },
   equipCol: { flex: 1, gap: 8 },
   equipText: {
-    fontFamily: "Outfit_400Regular", fontSize: 13,
+    fontFamily: "Outfit_400Regular", fontSize: ms(13),
     lineHeight: 25, letterSpacing: 0.26, color: "#464646",
   },
 
-  avisCard: { width: 327, gap: 8 },
+  avisCard: { width: sc(327), gap: sc(8) },
   avisHeader: { flexDirection: "row", gap: 8, alignItems: "flex-start" },
-  avisAvatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: "#D9D9D9" },
+  avisAvatar: { width: sc(32), height: sc(32), borderRadius: sc(16), backgroundColor: "#D9D9D9" },
   avisName: {
-    fontFamily: "Outfit_600SemiBold", fontSize: 13,
+    fontFamily: "Outfit_600SemiBold", fontSize: ms(13),
     lineHeight: 17, letterSpacing: 0.26, color: "#464646",
   },
   avisRating: { flexDirection: "row", alignItems: "center", gap: 3 },
   avisRatingText: {
-    fontFamily: "Outfit_400Regular", fontSize: 11,
+    fontFamily: "Outfit_400Regular", fontSize: ms(11),
     lineHeight: 14, color: "#434343",
   },
   avisText: {
-    fontFamily: "Outfit_400Regular", fontSize: 12,
+    fontFamily: "Outfit_400Regular", fontSize: ms(12),
     lineHeight: 17, letterSpacing: 0.24, color: "#464646",
   },
   starsRow: { flexDirection: "row", gap: 2 },

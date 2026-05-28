@@ -1,6 +1,7 @@
 import React from "react";
 import { View, TextInput, TouchableOpacity, ScrollView, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { s as sc, vs, ms } from "../../lib/scale";
 
 type Props = {
   search: string;
@@ -54,53 +55,53 @@ export default function SearchHeader({ search, onSearchChange, filters, activeFi
 const styles = StyleSheet.create({
   head: {
     backgroundColor: "#FFFFFF",
-    paddingTop: 40,
-    paddingBottom: 21,
-    gap: 16,
+    paddingTop: vs(40),
+    paddingBottom: vs(21),
+    gap: vs(16),
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    paddingHorizontal: 20,
+    gap: sc(10),
+    paddingHorizontal: sc(20),
   },
   searchBar: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#F5F5F5",
-    borderRadius: 32,
-    paddingHorizontal: 16,
-    height: 40,
-    gap: 10,
+    borderRadius: sc(32),
+    paddingHorizontal: sc(16),
+    height: vs(40),
+    gap: sc(10),
   },
   input: {
     flex: 1,
     fontFamily: "Outfit_300Light",
-    fontSize: 12,
+    fontSize: ms(12),
     letterSpacing: 0.24,
     color: "#464646",
     paddingVertical: 0,
   },
   bell: {
-    width: 40,
-    height: 40,
+    width: sc(40),
+    height: vs(40),
     backgroundColor: "#F5F5F5",
-    borderRadius: 38,
+    borderRadius: sc(38),
     alignItems: "center",
     justifyContent: "center",
   },
-  filtersScroll: { gap: 10, paddingHorizontal: 20 },
+  filtersScroll: { gap: sc(10), paddingHorizontal: sc(20) },
   chip: {
-    paddingHorizontal: 8,
-    paddingVertical: 6,
+    paddingHorizontal: sc(8),
+    paddingVertical: vs(6),
     backgroundColor: "#F5F5F5",
-    borderRadius: 32,
+    borderRadius: sc(32),
   },
   chipActive: { backgroundColor: "#01BDA5" },
   chipText: {
     fontFamily: "Outfit_400Regular",
-    fontSize: 12,
+    fontSize: ms(12),
     lineHeight: 15,
     letterSpacing: 0.24,
     color: "#000000",

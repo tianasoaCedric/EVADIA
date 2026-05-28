@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { OffreItem, getOffres } from "../services/offreService";
+import { s as sc, vs, ms } from "../lib/scale";
 
 function OfferCard({ offer, onPress }: { offer: OffreItem; onPress: () => void }) {
   return (
@@ -111,30 +112,30 @@ const s = StyleSheet.create({
   scroll: { paddingBottom: 32 },
   headerOverlay: {
     position: "absolute", top: 0, left: 0, right: 0,
-    flexDirection: "row", alignItems: "center", gap: 10,
-    paddingHorizontal: 20, paddingBottom: 12,
+    flexDirection: "row", alignItems: "center", gap: sc(10),
+    paddingHorizontal: sc(20), paddingBottom: vs(12),
   },
   searchBar: {
     flex: 1, flexDirection: "row", alignItems: "center",
-    backgroundColor: "#F5F5F5", borderRadius: 32,
-    paddingHorizontal: 16, height: 40, gap: 10,
+    backgroundColor: "#F5F5F5", borderRadius: sc(32),
+    paddingHorizontal: sc(16), height: vs(40), gap: sc(10),
   },
-  searchPlaceholder: { fontFamily: "Outfit_300Light", fontSize: 12, letterSpacing: 0.24, color: "#464646", textAlign: "center", flex: 1 },
-  bell: { width: 40, height: 40, backgroundColor: "#F5F5F5", borderRadius: 38, alignItems: "center", justifyContent: "center" },
-  hero: { height: 298, overflow: "hidden" },
-  heroImg: { borderBottomLeftRadius: 15, borderBottomRightRadius: 15 },
-  heroGradient: { flex: 1, justifyContent: "flex-end", borderBottomLeftRadius: 15, borderBottomRightRadius: 15, paddingHorizontal: 21, paddingBottom: 21 },
-  heroTitle: { fontFamily: "Outfit_400Regular", fontSize: 24, lineHeight: 23, letterSpacing: 0.48, color: "#FFFFFF" },
-  subtitleBox: { paddingHorizontal: 21, marginTop: 18, marginBottom: 18, gap: 2 },
-  subtitleText: { fontFamily: "Outfit_400Regular", fontSize: 12, lineHeight: 23, color: "#464646" },
-  subtitleLine: { width: 191, height: 1, backgroundColor: "#464646", marginLeft: 13 },
-  list: { paddingHorizontal: 20, gap: 20 },
-  offerCard: { width: "100%", height: 193, borderRadius: 15, overflow: "hidden" },
+  searchPlaceholder: { fontFamily: "Outfit_300Light", fontSize: ms(12), letterSpacing: 0.24, color: "#464646", textAlign: "center", flex: 1 },
+  bell: { width: sc(40), height: vs(40), backgroundColor: "#F5F5F5", borderRadius: sc(38), alignItems: "center", justifyContent: "center" },
+  hero: { height: vs(298), overflow: "hidden" },
+  heroImg: { borderBottomLeftRadius: sc(15), borderBottomRightRadius: sc(15) },
+  heroGradient: { flex: 1, justifyContent: "flex-end", borderBottomLeftRadius: sc(15), borderBottomRightRadius: sc(15), paddingHorizontal: sc(21), paddingBottom: vs(21) },
+  heroTitle: { fontFamily: "Outfit_400Regular", fontSize: ms(24), lineHeight: 23, letterSpacing: 0.48, color: "#FFFFFF" },
+  subtitleBox: { paddingHorizontal: sc(21), marginTop: vs(18), marginBottom: vs(18), gap: 2 },
+  subtitleText: { fontFamily: "Outfit_400Regular", fontSize: ms(12), lineHeight: 23, color: "#464646" },
+  subtitleLine: { width: sc(191), height: 1, backgroundColor: "#464646", marginLeft: sc(13) },
+  list: { paddingHorizontal: sc(20), gap: vs(20) },
+  offerCard: { width: "100%", height: vs(193), borderRadius: sc(15), overflow: "hidden" },
   offerBg: { flex: 1 },
-  offerImg: { borderRadius: 15 },
-  offerGradient: { flex: 1, justifyContent: "flex-end", padding: 15, gap: 8 },
-  offerBadge: { backgroundColor: "#01BDA5", borderRadius: 50, paddingHorizontal: 15, alignSelf: "flex-start", height: 23, justifyContent: "center" },
-  offerBadgeText: { fontFamily: "Outfit_500Medium", fontSize: 11, lineHeight: 23, letterSpacing: 0.88, color: "#FFFFFF", textAlign: "center" },
-  offerName: { fontFamily: "Outfit_700Bold", fontSize: 12, lineHeight: 12, color: "#FFFFFF" },
-  offerDesc: { fontFamily: "Outfit_400Regular", fontSize: 12, lineHeight: 15, color: "#FFFFFF" },
+  offerImg: { borderRadius: sc(15) },
+  offerGradient: { flex: 1, justifyContent: "flex-end", padding: sc(15), gap: vs(8) },
+  offerBadge: { backgroundColor: "#01BDA5", borderRadius: 50, paddingHorizontal: sc(15), alignSelf: "flex-start", height: vs(23), justifyContent: "center" },
+  offerBadgeText: { fontFamily: "Outfit_500Medium", fontSize: ms(11), lineHeight: 23, letterSpacing: 0.88, color: "#FFFFFF", textAlign: "center" },
+  offerName: { fontFamily: "Outfit_700Bold", fontSize: ms(12), lineHeight: 12, color: "#FFFFFF" },
+  offerDesc: { fontFamily: "Outfit_400Regular", fontSize: ms(12), lineHeight: 15, color: "#FFFFFF" },
 });

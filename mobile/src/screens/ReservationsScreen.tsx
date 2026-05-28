@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { s as sc, vs, ms } from "../lib/scale";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../lib/tokens";
 import AppText from "../components/atoms/AppText";
@@ -113,21 +114,21 @@ export default function ReservationsScreen() {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFFFFF" },
-  header: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 16 },
-  centered: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12 },
-  scrollContent: { padding: 20, gap: 16 },
-  card: { backgroundColor: "#FFFFFF", borderRadius: 16, padding: 16, gap: 12, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 8, elevation: 3 },
-  cardHeader: { flexDirection: "row", alignItems: "flex-start", gap: 10 },
-  hotelName: { fontFamily: "Outfit_600SemiBold", fontSize: 15, color: "#000000" },
-  ville: { fontFamily: "Outfit_400Regular", fontSize: 12, color: "#6B7280", marginTop: 2 },
-  statutBadge: { borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4 },
-  statutText: { fontFamily: "Outfit_500Medium", fontSize: 12 },
+  header: { paddingHorizontal: sc(20), paddingTop: vs(24), paddingBottom: vs(16) },
+  centered: { flex: 1, alignItems: "center", justifyContent: "center", gap: vs(12) },
+  scrollContent: { padding: sc(20), gap: vs(16) },
+  card: { backgroundColor: "#FFFFFF", borderRadius: sc(16), padding: sc(16), gap: vs(12), shadowColor: "#000", shadowOffset: { width: 0, height: vs(2) }, shadowOpacity: 0.07, shadowRadius: sc(8), elevation: 3 },
+  cardHeader: { flexDirection: "row", alignItems: "flex-start", gap: sc(10) },
+  hotelName: { fontFamily: "Outfit_600SemiBold", fontSize: ms(15), color: "#000000" },
+  ville: { fontFamily: "Outfit_400Regular", fontSize: ms(12), color: "#6B7280", marginTop: vs(2) },
+  statutBadge: { borderRadius: sc(20), paddingHorizontal: sc(10), paddingVertical: vs(4) },
+  statutText: { fontFamily: "Outfit_500Medium", fontSize: ms(12) },
   divider: { height: 1, backgroundColor: "#F3F4F6" },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  dateBox: { flexDirection: "row", alignItems: "center", gap: 4 },
-  dateText: { fontFamily: "Outfit_400Regular", fontSize: 13, color: "#6B7280" },
-  codeText: { fontFamily: "Outfit_300Light", fontSize: 12, color: "#9CA3AF" },
-  priceText: { fontFamily: "Outfit_700Bold", fontSize: 15, color: "#01BDA5" },
-  cancelBtn: { alignSelf: "flex-end", paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: "#EF4444" },
-  cancelText: { fontFamily: "Outfit_400Regular", fontSize: 12, color: "#EF4444" },
+  dateBox: { flexDirection: "row", alignItems: "center", gap: sc(4) },
+  dateText: { fontFamily: "Outfit_400Regular", fontSize: ms(13), color: "#6B7280" },
+  codeText: { fontFamily: "Outfit_300Light", fontSize: ms(12), color: "#9CA3AF" },
+  priceText: { fontFamily: "Outfit_700Bold", fontSize: ms(15), color: "#01BDA5" },
+  cancelBtn: { alignSelf: "flex-end", paddingHorizontal: sc(16), paddingVertical: vs(6), borderRadius: sc(20), borderWidth: 1, borderColor: "#EF4444" },
+  cancelText: { fontFamily: "Outfit_400Regular", fontSize: ms(12), color: "#EF4444" },
 });

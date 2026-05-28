@@ -6,6 +6,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { search, SearchHotelResult, SearchResults } from "../services/searchService";
+import { s as sc, vs, ms } from "../lib/scale";
 
 function useDebounce(value: string, delay: number) {
   const [debounced, setDebounced] = useState(value);
@@ -162,23 +163,23 @@ export default function SearchScreen({ navigation }: any) {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFFFFF" },
-  header: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 16, gap: 16 },
-  title: { fontFamily: "Manrope_700Bold", fontSize: 24, lineHeight: 30, color: "#000000" },
-  searchBar: { flexDirection: "row", alignItems: "center", backgroundColor: "#F5F5F5", borderRadius: 32, paddingHorizontal: 16, height: 44, gap: 10 },
-  input: { flex: 1, fontFamily: "Outfit_400Regular", fontSize: 14, color: "#000000" },
+  header: { paddingHorizontal: sc(20), paddingTop: vs(24), paddingBottom: vs(16), gap: vs(16) },
+  title: { fontFamily: "Manrope_700Bold", fontSize: ms(24), lineHeight: 30, color: "#000000" },
+  searchBar: { flexDirection: "row", alignItems: "center", backgroundColor: "#F5F5F5", borderRadius: sc(32), paddingHorizontal: sc(16), height: vs(44), gap: sc(10) },
+  input: { flex: 1, fontFamily: "Outfit_400Regular", fontSize: ms(14), color: "#000000" },
   centered: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12 },
-  emptyText: { fontFamily: "Outfit_400Regular", fontSize: 14, color: "#9CA3AF", textAlign: "center", paddingHorizontal: 40 },
-  scrollContent: { padding: 20, gap: 4, paddingBottom: 40 },
-  sectionTitle: { fontFamily: "Outfit_600SemiBold", fontSize: 14, color: "#374151", marginTop: 12, marginBottom: 8 },
-  resultCard: { flexDirection: "row", gap: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: "#F3F4F6" },
-  resultImage: { width: 72, height: 72, borderRadius: 10 },
-  resultInfo: { flex: 1, gap: 4, justifyContent: "center" },
-  resultName: { fontFamily: "Outfit_600SemiBold", fontSize: 14, color: "#000000" },
-  resultLocation: { flexDirection: "row", alignItems: "center", gap: 3 },
-  resultVille: { fontFamily: "Outfit_400Regular", fontSize: 12, color: "#6B7280" },
+  emptyText: { fontFamily: "Outfit_400Regular", fontSize: ms(14), color: "#9CA3AF", textAlign: "center", paddingHorizontal: sc(40) },
+  scrollContent: { padding: sc(20), gap: vs(4), paddingBottom: vs(40) },
+  sectionTitle: { fontFamily: "Outfit_600SemiBold", fontSize: ms(14), color: "#374151", marginTop: vs(12), marginBottom: vs(8) },
+  resultCard: { flexDirection: "row", gap: sc(12), paddingVertical: vs(10), borderBottomWidth: 1, borderBottomColor: "#F3F4F6" },
+  resultImage: { width: sc(72), height: sc(72), borderRadius: sc(10) },
+  resultInfo: { flex: 1, gap: vs(4), justifyContent: "center" },
+  resultName: { fontFamily: "Outfit_600SemiBold", fontSize: ms(14), color: "#000000" },
+  resultLocation: { flexDirection: "row", alignItems: "center", gap: sc(3) },
+  resultVille: { fontFamily: "Outfit_400Regular", fontSize: ms(12), color: "#6B7280" },
   starsRow: { flexDirection: "row", gap: 2 },
-  resultPrice: { fontFamily: "Outfit_700Bold", fontSize: 13, color: "#01BDA5" },
-  simpleRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "#F3F4F6" },
-  simpleText: { flex: 1, fontFamily: "Outfit_400Regular", fontSize: 14, color: "#000000" },
-  simpleSubText: { fontFamily: "Outfit_300Light", fontSize: 12, color: "#9CA3AF" },
+  resultPrice: { fontFamily: "Outfit_700Bold", fontSize: ms(13), color: "#01BDA5" },
+  simpleRow: { flexDirection: "row", alignItems: "center", gap: sc(12), paddingVertical: vs(12), borderBottomWidth: 1, borderBottomColor: "#F3F4F6" },
+  simpleText: { flex: 1, fontFamily: "Outfit_400Regular", fontSize: ms(14), color: "#000000" },
+  simpleSubText: { fontFamily: "Outfit_300Light", fontSize: ms(12), color: "#9CA3AF" },
 });

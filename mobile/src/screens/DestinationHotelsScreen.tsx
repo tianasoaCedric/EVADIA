@@ -7,6 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { HotelItem } from "../services/homeService";
 import { getDestinationHotels, getVilleHotelsById } from "../services/destinationService";
+import { s as sc, vs, ms } from "../lib/scale";
 
 const CARD_WIDTH = Dimensions.get("window").width - 42;
 
@@ -135,30 +136,30 @@ export default function DestinationHotelsScreen({ route, navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFFFFF" },
-  head: { backgroundColor: "#FFFFFF", paddingTop: 21, paddingBottom: 21, paddingHorizontal: 20 },
-  headRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-  searchBar: { flex: 1, flexDirection: "row", alignItems: "center", backgroundColor: "#F5F5F5", borderRadius: 32, paddingHorizontal: 16, height: 40, gap: 10 },
+  head: { backgroundColor: "#FFFFFF", paddingTop: vs(21), paddingBottom: vs(21), paddingHorizontal: sc(20) },
+  headRow: { flexDirection: "row", alignItems: "center", gap: sc(10) },
+  searchBar: { flex: 1, flexDirection: "row", alignItems: "center", backgroundColor: "#F5F5F5", borderRadius: 32, paddingHorizontal: sc(16), height: vs(40), gap: sc(10) },
   searchPlaceholder: { fontFamily: "Outfit_300Light", fontSize: 12, color: "#464646" },
-  bell: { width: 40, height: 40, backgroundColor: "#F5F5F5", borderRadius: 38, alignItems: "center", justifyContent: "center" },
-  scrollContent: { paddingBottom: 32 },
-  titleRow: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 21, marginBottom: 28 },
-  title: { fontFamily: "Manrope_700Bold", fontSize: 24, lineHeight: 30, color: "#000000" },
-  emptyText: { fontFamily: "Outfit_400Regular", fontSize: 14, color: "#9CA3AF", textAlign: "center", marginTop: 40 },
-  list: { paddingHorizontal: 21, gap: 28 },
-  card: { width: "100%", gap: 14 },
-  imageBox: { width: "100%", height: 330, borderRadius: 15, overflow: "hidden" },
-  image: { width: CARD_WIDTH, height: 330 },
-  dots: { position: "absolute", bottom: 16, alignSelf: "center", flexDirection: "row", gap: 3 },
-  dot: { width: 8, height: 8, borderRadius: 100, backgroundColor: "#FFFFFF" },
-  dotActive: { width: 28, backgroundColor: "#01BDA5" },
-  favBtn: { position: "absolute", top: 11, right: 11, width: 24, height: 24, alignItems: "center", justifyContent: "center" },
-  info: { gap: 10 },
+  bell: { width: sc(40), height: vs(40), backgroundColor: "#F5F5F5", borderRadius: sc(38), alignItems: "center", justifyContent: "center" },
+  scrollContent: { paddingBottom: vs(32) },
+  titleRow: { flexDirection: "row", alignItems: "center", gap: sc(6), paddingHorizontal: sc(21), marginBottom: vs(28) },
+  title: { fontFamily: "Manrope_700Bold", fontSize: ms(24), lineHeight: 30, color: "#000000" },
+  emptyText: { fontFamily: "Outfit_400Regular", fontSize: ms(14), color: "#9CA3AF", textAlign: "center", marginTop: 40 },
+  list: { paddingHorizontal: sc(21), gap: vs(28) },
+  card: { width: "100%", gap: vs(14) },
+  imageBox: { width: "100%", height: vs(330), borderRadius: sc(15), overflow: "hidden" },
+  image: { width: CARD_WIDTH, height: vs(330) },
+  dots: { position: "absolute", bottom: vs(16), alignSelf: "center", flexDirection: "row", gap: sc(3) },
+  dot: { width: sc(8), height: sc(8), borderRadius: 100, backgroundColor: "#FFFFFF" },
+  dotActive: { width: sc(28), backgroundColor: "#01BDA5" },
+  favBtn: { position: "absolute", top: vs(11), right: sc(11), width: sc(24), height: sc(24), alignItems: "center", justifyContent: "center" },
+  info: { gap: vs(10) },
   row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  hotelName: { fontFamily: "Outfit_600SemiBold", fontSize: 15, lineHeight: 17, letterSpacing: 0.3, color: "#000000" },
-  locationRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-  locationText: { fontFamily: "Outfit_400Regular", fontSize: 13, letterSpacing: 0.26, color: "#222222" },
-  price: { fontFamily: "Outfit_400Regular", fontSize: 15, lineHeight: 17, letterSpacing: 0.3, color: "#222222" },
-  ratingsRow: { flexDirection: "row", alignItems: "center", gap: 3 },
+  hotelName: { fontFamily: "Outfit_600SemiBold", fontSize: ms(15), lineHeight: 17, letterSpacing: 0.3, color: "#000000" },
+  locationRow: { flexDirection: "row", alignItems: "center", gap: sc(4) },
+  locationText: { fontFamily: "Outfit_400Regular", fontSize: ms(13), letterSpacing: 0.26, color: "#222222" },
+  price: { fontFamily: "Outfit_400Regular", fontSize: ms(15), lineHeight: 17, letterSpacing: 0.3, color: "#222222" },
+  ratingsRow: { flexDirection: "row", alignItems: "center", gap: sc(3) },
   starsRow: { flexDirection: "row", gap: 2 },
-  ratingText: { fontFamily: "Outfit_400Regular", fontSize: 11, lineHeight: 14, color: "#434343" },
+  ratingText: { fontFamily: "Outfit_400Regular", fontSize: ms(11), lineHeight: 14, color: "#434343" },
 });

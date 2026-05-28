@@ -6,6 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import SearchHeader from "../components/molecules/SearchHeader";
 import { FavoriItem, getFavoris, removeFavori } from "../services/favoriService";
+import { s as sc, vs, ms } from "../lib/scale";
 
 const FILTERS = ["Tous", "Favoris"];
 
@@ -108,19 +109,19 @@ export default function FavoritesScreen() {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFFFFF" },
-  centered: { flex: 1, alignItems: "center", justifyContent: "center", gap: 8, marginTop: 40 },
-  scrollContent: { paddingBottom: 32 },
-  title: { fontFamily: "Manrope_700Bold", fontSize: 24, lineHeight: 30, color: "#000000", marginTop: 21, marginBottom: 16, paddingHorizontal: 29 },
-  emptyText: { fontFamily: "Outfit_400Regular", fontSize: 14, color: "#9CA3AF" },
-  grid: { paddingHorizontal: 29, flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 26 },
-  card: { width: 150, borderRadius: 15, backgroundColor: "#FFFFFF", paddingBottom: 10, gap: 5 },
-  imageBox: { width: 150, height: 150, borderRadius: 15, overflow: "hidden" },
-  image: { width: 150, height: 150 },
-  heartBtn: { position: "absolute", top: 9, right: 9, width: 24, height: 24, alignItems: "center", justifyContent: "center" },
-  info: { paddingHorizontal: 6, gap: 6 },
-  cardText: { fontFamily: "Outfit_600SemiBold", fontSize: 12, lineHeight: 15, letterSpacing: 0.24, color: "#000000" },
+  centered: { flex: 1, alignItems: "center", justifyContent: "center", gap: vs(8), marginTop: vs(40) },
+  scrollContent: { paddingBottom: vs(32) },
+  title: { fontFamily: "Manrope_700Bold", fontSize: ms(24), lineHeight: 30, color: "#000000", marginTop: vs(21), marginBottom: vs(16), paddingHorizontal: sc(29) },
+  emptyText: { fontFamily: "Outfit_400Regular", fontSize: ms(14), color: "#9CA3AF" },
+  grid: { paddingHorizontal: sc(29), flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: vs(26) },
+  card: { width: sc(150), borderRadius: sc(15), backgroundColor: "#FFFFFF", paddingBottom: 10, gap: vs(5) },
+  imageBox: { width: sc(150), height: sc(150), borderRadius: sc(15), overflow: "hidden" },
+  image: { width: sc(150), height: sc(150) },
+  heartBtn: { position: "absolute", top: vs(9), right: sc(9), width: sc(24), height: sc(24), alignItems: "center", justifyContent: "center" },
+  info: { paddingHorizontal: sc(6), gap: vs(6) },
+  cardText: { fontFamily: "Outfit_600SemiBold", fontSize: ms(12), lineHeight: 15, letterSpacing: 0.24, color: "#000000" },
   divider: { height: 1, backgroundColor: "#D9D9D9" },
   ratingsRow: { flexDirection: "row", alignItems: "center", gap: 3 },
   starsRow: { flexDirection: "row", gap: 2 },
-  ratingText: { fontFamily: "Outfit_400Regular", fontSize: 11, lineHeight: 14, color: "#434343" },
+  ratingText: { fontFamily: "Outfit_400Regular", fontSize: ms(11), lineHeight: 14, color: "#434343" },
 });

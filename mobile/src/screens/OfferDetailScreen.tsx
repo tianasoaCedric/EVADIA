@@ -5,6 +5,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { OffreDetail, getOffreDetail } from "../services/offreService";
+import { s as sc, vs, ms } from "../lib/scale";
 
 export default function OfferDetailScreen({ route, navigation }: any) {
   const { width: SW } = useWindowDimensions();
@@ -91,21 +92,21 @@ export default function OfferDetailScreen({ route, navigation }: any) {
 
 const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#000" },
-  photoBox: { height: 382 },
-  photo: { height: 382 },
-  photoHeader: { position: "absolute", top: 61, left: 20, right: 20, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  iconBtn: { width: 42, height: 42, borderRadius: 38, alignItems: "center", justifyContent: "center" },
-  sheet: { flex: 1, backgroundColor: "#FFFFFF", borderTopLeftRadius: 32, borderTopRightRadius: 32, marginTop: -44, paddingTop: 10 },
-  handle: { width: 61, height: 8, borderRadius: 100, backgroundColor: "#D7D7D7", marginBottom: 10, alignSelf: "center" },
-  sheetContent: { paddingHorizontal: 20, paddingBottom: 40, gap: 32 },
-  topSection: { gap: 10 },
-  badge: { backgroundColor: "#01BDA5", borderRadius: 50, alignSelf: "stretch", alignItems: "center", justifyContent: "center", paddingVertical: 8, paddingHorizontal: 15 },
-  badgeText: { fontFamily: "Outfit_500Medium", fontSize: 20, lineHeight: 24, letterSpacing: 1.6, color: "#FFFFFF", textAlign: "center" },
-  offerName: { fontFamily: "Outfit_700Bold", fontSize: 13, lineHeight: 18, color: "#000000" },
-  offerDesc: { fontFamily: "Outfit_400Regular", fontSize: 13, lineHeight: 16, color: "#000000" },
-  detailSection: { gap: 8 },
-  detailTitle: { fontFamily: "Outfit_600SemiBold", fontSize: 13, lineHeight: 23, letterSpacing: 0.39, color: "#464646" },
-  bulletItem: { fontFamily: "Outfit_400Regular", fontSize: 13, lineHeight: 32, letterSpacing: 0.26, color: "#464646" },
-  reserveBtn: { backgroundColor: "#01BDA5", borderRadius: 25, height: 38, alignItems: "center", justifyContent: "center" },
-  reserveBtnText: { fontFamily: "Outfit_600SemiBold", fontSize: 14, lineHeight: 18, letterSpacing: 0.28, color: "#FFFFFF", textAlign: "center" },
+  photoBox: { height: vs(382) },
+  photo: { height: vs(382) },
+  photoHeader: { position: "absolute", top: vs(61), left: sc(20), right: sc(20), flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  iconBtn: { width: sc(42), height: sc(42), borderRadius: sc(38), alignItems: "center", justifyContent: "center" },
+  sheet: { flex: 1, backgroundColor: "#FFFFFF", borderTopLeftRadius: sc(32), borderTopRightRadius: sc(32), marginTop: -vs(44), paddingTop: 10 },
+  handle: { width: sc(61), height: vs(8), borderRadius: 100, backgroundColor: "#D7D7D7", marginBottom: 10, alignSelf: "center" },
+  sheetContent: { paddingHorizontal: sc(20), paddingBottom: vs(40), gap: vs(32) },
+  topSection: { gap: vs(10) },
+  badge: { backgroundColor: "#01BDA5", borderRadius: sc(50), alignSelf: "stretch", alignItems: "center", justifyContent: "center", paddingVertical: vs(8), paddingHorizontal: sc(15) },
+  badgeText: { fontFamily: "Outfit_500Medium", fontSize: ms(20), lineHeight: 24, letterSpacing: 1.6, color: "#FFFFFF", textAlign: "center" },
+  offerName: { fontFamily: "Outfit_700Bold", fontSize: ms(13), lineHeight: 18, color: "#000000" },
+  offerDesc: { fontFamily: "Outfit_400Regular", fontSize: ms(13), lineHeight: 16, color: "#000000" },
+  detailSection: { gap: vs(8) },
+  detailTitle: { fontFamily: "Outfit_600SemiBold", fontSize: ms(13), lineHeight: 23, letterSpacing: 0.39, color: "#464646" },
+  bulletItem: { fontFamily: "Outfit_400Regular", fontSize: ms(13), lineHeight: 32, letterSpacing: 0.26, color: "#464646" },
+  reserveBtn: { backgroundColor: "#01BDA5", borderRadius: sc(25), height: vs(38), alignItems: "center", justifyContent: "center" },
+  reserveBtnText: { fontFamily: "Outfit_600SemiBold", fontSize: ms(14), lineHeight: 18, letterSpacing: 0.28, color: "#FFFFFF", textAlign: "center" },
 });

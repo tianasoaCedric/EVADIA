@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { s as sc, vs, ms } from "../lib/scale";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import SearchHeader from "../components/molecules/SearchHeader";
@@ -272,43 +273,43 @@ export default function HomeScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFFFFF" },
 
-  centered: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24, gap: 12 },
-  errorText: { fontFamily: "Outfit_400Regular", fontSize: 14, color: "#6B7280", textAlign: "center" },
+  centered: { flex: 1, alignItems: "center", justifyContent: "center", padding: sc(24), gap: 12 },
+  errorText: { fontFamily: "Outfit_400Regular", fontSize: ms(14), color: "#6B7280", textAlign: "center" },
   retryBtn: { backgroundColor: "#01BDA5", paddingHorizontal: 24, paddingVertical: 10, borderRadius: 12 },
   retryText: { fontFamily: "Outfit_600SemiBold", color: "#FFFFFF" },
 
-  section: { marginTop: 24, gap: 12 },
+  section: { marginTop: vs(24), gap: vs(12) },
   sectionTitle: {
     fontFamily: "Outfit_700Bold",
-    fontSize: 16,
+    fontSize: ms(16),
     lineHeight: 22,
     letterSpacing: 0.32,
     color: "#000000",
-    marginLeft: 17,
+    marginLeft: sc(17),
   },
-  carousel: { paddingHorizontal: 22, paddingVertical: 6, gap: 12 },
+  carousel: { paddingHorizontal: sc(22), paddingVertical: vs(6), gap: sc(12) },
 
-  card: { width: 150, backgroundColor: "#FFFFFF", borderRadius: 15, paddingBottom: 10, gap: 5 },
-  cardImageBox: { width: 150, height: 150, borderRadius: 15, overflow: "hidden" },
-  cardImage: { width: 150, height: 150 },
+  card: { width: sc(150), backgroundColor: "#FFFFFF", borderRadius: sc(15), paddingBottom: 10, gap: 5 },
+  cardImageBox: { width: sc(150), height: sc(150), borderRadius: sc(15), overflow: "hidden" },
+  cardImage: { width: sc(150), height: sc(150) },
   favBtn: {
     position: "absolute",
-    top: 9,
-    right: 9,
-    width: 24,
-    height: 24,
+    top: vs(9),
+    right: sc(9),
+    width: sc(24),
+    height: sc(24),
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "rgba(255,255,255,0.75)",
-    borderRadius: 12,
+    borderRadius: sc(12),
   },
-  cardInfo: { paddingHorizontal: 6, gap: 2 },
-  cardName: { fontFamily: "Outfit_600SemiBold", fontSize: 12, lineHeight: 15, letterSpacing: 0.24, color: "#000000" },
-  cardSubtitle: { fontFamily: "Outfit_400Regular", fontSize: 11, color: "#6B7280" },
-  cardPrice: { fontFamily: "Outfit_600SemiBold", fontSize: 11, color: "#01BDA5" },
+  cardInfo: { paddingHorizontal: sc(6), gap: 2 },
+  cardName: { fontFamily: "Outfit_600SemiBold", fontSize: ms(12), lineHeight: 15, letterSpacing: 0.24, color: "#000000" },
+  cardSubtitle: { fontFamily: "Outfit_400Regular", fontSize: ms(11), color: "#6B7280" },
+  cardPrice: { fontFamily: "Outfit_600SemiBold", fontSize: ms(11), color: "#01BDA5" },
   cardDivider: { height: 1, backgroundColor: "#D9D9D9", width: "100%", marginVertical: 2 },
   ratingRow: { flexDirection: "row", alignItems: "center", gap: 3 },
   starsRow: { flexDirection: "row", gap: 2 },
-  ratingText: { fontFamily: "Outfit_400Regular", fontSize: 11, lineHeight: 14, color: "#434343" },
-  emptyText: { fontFamily: "Outfit_400Regular", fontSize: 13, color: "#9CA3AF", marginHorizontal: 22 },
+  ratingText: { fontFamily: "Outfit_400Regular", fontSize: ms(11), lineHeight: 14, color: "#434343" },
+  emptyText: { fontFamily: "Outfit_400Regular", fontSize: ms(13), color: "#9CA3AF", marginHorizontal: 22 },
 });

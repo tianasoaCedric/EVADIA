@@ -3,6 +3,7 @@ import {
   View, Text, ScrollView, TouchableOpacity, ImageBackground,
   StyleSheet, ActivityIndicator,
 } from "react-native";
+import { s as sc, vs, ms } from "../lib/scale";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import SearchHeader from "../components/molecules/SearchHeader";
@@ -105,13 +106,13 @@ export default function DestinationScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFFFFF" },
   centered: { flex: 1, alignItems: "center", justifyContent: "center" },
-  scrollContent: { paddingBottom: 32 },
-  title: { fontFamily: "Manrope_700Bold", fontSize: 24, lineHeight: 30, color: "#000000", marginTop: 21, marginBottom: 16, paddingHorizontal: 20 },
-  grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", paddingHorizontal: 20, rowGap: 11 },
-  card: { width: "48.5%", height: 214, borderRadius: 15, overflow: "hidden" },
+  scrollContent: { paddingBottom: vs(32) },
+  title: { fontFamily: "Manrope_700Bold", fontSize: ms(24), lineHeight: 30, color: "#000000", marginTop: vs(21), marginBottom: vs(16), paddingHorizontal: sc(20) },
+  grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", paddingHorizontal: sc(20), rowGap: vs(11) },
+  card: { width: "48.5%", height: vs(214), borderRadius: sc(15), overflow: "hidden" },
   cardBg: { flex: 1 },
-  cardImage: { borderRadius: 15 },
-  gradient: { flex: 1, justifyContent: "flex-end", padding: 12, paddingHorizontal: 6 },
-  cardName: { fontFamily: "Outfit_400Regular", fontSize: 20, lineHeight: 25, letterSpacing: 0.4, color: "#FFFFFF" },
-  emptyText: { fontFamily: "Outfit_400Regular", fontSize: 14, color: "#9CA3AF", textAlign: "center", marginTop: 40 },
+  cardImage: { borderRadius: sc(15) },
+  gradient: { flex: 1, justifyContent: "flex-end", padding: sc(12), paddingHorizontal: sc(6) },
+  cardName: { fontFamily: "Outfit_400Regular", fontSize: ms(20), lineHeight: 25, letterSpacing: 0.4, color: "#FFFFFF" },
+  emptyText: { fontFamily: "Outfit_400Regular", fontSize: ms(14), color: "#9CA3AF", textAlign: "center", marginTop: 40 },
 });
