@@ -40,7 +40,7 @@ export default async function RegisterPage() {
 
   const popularVilles: VillePopulaire[] = popularVillesRes.status === 'fulfilled' ? popularVillesRes.value.data : []
   const offres: Offre[] = offresRes.status === 'fulfilled' ? offresRes.value.data.slice(0, 3) : []
-  const villes: VilleDecouverte[] = villesRes.status === 'fulfilled' ? villesRes.value.slice(0, 3) : []
+  const villes: VilleDecouverte[] = villesRes.status === 'fulfilled' ? villesRes.value : []
 
   return (
     <HomePage
