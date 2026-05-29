@@ -39,5 +39,5 @@ export async function addFavori(hotelId: number): Promise<void> {
 }
 
 export async function removeFavori(hotelId: number): Promise<void> {
-  await api.delete(`/client/favorites/${hotelId}`);
+  await api.request({ method: "DELETE", url: `/client/favorites/${hotelId}` });
 }

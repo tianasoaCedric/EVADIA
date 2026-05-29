@@ -7,6 +7,7 @@ import {
   Image,
   StyleSheet,
   TextInput,
+  ScrollView,
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
@@ -60,113 +61,141 @@ export default function LoginScreen({ navigation }: any) {
     >
       <View style={styles.overlay} />
 
-      <View style={styles.logoContainer}>
-        <Image
-          source={require("../../assets/images/logo.png")}
-          style={styles.logoImage}
-          resizeMode="contain"
-        />
-        <Text style={styles.tagline}>Trouvez l'Hotel parfait pour vous !</Text>
-      </View>
-
-      <SafeAreaView style={styles.safeArea} edges={["bottom"]}>
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
-          <View style={styles.card}>
-            {!showForm ? (
-              <>
-                <TouchableOpacity
-                  style={styles.emailButton}
-                  activeOpacity={0.85}
-                  onPress={() => setShowForm(true)}
-                >
-                  <Text style={styles.emailButtonText}>Continuer avec votre Email</Text>
-                </TouchableOpacity>
-
-                <View style={styles.dividerRow}>
-                  <View style={styles.dividerLine} />
-                  <Text style={styles.dividerText}>ou</Text>
-                  <View style={styles.dividerLine} />
-                </View>
-
-                <TouchableOpacity style={styles.googleButton} activeOpacity={0.85} onPress={signInWithGoogle}>
-                  <GoogleIcon size={39} />
-                </TouchableOpacity>
-
-                <View style={styles.registerRow}>
-                  <Text style={styles.registerText}>Vous n'avez pas de compte ? </Text>
-                  <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-                    <Text style={styles.registerLink}>S'inscrire</Text>
-                  </TouchableOpacity>
-                </View>
-              </>
-            ) : (
-              <>
-                <Text style={styles.formTitle}>Connexion</Text>
-
-                {error ? <ErrorBanner message={error} /> : null}
-
-                <View style={styles.fieldsContainer}>
-                  <View style={styles.inputRow}>
-                    <Ionicons name="mail-outline" size={20} color="#626262" />
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Adresse Email"
-                      placeholderTextColor="#999"
-                      value={email}
-                      onChangeText={setEmail}
-                      keyboardType="email-address"
-                      autoCapitalize="none"
-                    />
-                  </View>
-
-                  <View style={styles.inputRow}>
-                    <Ionicons name="shield-outline" size={20} color="#626262" />
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Mot de passe"
-                      placeholderTextColor="#999"
-                      value={password}
-                      onChangeText={setPassword}
-                      secureTextEntry={!showPassword}
-                    />
-                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                      <Ionicons
-                        name={showPassword ? "eye-off-outline" : "eye-outline"}
-                        size={18}
-                        color="#626262"
-                      />
-                    </TouchableOpacity>
-                  </View>
-
-                  <TouchableOpacity
-                    style={[styles.emailButton, loading && { opacity: 0.7 }]}
-                    activeOpacity={0.85}
-                    onPress={handleLogin}
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <ActivityIndicator color="#fff" size="small" />
-                    ) : (
-                      <Text style={styles.emailButtonText}>Se connecter</Text>
-                    )}
-                  </TouchableOpacity>
-
-                  <TouchableOpacity onPress={() => setShowForm(false)}>
-                    <Text style={styles.backText}>← Retour</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.registerRow}>
-                  <Text style={styles.registerText}>Vous n'avez pas de compte ? </Text>
-                  <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-                    <Text style={styles.registerLink}>S'inscrire</Text>
-                  </TouchableOpacity>
-                </View>
-              </>
-            )}
+      {!showForm ? (
+        <>
+          <View style={styles.logoContainer}>
+            <Image
+              source={require("../../assets/images/logo.png")}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
+            <Text style={styles.tagline}>Trouvez l'Hotel parfait pour vous !</Text>
           </View>
+
+          <SafeAreaView style={styles.safeArea} edges={["bottom"]}>
+            <View style={styles.card}>
+              <TouchableOpacity
+                style={styles.emailButton}
+                activeOpacity={0.85}
+                onPress={() => setShowForm(true)}
+              >
+                <Text style={styles.emailButtonText}>Continuer avec votre Email</Text>
+              </TouchableOpacity>
+
+              <View style={styles.dividerRow}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>ou</Text>
+                <View style={styles.dividerLine} />
+              </View>
+
+              <TouchableOpacity style={styles.googleButton} activeOpacity={0.85} onPress={signInWithGoogle}>
+                <GoogleIcon size={39} />
+              </TouchableOpacity>
+
+              <View style={styles.registerRow}>
+                <Text style={styles.registerText}>Vous n'avez pas de compte ? </Text>
+                <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+                  <Text style={styles.registerLink}>S'inscrire</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </SafeAreaView>
+        </>
+      ) : (
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+        >
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.formLogoContainer}>
+              <Image
+                source={require("../../assets/images/logo.png")}
+                style={styles.logoImage}
+                resizeMode="contain"
+              />
+              <Text style={styles.tagline}>Trouvez l'Hotel parfait pour vous !</Text>
+            </View>
+
+            <View style={styles.formCard}>
+              <Text style={styles.formTitle}>Connexion</Text>
+
+              {error ? <ErrorBanner message={error} /> : null}
+
+              <View style={styles.fieldsContainer}>
+                <View style={styles.inputRow}>
+                  <Ionicons name="mail-outline" size={20} color="rgba(255,255,255,0.8)" />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Adresse Email"
+                    placeholderTextColor="rgba(255,255,255,0.6)"
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+                </View>
+
+                <View style={styles.inputRow}>
+                  <Ionicons name="shield-outline" size={20} color="rgba(255,255,255,0.8)" />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Mot de passe"
+                    placeholderTextColor="rgba(255,255,255,0.6)"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={!showPassword}
+                  />
+                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                    <Ionicons
+                      name={showPassword ? "eye-off-outline" : "eye-outline"}
+                      size={18}
+                      color="rgba(255,255,255,0.8)"
+                    />
+                  </TouchableOpacity>
+                </View>
+
+                <TouchableOpacity
+                  style={[styles.emailButton, { alignSelf: "stretch" }, loading && { opacity: 0.7 }]}
+                  activeOpacity={0.85}
+                  onPress={handleLogin}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <ActivityIndicator color="#fff" size="small" />
+                  ) : (
+                    <Text style={styles.emailButtonText}>Se connecter</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.dividerRow}>
+                <View style={styles.dividerLineFull} />
+                <Text style={styles.dividerTextWhite}>ou</Text>
+                <View style={styles.dividerLineFull} />
+              </View>
+
+              <TouchableOpacity activeOpacity={0.85} onPress={signInWithGoogle}>
+                <GoogleIcon size={39} />
+              </TouchableOpacity>
+
+              <Text style={styles.registerTextWhite}>
+                Vous n'avez pas de compte ?{" "}
+                <Text style={styles.registerLinkWhite} onPress={() => navigation.navigate("Register")}>
+                  S'inscrire
+                </Text>
+              </Text>
+
+              <TouchableOpacity onPress={() => setShowForm(false)}>
+                <Text style={styles.backText}>← Retour</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
         </KeyboardAvoidingView>
-      </SafeAreaView>
+      )}
     </ImageBackground>
   );
 }
@@ -179,8 +208,9 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(0,0,0,0.15)",
+    backgroundColor: "rgba(0,0,0,0.25)",
   },
+  // Vue initiale
   safeArea: {
     position: "absolute",
     bottom: 40,
@@ -214,39 +244,14 @@ const styles = StyleSheet.create({
     gap: 15,
     alignItems: "center",
   },
-  formTitle: {
-    fontFamily: "Outfit_600SemiBold",
-    fontSize: 22,
-    color: "#000",
-    alignSelf: "flex-start",
-  },
-  fieldsContainer: {
-    width: "100%",
-    gap: 12,
-  },
-  inputRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    gap: 12,
-    height: 46,
-    backgroundColor: "#F5F5F5",
-    borderRadius: 50,
-  },
-  input: {
-    flex: 1,
-    fontFamily: "Outfit_300Light",
-    fontSize: 13,
-    color: "#000",
-    paddingVertical: 0,
-  },
   emailButton: {
     backgroundColor: "#01BDA5",
     borderRadius: 25,
-    height: 38,
+    height: 46,
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
+    paddingHorizontal: 12,
   },
   emailButtonText: {
     fontFamily: "Outfit_600SemiBold",
@@ -292,10 +297,75 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     color: "#000000",
   },
+  // Vue formulaire (style RegisterScreen)
+  formLogoContainer: {
+    alignItems: "center",
+    marginTop: 80,
+  },
+  formCard: {
+    marginHorizontal: 20,
+    marginTop: 0,
+    marginBottom: 40,
+    borderRadius: 15,
+    paddingHorizontal: 15,
+    paddingVertical: 24,
+    gap: 20,
+    alignItems: "center",
+  },
+  formTitle: {
+    fontFamily: "Outfit_600SemiBold",
+    fontSize: 30,
+    lineHeight: 38,
+    color: "#FFFFFF",
+    textAlign: "center",
+  },
+  fieldsContainer: {
+    width: "100%",
+    gap: 12,
+  },
+  inputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    gap: 14,
+    width: "100%",
+    height: 46,
+    backgroundColor: "rgba(245, 245, 245, 0.18)",
+    borderRadius: 50,
+  },
+  input: {
+    flex: 1,
+    fontFamily: "Outfit_300Light",
+    fontSize: 13,
+    color: "#FFFFFF",
+    paddingVertical: 0,
+  },
+  dividerLineFull: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "rgba(255,255,255,0.5)",
+  },
+  dividerTextWhite: {
+    fontFamily: "Outfit_300Light",
+    fontSize: 13,
+    color: "#FFFFFF",
+  },
+  registerTextWhite: {
+    fontFamily: "Outfit_300Light",
+    fontSize: 13,
+    lineHeight: 16,
+    color: "#FFFFFF",
+  },
+  registerLinkWhite: {
+    fontFamily: "Outfit_700Bold",
+    fontSize: 13,
+    lineHeight: 16,
+    color: "#FFFFFF",
+  },
   backText: {
     fontFamily: "Outfit_300Light",
     fontSize: 13,
-    color: "#626262",
+    color: "rgba(255,255,255,0.7)",
     textAlign: "center",
   },
 });

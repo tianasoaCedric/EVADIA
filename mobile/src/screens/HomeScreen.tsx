@@ -20,6 +20,7 @@ import {
   getTypesHotels,
   getVilleHotels,
 } from "../services/homeService";
+import { addFavori, removeFavori, getFavoris } from "../services/favoriService";
 
 function filterByType(hotels: HotelItem[], activeFilter: string): HotelItem[] {
   if (activeFilter === "Tous") return hotels;
@@ -103,16 +104,15 @@ function HotelCard({
 
 function HotelCarousel({
   hotels,
-  sectionIdx,
   navigation,
+  favorites,
+  toggleFav,
 }: {
   hotels: HotelItem[];
-  sectionIdx: number;
   navigation: any;
+  favorites: Record<string, boolean>;
+  toggleFav: (hotelId: string) => void;
 }) {
-  const [favorites, setFavorites] = useState<Record<string, boolean>>({});
-  const toggleFav = (id: string) =>
-    setFavorites((prev) => ({ ...prev, [id]: !prev[id] }));
 
   if (hotels.length === 0) {
     return (
@@ -132,8 +132,8 @@ function HotelCarousel({
         <HotelCard
           key={hotel.id}
           hotel={hotel}
-          isFavorite={favorites[`${sectionIdx}-${hotel.id}`] ?? false}
-          onFavPress={() => toggleFav(`${sectionIdx}-${hotel.id}`)}
+          isFavorite={favorites[hotel.id] ?? false}
+          onFavPress={() => toggleFav(hotel.id)}
           onPress={() => navigation.navigate("HotelDetail", { id: hotel.id, name: hotel.nom })}
         />
       ))}
@@ -150,17 +150,33 @@ export default function HomeScreen({ navigation }: any) {
   const [villeSections, setVilleSections] = useState<VilleSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [favorites, setFavorites] = useState<Record<string, boolean>>({});
+
+  const toggleFav = async (hotelId: string) => {
+    const wasFav = favorites[hotelId] ?? false;
+    setFavorites((prev) => ({ ...prev, [hotelId]: !wasFav }));
+    try {
+      wasFav ? await removeFavori(Number(hotelId)) : await addFavori(Number(hotelId));
+    } catch {
+      setFavorites((prev) => ({ ...prev, [hotelId]: wasFav }));
+    }
+  };
 
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const [selection, villes, types] = await Promise.all([
+      const [selection, villes, types, favs] = await Promise.all([
         getSelectionHotels(),
         getPopularVilles(4),
         getTypesHotels(),
+        getFavoris(),
       ]);
+
+      const favMap: Record<string, boolean> = {};
+      favs.forEach((f) => { favMap[String(f.hotelId)] = true; });
+      setFavorites(favMap);
 
       setFilters(["Tous", ...types.map((t) => t.nom)]);
 
@@ -234,7 +250,7 @@ export default function HomeScreen({ navigation }: any) {
                   Sélection d'hébergement à {ville} {">"}
                 </Text>
               </TouchableOpacity>
-              <HotelCarousel hotels={hotels} sectionIdx={idx} navigation={navigation} />
+              <HotelCarousel hotels={hotels} navigation={navigation} favorites={favorites} toggleFav={toggleFav} />
             </View>
           ))}
 
@@ -253,7 +269,7 @@ export default function HomeScreen({ navigation }: any) {
                   Hébergements à {ville.nom} {">"}
                 </Text>
               </TouchableOpacity>
-              <HotelCarousel hotels={hotels} sectionIdx={filteredSelection.length + idx} navigation={navigation} />
+              <HotelCarousel hotels={hotels} navigation={navigation} favorites={favorites} toggleFav={toggleFav} />
             </View>
           ))}
 

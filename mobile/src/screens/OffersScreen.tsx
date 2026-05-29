@@ -59,6 +59,15 @@ export default function OffersScreen({ navigation }: any) {
           imageStyle={s.heroImg}
           resizeMode="cover"
         >
+          <View style={[s.headerOverlay, { paddingTop: insets.top + 40 }]}>
+            <View style={s.searchBar}>
+              <Ionicons name="search-outline" size={20} color="#626262" />
+              <Text style={s.searchPlaceholder}>Recherche</Text>
+            </View>
+            <View style={s.bell}>
+              <Ionicons name="notifications-outline" size={24} color="#000" />
+            </View>
+          </View>
           <LinearGradient
             colors={["rgba(0,0,0,0)", "rgba(1,189,165,0.82)"]}
             locations={[0.2586, 0.9962]}
@@ -94,15 +103,6 @@ export default function OffersScreen({ navigation }: any) {
         )}
       </ScrollView>
 
-      <View style={[s.headerOverlay, { paddingTop: insets.top + 40 }]} pointerEvents="box-none">
-        <View style={s.searchBar}>
-          <Ionicons name="search-outline" size={20} color="#626262" />
-          <Text style={s.searchPlaceholder}>Recherche</Text>
-        </View>
-        <View style={s.bell}>
-          <Ionicons name="notifications-outline" size={24} color="#000" />
-        </View>
-      </View>
     </View>
   );
 }
@@ -114,6 +114,11 @@ const s = StyleSheet.create({
     position: "absolute", top: 0, left: 0, right: 0,
     flexDirection: "row", alignItems: "center", gap: sc(10),
     paddingHorizontal: sc(20), paddingBottom: vs(12),
+  },
+  headerFixed: {
+    flexDirection: "row", alignItems: "center", gap: sc(10),
+    paddingHorizontal: sc(20), paddingBottom: vs(12),
+    backgroundColor: "#FFFFFF",
   },
   searchBar: {
     flex: 1, flexDirection: "row", alignItems: "center",

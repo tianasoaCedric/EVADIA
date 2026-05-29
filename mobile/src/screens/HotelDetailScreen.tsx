@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { AvisItem, HotelDetail, getHotelAvis, getHotelDetail } from "../services/homeService";
+import { addFavori, removeFavori, getFavoris } from "../services/favoriService";
 import { API_BASE_URL } from "../lib/api";
 import { s as sc, vs, ms } from "../lib/scale";
 
@@ -46,8 +47,12 @@ export default function HotelDetailScreen({ route, navigation }: any) {
 
   useEffect(() => {
     if (!id) return;
-    Promise.all([getHotelDetail(id), getHotelAvis(id)])
-      .then(([h, a]) => { setHotel(h); setAvis(a); })
+    Promise.all([getHotelDetail(id), getHotelAvis(id), getFavoris()])
+      .then(([h, a, favs]) => {
+        setHotel(h);
+        setAvis(a);
+        setIsFav(favs.some((f) => f.hotelId === Number(id)));
+      })
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -100,7 +105,16 @@ export default function HotelDetailScreen({ route, navigation }: any) {
             <TouchableOpacity style={s.iconBtn}>
               <Ionicons name="share-social" size={22} color="#FFFFFF" />
             </TouchableOpacity>
-            <TouchableOpacity style={s.iconBtn} onPress={() => setIsFav(!isFav)}>
+            <TouchableOpacity style={s.iconBtn} onPress={async () => {
+              if (!id) return;
+              const wasFav = isFav;
+              setIsFav(!wasFav);
+              try {
+                wasFav ? await removeFavori(id) : await addFavori(id);
+              } catch {
+                setIsFav(wasFav);
+              }
+            }}>
               <Ionicons name={isFav ? "heart" : "heart-outline"} size={22} color={isFav ? "#FF4141" : "#FFFFFF"} />
             </TouchableOpacity>
           </View>

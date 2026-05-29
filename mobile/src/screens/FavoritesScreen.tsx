@@ -38,12 +38,12 @@ function FavCard({ item, onUnfav }: { item: FavoriItem; onUnfav: () => void }) {
         <Text style={s.cardText}>
           {item.nom}{"\n"}
           {item.ville}{"\n"}
-          {item.prix_min.toLocaleString()} {item.devise}/nuité
+          {(item.prix_min ?? 0).toLocaleString()} {item.devise}/nuité
         </Text>
         <View style={s.divider} />
         <View style={s.ratingsRow}>
           <StarRating rating={item.note_moyenne} />
-          {item.note_moyenne !== null && <Text style={s.ratingText}>{item.note_moyenne.toFixed(2)}</Text>}
+          {item.note_moyenne != null && <Text style={s.ratingText}>{Number(item.note_moyenne).toFixed(2)}</Text>}
         </View>
       </View>
     </View>
