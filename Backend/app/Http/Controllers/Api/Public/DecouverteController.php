@@ -5,24 +5,27 @@ namespace App\Http\Controllers\Api\Public;
 use App\Http\Controllers\Controller;
 use App\Models\VilleDecouverte;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 
 class DecouverteController extends Controller
 {
     public function villes(): JsonResponse
     {
-        $villes = VilleDecouverte::actif()
-            ->withCount(['lieux' => fn($q) => $q->where('actif', true)])
-            ->orderBy('ordre')
-            ->orderBy('nom')
-            ->get()
-            ->map(fn($v) => [
-                'id'          => $v->id,
-                'nom'         => $v->nom,
-                'slug'        => $v->slug,
-                'image'       => $v->image ? \Storage::disk('s3')->url($v->image) : null,
-                'ordre'       => $v->ordre,
-                'lieux_count' => $v->lieux_count,
-            ]);
+        $villes = Cache::remember('decouverte:villes', 3600, function () {
+            return VilleDecouverte::actif()
+                ->withCount(['lieux' => fn($q) => $q->where('actif', true)])
+                ->orderBy('ordre')
+                ->orderBy('nom')
+                ->get()
+                ->map(fn($v) => [
+                    'id'          => $v->id,
+                    'nom'         => $v->nom,
+                    'slug'        => $v->slug,
+                    'image'       => $v->image ? \Storage::disk('s3')->url($v->image) : null,
+                    'ordre'       => $v->ordre,
+                    'lieux_count' => $v->lieux_count,
+                ]);
+        });
 
         return response()->json($villes);
     }
@@ -31,7 +34,7 @@ class DecouverteController extends Controller
     {
         $ville = VilleDecouverte::where('slug', $slug)->where('actif', true)->firstOrFail();
 
-        $lieux = $ville->lieux()
+        $lieux = Cache::remember("decouverte:lieux:{$slug}", 3600, fn() => $ville->lieux()
             ->where('actif', true)
             ->orderBy('ordre')
             ->get()
@@ -45,7 +48,7 @@ class DecouverteController extends Controller
                 'images'         => collect($l->images ?? [])->map(fn($path) => \Storage::disk('s3')->url($path))->values(),
                 'position_image' => $l->position_image,
                 'ordre'          => $l->ordre,
-            ]);
+            ]));
 
         return response()->json([
             'ville' => [
