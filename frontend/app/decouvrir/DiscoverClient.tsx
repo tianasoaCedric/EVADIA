@@ -51,7 +51,7 @@ export default function DiscoverClient({ initialVilles }: DiscoverClientProps) {
             return (
               <div
                 key={ville.id}
-                className={`w-full max-w-[320px] transition-[transform] duration-300 ${index === 1 && row.length === 3 ? 'md:mt-12' : ''}`}
+                className={`w-full max-w-[300px] gap-16 transition-[transform] duration-300 ${index === 1 && row.length === 3 ? 'md:mt-12' : ''}`}
               >
                 <DiscoverCard
                   imageUrl={ville.image ?? '/photos/discover/hero-discover.jpg'}

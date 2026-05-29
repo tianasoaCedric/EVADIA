@@ -23,7 +23,7 @@ const DiscoverCard = ({
   href,
   alt = '',
   className = '',
-  width = 'w-full sm:w-80 md:w-72',
+  width = 'w-full',
   onClick,
   priority = false
 }: DiscoverCardProps) => {
