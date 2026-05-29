@@ -1,3 +1,6 @@
+
+import Header from '@/app/components/molecules/Header'
+
 export default function DarkLayout({
   children,
 }: {
@@ -5,6 +8,7 @@ export default function DarkLayout({
 }) {
   return (
     <main className="min-h-screen">
+      <Header/>
       {children}
     </main>
   )
