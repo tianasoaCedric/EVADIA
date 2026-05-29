@@ -308,77 +308,88 @@ export default function HomePage({ popularVilles, offres, villes }: HomePageProp
                     </section>
                 )}
 
-                {/* Section Découvertes */}
-                {villes.length > 0 && (
-                    <section
-                        ref={setDiscoverRef}
-                        className={`py-8 md:py-8 transition-all duration-700 ease-out overflow-visible ${
-                            isDiscoverVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+{/* Section Découvertes */}
+{villes.length > 0 && (
+    <section
+        ref={setDiscoverRef}
+        className={`py-8 md:py-8 transition-all duration-700 ease-out overflow-visible ${
+            isDiscoverVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}
+        style={{ background: 'linear-gradient(to bottom, #FFFFFF, #EBE898, #01BDA5)' }}
+    >
+        <div className="container mx-auto px-6 overflow-visible">
+            <div className="text-center mb-10 md:mb-12">
+                <h2 className="text-4xl md:text-4xl lg:text-5xl font-light text-[#01BDA5] mb-2 font-rubik-distressed">
+                    {t('discover')}
+                </h2>
+                <p className="text-[#01BDA5] text-sm md:text-base">
+                    {t('discover_description')}
+                </p>
+            </div>
+
+            {/* Carrousel commun pour mobile et desktop */}
+            <div className="relative overflow-visible">
+                {/* Boutons de navigation desktop */}
+                <button
+                    onClick={() => {
+                        const container = discoverScrollRef.current
+                        if (container) container.scrollBy({ left: -310, behavior: 'smooth' })
+                    }}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 hover:scale-110 hidden lg:flex items-center justify-center cursor-pointer"
+                    aria-label="Défiler vers la gauche"
+                >
+                    <ChevronLeft className="w-6 h-6 text-gray-700" />
+                </button>
+
+                <div
+                    ref={discoverScrollRef}
+                    className="overflow-x-auto scroll-smooth pb-6 scrollbar-hide overflow-visible px-2"
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
+                    <div className="flex gap-6 px-2 md:justify-center w-full  lg:justify-start">
+                        {villes.map((ville) => (
+                            <div key={ville.id} className="flex-shrink-0 min-w-[320px] p-2">
+                                <SpecialDiscoverCard
+                                    imageUrl={ville.image ?? '/photos/discover/hero-discover.jpg'}
+                                    title={ville.nom}
+                                    href={`/decouvrir/${ville.slug}`}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Boutons de navigation desktop droite */}
+                <button
+                    onClick={() => {
+                        const container = discoverScrollRef.current
+                        if (container) container.scrollBy({ left: 310, behavior: 'smooth' })
+                    }}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 hover:scale-110 hidden lg:flex items-center justify-center cursor-pointer"
+                    aria-label="Défiler vers la droite"
+                >
+                    <ChevronRight className="w-6 h-6 text-gray-700" />
+                </button>
+            </div>
+
+            {/* Indicateurs de pagination */}
+            <div className="flex justify-center lg:hidden gap-2 mt-6">
+                {villes.map((_, index) => (
+                    <button
+                        key={index}
+                        onClick={() => scrollToDiscover(index)}
+                        className={`transition-all duration-300 cursor-pointer ${
+                            activeDiscoverIndex === index
+                                ? 'w-6 h-2 rounded-full bg-white'
+                                : 'w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400'
                         }`}
-                        style={{ background: 'linear-gradient(to bottom, #FFFFFF, #EBE898, #01BDA5)' }}
-                    >
-                        <div className="container mx-auto px-6 overflow-visible">
-                            <div className="text-center mb-10 md:mb-12">
-                                <h2 className="text-4xl md:text-4xl lg:text-5xl font-light text-[#01BDA5] mb-2 font-rubik-distressed">
-                                    {t('discover')}
-                                </h2>
-                                <p className="text-[#01BDA5] text-sm md:text-base">
-                                    {t('discover_description')}
-                                </p>
-                            </div>
-
-                            {/* Mobile : carrousel */}
-                            <div className="md:hidden overflow-visible">
-                                <div
-                                    ref={discoverScrollRef}
-                                    className="overflow-x-auto scroll-smooth pb-6 scrollbar-hide overflow-visible px-2"
-                                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                                >
-                                    <div className="flex gap-6 px-2">
-                                        {villes.map((ville) => (
-                                            <div key={ville.id} className="flex-shrink-0 w-[280px] p-2">
-                                                <SpecialDiscoverCard
-                                                    imageUrl={ville.image ?? '/photos/discover/hero-discover.jpg'}
-                                                    title={ville.nom}
-                                                    href={`/decouvrir/${ville.slug}`}
-                                                />
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className="flex justify-center gap-2 mt-6">
-                                    {villes.map((_, index) => (
-                                        <button
-                                            key={index}
-                                            onClick={() => scrollToDiscover(index)}
-                                            className={`transition-all duration-300 cursor-pointer ${
-                                                activeDiscoverIndex === index
-                                                    ? 'w-6 h-2 rounded-full bg-white'
-                                                    : 'w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400'
-                                            }`}
-                                            aria-label={`Aller à la découverte ${index + 1}`}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Desktop : grille 3 cartes */}
-                            <div className="hidden md:flex md:justify-center md:gap-24 lg:gap-32">
-                                {villes.map((ville) => (
-                                    <div key={ville.id} className="flex justify-center w-[280px] p-2">
-                                        <SpecialDiscoverCard
-                                            imageUrl={ville.image ?? '/photos/discover/hero-discover.jpg'}
-                                            title={ville.nom}
-                                            href={`/decouvrir/${ville.slug}`}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-                )}
-            </main>
+                        aria-label={`Aller à la découverte ${index + 1}`}
+                    />
+                ))}
+            </div>
+        </div>
+    </section>
+)}            </main>
         </>
     )
 }
