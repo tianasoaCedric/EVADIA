@@ -83,19 +83,15 @@ function HotelCard({
       </View>
 
       <View style={styles.cardInfo}>
-        <Text style={styles.cardName} numberOfLines={1}>
-          {hotel.nom}, {hotel.ville}
-        </Text>
-        <Text style={styles.cardSubtitle}>Disponibilité</Text>
-        <Text style={styles.cardPrice}>
-          {hotel.prix_min.toLocaleString()} {hotel.devise}/nuité
-        </Text>
+        <Text style={styles.cardName}>{hotel.nom}, {hotel.ville}</Text>
+        <Text style={styles.cardAvail}>Disponibilité</Text>
+        <Text style={styles.cardPrice}>{(hotel.prix_min ?? 0).toLocaleString()} {hotel.devise}/nuité</Text>
         <View style={styles.cardDivider} />
         <View style={styles.ratingRow}>
           <StarRating rating={hotel.note_moyenne} />
-          {hotel.note_moyenne !== null && (
-            <Text style={styles.ratingText}>{hotel.note_moyenne.toFixed(2)}</Text>
-          )}
+          <Text style={styles.ratingText}>
+            {hotel.note_moyenne != null ? Number(hotel.note_moyenne).toFixed(1) : "—"}
+          </Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -243,7 +239,7 @@ export default function HomeScreen({ navigation }: any) {
               acc[key] = [...(acc[key] ?? []), h];
               return acc;
             }, {})
-          ).map(([ville, hotels], idx) => (
+          ).map(([ville, hotels]) => (
             <View key={`sel-${ville}`} style={styles.section}>
               <TouchableOpacity>
                 <Text style={styles.sectionTitle}>
@@ -255,7 +251,7 @@ export default function HomeScreen({ navigation }: any) {
           ))}
 
           {/* Sections par ville populaire (triées par nb réservations) */}
-          {filteredSections.map(({ ville, hotels }, idx) => (
+          {filteredSections.map(({ ville, hotels }) => (
             <View key={ville.id} style={styles.section}>
               <TouchableOpacity
                 onPress={() =>
@@ -320,9 +316,9 @@ const styles = StyleSheet.create({
     borderRadius: sc(12),
   },
   cardInfo: { paddingHorizontal: sc(6), gap: 2 },
-  cardName: { fontFamily: "Outfit_600SemiBold", fontSize: ms(12), lineHeight: 15, letterSpacing: 0.24, color: "#000000" },
-  cardSubtitle: { fontFamily: "Outfit_400Regular", fontSize: ms(11), color: "#6B7280" },
-  cardPrice: { fontFamily: "Outfit_600SemiBold", fontSize: ms(11), color: "#01BDA5" },
+  cardName: { fontFamily: "Outfit_700Bold", fontSize: ms(12), lineHeight: 15, letterSpacing: 0.24, color: "#000000" },
+  cardAvail: { fontFamily: "Outfit_400Regular", fontSize: ms(11), color: "#01BDA5" },
+  cardPrice: { fontFamily: "Outfit_400Regular", fontSize: ms(11), color: "#000000" },
   cardDivider: { height: 1, backgroundColor: "#D9D9D9", width: "100%", marginVertical: 2 },
   ratingRow: { flexDirection: "row", alignItems: "center", gap: 3 },
   starsRow: { flexDirection: "row", gap: 2 },
