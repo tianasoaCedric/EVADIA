@@ -63,7 +63,7 @@ const CardHotel = ({
   href,
   alt = '',
   className = '',
-  width = 'w-[260px]',
+  width = 'w-full',
   priority = false,
   initialIsFavorite = false,
   onFavoriteToggle,

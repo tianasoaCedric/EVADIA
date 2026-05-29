@@ -33,7 +33,7 @@ const OfferCard = ({
   href,
   alt = '',
   className = '',
-  width = 'w-full sm:w-80 md:w-72'
+  width = 'w-full'
 }: OfferCardProps) => {
   const t = useTranslations('OfferCard')
   const [imageError, setImageError] = useState(false)

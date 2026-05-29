@@ -269,9 +269,9 @@ export default function FavoriteClient() {
                             </div>
                         ) : (
                             <>
-                                <div className="flex flex-wrap justify-start items-start gap-11">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 sm:gap-24 lg:gap-16 xl:grid-cols-4 2xl:grid-cols-5 gap-12">
                                     {currentFavorites.map((favori, idx) => (
-                                        <div key={favori.id} className="w-[260px]">
+                                        <div key={favori.id}>
                                             <CardHotel
                                                 imageUrl={favori.hotel.photo_principale ?? ''}
                                                 name={favori.hotel.nom}
