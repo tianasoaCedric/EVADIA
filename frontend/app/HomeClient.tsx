@@ -13,6 +13,8 @@ import type { VilleDecouverte } from '@/lib/types'
 import type { Offre } from '@/lib/services/offre.service'
 import type { VillePopulaire } from '@/lib/services/hotel.service'
 import { createSlug } from '@/lib/slug'
+import Header from './components/molecules/Header'
+
 
 const BORDER_RADIUS_CYCLE = [
   'rounded-top-left-bottom-right',
@@ -115,6 +117,7 @@ export default function HomePage({ popularVilles, offres, villes }: HomePageProp
     return (
         <>
             <main className="relative min-h-screen">
+                <Header />
                 <HeroSection
                     title={t('hero_title')}
                     subtitle={t('hero_subtitle')}

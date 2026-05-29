@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { Outfit, Rubik_Distressed } from 'next/font/google'
 import './globals.css'
 import Footer from './components/molecules/Footer'
-import Header from './components/molecules/Header'
+// import Header from './components/molecules/Header'
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { DeviseProvider } from './context/DeviseContext';
@@ -40,7 +40,7 @@ export default async function RootLayout({
           <DeviseProvider>
             <FavorisProvider>
               <HeaderThemeProvider>
-                <Header />
+                {/* <Header /> */}
                 {children}
                 <Footer/>
               </HeaderThemeProvider>
