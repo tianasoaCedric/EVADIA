@@ -41,14 +41,14 @@ const MOCK_ROOMS = [
 ];
 
 const EQUIPEMENTS = [
-  { icon: 'wifi', label: 'Wifi gratuit' },
-  { icon: 'water', label: 'Piscine' },
-  { icon: 'car', label: 'Parking' },
-  { icon: 'flower', label: 'Spa' },
-  { icon: 'snow', label: 'Climatisation' },
-  { icon: 'restaurant', label: 'Restaurant' },
-  { icon: 'fitness', label: 'Salle sport' },
-  { icon: 'shield-checkmark', label: 'Sécurité 24h' },
+  { icon: 'wifi-outline', label: 'Wifi gratuit' },
+  { icon: 'water-outline', label: 'Piscine' },
+  { icon: 'car-outline', label: 'Parking' },
+  { icon: 'flower-outline', label: 'Spa' },
+  { icon: 'snow-outline', label: 'Climatisation' },
+  { icon: 'restaurant-outline', label: 'Restaurant' },
+  { icon: 'fitness-outline', label: 'Salle sport' },
+  { icon: 'shield-checkmark-outline', label: 'Sécurité 24h' },
 ] as const;
 
 export default function HotelDetailScreen() {
@@ -100,20 +100,30 @@ export default function HotelDetailScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={[]}>
       <Animated.View style={{ flex: 1, opacity: fadeAnim, transform: [{ translateY: translateYAnim }] }}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 110 }}
+        {/* ── Carrousel d'images plein largeur ────────────────────────── */}
+        <View
+          style={{
+            width: screenWidth,
+            height: IMAGE_HEIGHT,
+            borderBottomLeftRadius: 36,
+            borderBottomRightRadius: 36,
+            backgroundColor: '#fff',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.08,
+            shadowRadius: 12,
+            elevation: 4,
+            zIndex: 10,
+          }}
         >
-          {/* ── Carrousel d'images plein largeur ────────────────────────── */}
           <View
             style={{
-              width: screenWidth,
-              height: IMAGE_HEIGHT,
-              backgroundColor: '#e5e7eb',
-              position: 'relative',
+              width: '100%',
+              height: '100%',
               borderBottomLeftRadius: 36,
               borderBottomRightRadius: 36,
               overflow: 'hidden',
+              backgroundColor: '#e5e7eb',
             }}
           >
             <ScrollView
@@ -248,7 +258,13 @@ export default function HotelDetailScreen() {
               </View>
             )}
           </View>
+        </View>
 
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 110 }}
+          style={{ flex: 1 }}
+        >
           {/* ── Informations principales ─────────────────────────────────── */}
           <View style={{ paddingHorizontal: 18, paddingTop: 20 }}>
             {/* Nom */}
@@ -443,13 +459,13 @@ export default function HotelDetailScreen() {
               }}
             />
 
-            {/* ── Équipements ───────────────────────────────────────────── */}
+            {/* ── Équipements ── */}
             <Text
               style={{
-                fontSize: 17,
-                fontWeight: '800',
+                fontSize: 16,
+                fontWeight: '700',
                 color: '#111827',
-                marginBottom: 16,
+                marginBottom: 14,
               }}
             >
               Équipements
@@ -458,33 +474,28 @@ export default function HotelDetailScreen() {
               style={{
                 flexDirection: 'row',
                 flexWrap: 'wrap',
-                gap: 12,
               }}
             >
-              {EQUIPEMENTS.map((eq) => (
+              {EQUIPEMENTS.map((item, idx) => (
                 <View
-                  key={eq.label}
+                  key={idx}
                   style={{
+                    width: '50%',
                     flexDirection: 'row',
                     alignItems: 'center',
-                    width: '45%',
-                    backgroundColor: '#f9fafb',
-                    borderRadius: 12,
-                    padding: 12,
-                    borderWidth: 1,
-                    borderColor: '#f0f0f0',
+                    marginBottom: 14,
                   }}
                 >
-                  <Ionicons name={eq.icon as any} size={20} color="#01BDA5" />
+                  <Ionicons name={item.icon as any} size={22} color="#4b5563" />
                   <Text
                     style={{
                       fontSize: 13,
-                      color: '#374151',
-                      fontWeight: '600',
-                      marginLeft: 8,
+                      color: '#4b5563',
+                      fontWeight: '500',
+                      marginLeft: 10,
                     }}
                   >
-                    {eq.label}
+                    {item.label}
                   </Text>
                 </View>
               ))}

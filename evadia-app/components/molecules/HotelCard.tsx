@@ -43,11 +43,6 @@ export const HotelCard = ({
       style={{
         width: width,
         borderRadius: 24,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.03,
-        shadowRadius: 6,
-        elevation: 1,
         marginRight: marginRight,
         marginBottom: 8,
       }}
