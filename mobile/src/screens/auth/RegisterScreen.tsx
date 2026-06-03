@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import GoogleIcon from "../../components/atoms/GoogleIcon";
 import ErrorBanner from "../../components/atoms/ErrorBanner";
 import { useAuth } from "../../context/AuthContext";
+import { s as sc, vs, ms } from "../../lib/scale";
 
 export default function RegisterScreen({ navigation }: any) {
   const { register } = useAuth();
@@ -181,110 +182,46 @@ export default function RegisterScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-  },
-  overlay: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(0,0,0,0.25)",
-  },
-  logoContainer: {
-    alignItems: "center",
-    marginTop: 80,
-  },
-  logoImage: {
-    width: 220,
-    height: 220,
-  },
-  tagline: {
-    fontFamily: "Outfit_300Light",
-    fontSize: 14,
-    color: "#FFFFFF",
-    textAlign: "center",
-    marginTop: -60,
-  },
+  background: { flex: 1, width: "100%", height: "100%" },
+  overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.25)" },
+  logoContainer: { alignItems: "center", marginTop: vs(80) },
+  logoImage: { width: sc(220), height: sc(220) },
+  tagline: { fontFamily: "Outfit_300Light", fontSize: ms(14), color: "#FFFFFF", textAlign: "center", marginTop: vs(-60) },
   card: {
-    marginHorizontal: 20,
-    marginTop: 0,
-    marginBottom: 40,
-    borderRadius: 15,
-    paddingHorizontal: 15,
-    paddingVertical: 24,
-    gap: 20,
+    marginHorizontal: sc(20),
+    marginBottom: vs(40),
+    borderRadius: sc(15),
+    paddingHorizontal: sc(15),
+    paddingVertical: vs(24),
+    gap: vs(20),
     alignItems: "center",
   },
-  title: {
-    fontFamily: "Outfit_600SemiBold",
-    fontSize: 30,
-    lineHeight: 38,
-    color: "#FFFFFF",
-    textAlign: "center",
-  },
-  fieldsContainer: {
-    width: "100%",
-    gap: 12,
-  },
+  title: { fontFamily: "Outfit_600SemiBold", fontSize: ms(30), lineHeight: ms(38), color: "#FFFFFF", textAlign: "center" },
+  fieldsContainer: { width: "100%", gap: vs(12) },
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 20,
-    gap: 14,
+    paddingHorizontal: sc(20),
+    gap: sc(14),
     width: "100%",
-    height: 46,
+    height: vs(46),
     backgroundColor: "rgba(245, 245, 245, 0.18)",
-    borderRadius: 50,
+    borderRadius: sc(50),
   },
-  input: {
-    flex: 1,
-    fontFamily: "Outfit_300Light",
-    fontSize: 13,
-    color: "#FFFFFF",
-    paddingVertical: 0,
-  },
+  input: { flex: 1, fontFamily: "Outfit_300Light", fontSize: ms(13), color: "#FFFFFF", paddingVertical: 0 },
   registerButton: {
     justifyContent: "center",
     alignItems: "center",
     width: "100%",
-    height: 38,
+    height: vs(46),
     backgroundColor: "#01BDA5",
-    borderRadius: 25,
-    marginTop: 4,
+    borderRadius: sc(25),
+    marginTop: vs(4),
   },
-  registerButtonText: {
-    fontFamily: "Outfit_600SemiBold",
-    fontSize: 14,
-    lineHeight: 18,
-    letterSpacing: 0.28,
-    color: "#FFFFFF",
-  },
-  dividerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
-    gap: 18,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "rgba(255,255,255,0.5)",
-  },
-  dividerText: {
-    fontFamily: "Outfit_300Light",
-    fontSize: 13,
-    color: "#FFFFFF",
-  },
-  loginText: {
-    fontFamily: "Outfit_300Light",
-    fontSize: 13,
-    lineHeight: 16,
-    color: "#FFFFFF",
-  },
-  loginLink: {
-    fontFamily: "Outfit_700Bold",
-    fontSize: 13,
-    lineHeight: 16,
-    color: "#FFFFFF",
-  },
+  registerButtonText: { fontFamily: "Outfit_600SemiBold", fontSize: ms(14), lineHeight: ms(18), letterSpacing: 0.28, color: "#FFFFFF" },
+  dividerRow: { flexDirection: "row", alignItems: "center", width: "100%", gap: sc(18) },
+  dividerLine: { flex: 1, height: 1, backgroundColor: "rgba(255,255,255,0.5)" },
+  dividerText: { fontFamily: "Outfit_300Light", fontSize: ms(13), color: "#FFFFFF" },
+  loginText: { fontFamily: "Outfit_300Light", fontSize: ms(13), lineHeight: ms(16), color: "#FFFFFF" },
+  loginLink: { fontFamily: "Outfit_700Bold", fontSize: ms(13), lineHeight: ms(16), color: "#FFFFFF" },
 });

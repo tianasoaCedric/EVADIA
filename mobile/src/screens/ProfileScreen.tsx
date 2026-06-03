@@ -10,6 +10,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../context/AuthContext";
+import { s as sc, vs, ms } from "../lib/scale";
 
 type RowProps =
   | { label: string; value: string; chevron?: false }
@@ -103,130 +104,61 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFFFFF" },
-
-  // HEAD
   head: {
     backgroundColor: "#FFFFFF",
-    paddingTop: 61,
-    paddingHorizontal: 20,
-    paddingBottom: 21,
-    gap: 16,
+    paddingTop: vs(61),
+    paddingHorizontal: sc(20),
+    paddingBottom: vs(21),
+    gap: vs(16),
     alignItems: "center",
-    minHeight: 283,
+    minHeight: vs(283),
     justifyContent: "flex-end",
   },
-  avatarOuter: {
-    width: 85,
-    height: 85,
-  },
+  avatarOuter: { width: sc(85), height: sc(85) },
   avatarInner: {
-    width: 84,
-    height: 85,
+    width: sc(84),
+    height: sc(85),
     backgroundColor: "#F5F5F5",
-    borderRadius: 64,
+    borderRadius: sc(64),
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
   },
-  avatarImage: {
-    width: 84,
-    height: 85,
-    resizeMode: "cover",
-  },
-  avatarFallback: {
-    width: 84,
-    height: 85,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarInitials: {
-    fontFamily: "Outfit_600SemiBold",
-    fontSize: 28,
-    color: "#8A8A8A",
-  },
-  nameBlock: {
-    alignItems: "center",
-    gap: 2,
-  },
-  name: {
-    fontFamily: "Outfit_400Regular",
-    fontSize: 20,
-    lineHeight: 23,
-    letterSpacing: 0.4,
-    color: "#000000",
-  },
-  email: {
-    fontFamily: "Outfit_400Regular",
-    fontSize: 14,
-    lineHeight: 23,
-    letterSpacing: 0.28,
-    color: "#7E7E7E",
-  },
+  avatarImage: { width: sc(84), height: sc(85), resizeMode: "cover" },
+  avatarFallback: { width: sc(84), height: sc(85), alignItems: "center", justifyContent: "center" },
+  avatarInitials: { fontFamily: "Outfit_600SemiBold", fontSize: ms(28), color: "#8A8A8A" },
+  nameBlock: { alignItems: "center", gap: vs(2) },
+  name: { fontFamily: "Outfit_400Regular", fontSize: ms(20), lineHeight: ms(23), letterSpacing: 0.4, color: "#000000" },
+  email: { fontFamily: "Outfit_400Regular", fontSize: ms(14), lineHeight: ms(23), letterSpacing: 0.28, color: "#7E7E7E" },
   editBtn: {
     backgroundColor: "#01BDA5",
-    borderRadius: 25,
-    height: 38,
-    paddingHorizontal: 16,
+    borderRadius: sc(25),
+    height: vs(38),
+    paddingHorizontal: sc(16),
     alignItems: "center",
     justifyContent: "center",
   },
-  editBtnText: {
-    fontFamily: "Outfit_600SemiBold",
-    fontSize: 14,
-    lineHeight: 18,
-    letterSpacing: 0.28,
-    color: "#FFFFFF",
-  },
-
-  // MENU
-  menuContainer: {
-    marginTop: 9,
-    paddingHorizontal: 20,
-    gap: 15,
-  },
-  sectionLabel: {
-    fontFamily: "Outfit_400Regular",
-    fontSize: 14,
-    lineHeight: 18,
-    letterSpacing: 0.28,
-    color: "#000000",
-  },
+  editBtnText: { fontFamily: "Outfit_600SemiBold", fontSize: ms(14), lineHeight: ms(18), letterSpacing: 0.28, color: "#FFFFFF" },
+  menuContainer: { marginTop: vs(9), paddingHorizontal: sc(20), gap: vs(15) },
+  sectionLabel: { fontFamily: "Outfit_400Regular", fontSize: ms(14), lineHeight: ms(18), letterSpacing: 0.28, color: "#000000" },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    height: 38,
+    paddingHorizontal: sc(20),
+    paddingVertical: vs(10),
+    height: vs(38),
     backgroundColor: "#F5F5F5",
-    borderRadius: 40,
+    borderRadius: sc(40),
   },
-  rowLabel: {
-    fontFamily: "Outfit_400Regular",
-    fontSize: 14,
-    lineHeight: 18,
-    letterSpacing: 0.28,
-    color: "#464646",
-  },
-  rowValue: {
-    fontFamily: "Outfit_400Regular",
-    fontSize: 14,
-    lineHeight: 18,
-    letterSpacing: 0.28,
-    color: "#8A8A8A",
-  },
+  rowLabel: { fontFamily: "Outfit_400Regular", fontSize: ms(14), lineHeight: ms(18), letterSpacing: 0.28, color: "#464646" },
+  rowValue: { fontFamily: "Outfit_400Regular", fontSize: ms(14), lineHeight: ms(18), letterSpacing: 0.28, color: "#8A8A8A" },
   logoutBtn: {
     backgroundColor: "#FF4E52",
-    borderRadius: 25,
-    height: 38,
+    borderRadius: sc(25),
+    height: vs(38),
     alignItems: "center",
     justifyContent: "center",
   },
-  logoutText: {
-    fontFamily: "Outfit_600SemiBold",
-    fontSize: 14,
-    lineHeight: 18,
-    letterSpacing: 0.28,
-    color: "#FFFFFF",
-  },
+  logoutText: { fontFamily: "Outfit_600SemiBold", fontSize: ms(14), lineHeight: ms(18), letterSpacing: 0.28, color: "#FFFFFF" },
 });

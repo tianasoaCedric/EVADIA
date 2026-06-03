@@ -9,7 +9,7 @@ import { HotelItem } from "../services/homeService";
 import { getDestinationHotels, getVilleHotelsById } from "../services/destinationService";
 import { s as sc, vs, ms } from "../lib/scale";
 
-const CARD_WIDTH = Dimensions.get("window").width - 42;
+const CARD_WIDTH = Dimensions.get("window").width - sc(42);
 
 function StarRating({ rating }: { rating: number | null }) {
   const filled = rating ? Math.round(rating) : 0;
