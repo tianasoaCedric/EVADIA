@@ -166,7 +166,7 @@ const Avatar = ({ size = 'md', variant = 'default', className = '', onDeviseChan
           <div className="py-1">
             <button
               onClick={() => { setIsOpen(false); router.push('/profil') }}
-              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              className="flex items-center cursor-pointer gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
             >
               <User className="w-4 h-4 text-gray-400" />
               {t('my_profile')}
@@ -174,7 +174,7 @@ const Avatar = ({ size = 'md', variant = 'default', className = '', onDeviseChan
             
             <button
               onClick={() => { setIsOpen(false); router.push('/reservations') }}
-              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              className="flex items-center cursor-pointer gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
             >
               <CalendarDays className="w-4 h-4 text-gray-400" />
               {t('my_bookings')}
@@ -182,7 +182,7 @@ const Avatar = ({ size = 'md', variant = 'default', className = '', onDeviseChan
 
             <button
               onClick={() => { setIsOpen(false); router.push('/favorite') }}
-              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              className="flex items-center cursor-pointer gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
             >
               <Heart className="w-4 h-4 text-gray-400" />
               {t('my_favorites')}
@@ -194,7 +194,7 @@ const Avatar = ({ size = 'md', variant = 'default', className = '', onDeviseChan
             <button
               onClick={handleLogout}
               disabled={isLoggingOut}
-              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+              className="flex cursor-pointer items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
             >
               <LogOut className="w-4 h-4" />
               {isLoggingOut ? t('logging_out') : t('logout')}
@@ -210,7 +210,7 @@ const Avatar = ({ size = 'md', variant = 'default', className = '', onDeviseChan
           <div className="py-2">
             <button
               onClick={() => { setIsOpen(false); router.push('/login') }}
-              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
             >
               <LogIn className="w-4 h-4 text-gray-400" />
               {t('login')}
@@ -218,7 +218,7 @@ const Avatar = ({ size = 'md', variant = 'default', className = '', onDeviseChan
             
             <button
               onClick={() => { setIsOpen(false); router.push('/register') }}
-              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
             >
               <UserPlus className="w-4 h-4 text-gray-400" />
               {t('register')}
@@ -232,7 +232,7 @@ const Avatar = ({ size = 'md', variant = 'default', className = '', onDeviseChan
           <div className="py-2">
             <button
               onClick={handleGoogleLogin}
-              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />

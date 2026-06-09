@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Offre;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class OffreController extends Controller
 {
@@ -58,23 +59,28 @@ class OffreController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        $offre = Offre::with([
-            'photos',
-            'hotel.photos' => fn($q) => $q->where('est_principale', true),
-            'hotel.adresse',
-            'hotel.destinations',
-        ])
-        ->whereNotNull('hotel_id')
-        ->find($id);
+        $formatted = Cache::remember("offre:{$id}", 1800, function () use ($id) {
+            $offre = Offre::with([
+                'photos',
+                'hotel.photos' => fn($q) => $q->where('est_principale', true),
+                'hotel.adresse',
+                'hotel.destinations',
+            ])
+            ->whereNotNull('hotel_id')
+            ->find($id);
 
-        if (!$offre) {
+            if (!$offre) return null;
+
+            $data = $this->formatOffre($offre);
+            $data['phone'] = $offre->hotel?->telephone;
+            $data['email'] = $offre->hotel?->email_contact;
+            $data['terms'] = $offre->conditions ?? [];
+            return $data;
+        });
+
+        if (!$formatted) {
             return response()->json(['message' => 'Offre introuvable'], 404);
         }
-
-        $formatted = $this->formatOffre($offre);
-        $formatted['phone']  = $offre->hotel?->telephone;
-        $formatted['email']  = $offre->hotel?->email_contact;
-        $formatted['terms']  = $offre->conditions ?? [];
 
         return response()->json($formatted);
     }

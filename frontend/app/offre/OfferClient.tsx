@@ -129,7 +129,7 @@ export default function OfferClient({ initialData }: OfferClientProps) {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 w-full sm:grid-cols-2 lg:grid-cols-3 gap-12">
                   {offers.map((offer) => (
                     <OfferCard
                       key={offer.id}

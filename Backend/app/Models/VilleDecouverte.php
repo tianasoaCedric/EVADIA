@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class VilleDecouverte extends Model
@@ -37,6 +38,16 @@ class VilleDecouverte extends Model
             if ($ville->isDirty('nom') && ! $ville->isDirty('slug')) {
                 $ville->slug = Str::slug($ville->nom);
             }
+        });
+
+        static::saved(function (self $ville) {
+            Cache::forget('decouverte:villes');
+            Cache::forget("decouverte:lieux:{$ville->slug}");
+        });
+
+        static::deleted(function (self $ville) {
+            Cache::forget('decouverte:villes');
+            Cache::forget("decouverte:lieux:{$ville->slug}");
         });
     }
 
