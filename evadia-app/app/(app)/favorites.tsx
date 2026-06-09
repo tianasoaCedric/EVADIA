@@ -104,6 +104,7 @@ export default function FavoritesScreen() {
                       location: ville,
                       rating: note.toString(),
                       imageUris: JSON.stringify(photos),
+                      from: 'favorites',
                     },
                   })
                 }

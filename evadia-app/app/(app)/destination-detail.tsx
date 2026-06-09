@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { SearchBar } from '../../components/atoms/SearchBar';
 import { DestinationHotelCard } from '../../components/molecules/DestinationHotelCard';
 import { publicService, Hotel, hotelVille, hotelPhoto, hotelPhotos, hotelPrix, hotelNote } from '../../services/public';
+import { clientService } from '../../services/client';
 
 export default function DestinationDetailScreen() {
   const params = useLocalSearchParams();
@@ -13,6 +14,7 @@ export default function DestinationDetailScreen() {
   const villeId = params.villeId ? Number(params.villeId) : null;
 
   const [hotels, setHotels] = useState<Hotel[]>([]);
+  const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -32,12 +34,38 @@ export default function DestinationDetailScreen() {
     setLoading(true);
     try {
       if (!villeId) { setHotels([]); return; }
-      const data = await publicService.getHotelsByVille(villeId);
+      const [data, favs] = await Promise.all([
+        publicService.getHotelsByVille(villeId),
+        clientService.getFavorites().catch(() => []),
+      ]);
       setHotels(Array.isArray(data) ? data : []);
+      setFavoriteIds(new Set(favs.map((f) => f.hotel.id)));
     } catch {
       setHotels([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFavoriteToggle = async (hotelId: number, newState: boolean) => {
+    setFavoriteIds((prev) => {
+      const next = new Set(prev);
+      if (newState) next.add(hotelId); else next.delete(hotelId);
+      return next;
+    });
+    try {
+      if (newState) {
+        await clientService.addFavorite(hotelId);
+      } else {
+        await clientService.removeFavorite(hotelId);
+      }
+    } catch {
+      // rollback
+      setFavoriteIds((prev) => {
+        const next = new Set(prev);
+        if (newState) next.delete(hotelId); else next.add(hotelId);
+        return next;
+      });
     }
   };
 
@@ -75,7 +103,8 @@ export default function DestinationDetailScreen() {
         ) : (
           <FlatList
             data={filtered}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={(item) => `${item.id}-${favoriteIds.has(item.id)}`}
+            extraData={favoriteIds}
             contentContainerStyle={{ paddingHorizontal: 18, paddingBottom: 110 }}
             showsVerticalScrollIndicator={false}
             renderItem={({ item }) => {
@@ -91,6 +120,8 @@ export default function DestinationDetailScreen() {
                   location={ville}
                   imageUri={photos[0]}
                   imageUris={photos}
+                  defaultFavorite={favoriteIds.has(item.id)}
+                  onFavoriteToggle={(newState) => handleFavoriteToggle(item.id, newState)}
                   onPress={() =>
                     router.push({
                       pathname: '/(app)/hotel-detail',

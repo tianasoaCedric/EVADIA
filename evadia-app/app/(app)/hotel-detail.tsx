@@ -67,7 +67,15 @@ export default function HotelDetailScreen() {
     ]).start();
 
     if (hotelId) loadHotel(hotelId);
+    if (hotelId) checkFavorite(hotelId);
   }, [hotelId]);
+
+  const checkFavorite = async (id: number) => {
+    try {
+      const favs = await clientService.getFavorites();
+      setIsFavorite(favs.some((f) => f.hotel.id === id));
+    } catch {}
+  };
 
   const loadHotel = async (id: number) => {
     setLoading(true);
@@ -128,8 +136,12 @@ export default function HotelDetailScreen() {
           <TouchableOpacity activeOpacity={0.8} onPress={() => {
             if (from === 'home') {
               router.replace('/(app)/home');
+            } else if (from === 'favorites') {
+              router.replace('/(app)/favorites');
+            } else if (from === 'destination-detail' && fromVilleId) {
+              router.replace({ pathname: '/(app)/destination-detail', params: { villeId: fromVilleId, name: fromVilleName } });
             } else {
-              router.replace({ pathname: '/destination-detail', params: { villeId: fromVilleId ?? '', name: fromVilleName } });
+              router.back();
             }
           }}
             style={{ position: 'absolute', top: 52, left: 18, zIndex: 20, width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>

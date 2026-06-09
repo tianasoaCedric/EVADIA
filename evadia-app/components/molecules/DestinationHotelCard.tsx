@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState, useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Dimensions, Image, ScrollView, Text, TouchableOpacity, View, Animated } from 'react-native';
 
 interface DestinationHotelCardProps {
@@ -9,7 +9,9 @@ interface DestinationHotelCardProps {
   location: string;
   imageUri?: string;
   imageUris?: string[];
+  defaultFavorite?: boolean;
   onPress?: () => void;
+  onFavoriteToggle?: (newState: boolean) => void;
 }
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -22,9 +24,10 @@ export const DestinationHotelCard = ({
   location,
   imageUri,
   imageUris,
+  defaultFavorite = false,
   onPress,
+  onFavoriteToggle,
 }: DestinationHotelCardProps) => {
-  const [isFavorite, setIsFavorite] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
@@ -133,7 +136,7 @@ export const DestinationHotelCard = ({
         {/* Bouton Favoris (Cœur) en haut à droite - flottant, sans cercle */}
         <TouchableOpacity
           activeOpacity={0.8}
-          onPress={() => setIsFavorite(!isFavorite)}
+          onPress={() => onFavoriteToggle?.(!defaultFavorite)}
           style={{
             position: 'absolute',
             top: 14,
@@ -144,7 +147,7 @@ export const DestinationHotelCard = ({
           <Ionicons
             name="heart"
             size={28}
-            color={isFavorite ? "#ff2d55" : "rgba(255, 255, 255, 0.75)"}
+            color={defaultFavorite ? "#ff2d55" : "rgba(255, 255, 255, 0.75)"}
             style={{
               textShadowColor: 'rgba(0, 0, 0, 0.25)',
               textShadowOffset: { width: 0, height: 1 },

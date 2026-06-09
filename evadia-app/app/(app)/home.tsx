@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { HotelCard } from '../../components/molecules/HotelCard';
 import { Header } from '../../components/molecules/Header';
 import { publicService, Hotel, hotelVille, hotelPhoto, hotelPrix, hotelNote } from '../../services/public';
+import { clientService } from '../../services/client';
 import { router, useFocusEffect } from 'expo-router';
 
 interface CitySection {
@@ -14,6 +15,7 @@ interface CitySection {
 
 export default function HomePage() {
   const [sections, setSections] = useState<CitySection[]>([]);
+  const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
 
   useFocusEffect(
@@ -28,7 +30,10 @@ export default function HomePage() {
     setLoading(true);
     setError(null);
     try {
-      const hotels = await publicService.getHotels({ per_page: 20 });
+      const [hotels, favs] = await Promise.all([
+        publicService.getHotels({ per_page: 20 }),
+        clientService.getFavorites().catch(() => []),
+      ]);
 
       const map = new Map<string, Hotel[]>();
       for (const hotel of hotels) {
@@ -38,10 +43,32 @@ export default function HomePage() {
       }
 
       setSections(Array.from(map.entries()).map(([city, hs]) => ({ city, hotels: hs })));
+      setFavoriteIds(new Set(favs.map((f) => f.hotel.id)));
     } catch (e: any) {
       setError(e?.message ?? 'Impossible de charger les hôtels.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFavoriteToggle = async (hotelId: number, newState: boolean) => {
+    setFavoriteIds((prev) => {
+      const next = new Set(prev);
+      if (newState) next.add(hotelId); else next.delete(hotelId);
+      return next;
+    });
+    try {
+      if (newState) {
+        await clientService.addFavorite(hotelId);
+      } else {
+        await clientService.removeFavorite(hotelId);
+      }
+    } catch {
+      setFavoriteIds((prev) => {
+        const next = new Set(prev);
+        if (newState) next.delete(hotelId); else next.add(hotelId);
+        return next;
+      });
     }
   };
 
@@ -89,13 +116,15 @@ export default function HomePage() {
                   const note = hotelNote(hotel);
                   const photo = hotelPhoto(hotel);
                   const ville = hotelVille(hotel);
+                  const isFav = favoriteIds.has(hotel.id);
                   return (
                     <HotelCard
-                      key={hotel.id}
+                      key={`${hotel.id}-${isFav}`}
                       imageUri={photo}
                       name={hotel.nom}
                       price={prix ? `${prix.toLocaleString('fr-FR')}Ar/nuité` : ''}
                       rating={note}
+                      defaultFavorite={isFav}
                       onPress={() =>
                         router.push({
                           pathname: '/(app)/hotel-detail',
@@ -109,6 +138,7 @@ export default function HomePage() {
                           },
                         })
                       }
+                      onFavoriteToggle={(newState) => handleFavoriteToggle(hotel.id, newState)}
                     />
                   );
                 })}

@@ -1,5 +1,4 @@
 import { View, Text, Image, TouchableOpacity, DimensionValue, Pressable } from 'react-native';
-import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 
 interface HotelCardProps {
@@ -11,7 +10,7 @@ interface HotelCardProps {
   width?: DimensionValue;
   marginRight?: number;
   onPress?: () => void;
-  onFavoriteToggle?: () => void;
+  onFavoriteToggle?: (newState: boolean) => void;
 }
 
 export const HotelCard = ({
@@ -25,7 +24,6 @@ export const HotelCard = ({
   onPress,
   onFavoriteToggle,
 }: HotelCardProps) => {
-  const [isFavorite, setIsFavorite] = useState(defaultFavorite);
   const safeRating = typeof rating === 'number' && !isNaN(rating) ? rating : 0;
 
   const renderStars = () => {
@@ -68,14 +66,14 @@ export const HotelCard = ({
         
         {/* Icône Coeur de favori (sans fond blanc, flottant en haut à droite) */}
         <TouchableOpacity
-          onPress={() => { setIsFavorite(!isFavorite); onFavoriteToggle?.(); }}
+          onPress={() => onFavoriteToggle?.(!defaultFavorite)}
           className="absolute top-3 right-3"
           style={{ zIndex: 10 }}
         >
           <Ionicons 
             name="heart" 
             size={28} 
-            color={isFavorite ? "#ff2d55" : "rgba(255, 255, 255, 0.75)"} 
+            color={defaultFavorite ? "#ff2d55" : "rgba(255, 255, 255, 0.75)"} 
             style={{
               textShadowColor: 'rgba(0, 0, 0, 0.25)',
               textShadowOffset: { width: 0, height: 1 },
