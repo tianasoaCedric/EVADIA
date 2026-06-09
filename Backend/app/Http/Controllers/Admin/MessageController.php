@@ -37,7 +37,7 @@ class MessageController extends Controller
 
         // Load interlocutors and last message / unread count
         $conversations = $conversationUsers->through(function ($item) use ($userId) {
-            $item->interlocuteur = User::find($item->interlocuteur_id);
+            $item->interlocuteur = User::with(['hotelAdmins.hotel'])->find($item->interlocuteur_id);
             $item->dernier_message = Message::where(function ($q) use ($userId, $item) {
                 $q->where('expediteur_id', $userId)->where('destinataire_id', $item->interlocuteur_id);
             })->orWhere(function ($q) use ($userId, $item) {

@@ -88,17 +88,20 @@ class OffreController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'titre' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'titre'      => 'required|string|max:255',
+            'description'=> 'nullable|string',
             'date_debut' => 'required|date',
-            'date_fin' => 'required|date|after:date_debut',
+            'date_fin'   => 'required|date|after:date_debut',
             'code_promo' => 'nullable|string|max:50|unique:offres,code_promo',
-            'hotel_id' => 'nullable|exists:hotels,id',
+            'hotel_id'   => 'nullable|exists:hotels,id',
+            'remise_pct' => 'nullable|integer|min:0|max:100',
+            'conditions' => 'nullable|array',
+            'conditions.*' => 'string|max:500',
         ]);
 
         $offre = Offre::create([
             ...$validated,
-            'statut' => 'active',
+            'statut'     => 'active',
             'created_by' => auth()->id(),
         ]);
 

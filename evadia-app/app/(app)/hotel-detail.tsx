@@ -1,0 +1,271 @@
+import { Ionicons } from '@expo/vector-icons';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Animated, Dimensions, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { RoomCard } from '../../components/molecules/RoomCard';
+import { publicService, Hotel, Propriete, hotelVille, hotelPhotos, hotelNote, proprietePrix, proprietePhotos } from '../../services/public';
+import { clientService } from '../../services/client';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const IMAGE_HEIGHT = Math.round(screenHeight * 0.42);
+
+const EQUIPEMENT_ICON_MAP: Record<string, string> = {
+  'wifi': 'wifi-outline',
+  'piscine': 'water-outline',
+  'parking': 'car-outline',
+  'spa': 'flower-outline',
+  'climatisation': 'snow-outline',
+  'restaurant': 'restaurant-outline',
+  'salle sport': 'fitness-outline',
+  'sécurité': 'shield-checkmark-outline',
+};
+
+function getEquipIcon(name: string): string {
+  const key = name.toLowerCase();
+  for (const [k, v] of Object.entries(EQUIPEMENT_ICON_MAP)) {
+    if (key.includes(k)) return v;
+  }
+  return 'checkmark-circle-outline';
+}
+
+export default function HotelDetailScreen() {
+  const params = useLocalSearchParams();
+  const hotelId = params.id ? Number(params.id) : null;
+  const hotelName = (params.name as string) || 'Hôtel';
+  const hotelLocation = (params.location as string) || '';
+  const fromVilleId = params.fromVilleId ? Number(params.fromVilleId) : null;
+  const fromVilleName = (params.fromVilleName as string) || '';
+  const from = (params.from as string) || '';
+  const hotelRating = parseFloat((params.rating as string) || '0');
+  const paramImageUris: string[] = params.imageUris
+    ? JSON.parse(params.imageUris as string)
+    : ['https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=800'];
+
+  const [hotel, setHotel] = useState<Hotel | null>(null);
+  const [rooms, setRooms] = useState<Propriete[]>([]);
+  const [loading, setLoading] = useState(!!hotelId);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeRoomIndex, setActiveRoomIndex] = useState(0);
+  const [togglingFav, setTogglingFav] = useState(false);
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const translateYAnim = useRef(new Animated.Value(30)).current;
+
+  useEffect(() => {
+    setHotel(null);
+    setRooms([]);
+    setActiveIndex(0);
+    setActiveRoomIndex(0);
+    setIsFavorite(false);
+
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }),
+      Animated.timing(translateYAnim, { toValue: 0, duration: 400, useNativeDriver: true }),
+    ]).start();
+
+    if (hotelId) loadHotel(hotelId);
+  }, [hotelId]);
+
+  const loadHotel = async (id: number) => {
+    setLoading(true);
+    try {
+      const data = await publicService.getHotel(id);
+      setHotel(data);
+      // getHotel normalise déjà et place les chambres dans data.chambres
+      setRooms(Array.isArray((data as any).chambres) ? (data as any).chambres : []);
+    } catch {}
+    finally { setLoading(false); }
+  };
+
+  const handleToggleFavorite = async () => {
+    if (togglingFav || !hotelId) return;
+    setTogglingFav(true);
+    try {
+      if (isFavorite) {
+        await clientService.removeFavorite(hotelId);
+      } else {
+        await clientService.addFavorite(hotelId);
+      }
+      setIsFavorite(!isFavorite);
+    } catch {}
+    finally { setTogglingFav(false); }
+  };
+
+  const imageUris = hotel ? hotelPhotos(hotel) : paramImageUris;
+  const displayRating = hotel ? hotelNote(hotel) : hotelRating;
+  const displayVille = hotel ? hotelVille(hotel) : hotelLocation;
+  const nbAvis = hotel?.nb_avis ?? 0;
+  const description = hotel?.description ?? 'Détendez-vous dans notre établissement confortable avec 3 villas indépendantes et 5 bungalows. Calme, familial et à quelques pas de la mer.';
+  const services = (hotel as any)?.services ?? [];
+
+  const handleScroll = (event: any) => {
+    const index = Math.round(event.nativeEvent.contentOffset.x / screenWidth);
+    if (index !== activeIndex) setActiveIndex(index);
+  };
+  const handleRoomScroll = (event: any) => {
+    const index = Math.round(event.nativeEvent.contentOffset.x / (screenWidth - 20));
+    if (index !== activeRoomIndex) setActiveRoomIndex(index);
+  };
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={[]}>
+      <Animated.View style={{ flex: 1, opacity: fadeAnim, transform: [{ translateY: translateYAnim }] }}>
+        {/* Image carousel */}
+        <View style={{ width: screenWidth, height: IMAGE_HEIGHT, borderBottomLeftRadius: 36, borderBottomRightRadius: 36, overflow: 'hidden', backgroundColor: '#e5e7eb', zIndex: 10 }}>
+          <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} onScroll={handleScroll} scrollEventThrottle={16} style={{ width: screenWidth, height: IMAGE_HEIGHT }}>
+            {imageUris.map((uri, idx) => (
+              <Image key={idx} source={{ uri }} style={{ width: screenWidth, height: IMAGE_HEIGHT, resizeMode: 'cover' }} />
+            ))}
+          </ScrollView>
+
+          {/* Back */}
+          <TouchableOpacity activeOpacity={0.8} onPress={() => {
+            if (from === 'home') {
+              router.replace('/(app)/home');
+            } else {
+              router.replace({ pathname: '/destination-detail', params: { villeId: fromVilleId ?? '', name: fromVilleName } });
+            }
+          }}
+            style={{ position: 'absolute', top: 52, left: 18, zIndex: 20, width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
+            <Ionicons name="chevron-back" size={30} color="#fff" style={{ textShadowColor: 'rgba(0,0,0,0.35)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 }} />
+          </TouchableOpacity>
+
+          {/* Share + Favorite */}
+          <View style={{ position: 'absolute', top: 52, right: 18, zIndex: 20, flexDirection: 'row', alignItems: 'center' }}>
+            <TouchableOpacity activeOpacity={0.8} style={{ marginRight: 14 }}>
+              <Ionicons name="share-outline" size={26} color="#fff" style={{ textShadowColor: 'rgba(0,0,0,0.35)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 }} />
+            </TouchableOpacity>
+            <TouchableOpacity activeOpacity={0.8} onPress={handleToggleFavorite}>
+              <Ionicons name="heart" size={28} color={isFavorite ? '#ff2d55' : 'rgba(255,255,255,0.85)'} style={{ textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 3 }} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Dots */}
+          {imageUris.length > 1 && (
+            <View style={{ position: 'absolute', bottom: 18, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center' }}>
+              {imageUris.map((_, idx) => (
+                <View key={idx} style={{ width: idx === activeIndex ? 24 : 6, height: 6, borderRadius: 3, backgroundColor: idx === activeIndex ? '#01BDA5' : 'rgba(255,255,255,0.75)', marginRight: idx < imageUris.length - 1 ? 6 : 0 }} />
+              ))}
+            </View>
+          )}
+        </View>
+
+        {loading ? (
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <ActivityIndicator size="large" color="#01BDA5" />
+          </View>
+        ) : (
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 110 }} style={{ flex: 1 }}>
+            <View style={{ paddingHorizontal: 18, paddingTop: 20 }}>
+              <Text style={{ fontSize: 22, fontWeight: '800', color: '#111827', letterSpacing: -0.3 }}>
+                {hotel?.nom ?? hotelName}
+              </Text>
+
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6 }}>
+                <Ionicons name="location-outline" size={15} color="#6b7280" style={{ marginRight: 4 }} />
+                <Text style={{ fontSize: 13, color: '#6b7280', fontWeight: '600' }}>{displayVille}</Text>
+              </View>
+
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+                <Ionicons name="star" size={17} color="#111827" style={{ marginRight: 5 }} />
+                <Text style={{ fontSize: 15, fontWeight: '800', color: '#111827', marginRight: 8 }}>
+                  {displayRating.toFixed(1).replace('.', ',')}
+                </Text>
+                {nbAvis > 0 && <Text style={{ fontSize: 13, color: '#6b7280', fontWeight: '600' }}>{nbAvis} avis</Text>}
+              </View>
+
+              <View style={{ height: 1, backgroundColor: '#f3f4f6', marginTop: 18, marginBottom: 18 }} />
+
+              {/* À propos */}
+              <Text style={{ fontSize: 17, fontWeight: '800', color: '#111827', marginBottom: 10 }}>À propos</Text>
+              <Text style={{ fontSize: 14, color: '#6b7280', lineHeight: 22, fontWeight: '500' }}>{description}</Text>
+
+              <View style={{ height: 1, backgroundColor: '#f3f4f6', marginTop: 22, marginBottom: 22 }} />
+
+              {/* Chambres */}
+              <Text style={{ fontSize: 17, fontWeight: '800', color: '#111827', marginBottom: 14 }}>Chambres et disponibilité</Text>
+
+              {rooms.length === 0 ? (
+                <Text style={{ color: '#9ca3af', fontSize: 13, marginBottom: 16 }}>Aucune chambre disponible pour le moment.</Text>
+              ) : (
+                <>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} decelerationRate="fast" snapToInterval={screenWidth - 20} snapToAlignment="start" onScroll={handleRoomScroll} scrollEventThrottle={16} style={{ width: '100%', marginBottom: 12 }}>
+                    {rooms.map((room) => {
+                      const prix = proprietePrix(room);
+                      const photos = proprietePhotos(room);
+                      return (
+                        <RoomCard
+                          key={room.id}
+                          name={room.nom}
+                          price={prix ? `${prix.toLocaleString('fr-FR')}Ariary/nuit` : 'Prix sur demande'}
+                          imageUri={photos[0]}
+                          beds={room.nb_lits ?? 1}
+                          bathrooms={room.nb_salles_bain ?? 1}
+                          persons={room.capacite ?? 2}
+                          onReserve={() =>
+                            router.push({
+                              pathname: '/(app)/proprieter-detail',
+                              params: {
+                                id: room.id,
+                                name: room.nom,
+                                price: prix ? `${prix.toLocaleString('fr-FR')}Ariary/nuit` : 'Prix sur demande',
+                                imageUri: photos[0],
+                                beds: room.nb_lits ?? 1,
+                                bathrooms: room.nb_salles_bain ?? 1,
+                                persons: room.capacite ?? 2,
+                                location: displayVille,
+                                hotelName: hotel?.nom ?? hotelName,
+                                hotelRating: displayRating.toString(),
+                                hotelImageUris: JSON.stringify(imageUris),
+                              },
+                            })
+                          }
+                        />
+                      );
+                    })}
+                  </ScrollView>
+                  {rooms.length > 1 && (
+                    <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 22 }}>
+                      {rooms.map((_, idx) => (
+                        <View key={idx} style={{ width: idx === activeRoomIndex ? 24 : 6, height: 6, borderRadius: 3, backgroundColor: idx === activeRoomIndex ? '#01BDA5' : '#cbd5e1', marginRight: idx < rooms.length - 1 ? 6 : 0 }} />
+                      ))}
+                    </View>
+                  )}
+                </>
+              )}
+
+              <View style={{ height: 1, backgroundColor: '#f3f4f6', marginBottom: 22 }} />
+
+              {/* Services / Équipements */}
+              <Text style={{ fontSize: 16, fontWeight: '700', color: '#111827', marginBottom: 14 }}>Équipements</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                {services.length > 0
+                  ? services.map((s: any) => (
+                      <View key={s.id} style={{ width: '50%', flexDirection: 'row', alignItems: 'center', marginBottom: 14 }}>
+                        <Ionicons name={getEquipIcon(s.nom) as any} size={22} color="#4b5563" />
+                        <Text style={{ fontSize: 13, color: '#4b5563', fontWeight: '500', marginLeft: 10 }}>{s.nom}</Text>
+                      </View>
+                    ))
+                  : [
+                      { icon: 'wifi-outline', label: 'Wifi gratuit' },
+                      { icon: 'water-outline', label: 'Piscine' },
+                      { icon: 'car-outline', label: 'Parking' },
+                      { icon: 'snow-outline', label: 'Climatisation' },
+                      { icon: 'restaurant-outline', label: 'Restaurant' },
+                      { icon: 'shield-checkmark-outline', label: 'Sécurité 24h' },
+                    ].map((item, idx) => (
+                      <View key={idx} style={{ width: '50%', flexDirection: 'row', alignItems: 'center', marginBottom: 14 }}>
+                        <Ionicons name={item.icon as any} size={22} color="#4b5563" />
+                        <Text style={{ fontSize: 13, color: '#4b5563', fontWeight: '500', marginLeft: 10 }}>{item.label}</Text>
+                      </View>
+                    ))}
+              </View>
+            </View>
+          </ScrollView>
+        )}
+      </Animated.View>
+    </SafeAreaView>
+  );
+}

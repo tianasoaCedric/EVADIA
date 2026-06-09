@@ -12,7 +12,7 @@ trait BelongsToHotel
      */
     protected function getHotel(): Hotel
     {
-        return Hotel::whereHas('admins', fn($q) => $q->where('user_id', auth()->id())->whereNull('date_fin'))
+        return Hotel::whereHas('admins', fn($q) => $q->where('user_id', auth('hotel')->id())->whereNull('date_fin'))
             ->firstOrFail();
     }
 

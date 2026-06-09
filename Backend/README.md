@@ -35,17 +35,27 @@ git clone <url-du-repo> evadia
 cd evadia/Backend
 ```
 
-### 2. Installer les dépendances PHP
+> Telecharge le code source du projet et se place dans le dossier `Backend` qui contient l'application Laravel.
+
+### 2. Installer les dependances PHP
 
 ```bash
 composer install
 ```
 
-### 3. Installer les dépendances JavaScript
+> Installe toutes les librairies PHP necessaires au projet (Laravel, Sanctum, L5-Swagger, etc.).
+> Les packages sont definis dans `composer.json` et installes dans le dossier `vendor/`.
+> Si Composer n'est pas installe : [getcomposer.org](https://getcomposer.org/download/)
+
+### 3. Installer les dependances JavaScript
 
 ```bash
 npm install
 ```
+
+> Installe les packages front-end (Tailwind CSS, Alpine.js, Vite, Laravel Echo, etc.).
+> Les packages sont definis dans `package.json` et installes dans le dossier `node_modules/`.
+> Necessite Node.js 18+ : [nodejs.org](https://nodejs.org/)
 
 ### 4. Configuration de l'environnement
 
@@ -54,33 +64,52 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-Modifier le fichier `.env` selon votre environnement :
+> - `cp .env.example .env` : Copie le fichier de configuration modele. Le fichier `.env` contient toutes les variables sensibles (mots de passe, cles API) et n'est **jamais** commit dans Git.
+> - `php artisan key:generate` : Genere une cle de chiffrement unique (`APP_KEY`) utilisee par Laravel pour securiser les sessions, cookies et donnees chiffrees. **Obligatoire** avant le premier lancement.
+
+Ouvrir le fichier `.env` et modifier les valeurs selon votre environnement :
 
 ```env
-# Application
-APP_NAME=EVADIA
-APP_URL=http://localhost:8000
+# ── Application ──────────────────────────────────────
+APP_NAME=EVADIA                    # Nom affiche dans les emails et le titre
+APP_URL=http://localhost:8000      # URL de base (adapter en production)
+APP_ENV=local                      # local = dev, production = prod
+APP_DEBUG=true                     # true = affiche les erreurs detaillees (desactiver en production)
 
-# Base de données PostgreSQL
-DB_CONNECTION=pgsql
-DB_HOST=127.0.0.1
-DB_PORT=5432
-DB_DATABASE=evadia
-DB_USERNAME=postgres
-DB_PASSWORD=votre_mot_de_passe
+# ── Base de donnees ──────────────────────────────────
+# PostgreSQL est recommande (le projet utilise ilike pour la recherche)
+DB_CONNECTION=pgsql                # Driver : pgsql, mysql ou sqlite
+DB_HOST=127.0.0.1                  # Adresse du serveur de base de donnees
+DB_PORT=5432                       # Port par defaut : 5432 (PostgreSQL), 3306 (MySQL)
+DB_DATABASE=evadia                 # Nom de la base (a creer manuellement avant)
+DB_USERNAME=postgres               # Utilisateur de la base de donnees
+DB_PASSWORD=votre_mot_de_passe     # Mot de passe de la base de donnees
 
-# Redis (optionnel)
+# ── Queue / Jobs ─────────────────────────────────────
+QUEUE_CONNECTION=sync              # sync = execution immediate (pas besoin de queue:work)
+                                   # database = execution asynchrone (necessite php artisan queue:work)
+
+# ── Cache et Sessions ────────────────────────────────
+CACHE_STORE=file                   # file = stockage sur disque (suffisant en dev)
+SESSION_DRIVER=file                # file, database ou redis
+
+# ── Redis (optionnel) ────────────────────────────────
+# Utile en production pour le cache, les sessions et les queues
 REDIS_HOST=127.0.0.1
 REDIS_PORT=6379
 
-# Stockage S3
+# ── Stockage fichiers (S3) ───────────────────────────
+# Necessaire uniquement si vous activez l'upload de photos
+FILESYSTEM_DISK=local              # local = stockage sur disque, s3 = Amazon S3
 AWS_ACCESS_KEY_ID=votre_cle
 AWS_SECRET_ACCESS_KEY=votre_secret
 AWS_DEFAULT_REGION=eu-west-3
 AWS_BUCKET=evadia-uploads
 
-# Email (SMTP pour production)
-MAIL_MAILER=smtp
+# ── Email ────────────────────────────────────────────
+# En dev : MAIL_MAILER=log (les emails sont ecrits dans storage/logs)
+# En prod : configurer un serveur SMTP reel
+MAIL_MAILER=log                    # log = pas d'envoi reel, smtp = envoi reel
 MAIL_HOST=smtp.exemple.com
 MAIL_PORT=587
 MAIL_USERNAME=noreply@evadia.com
@@ -88,59 +117,120 @@ MAIL_PASSWORD=votre_mot_de_passe
 MAIL_FROM_ADDRESS=noreply@evadia.com
 MAIL_FROM_NAME=EVADIA
 
-# WebSocket (Reverb)
-BROADCAST_CONNECTION=reverb
+# ── WebSocket (Reverb) ──────────────────────────────
+# Necessaire uniquement pour la messagerie en temps reel
+BROADCAST_CONNECTION=log           # log = pas de websocket, reverb = temps reel actif
 REVERB_APP_ID=evadia-local
 REVERB_APP_KEY=evadia-reverb-key
 REVERB_APP_SECRET=evadia-reverb-secret
 REVERB_HOST=localhost
-REVERB_PORT=8080
-REVERB_SCHEME=http
+REVERB_PORT=6001                   # Port du client (navigateur)
+REVERB_SERVER_PORT=6001            # Port du serveur WebSocket
+REVERB_SCHEME=http                 # http en dev, https en production
 ```
 
-### 5. Créer la base de données et lancer les migrations
+### 5. Creer la base de donnees et lancer les migrations
+
+Avant de lancer les migrations, creer la base de donnees manuellement :
+
+```bash
+# PostgreSQL
+psql -U postgres -c "CREATE DATABASE evadia;"
+
+# Ou avec MySQL
+# mysql -u root -p -e "CREATE DATABASE evadia CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+```
+
+Puis executer les migrations :
 
 ```bash
 php artisan migrate
 ```
 
-### 6. Exécuter les seeders (données initiales)
+> Cette commande cree toutes les tables dans la base de donnees a partir des fichiers de migration situes dans `database/migrations/`.
+> Chaque fichier de migration definit la structure d'une ou plusieurs tables (colonnes, index, cles etrangeres).
+> En cas d'erreur, verifier que la base `evadia` existe et que les identifiants dans `.env` sont corrects.
+
+### 6. Executer les seeders (donnees initiales)
 
 ```bash
 php artisan db:seed
 ```
 
-Cela crée :
-- Les 5 rôles système (`super_admin`, `admin_evadia`, `admin_hotel`, `gestionnaire_hotel`, `client`)
-- Un compte admin par défaut : **admin@evadia.com** / **Evadia2026!**
+> Les seeders inserent les donnees necessaires au fonctionnement de l'application :
+> - **5 roles systeme** : `super_admin` (niveau 100), `admin_evadia` (90), `admin_hotel` (50), `gestionnaire_hotel` (40), `client` (10)
+> - **Un compte administrateur** : `admin@evadia.com` / `Evadia2026!`
+>
+> Les seeders se trouvent dans `database/seeders/`. Vous pouvez les modifier pour ajouter des donnees de test supplementaires.
+> Pour re-executer un seeder specifique : `php artisan db:seed --class=RolesAndAdminSeeder`
 
 ### 7. Compiler les assets frontend
 
 ```bash
-# Développement (avec hot-reload)
+# Developpement (avec hot-reload : les changements CSS/JS sont appliques instantanement)
 npm run dev
 
-# Production
+# Production (fichiers minifies et optimises dans public/build/)
 npm run build
 ```
+
+> - `npm run dev` : Lance le serveur Vite qui compile les assets a la volee. Utile pendant le developpement car les modifications sont appliquees sans rechargement.
+> - `npm run build` : Genere les fichiers CSS/JS finaux dans `public/build/`. **Obligatoire** si vous n'utilisez pas `npm run dev` car sans le manifest Vite, Laravel ne peut pas charger les styles.
+> - Si vous voyez l'erreur "Vite manifest not found", lancez `npm run build` ou `npm run dev`.
 
 ### 8. Lancer le serveur
 
 ```bash
-# Terminal 1 : Serveur Laravel
+# Terminal 1 : Serveur Laravel (obligatoire)
 php artisan serve
+```
 
-# Terminal 2 : Serveur WebSocket (pour la messagerie temps réel)
-php artisan reverb:start
+> Demarre le serveur de developpement PHP sur `http://localhost:8000`.
+> C'est le seul terminal obligatoire pour commencer a utiliser l'application.
 
-# Terminal 3 : Queue worker (pour les notifications, emails)
-php artisan queue:work
-
-# Terminal 4 : Vite dev server (développement uniquement)
+```bash
+# Terminal 2 : Vite dev server (recommande en developpement)
 npm run dev
 ```
 
+> Compile les assets CSS/JS en temps reel. Si vous preferez ne pas le lancer, executez `npm run build` une seule fois.
+
+```bash
+# Terminal 3 : Serveur WebSocket (optionnel - uniquement pour la messagerie temps reel)
+php artisan reverb:start
+```
+
+> Demarre le serveur WebSocket sur le port 6001. Necessaire uniquement si `BROADCAST_CONNECTION=reverb` dans `.env`.
+> Si le port est occupe, changez `REVERB_SERVER_PORT` dans `.env`.
+> En dev, vous pouvez utiliser `BROADCAST_CONNECTION=log` pour desactiver le temps reel.
+
+```bash
+# Terminal 4 : Queue worker (optionnel - uniquement si QUEUE_CONNECTION=database)
+php artisan queue:work
+```
+
+> Execute les jobs en arriere-plan (emails, notifications asynchrones).
+> **Non necessaire** si `QUEUE_CONNECTION=sync` dans `.env` (les jobs sont executes immediatement).
+
 L'application est accessible sur : **http://localhost:8000**
+
+### Resume : configuration minimale pour demarrer
+
+Pour un demarrage rapide en developpement, seules ces etapes sont necessaires :
+
+```bash
+composer install                  # Dependances PHP
+npm install                       # Dependances JS
+cp .env.example .env              # Fichier de configuration
+php artisan key:generate          # Cle de chiffrement
+# Configurer DB_* dans .env       # Connexion base de donnees
+php artisan migrate               # Creer les tables
+php artisan db:seed               # Donnees initiales
+npm run build                     # Compiler les assets
+php artisan serve                 # Lancer le serveur
+```
+
+> Avec `QUEUE_CONNECTION=sync` et `BROADCAST_CONNECTION=log`, un seul terminal suffit.
 
 ---
 
@@ -222,17 +312,18 @@ Affiche : nombre d'hôtels, réservations, utilisateurs, revenus, graphiques.
 | `POST /admin/hotels/{hotel}/photos` | Ajouter des photos (upload vers S3) |
 | `DELETE /admin/hotels/{hotel}/photos/{photo}` | Supprimer une photo |
 
-#### 2.4 Gestion des Abonnements
+#### 2.4 Suivi des Abonnements
 
 | URL | Description |
 |-----|-------------|
-| `GET /admin/subscriptions` | Liste des abonnements hôteliers |
-| `GET /admin/subscriptions/create` | Créer un nouvel abonnement |
+| `GET /admin/subscriptions` | Tableau de suivi annuel : liste des hotels avec colonnes Jan-Dec |
+| `GET /admin/subscriptions/create` | Creer un nouvel abonnement |
 | `POST /admin/subscriptions` | Enregistrer l'abonnement |
-| `GET /admin/subscriptions/{sub}` | Détail d'un abonnement |
+| `GET /admin/subscriptions/{sub}` | Detail d'un abonnement |
 | `GET /admin/subscriptions/{sub}/edit` | Modifier un abonnement |
-| `PUT /admin/subscriptions/{sub}` | Mise à jour |
-| `DELETE /admin/subscriptions/{sub}` | Supprimer |
+| `PUT /admin/subscriptions/{sub}` | Mise a jour |
+
+La page index affiche un tableau avec les hotels en lignes et les 12 mois en colonnes. Chaque cellule indique si l'hotel a un abonnement actif (vert) ou expire (rouge) pour ce mois. Filtres disponibles : recherche par nom d'hotel, selection de l'annee. Pagination par 10 hotels.
 
 #### 2.5 Gestion des Offres
 
@@ -450,11 +541,12 @@ Authorization: Bearer {votre-token}
 | `destinations` | Destinations touristiques |
 | `log_admin` | Journal des actions administratives |
 
-### Particularités du schéma
+### Particularites du schema
 
-- **Photos polymorphiques** : La table `photos` utilise `entite_type` + `entite_id` au lieu de clés étrangères séparées. Cela permet de stocker les photos d'hôtels (`entite_type = 'hotel'`) et de chambres (`entite_type = 'propriete'`) dans la même table.
-- **Colonnes personnalisées** : `date_inscription` au lieu de `created_at`, `password_hash` au lieu de `password` (override via `getAuthPassword()` dans le modèle User).
-- **Soft-desactivation** : Les admins hôtels sont désactivés via `date_fin` dans `hotel_admins` plutôt que supprimés.
+- **Photos** : La table `photos` utilise `propriete_id` pour lier les photos aux chambres. Le systeme de photos n'est pas encore actif en production (migration presente mais non utilisee).
+- **Colonnes personnalisees** : La table `users` utilise `date_inscription` au lieu de `created_at` et `password_hash` au lieu de `password`. Le modele `User` surcharge `getAuthPassword()` pour que Laravel utilise `password_hash` pour l'authentification.
+- **Soft-desactivation** : Les admins hotels sont desactives via `date_fin` dans `hotel_admins` plutot que supprimes. Cela permet de garder l'historique des assignations.
+- **Recherche** : Le projet utilise `ilike` (PostgreSQL) pour les recherches insensibles a la casse. Si vous utilisez MySQL, remplacez par `like`.
 
 ---
 
@@ -466,27 +558,33 @@ La messagerie utilise **Laravel Reverb** comme serveur WebSocket.
 
 Les variables d'environnement sont dans `.env` :
 ```env
-BROADCAST_CONNECTION=reverb
-REVERB_APP_ID=evadia-local
-REVERB_APP_KEY=evadia-reverb-key
-REVERB_APP_SECRET=evadia-reverb-secret
-REVERB_HOST=localhost
-REVERB_PORT=8080
-REVERB_SCHEME=http
+BROADCAST_CONNECTION=reverb        # Activer le broadcast via Reverb
+REVERB_APP_ID=evadia-local         # Identifiant de l'application Reverb
+REVERB_APP_KEY=evadia-reverb-key   # Cle publique (utilisee cote client)
+REVERB_APP_SECRET=evadia-reverb-secret  # Cle secrete (utilisee cote serveur)
+REVERB_HOST=localhost              # Hote du serveur WebSocket
+REVERB_PORT=6001                   # Port cote client (navigateur)
+REVERB_SERVER_PORT=6001            # Port d'ecoute du serveur Reverb
+REVERB_SCHEME=http                 # http en dev, https en production
 ```
+
+> **Note :** En developpement, vous pouvez desactiver le temps reel avec `BROADCAST_CONNECTION=log`. La messagerie fonctionnera toujours mais les messages n'apparaitront qu'apres rechargement de la page.
 
 ### Fonctionnement
 
 1. Un utilisateur envoie un message via le formulaire
-2. Le contrôleur crée le `Message` en base et diffuse un événement `NewMessageSent`
-3. L'événement est envoyé sur le canal privé `messages.{destinataire_id}`
-4. Le navigateur du destinataire reçoit l'événement via Laravel Echo et affiche le message sans rechargement
+2. Le controleur cree le `Message` en base et diffuse un evenement `NewMessageSent`
+3. L'evenement est envoye sur le canal prive `messages.{destinataire_id}`
+4. Le navigateur du destinataire recoit l'evenement via Laravel Echo et affiche le message sans rechargement
 
 ### Lancer le serveur WebSocket
 
 ```bash
 php artisan reverb:start
 ```
+
+> Demarre le serveur WebSocket sur le port defini dans `REVERB_SERVER_PORT`.
+> Si le port est deja utilise par un autre processus, changez la valeur dans `.env`.
 
 En production avec SSL :
 ```bash
@@ -497,77 +595,139 @@ php artisan reverb:start --host=0.0.0.0 --port=443
 
 ## Commandes utiles
 
+### Tests
+
 ```bash
-# Lancer les tests
-php artisan test
+php artisan test                   # Lance tous les tests unitaires et fonctionnels
+php artisan test --filter=HotelTest  # Lance un test specifique
+```
 
-# Vider les caches
-php artisan cache:clear
-php artisan config:clear
-php artisan route:clear
-php artisan view:clear
+### Cache
 
-# Voir toutes les routes
-php artisan route:list
+```bash
+php artisan cache:clear            # Vide le cache applicatif (donnees en cache)
+php artisan config:clear           # Vide le cache de configuration (apres modif .env)
+php artisan route:clear            # Vide le cache des routes (apres modif routes/)
+php artisan view:clear             # Vide le cache des vues Blade compilees
+```
 
-# Regénérer la doc Swagger
-php artisan l5-swagger:generate
+> **Quand utiliser ?** Apres avoir modifie `.env`, les routes, ou si vous avez un comportement inattendu, videz les caches concernes.
 
-# Lancer les migrations en production
+### Routes
+
+```bash
+php artisan route:list             # Affiche toutes les routes avec URL, methode, middleware
+php artisan route:list --path=admin  # Filtrer par prefixe
+```
+
+### Documentation Swagger
+
+```bash
+php artisan l5-swagger:generate    # Regenere la doc API a partir des annotations PHP
+```
+
+> La documentation est ensuite accessible sur `http://localhost:8000/docs`
+
+### Migrations
+
+```bash
+php artisan migrate                # Execute les nouvelles migrations
+php artisan migrate --force        # Force en production (pas de confirmation)
+php artisan migrate:rollback       # Annule la derniere migration
+php artisan migrate:status         # Voir quelles migrations ont ete executees
+```
+
+### Stockage
+
+```bash
+php artisan storage:link           # Cree un lien symbolique public/storage -> storage/app/public
+```
+
+> Necessaire pour que les fichiers uploades dans `storage/app/public/` soient accessibles via URL.
+
+### Optimisation production
+
+```bash
+php artisan optimize               # Cache config + routes + vues en une commande
+php artisan config:cache           # Cache la configuration (ne plus modifier .env sans re-cacher)
+php artisan route:cache            # Cache les routes (plus rapide au demarrage)
+php artisan view:cache             # Pre-compile toutes les vues Blade
+```
+
+> En production, ces commandes accelerent le chargement de l'application. Ne pas utiliser `config:cache` en dev car les modifications de `.env` ne seront plus prises en compte sans `config:clear`.
+
+---
+
+## Deploiement en production
+
+### Etape 1 : Installer les dependances
+
+```bash
+composer install --no-dev --optimize-autoloader
+npm install && npm run build
+```
+
+> - `--no-dev` : N'installe pas les packages de developpement (phpunit, debugbar, etc.)
+> - `--optimize-autoloader` : Genere un autoloader optimise pour de meilleures performances
+> - `npm run build` : Compile les assets CSS/JS en fichiers minifies dans `public/build/`
+
+### Etape 2 : Configurer l'environnement
+
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+> Modifier `.env` avec les valeurs de production :
+> - `APP_ENV=production` et `APP_DEBUG=false` (ne jamais afficher les erreurs en prod)
+> - `DB_*` : Identifiants de la base de donnees de production
+> - `QUEUE_CONNECTION=database` ou `redis` (pour l'execution asynchrone)
+> - `BROADCAST_CONNECTION=reverb` (si temps reel actif)
+> - `MAIL_MAILER=smtp` avec un vrai serveur SMTP
+> - `FILESYSTEM_DISK=s3` pour le stockage des photos
+
+### Etape 3 : Migrations
+
+```bash
 php artisan migrate --force
+```
 
-# Rollback dernière migration
-php artisan migrate:rollback
+> `--force` est necessaire en production car Laravel demande une confirmation par defaut. Cette commande cree/met a jour les tables sans toucher aux donnees existantes.
 
-# Créer un lien symbolique pour le storage
-php artisan storage:link
+### Etape 4 : Optimiser
 
-# Optimiser pour la production
+```bash
 php artisan optimize
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 ```
 
----
+> Ces commandes mettent en cache la configuration, les routes et les vues Blade compilees. L'application demarre plus vite car elle ne relit pas les fichiers a chaque requete.
+> **Important :** Apres chaque deploiement, re-executez ces commandes pour prendre en compte les nouveaux fichiers.
 
-## Déploiement en production
+### Etape 5 : Lancer les services
 
 ```bash
-# 1. Installer les dépendances (sans dev)
-composer install --no-dev --optimize-autoloader
-npm install && npm run build
-
-# 2. Configurer l'environnement
-cp .env.example .env
-# Modifier .env avec les valeurs de production
-php artisan key:generate
-
-# 3. Migrations
-php artisan migrate --force
-
-# 4. Optimiser
-php artisan optimize
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-
-# 5. Lancer les services
 php artisan reverb:start --host=0.0.0.0 &
 php artisan queue:work --daemon &
 ```
 
+> - `reverb:start` : Serveur WebSocket pour la messagerie temps reel
+> - `queue:work --daemon` : Traite les jobs en arriere-plan (emails, notifications)
+> - En production, utilisez **Supervisor** pour garder ces processus actifs et les redemarrer automatiquement en cas de crash
+
 ### Services requis en production
 
-| Service | Usage |
-|---------|-------|
-| **Nginx / Apache** | Serveur web (pointer vers `/public`) |
-| **PHP-FPM 8.2+** | Exécution PHP |
-| **PostgreSQL** | Base de données |
-| **Redis** | Cache, sessions, queues |
-| **Supervisor** | Gérer `queue:work` et `reverb:start` en daemon |
-| **S3 / MinIO** | Stockage des photos |
-| **SMTP** | Envoi d'emails (réinitialisation mot de passe, notifications) |
+| Service | Usage | Pourquoi |
+|---------|-------|----------|
+| **Nginx / Apache** | Serveur web | Sert les fichiers statiques et redirige les requetes vers PHP-FPM. Pointer le `root` vers le dossier `/public` |
+| **PHP-FPM 8.2+** | Execution PHP | Traite les requetes Laravel. Configurer `max_children` selon la charge |
+| **PostgreSQL** | Base de donnees | Stocke toutes les donnees. Configurer les backups automatiques |
+| **Redis** | Cache, sessions, queues | Accelere les lectures frequentes et gere les files d'attente de jobs |
+| **Supervisor** | Gestion de processus | Maintient `queue:work` et `reverb:start` actifs en permanence |
+| **S3 / MinIO** | Stockage des photos | Stockage scalable pour les photos d'hotels et de chambres |
+| **SMTP** | Envoi d'emails | Pour les reinitialisation de mot de passe et les notifications email |
 
 ---
 

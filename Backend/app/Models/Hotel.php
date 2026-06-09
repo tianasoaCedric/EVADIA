@@ -23,6 +23,8 @@ class Hotel extends Model
         'telephone',
         'site_web',
         'etoiles',
+        'note_moyenne',
+        'nb_avis',
         'devise_principale',
         'date_creation',
         'updated_at',
@@ -33,6 +35,8 @@ class Hotel extends Model
     {
         return [
             'etoiles' => 'integer',
+            'note_moyenne' => 'decimal:2',
+            'nb_avis' => 'integer',
             'date_creation' => 'datetime',
             'updated_at' => 'datetime',
         ];
@@ -65,14 +69,10 @@ class Hotel extends Model
         return $this->hasOne(HotelStatut::class)->whereNull('date_fin');
     }
 
-    /**
-     * Retourne une collection vide pour l'instant.
-     * Sera remplacé par la relation polymorphique après migration.
-     */
     public function photos(): HasMany
     {
-        return $this->hasMany(Photo::class, 'propriete_id')
-            ->whereRaw('1 = 0');
+        return $this->hasMany(Photo::class, 'entite_id')
+            ->where('entite_type', 'hotel');
     }
 
     public function offres(): HasMany

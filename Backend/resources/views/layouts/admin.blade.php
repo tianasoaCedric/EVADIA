@@ -55,8 +55,8 @@
         /* Sidebar scrollbar */
         .sidebar-scroll::-webkit-scrollbar { width: 4px; }
         .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-        .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
-        .sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
+        .sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
 
         /* Sidebar link base */
         .sidebar-link {
@@ -64,32 +64,56 @@
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            padding: 0.625rem 0.75rem;
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
+            padding: 0.5rem 0.625rem;
+            border-radius: 0.625rem;
+            font-size: 0.8125rem;
             font-weight: 500;
-            color: rgba(255,255,255,0.6);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            color: rgba(255,255,255,0.5);
+            transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.01em;
         }
         .sidebar-link:hover {
-            color: #fff;
-            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.06);
         }
         .sidebar-link.active {
             color: #fff;
-            background: rgba(255,255,255,0.12);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            background: rgba(1,189,165,0.12);
         }
         .sidebar-link.active::before {
             content: '';
             position: absolute;
-            left: -0.75rem;
+            left: 0;
             top: 50%;
             transform: translateY(-50%);
             width: 3px;
-            height: 60%;
+            height: 55%;
             background: #01BDA5;
-            border-radius: 0 3px 3px 0;
+            border-radius: 0 2px 2px 0;
+            box-shadow: 0 0 8px rgba(1,189,165,0.6);
+        }
+
+        /* Section separator */
+        .sidebar-section-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0 0.5rem;
+            margin-bottom: 0.375rem;
+        }
+        .sidebar-section-label span {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.22);
+            white-space: nowrap;
+        }
+        .sidebar-section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.06);
         }
 
         /* Tooltip for collapsed sidebar */
@@ -106,7 +130,7 @@
             font-weight: 500;
             border-radius: 0.375rem;
             white-space: nowrap;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
             z-index: 60;
             pointer-events: none;
         }
@@ -119,6 +143,14 @@
             border: 5px solid transparent;
             border-right-color: #1e293b;
         }
+
+        /* Collapsed sidebar: center icons */
+        .sidebar-collapsed .sidebar-link {
+            justify-content: center;
+            padding-left: 0;
+            padding-right: 0;
+        }
+        .sidebar-collapsed .sidebar-link::before { display: none; }
     </style>
     @stack('styles')
 </head>
@@ -137,13 +169,14 @@
         <!-- ═══════════════ SIDEBAR ═══════════════ -->
         <aside
             class="fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-gradient-to-b from-slate-900 via-evadia-950 to-slate-950 shadow-2xl transition-all duration-300 ease-in-out"
-            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0 lg:w-[4.5rem]'">
+            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0 lg:w-[4.5rem] sidebar-collapsed'">
 
             <!-- Logo -->
-            <div class="flex h-16 items-center px-4 border-b border-white/[0.06]">
-                <a href="{{ route('admin.dashboard') }}" class="flex items-center">
-                    <img x-show="sidebarOpen" src="{{ asset('images/Evadia_Logo BW 1.png') }}" alt="EVADIA" class="h-9">
-                    <img x-show="!sidebarOpen" src="{{ asset('images/Evadia_Logo BW 4.png') }}" alt="EVADIA" class="h-9 mx-auto">
+            <div class="flex h-16 items-center gap-3 px-4 border-b border-white/[0.06]">
+                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 min-w-0">
+                    <img x-show="sidebarOpen" src="{{ asset('images/Evadia_Logo BW 1.png') }}" alt="EVADIA" class="h-8 shrink-0">
+                    <img x-show="!sidebarOpen" src="{{ asset('images/Evadia_Logo BW 4.png') }}" alt="EVADIA" class="h-8 mx-auto shrink-0">
+                    <span x-show="sidebarOpen" class="text-[10px] font-bold uppercase tracking-widest text-evadia-400/70 shrink-0">Admin</span>
                 </a>
             </div>
 
@@ -151,7 +184,7 @@
             <nav class="flex-1 overflow-y-auto sidebar-scroll py-5 px-3 space-y-6">
                 <!-- Section: Principal -->
                 <div>
-                    <p x-show="sidebarOpen" class="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-white/30">Principal</p>
+                    <div x-show="sidebarOpen" class="sidebar-section-label"><span>Principal</span></div>
                     <div class="space-y-0.5">
                         <a href="{{ route('admin.dashboard') }}"
                             class="sidebar-link group {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
@@ -169,7 +202,7 @@
 
                 <!-- Section: Gestion -->
                 <div>
-                    <p x-show="sidebarOpen" class="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-white/30">Gestion</p>
+                    <div x-show="sidebarOpen" class="sidebar-section-label"><span>Gestion</span></div>
                     <div class="space-y-0.5">
                         <a href="{{ route('admin.users.index') }}"
                             class="sidebar-link group {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
@@ -207,24 +240,69 @@
                             <span x-show="!sidebarOpen" class="sidebar-tooltip">Abonnements</span>
                         </a>
 
-                        <a href="{{ route('admin.offers.index') }}"
-                            class="sidebar-link group {{ request()->routeIs('admin.offers.*') ? 'active' : '' }}">
-                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg {{ request()->routeIs('admin.offers.*') ? 'bg-rose-500/20 text-rose-400' : 'text-white/50 group-hover:text-white/80' }} transition-colors">
+                        <a href="{{ route('admin.destinations.index') }}"
+                            class="sidebar-link group {{ request()->routeIs('admin.destinations.*') ? 'active' : '' }}">
+                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg {{ request()->routeIs('admin.destinations.*') ? 'bg-rose-500/20 text-rose-400' : 'text-white/50 group-hover:text-white/80' }} transition-colors">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
                                 </svg>
                             </div>
-                            <span x-show="sidebarOpen">Offres</span>
-                            <span x-show="!sidebarOpen" class="sidebar-tooltip">Offres</span>
+                            <span x-show="sidebarOpen">Destinations</span>
+                            <span x-show="!sidebarOpen" class="sidebar-tooltip">Destinations</span>
+                        </a>
+
+                        <a href="{{ route('admin.villes.index') }}"
+                            class="sidebar-link group {{ request()->routeIs('admin.villes.*') ? 'active' : '' }}">
+                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg {{ request()->routeIs('admin.villes.*') ? 'bg-cyan-500/20 text-cyan-400' : 'text-white/50 group-hover:text-white/80' }} transition-colors">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5M3.75 21V5.625A2.625 2.625 0 016.375 3h11.25A2.625 2.625 0 0120.25 5.625V21M9 9.75h1.5m0 0H12m-1.5 0v1.5m0-1.5V8.25M6.75 9.75h.008v.008H6.75V9.75zm.375 3h.008v.008h-.008V12.75zm0 3h.008v.008h-.008V15.75zM9.75 9.75h.008v.008H9.75V9.75zm.375 3h.008v.008h-.008V12.75zm0 3h.008v.008h-.008V15.75zM13.5 9.75h.008v.008H13.5V9.75zm.375 3h.008v.008h-.008V12.75zm0 3h.008v.008h-.008V15.75zM16.5 9.75h.008v.008H16.5V9.75zm.375 3h.008v.008h-.008V12.75zm0 3h.008v.008h-.008V15.75z" />
+                                </svg>
+                            </div>
+                            <span x-show="sidebarOpen">Villes</span>
+                            <span x-show="!sidebarOpen" class="sidebar-tooltip">Villes</span>
+                        </a>
+
+                        <a href="{{ route('admin.types-hebergement.index') }}"
+                            class="sidebar-link group {{ request()->routeIs('admin.types-hebergement.*') ? 'active' : '' }}">
+                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg {{ request()->routeIs('admin.types-hebergement.*') ? 'bg-amber-500/20 text-amber-400' : 'text-white/50 group-hover:text-white/80' }} transition-colors">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205l3 1m1.5.5l-1.5-.5M6.75 7.364V3h-3v18m3-13.636l10.5-3.819" />
+                                </svg>
+                            </div>
+                            <span x-show="sidebarOpen">Types d'hébergement</span>
+                            <span x-show="!sidebarOpen" class="sidebar-tooltip">Types héberg.</span>
+                        </a>
+
+                        <a href="{{ route('admin.equipements.index') }}"
+                            class="sidebar-link group {{ request()->routeIs('admin.equipements.*') ? 'active' : '' }}">
+                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg {{ request()->routeIs('admin.equipements.*') ? 'bg-orange-500/20 text-orange-400' : 'text-white/50 group-hover:text-white/80' }} transition-colors">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                            </div>
+                            <span x-show="sidebarOpen">Équipements</span>
+                            <span x-show="!sidebarOpen" class="sidebar-tooltip">Équipements</span>
+                        </a>
+
+                        <a href="{{ route('admin.decouverte.villes.index') }}"
+                            class="sidebar-link group {{ request()->routeIs('admin.decouverte.*') ? 'active' : '' }}">
+                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg {{ request()->routeIs('admin.decouverte.*') ? 'bg-teal-500/20 text-teal-400' : 'text-white/50 group-hover:text-white/80' }} transition-colors">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
+                                </svg>
+                            </div>
+                            <span x-show="sidebarOpen">Contenu Découverte</span>
+                            <span x-show="!sidebarOpen" class="sidebar-tooltip">Contenu Découverte</span>
                         </a>
                     </div>
                 </div>
 
                 <!-- Section: Communication -->
                 <div>
-                    <p x-show="sidebarOpen" class="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-white/30">Communication</p>
+                    <div x-show="sidebarOpen" class="sidebar-section-label"><span>Communication</span></div>
                     <div class="space-y-0.5">
                         <a href="{{ route('admin.messages.index') }}"
                             class="sidebar-link group {{ request()->routeIs('admin.messages.*') ? 'active' : '' }}">
@@ -253,20 +331,32 @@
                 </div>
             </nav>
 
-            <!-- Sidebar Footer - User info -->
-            <div class="border-t border-white/[0.06] p-3">
-                <div class="flex items-center gap-3 rounded-lg px-2 py-2.5 hover:bg-white/[0.06] transition-colors cursor-default">
-                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-evadia-400 to-evadia-600 text-white text-xs font-bold shadow-lg shadow-evadia-500/20">
+            <!-- Sidebar Footer - User info + logout -->
+            <div class="border-t border-white/[0.06] p-3 space-y-1">
+                <div class="flex items-center gap-3 rounded-xl px-2 py-2 cursor-default">
+                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-evadia-400 to-evadia-600 text-white text-xs font-bold shadow-lg shadow-evadia-500/20">
                         {{ substr(auth()->user()->prenom, 0, 1) }}{{ substr(auth()->user()->nom, 0, 1) }}
                     </div>
                     <div x-show="sidebarOpen" class="min-w-0 flex-1">
-                        <p class="text-sm font-medium text-white/90 truncate">{{ auth()->user()->prenom }} {{ auth()->user()->nom }}</p>
-                        <p class="text-[10px] text-white/40 truncate">Super Admin</p>
-                    </div>
-                    <div x-show="sidebarOpen" class="shrink-0">
-                        <div class="h-2 w-2 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50"></div>
+                        <p class="text-xs font-semibold text-white/85 truncate">{{ auth()->user()->prenom }} {{ auth()->user()->nom }}</p>
+                        <p class="text-[10px] text-white/35 truncate flex items-center gap-1">
+                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 inline-block"></span>
+                            Super Admin
+                        </p>
                     </div>
                 </div>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="sidebar-link w-full group">
+                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-white/40 group-hover:text-red-400 transition-colors">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/>
+                            </svg>
+                        </div>
+                        <span x-show="sidebarOpen" class="group-hover:text-red-400 transition-colors">Déconnexion</span>
+                        <span x-show="!sidebarOpen" class="sidebar-tooltip">Déconnexion</span>
+                    </button>
+                </form>
             </div>
         </aside>
 

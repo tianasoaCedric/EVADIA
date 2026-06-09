@@ -12,13 +12,18 @@ use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller
 {
+    protected function guard()
+    {
+        return Auth::guard('hotel');
+    }
+
     /**
      * Show the hotel login form.
      */
     public function showLogin()
     {
-        if (Auth::check()) {
-            $user = Auth::user();
+        if ($this->guard()->check()) {
+            $user = $this->guard()->user();
             $hasHotelRole = $user->roles()->whereIn('code', ['admin_hotel', 'gestionnaire_hotel'])->exists();
             if ($hasHotelRole) {
                 return redirect()->route('hotel.dashboard');
@@ -38,31 +43,31 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        if (!Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']], $request->boolean('remember'))) {
+        if (!$this->guard()->attempt(['email' => $credentials['email'], 'password' => $credentials['password']], $request->boolean('remember'))) {
             return back()->withErrors([
                 'email' => 'Les identifiants fournis sont incorrects.',
             ])->onlyInput('email');
         }
 
-        $user = Auth::user();
+        $user = $this->guard()->user();
 
         // Check hotel role
         $hasHotelRole = $user->roles()->whereIn('code', ['admin_hotel', 'gestionnaire_hotel'])->exists();
         if (!$hasHotelRole) {
-            Auth::logout();
+            $this->guard()->logout();
             return back()->withErrors(['email' => 'Accès non autorisé à ce back-office.'])->onlyInput('email');
         }
 
         // Check hotel assignment
         $hasHotel = HotelAdmin::where('user_id', $user->id)->whereNull('date_fin')->exists();
         if (!$hasHotel) {
-            Auth::logout();
+            $this->guard()->logout();
             return back()->withErrors(['email' => 'Aucun hôtel associé à ce compte.'])->onlyInput('email');
         }
 
         // Check if account is active
         if (!$user->est_actif) {
-            Auth::logout();
+            $this->guard()->logout();
             return back()->withErrors(['email' => 'Votre compte a été désactivé. Contactez le support.'])->onlyInput('email');
         }
 
@@ -79,8 +84,8 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        Auth::logout();
-        $request->session()->invalidate();
+        $this->guard()->logout();
+        $request->session()->regenerate();
         $request->session()->regenerateToken();
 
         return redirect()->route('hotel.login');

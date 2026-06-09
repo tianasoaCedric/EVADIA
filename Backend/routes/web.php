@@ -6,7 +6,12 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\HotelController;
 use App\Http\Controllers\Admin\HotelPhotoController;
 use App\Http\Controllers\Admin\AbonnementController;
-use App\Http\Controllers\Admin\OffreController;
+use App\Http\Controllers\Admin\DestinationController;
+use App\Http\Controllers\Admin\VilleController;
+use App\Http\Controllers\Admin\TypeHebergementController;
+use App\Http\Controllers\Admin\EquipementController;
+use App\Http\Controllers\Admin\VilleDecouverteController;
+use App\Http\Controllers\Admin\LieuDecouverteController;
 use App\Http\Controllers\Admin\MessageController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Hotel\PasswordController;
@@ -15,14 +20,17 @@ use App\Http\Controllers\Hotel\DashboardController as HotelDashboardController;
 use App\Http\Controllers\Hotel\ProfileController as HotelProfileController;
 use App\Http\Controllers\Hotel\HotelContentController;
 use App\Http\Controllers\Hotel\RoomController;
+use App\Http\Controllers\Hotel\HotelEquipementController;
 use App\Http\Controllers\Hotel\RoomPhotoController;
 use App\Http\Controllers\Hotel\ReservationController;
 use App\Http\Controllers\Hotel\CalendarController;
 use App\Http\Controllers\Hotel\PricingController;
 use App\Http\Controllers\Hotel\HotelOffreController;
+use App\Http\Controllers\Hotel\OffrePhotoController;
 use App\Http\Controllers\Hotel\MessageController as HotelMessageController;
 use App\Http\Controllers\Hotel\NotificationController as HotelNotificationController;
 use App\Http\Controllers\Hotel\PaymentController;
+use App\Http\Controllers\Hotel\SubscriptionController as HotelSubscriptionController;
 use Illuminate\Support\Facades\Route;
 
 // ────────────────────────────────────────────────────────
@@ -73,12 +81,31 @@ Route::middleware(['auth', 'role:super_admin,admin_evadia'])
             'subscriptions' => 'subscription',
         ]);
 
-        // Offers (Offres)
-        Route::resource('offers', OffreController::class)->parameters([
-            'offers' => 'offer',
-        ]);
-        Route::patch('offers/{offer}/toggle', [OffreController::class, 'toggle'])->name('offers.toggle');
-        Route::get('offers/generate-promo-code', [OffreController::class, 'generatePromoCode'])->name('offers.generate-promo');
+        // Destinations
+        Route::resource('destinations', DestinationController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+
+        // Villes (destinations)
+        Route::resource('villes', VilleController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+
+        // Types d'hébergement
+        Route::resource('types-hebergement', TypeHebergementController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy'])
+            ->parameters(['types-hebergement' => 'typesHebergement']);
+
+        // Équipements
+        Route::get('equipements', [EquipementController::class, 'index'])->name('equipements.index');
+        Route::post('equipements', [EquipementController::class, 'store'])->name('equipements.store');
+        Route::delete('equipements/{equipement}', [EquipementController::class, 'destroy'])->name('equipements.destroy');
+
+        // Contenu Découverte
+        Route::resource('decouverte/villes', VilleDecouverteController::class)->parameters([
+            'villes' => 'ville',
+        ])->names('decouverte.villes');
+        Route::patch('decouverte/villes/{ville}/toggle', [VilleDecouverteController::class, 'toggle'])->name('decouverte.villes.toggle');
+
+        Route::resource('decouverte/villes/{ville}/lieux', LieuDecouverteController::class)->parameters([
+            'lieux' => 'lieu',
+        ])->names('decouverte.villes.lieux');
+        Route::patch('decouverte/villes/{ville}/lieux/{lieu}/toggle', [LieuDecouverteController::class, 'toggle'])->name('decouverte.villes.lieux.toggle');
 
         // Messages
         Route::get('messages', [MessageController::class, 'index'])->name('messages.index');
@@ -110,7 +137,7 @@ Route::prefix('hotel')->name('hotel.')->group(function () {
 // ────────────────────────────────────────────────────────
 // Hotel Routes (back-office hôtelier protégé)
 // ────────────────────────────────────────────────────────
-Route::middleware(['auth', 'role:admin_hotel,gestionnaire_hotel', 'password.change'])
+Route::middleware(['auth:hotel', 'role:admin_hotel,gestionnaire_hotel', 'password.change'])
     ->prefix('hotel')->name('hotel.')->group(function () {
 
         // Password change (exempt from ForcePasswordChange middleware)
@@ -126,7 +153,10 @@ Route::middleware(['auth', 'role:admin_hotel,gestionnaire_hotel', 'password.chan
         Route::put('profile/password', [HotelProfileController::class, 'updatePassword'])->name('profile.password');
 
         // Hotel Content
-        Route::get('content', [HotelContentController::class, 'edit'])->name('content.edit');
+        Route::get('services', [HotelContentController::class, 'services'])->name('services.index');
+
+        Route::get('content', [HotelContentController::class, 'show'])->name('content.show');
+        Route::get('content/edit', [HotelContentController::class, 'edit'])->name('content.edit');
         Route::put('content', [HotelContentController::class, 'update'])->name('content.update');
         Route::post('content/photos', [HotelContentController::class, 'uploadPhotos'])->name('content.photos.store');
         Route::delete('content/photos/{photo}', [HotelContentController::class, 'deletePhoto'])->name('content.photos.destroy');
@@ -134,6 +164,13 @@ Route::middleware(['auth', 'role:admin_hotel,gestionnaire_hotel', 'password.chan
         Route::post('content/services', [HotelContentController::class, 'storeService'])->name('content.services.store');
         Route::put('content/services/{service}', [HotelContentController::class, 'updateService'])->name('content.services.update');
         Route::delete('content/services/{service}', [HotelContentController::class, 'deleteService'])->name('content.services.destroy');
+
+        // Équipements de l'hôtel
+        Route::get('equipements', [HotelEquipementController::class, 'index'])->name('equipements.index');
+        Route::post('equipements', [HotelEquipementController::class, 'store'])->name('equipements.store');
+        Route::delete('equipements/{equipement}', [HotelEquipementController::class, 'destroy'])->name('equipements.destroy');
+        Route::get('equipements/search', [HotelEquipementController::class, 'search'])->name('equipements.search');
+        Route::post('equipements/ajax', [HotelEquipementController::class, 'storeAjax'])->name('equipements.store-ajax');
 
         // Rooms (Chambres)
         Route::resource('rooms', RoomController::class);
@@ -158,6 +195,8 @@ Route::middleware(['auth', 'role:admin_hotel,gestionnaire_hotel', 'password.chan
         Route::post('pricing/{propriete}/price', [PricingController::class, 'updatePrice'])->name('pricing.update');
         Route::resource('offers', HotelOffreController::class)->except(['show', 'destroy']);
         Route::patch('offers/{offre}/toggle', [HotelOffreController::class, 'toggle'])->name('offers.toggle');
+        Route::post('offers/{offre}/photo', [OffrePhotoController::class, 'store'])->name('offers.photo.store');
+        Route::delete('offers/{offre}/photo/{photo}', [OffrePhotoController::class, 'destroy'])->name('offers.photo.destroy');
 
         // Messaging
         Route::get('messages', [HotelMessageController::class, 'index'])->name('messages.index');
@@ -170,6 +209,9 @@ Route::middleware(['auth', 'role:admin_hotel,gestionnaire_hotel', 'password.chan
         Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
         Route::get('payments/export', [PaymentController::class, 'export'])->name('payments.export');
         Route::get('payments/{paiement}', [PaymentController::class, 'show'])->name('payments.show');
+
+        // Subscription
+        Route::get('subscription', [HotelSubscriptionController::class, 'index'])->name('subscription.index');
 
         // Notifications
         Route::get('notifications', [HotelNotificationController::class, 'index'])->name('notifications.index');

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Support\Facades\Cache;
 
 class Offre extends Model
 {
@@ -22,6 +23,8 @@ class Offre extends Model
         'date_debut',
         'date_fin',
         'code_promo',
+        'remise_pct',
+        'conditions',
         'statut',
         'created_at',
         'created_by',
@@ -30,10 +33,18 @@ class Offre extends Model
     protected function casts(): array
     {
         return [
-            'date_debut' => 'date',
-            'date_fin' => 'date',
-            'created_at' => 'datetime',
+            'date_debut'  => 'date',
+            'date_fin'    => 'date',
+            'created_at'  => 'datetime',
+            'remise_pct'  => 'integer',
+            'conditions'  => 'array',
         ];
+    }
+
+    public function photos(): HasMany
+    {
+        return $this->hasMany(Photo::class, 'entite_id')
+            ->where('entite_type', 'offre');
     }
 
     public function hotel(): BelongsTo
@@ -54,6 +65,17 @@ class Offre extends Model
     public function utilisations(): HasManyThrough
     {
         return $this->hasManyThrough(OffreUtilisation::class, AvantageOffre::class, 'offre_id', 'avantage_id');
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(function (self $offre) {
+            Cache::forget("offre:{$offre->id}");
+        });
+
+        static::deleted(function (self $offre) {
+            Cache::forget("offre:{$offre->id}");
+        });
     }
 
     // Scopes

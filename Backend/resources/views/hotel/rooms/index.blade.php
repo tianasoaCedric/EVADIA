@@ -59,10 +59,10 @@
                 {{-- Photo --}}
                 <div class="h-48 bg-gray-100 relative overflow-hidden">
                     @if($propriete->photos->where('est_principale', true)->first())
-                        <img src="{{ Storage::disk('s3')->url($propriete->photos->where('est_principale', true)->first()->url_photo) }}"
+                        <img src="{{ $propriete->photos->where('est_principale', true)->first()->url }}"
                             class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300">
                     @elseif($propriete->photos->first())
-                        <img src="{{ Storage::disk('s3')->url($propriete->photos->first()->url_photo) }}"
+                        <img src="{{ $propriete->photos->first()->url }}"
                             class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300">
                     @else
                         <div class="h-full w-full flex items-center justify-center text-gray-300">

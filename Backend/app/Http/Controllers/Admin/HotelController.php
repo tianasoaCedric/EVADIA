@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreHotelRequest;
 use App\Http\Requests\Admin\UpdateHotelRequest;
 use App\Jobs\SendHotelAdminCredentials;
+use App\Models\Abonnement;
 use App\Models\Avis;
+use App\Models\Plan;
 use App\Models\Destination;
 use App\Models\Hotel;
 use App\Models\HotelAdmin;
@@ -48,13 +50,17 @@ class HotelController extends Controller
     {
         $types = TypesHotel::all();
         $destinations = Destination::all();
+        $plans = Plan::actif()->get();
 
-        return view('admin.hotels.create', compact('types', 'destinations'));
+        return view('admin.hotels.create', compact('types', 'destinations', 'plans'));
     }
 
     public function store(StoreHotelRequest $request)
     {
-        DB::transaction(function () use ($request) {
+        $adminUser = null;
+        $hotel = null;
+
+        DB::transaction(function () use ($request, &$hotel, &$adminUser) {
             // 1. Create hotel
             $hotel = Hotel::create([
                 'nom' => $request->nom,
@@ -84,18 +90,20 @@ class HotelController extends Controller
             // 4. Attach destination
             $hotel->destinations()->attach($request->destination_id);
 
-            // 5. Upload photos
-            if ($request->hasFile('photos')) {
+            // 5. Upload photos (only if S3 is configured)
+            if ($request->hasFile('photos') && config('filesystems.disks.s3.bucket')) {
                 foreach ($request->file('photos') as $index => $photo) {
                     $path = $photo->store("hotels/{$hotel->id}", 's3');
-                    Photo::create([
-                        'entite_type' => 'hotel',
-                        'entite_id' => $hotel->id,
-                        'url_photo' => Storage::disk('s3')->url($path),
-                        'ordre' => $index,
-                        'est_principale' => $index === 0,
-                        'uploaded_by' => auth()->id(),
-                    ]);
+                    if ($path) {
+                        Photo::create([
+                            'entite_type' => 'hotel',
+                            'entite_id' => $hotel->id,
+                            'url_photo' => $path,
+                            'ordre' => $index,
+                            'est_principale' => $index === 0,
+                            'uploaded_by' => auth()->id(),
+                        ]);
+                    }
                 }
             }
 
@@ -137,12 +145,28 @@ class HotelController extends Controller
                 'date_debut' => now(),
             ]);
 
-            // 10. Send credentials email via queue
-            SendHotelAdminCredentials::dispatch($adminUser, $hotel);
+            // 10. Create subscription (price from DB)
+            $plan = Plan::where('code', $request->type_abonnement)->firstOrFail();
+            Abonnement::create([
+                'hotel_id'        => $hotel->id,
+                'type_abonnement' => $request->type_abonnement,
+                'date_debut'      => $request->abonnement_date_debut,
+                'date_fin'        => $request->abonnement_date_fin ?: null,
+                'prix_mensuel'    => $plan->prix,
+                'devise'          => $plan->devise,
+            ]);
 
             // 11. Log action
             $this->logAction('hotel_created', "Hôtel {$hotel->nom} créé (ID: {$hotel->id}). Admin: {$adminUser->email}");
         });
+
+        // Send credentials email OUTSIDE the transaction so a mail failure
+        // does not roll back the hotel creation.
+        try {
+            SendHotelAdminCredentials::dispatch($adminUser, $hotel);
+        } catch (\Throwable) {
+            // Email failure is non-blocking — hotel is already created.
+        }
 
         return redirect()->route('admin.hotels.index')
             ->with('success', 'Hôtel créé avec succès. Un email avec les identifiants a été envoyé à l\'administrateur.');
@@ -172,7 +196,13 @@ class HotelController extends Controller
 
     public function edit(Hotel $hotel)
     {
-        $hotel->load(['adresse', 'types', 'destinations']);
+        $hotel->load(['adresse', 'types', 'destinations', 'currentStatut']);
+
+        if ($hotel->currentStatut?->statut === 'actif') {
+            return redirect()->route('admin.hotels.show', $hotel)
+                ->with('error', 'Cet hôtel est actif et ne peut plus être modifié depuis le back-office.');
+        }
+
         $types = TypesHotel::all();
         $destinations = Destination::all();
 
@@ -181,6 +211,12 @@ class HotelController extends Controller
 
     public function update(UpdateHotelRequest $request, Hotel $hotel)
     {
+        $hotel->load('currentStatut');
+
+        if ($hotel->currentStatut?->statut === 'actif') {
+            return redirect()->route('admin.hotels.show', $hotel)
+                ->with('error', 'Cet hôtel est actif et ne peut plus être modifié depuis le back-office.');
+        }
         DB::transaction(function () use ($request, $hotel) {
             $hotel->update($request->only([
                 'nom',

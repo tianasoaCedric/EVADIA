@@ -6,13 +6,22 @@ use App\Http\Controllers\Api\Admin\HotelController;
 use App\Http\Controllers\Api\Admin\MessageController as AdminMessageController;
 use App\Http\Controllers\Api\Admin\OffreController as AdminOffreController;
 use App\Http\Controllers\Api\Admin\UserController;
+use App\Http\Controllers\Api\Auth\GoogleAuthController;
 use App\Http\Controllers\Api\Auth\LoginController;
+use App\Http\Controllers\Api\Auth\PasswordResetController;
 use App\Http\Controllers\Api\Auth\RegisterController;
 use App\Http\Controllers\Api\Client\AvisController;
 use App\Http\Controllers\Api\Client\FavoriController;
 use App\Http\Controllers\Api\Client\HotelController as ClientHotelController;
 use App\Http\Controllers\Api\Client\ProfileController;
 use App\Http\Controllers\Api\Client\ReservationController as ClientReservationController;
+use App\Http\Controllers\Api\Public\DecouverteController;
+use App\Http\Controllers\Api\Public\OffreController as PublicOffreController;
+use App\Http\Controllers\Api\Public\DestinationController;
+use App\Http\Controllers\Api\Public\ProprieteController as PublicProprieteController;
+use App\Http\Controllers\Api\Public\SearchController;
+use App\Http\Controllers\Api\Public\TypeHotelController;
+use App\Http\Controllers\Api\Public\VilleController;
 use App\Http\Controllers\Api\Hotel\CalendarController;
 use App\Http\Controllers\Api\Hotel\DashboardController as HotelDashboardController;
 use App\Http\Controllers\Api\Hotel\MessageController as HotelMessageController;
@@ -30,7 +39,34 @@ Route::prefix('auth')->group(function () {
         ->middleware('throttle:register');
     Route::post('/login', [LoginController::class, 'login'])
         ->middleware('throttle:login');
+    Route::get('/google', [GoogleAuthController::class, 'redirect']);
+    Route::get('/google/callback', [GoogleAuthController::class, 'callback']);
+
+    Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword'])
+        ->middleware('throttle:6,1');
+    Route::post('/verify-reset-code', [PasswordResetController::class, 'verifyCode'])
+        ->middleware('throttle:10,1');
+    Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])
+        ->middleware('throttle:6,1');
 });
+
+// Navigation / discovery — accessibles sans compte (booking.com style)
+Route::get('/hotels', [ClientHotelController::class, 'index']);
+Route::get('/hotels/{id}', [ClientHotelController::class, 'show']);
+Route::get('/destinations', [DestinationController::class, 'index']);
+Route::get('/villes/popular', [VilleController::class, 'popular']);
+Route::get('/villes/search', [VilleController::class, 'search']);
+Route::get('/destinations/{id}/villes', [VilleController::class, 'byDestination']);
+Route::get('/destinations/{id}/hotels', [VilleController::class, 'hotels']);
+Route::get('/villes/{id}/hotels', [VilleController::class, 'hotelsByVille']);
+Route::get('/offres', [PublicOffreController::class, 'index']);
+Route::get('/offres/{id}', [PublicOffreController::class, 'show']);
+Route::get('/types-hotels', [TypeHotelController::class, 'index']);
+Route::get('/proprietes/{id}', [PublicProprieteController::class, 'show']);
+Route::get('/hotels/{id}/reviews', [AvisController::class, 'byHotel']);
+Route::get('/search', SearchController::class)->middleware('throttle:60,1');
+Route::get('/decouverte/villes', [DecouverteController::class, 'villes']);
+Route::get('/decouverte/villes/{slug}/lieux', [DecouverteController::class, 'lieux']);
 
 // ============================================================
 // Routes authentifiées (token Sanctum requis)
@@ -129,6 +165,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('reservations', [ClientReservationController::class, 'store']);
         Route::get('reservations/{id}', [ClientReservationController::class, 'show']);
         Route::patch('reservations/{id}/cancel', [ClientReservationController::class, 'cancel']);
+        Route::get('promo/{code}', [ClientReservationController::class, 'verifierPromo']);
 
         // Favoris
         Route::get('favorites', [FavoriController::class, 'index']);

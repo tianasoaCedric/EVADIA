@@ -31,18 +31,24 @@ class Reservation extends Model
         'demande_speciale',
         'annulee_par',
         'raison_annulation',
+        'code_promo_utilise',
+        'offre_id',
+        'prix_avant_reduction',
+        'montant_reduction',
     ];
 
     protected function casts(): array
     {
         return [
-            'date_debut' => 'date',
-            'date_fin' => 'date',
-            'prix_total' => 'decimal:2',
-            'nb_adultes' => 'integer',
-            'nb_enfants' => 'integer',
-            'nb_bebes' => 'integer',
-            'date_reservation' => 'datetime',
+            'date_debut'          => 'date',
+            'date_fin'            => 'date',
+            'prix_total'          => 'decimal:2',
+            'prix_avant_reduction' => 'decimal:2',
+            'montant_reduction'   => 'decimal:2',
+            'nb_adultes'          => 'integer',
+            'nb_enfants'          => 'integer',
+            'nb_bebes'            => 'integer',
+            'date_reservation'    => 'datetime',
         ];
     }
 
