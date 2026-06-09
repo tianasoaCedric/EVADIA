@@ -1,161 +1,116 @@
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Header } from '../../components/molecules/Header';
-import { HotelCard } from '../../components/molecules/HotelCard';
 import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { HotelCard } from '../../components/molecules/HotelCard';
+import { Header } from '../../components/molecules/Header';
+import { publicService, Hotel, hotelVille, hotelPhoto, hotelPrix, hotelNote } from '../../services/public';
+import { router } from 'expo-router';
 
-// Mock data reflétant fidèlement les quatre villes demandées dans les maquettes
-const ACCOMMODATIONS_BY_CITY = [
-  {
-    city: 'Nosy Be',
-    hotels: [
-      {
-        id: 'nb1',
-        name: 'Aara Antananarivo',
-        price: '225.000Ar/nuité',
-        rating: 4.25,
-        imageUri: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=300',
-      },
-      {
-        id: 'nb2',
-        name: 'Ravintsara Wellness',
-        price: '310.000Ar/nuité',
-        rating: 4.5,
-        imageUri: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=300',
-      },
-      {
-        id: 'nb3',
-        name: 'Nosy Be Beach Resort',
-        price: '280.000Ar/nuité',
-        rating: 4.35,
-        imageUri: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=300',
-      },
-    ]
-  },
-  {
-    city: 'Isalo',
-    hotels: [
-      {
-        id: 'is1',
-        name: 'Aara Antananarivo',
-        price: '225.000Ar/nuité',
-        rating: 4.25,
-        imageUri: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=300',
-      },
-      {
-        id: 'is2',
-        name: 'Isalo Rock Lodge',
-        price: '260.000Ar/nuité',
-        rating: 4.6,
-        imageUri: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=300',
-      },
-      {
-        id: 'is3',
-        name: 'Relais de la Reine',
-        price: '195.000Ar/nuité',
-        rating: 4.15,
-        imageUri: 'https://images.unsplash.com/photo-1439066615861-d1af74d74000?q=80&w=300',
-      },
-    ]
-  },
-  {
-    city: 'Antananarivo',
-    hotels: [
-      {
-        id: 'an1',
-        name: 'Aara Antananarivo',
-        price: '225.000Ar/nuité',
-        rating: 4.25,
-        imageUri: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=300',
-      },
-      {
-        id: 'an2',
-        name: 'Carlton Hotel',
-        price: '340.000Ar/nuité',
-        rating: 4.8,
-        imageUri: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=300',
-      },
-      {
-        id: 'an3',
-        name: 'Tambho Hotel & Spa',
-        price: '185.000Ar/nuité',
-        rating: 4.3,
-        imageUri: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=300',
-      },
-    ]
-  },
-  {
-    city: 'Mahajanga',
-    hotels: [
-      {
-        id: 'mj1',
-        name: 'Aara Antananarivo',
-        price: '225.000Ar/nuité',
-        rating: 4.25,
-        imageUri: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=300',
-      },
-      {
-        id: 'mj2',
-        name: 'Coco Lodge Majunga',
-        price: '160.000Ar/nuité',
-        rating: 4.0,
-        imageUri: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=300',
-      },
-      {
-        id: 'mj3',
-        name: 'Antsanitia Resort',
-        price: '250.000Ar/nuité',
-        rating: 4.45,
-        imageUri: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=300',
-      },
-    ]
-  }
-];
+interface CitySection {
+  city: string;
+  hotels: Hotel[];
+}
 
 export default function HomePage() {
+  const [sections, setSections] = useState<CitySection[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadHotels();
+  }, []);
+
+  const loadHotels = async () => {
+    setLoading(true);
+    try {
+      const hotels = await publicService.getHotels({ per_page: 20 });
+
+      const map = new Map<string, Hotel[]>();
+      for (const hotel of hotels) {
+        const city = hotelVille(hotel);
+        if (!map.has(city)) map.set(city, []);
+        map.get(city)!.push(hotel);
+      }
+
+      setSections(Array.from(map.entries()).map(([city, hs]) => ({ city, hotels: hs })));
+    } catch {
+      // keep empty on error
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
-      {/* Header unifié avec barre de recherche et slider de catégories */}
       <Header />
 
-      {/* Liste des sections de sélections par villes */}
-      <ScrollView 
-        className="flex-1 px-4"
-        contentContainerStyle={{ paddingTop: 8, paddingBottom: 96 }} // Padding bottom plus large pour ne pas masquer les cartes sous le footer
-        showsVerticalScrollIndicator={false}
-      >
-        {ACCOMMODATIONS_BY_CITY.map((section) => (
-          <View key={section.city} className="mb-6">
-            {/* Titre de la section avec flèche directionnelle */}
-            <TouchableOpacity 
-              className="flex-row items-center justify-between mb-3 mt-3"
-              onPress={() => console.log('Voir tout:', section.city)}
-            >
-              <Text className="text-[16px] font-bold text-gray-900">
-                Selection d’hebergement a {section.city}
-              </Text>
-              <Ionicons name="chevron-forward" size={18} color="#000" />
-            </TouchableOpacity>
+      {loading ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#01BDA5" />
+        </View>
+      ) : (
+        <ScrollView
+          className="flex-1 px-4"
+          contentContainerStyle={{ paddingTop: 8, paddingBottom: 96 }}
+          showsVerticalScrollIndicator={false}
+        >
+          {sections.map((section) => (
+            <View key={section.city} className="mb-6">
+              <TouchableOpacity
+                className="flex-row items-center justify-between mb-3 mt-3"
+                onPress={() => {}}
+              >
+                <Text className="text-[16px] font-bold text-gray-900">
+                  Selection d'hebergement a {section.city}
+                </Text>
+                <Ionicons name="chevron-forward" size={18} color="#000" />
+              </TouchableOpacity>
 
-            {/* Slider horizontal d'hébergements */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingRight: 8 }}
-            >
-              {section.hotels.map((hotel) => (
-                <HotelCard 
-                  key={hotel.id}
-                  imageUri={hotel.imageUri}
-                  name={hotel.name}
-                  price={hotel.price}
-                  rating={hotel.rating}
-                />
-              ))}
-            </ScrollView>
-          </View>
-        ))}
-      </ScrollView>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingRight: 8 }}
+              >
+                {section.hotels.map((hotel) => {
+                  const prix = hotelPrix(hotel);
+                  const note = hotelNote(hotel);
+                  const photo = hotelPhoto(hotel);
+                  const ville = hotelVille(hotel);
+                  return (
+                    <HotelCard
+                      key={hotel.id}
+                      imageUri={photo}
+                      name={hotel.nom}
+                      price={prix ? `${prix.toLocaleString('fr-FR')}Ar/nuité` : ''}
+                      rating={note}
+                      onPress={() =>
+                        router.push({
+                          pathname: '/(app)/hotel-detail',
+                          params: {
+                            id: hotel.id,
+                            name: hotel.nom,
+                            location: ville,
+                            rating: note.toString(),
+                            imageUris: JSON.stringify([photo]),
+                            from: 'home',
+                          },
+                        })
+                      }
+                    />
+                  );
+                })}
+              </ScrollView>
+            </View>
+          ))}
+
+          {sections.length === 0 && (
+            <View className="flex-1 items-center justify-center pt-20">
+              <Ionicons name="business-outline" size={48} color="#ccc" />
+              <Text className="text-gray-400 mt-4 font-semibold">Aucun hôtel disponible</Text>
+            </View>
+          )}
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 }

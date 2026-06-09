@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity, DimensionValue } from 'react-native';
+import { View, Text, Image, TouchableOpacity, DimensionValue, Pressable } from 'react-native';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -10,23 +10,27 @@ interface HotelCardProps {
   defaultFavorite?: boolean;
   width?: DimensionValue;
   marginRight?: number;
+  onPress?: () => void;
+  onFavoriteToggle?: () => void;
 }
 
-export const HotelCard = ({ 
-  imageUri, 
-  name, 
-  price, 
+export const HotelCard = ({
+  imageUri,
+  name,
+  price,
   rating,
   defaultFavorite = false,
   width = 165,
   marginRight = 14,
+  onPress,
+  onFavoriteToggle,
 }: HotelCardProps) => {
   const [isFavorite, setIsFavorite] = useState(defaultFavorite);
+  const safeRating = typeof rating === 'number' && !isNaN(rating) ? rating : 0;
 
-  // Génère un tableau d'étoiles (ex: 4 étoiles jaunes et 1 grise pour 4,25)
   const renderStars = () => {
     const stars = [];
-    const fullStars = Math.floor(rating);
+    const fullStars = Math.floor(safeRating);
     for (let i = 1; i <= 5; i++) {
       if (i <= fullStars) {
         stars.push(<Ionicons key={i} name="star" size={13} color="#fbbf24" style={{ marginRight: 2 }} />);
@@ -38,7 +42,8 @@ export const HotelCard = ({
   };
 
   return (
-    <View 
+    <Pressable
+      onPress={onPress}
       className="bg-white"
       style={{
         width: width,
@@ -62,8 +67,8 @@ export const HotelCard = ({
         />
         
         {/* Icône Coeur de favori (sans fond blanc, flottant en haut à droite) */}
-        <TouchableOpacity 
-          onPress={() => setIsFavorite(!isFavorite)}
+        <TouchableOpacity
+          onPress={() => { setIsFavorite(!isFavorite); onFavoriteToggle?.(); }}
           className="absolute top-3 right-3"
           style={{ zIndex: 10 }}
         >
@@ -106,10 +111,10 @@ export const HotelCard = ({
             {renderStars()}
           </View>
           <Text className="text-gray-500 font-bold text-[11px]">
-            {rating.toFixed(2).replace('.', ',')}
+            {safeRating.toFixed(2).replace('.', ',')}
           </Text>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 };

@@ -59,10 +59,12 @@ export const DestinationHotelCard = ({
     }
   };
 
+  const safeRating = typeof rating === 'number' && !isNaN(rating) ? rating : 0;
+
   // Générer les étoiles dorées et grises
   const renderStars = () => {
     const stars = [];
-    const floorRating = Math.floor(rating);
+    const floorRating = Math.floor(safeRating);
 
     for (let i = 1; i <= 5; i++) {
       if (i <= floorRating) {
@@ -242,7 +244,7 @@ export const DestinationHotelCard = ({
                 marginLeft: 4,
               }}
             >
-              {rating.toFixed(2).replace('.', ',')}
+              {safeRating.toFixed(2).replace('.', ',')}
             </Text>
           </View>
         </View>

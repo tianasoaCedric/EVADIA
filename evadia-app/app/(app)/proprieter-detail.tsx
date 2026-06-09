@@ -1,4 +1,5 @@
 import {
+  Alert,
   Dimensions,
   Image,
   ScrollView,
@@ -13,6 +14,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { clientService } from '../../services/client';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const IMAGE_HEIGHT = Math.round(screenHeight * 0.42);
@@ -30,6 +32,7 @@ const ROOM_AMENITIES = [
 
 export default function ProprieterDetailScreen() {
   const params = useLocalSearchParams();
+  const roomId = params.id ? Number(params.id) : null;
   const roomName = (params.name as string) || 'Chambre de Luxe';
   const roomPrice = (params.price as string) || '225.000Ariary/nuit';
   const roomImage = (params.imageUri as string) || 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?q=80&w=800';
@@ -40,6 +43,7 @@ export default function ProprieterDetailScreen() {
   const hotelName = (params.hotelName as string) || '';
   const hotelRating = (params.hotelRating as string) || '4.5';
   const hotelImageUris = (params.hotelImageUris as string) || '';
+  const [submitting, setSubmitting] = useState(false);
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [isBooking, setIsBooking] = useState(false);
@@ -238,23 +242,7 @@ export default function ProprieterDetailScreen() {
                 if (isBooking) {
                   setIsBooking(false);
                 } else {
-                  if (hotelName) {
-                    router.replace({
-                      pathname: '/(app)/hotel-detail',
-                      params: {
-                        name: hotelName,
-                        location: location,
-                        rating: hotelRating,
-                        imageUris: hotelImageUris,
-                      },
-                    });
-                  } else {
-                    if (router.canGoBack()) {
-                      router.back();
-                    } else {
-                      router.replace('/(app)/hotel-detail');
-                    }
-                  }
+                  router.replace('/hotel-detail');
                 }
               }}
               style={{
@@ -699,8 +687,30 @@ export default function ProprieterDetailScreen() {
         >
           <TouchableOpacity
             activeOpacity={0.9}
-            onPress={() => {
-              console.log('Réservation validée !');
+            disabled={submitting}
+            onPress={async () => {
+              if (!roomId) {
+                Alert.alert('Erreur', 'Chambre introuvable.');
+                return;
+              }
+              setSubmitting(true);
+              try {
+                const toISO = (d: Date) => d.toISOString().split('T')[0];
+                await clientService.createReservation({
+                  propriete_id: roomId,
+                  check_in: toISO(checkInDate),
+                  check_out: toISO(checkOutDate),
+                  nb_adultes: persons,
+                });
+                Alert.alert('Réservation confirmée !', 'Votre réservation a bien été enregistrée.', [
+                  { text: 'OK', onPress: () => router.replace('/(app)/home') },
+                ]);
+              } catch (err: any) {
+                const msg = err?.data?.message ?? err?.message ?? 'Une erreur est survenue.';
+                Alert.alert('Erreur de réservation', msg);
+              } finally {
+                setSubmitting(false);
+              }
             }}
             style={{
               backgroundColor: '#01BDA5',

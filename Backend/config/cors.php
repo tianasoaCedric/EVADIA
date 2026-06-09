@@ -17,7 +17,12 @@ return [
     'allowed_origins' => [
         'http://localhost:3000',
         'http://127.0.0.1:3000',
+        // React Native / Expo — le mobile ne passe pas par un navigateur,
+        // les requêtes n'ont pas d'Origin header, donc '*' est sans risque ici.
+        '*',
     ],
+
+    // En production, retirez '*' et listez uniquement vos domaines exacts.
 
     'allowed_origins_patterns' => [],
 
@@ -27,6 +32,8 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => true,
+    // false = compatible avec '*' dans allowed_origins (Bearer token, pas cookies).
+    // Le frontend web Next.js utilise withCredentials — gérer séparément si besoin.
+    'supports_credentials' => false,
 
 ];

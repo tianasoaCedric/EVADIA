@@ -85,28 +85,29 @@ export default function AppLayout() {
         }} 
       />
       
-      <Tabs.Screen 
-        name="destination-detail" 
-        options={{
-          href: null,
-        }} 
-      />
-
-      <Tabs.Screen 
-        name="hotel-detail" 
-        options={{
-          href: null,
-        }} 
-      />
-
-      <Tabs.Screen 
-        name="proprieter-detail" 
-        options={{
-          href: null,
-        }} 
-      />
       
-      <Tabs.Screen 
+      <Tabs.Screen
+        name="destination-detail"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="hotel-detail"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="proprieter-detail"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
         name="profile" 
         options={{
           title: 'Vous',
