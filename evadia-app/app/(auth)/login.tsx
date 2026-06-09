@@ -15,16 +15,19 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as WebBrowser from "expo-web-browser";
+import * as SecureStore from "expo-secure-store";
 import ErrorBanner from "../../components/atoms/ErrorBanner";
 import { Divider } from "../../components/atoms/Divider";
 import { useAuth } from "../../context/AuthContext";
+import { API_BASE_URL, TOKEN_KEY } from "../../lib/api";
 
 const oceanBg = require("../../assets/ocean.jpg");
 const evadiaLogo = require("../../assets/evadia.png");
 const googleIcon = require("../../assets/google-icon.png");
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, loginWithToken } = useAuth();
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -54,8 +57,50 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    // TODO: OAuth via useGoogleAuth (même pattern que mobile/)
+  const handleGoogleLogin = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      // Ouvre le navigateur système sur la page Google OAuth du backend
+      const result = await WebBrowser.openAuthSessionAsync(
+        `${API_BASE_URL}/api/auth/google`,
+        "evadia://auth/callback"
+      );
+
+      if (result.type !== "success") {
+        // L'utilisateur a fermé le browser sans se connecter
+        return;
+      }
+
+      // Extrait le token depuis l'URL de retour evadia://auth/callback?token=...
+      const url = result.url;
+      const tokenMatch = url.match(/[?&]token=([^&]+)/);
+      const errorMatch = url.match(/[?&]error=([^&]+)/);
+
+      if (errorMatch) {
+        const code = errorMatch[1];
+        setError(
+          code === "not_client"
+            ? "Ce compte n'est pas un compte client."
+            : "La connexion Google a échoué. Réessayez."
+        );
+        return;
+      }
+
+      if (!tokenMatch) {
+        setError("Token non reçu. Réessayez.");
+        return;
+      }
+
+      const token = decodeURIComponent(tokenMatch[1]);
+      await SecureStore.setItemAsync(TOKEN_KEY, token);
+      await loginWithToken();
+      // AuthContext met à jour state → _layout.tsx redirige vers /(app)/home
+    } catch {
+      setError("Une erreur est survenue. Réessayez.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const animate = (to: boolean) => {

@@ -2,27 +2,15 @@ import { apiClient } from '@/lib/api-client'
 import type { Favori } from '@/lib/types'
 
 export const favoriService = {
-  /**
-   * Liste des hôtels favoris du client
-   * GET /client/favorites
-   */
   list(): Promise<{ data: Favori[] }> {
-    return apiClient.get<{ data: Favori[] }>('/client/favorites')
+    return apiClient.silentGet<{ data: Favori[] }>('/api/client/favorites')
   },
 
-  /**
-   * Ajouter un hôtel aux favoris
-   * POST /client/favorites
-   */
   add(hotelId: number): Promise<{ data: Favori }> {
-    return apiClient.post<{ data: Favori }>('/client/favorites', { hotel_id: hotelId })
+    return apiClient.post<{ data: Favori }>('/api/client/favorites', { hotel_id: hotelId })
   },
 
-  /**
-   * Retirer un hôtel des favoris
-   * DELETE /client/favorites/{hotelId}
-   */
   remove(hotelId: number): Promise<void> {
-    return apiClient.delete<void>(`/client/favorites/${hotelId}`)
+    return apiClient.delete<void>(`/api/client/favorites/${hotelId}`)
   },
 }

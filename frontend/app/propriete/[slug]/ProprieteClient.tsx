@@ -17,7 +17,6 @@ import HotelInfo from '../../components/ui/HotelInfo'
 import SharePopup from '../../components/ui/SharePopup'
 import { proprieteService } from '@/lib/services/propriete.service'
 import { reservationService } from '@/lib/services/reservation.service'
-import { authService } from '@/lib/services/auth.service'
 import type { ProprietePublic } from '@/lib/types'
 import Loading from '../../components/ui/Loading'
 
@@ -93,10 +92,6 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
   }
 
   const handleReservation = async (data: any) => {
-    if (!authService.isAuthenticated()) {
-      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`)
-      return
-    }
     setIsSubmitting(true)
     try {
       const fmt = (d: Date) => d.toISOString().split('T')[0]

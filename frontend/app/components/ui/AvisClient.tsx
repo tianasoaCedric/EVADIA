@@ -8,7 +8,6 @@ import { useOnScreen } from '@/hooks/useOnScreen'
 import Bouton from './Bouton'
 import { avisService } from '@/lib/services/avis.service'
 import { reservationService } from '@/lib/services/reservation.service'
-import { authService } from '@/lib/services/auth.service'
 import type { AvisPublic, Reservation } from '@/lib/types'
 
 interface AvisClientProps {
@@ -110,8 +109,6 @@ export default function AvisClient({ hotelId, title }: AvisClientProps) {
   const [submitError, setSubmitError] = useState('')
   const [submitSuccess, setSubmitSuccess] = useState(false)
 
-  const isAuthenticated = authService.isAuthenticated()
-
   const [setTitleRef, isTitleVisible] = useOnScreen({ threshold: 0.2,  })
   const [setGridRef, isGridVisible] = useOnScreen({ threshold: 0.2,  })
   const [setFormRef, isFormVisible] = useOnScreen({ threshold: 0.2,  })
@@ -126,10 +123,6 @@ export default function AvisClient({ hotelId, title }: AvisClientProps) {
   }, [hotelId])
 
   const handleOpenForm = async () => {
-    if (!isAuthenticated) {
-      window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`
-      return
-    }
     if (!isFormOpen && hotelId) {
       try {
         const res = await reservationService.list({ statut: 'terminee' })

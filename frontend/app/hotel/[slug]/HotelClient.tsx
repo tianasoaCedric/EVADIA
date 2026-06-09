@@ -12,7 +12,6 @@ import dynamic from 'next/dynamic'
 const AvisClient = dynamic(() => import('@/app/components/ui/AvisClient'), { ssr: false })
 import HotelInfo from '@/app/components/ui/HotelInfo'
 import { favoriService } from '@/lib/services/favori.service'
-import { authService } from '@/lib/services/auth.service'
 import type { HotelDetail } from '@/lib/types'
 import SharePopup from '@/app/components/ui/SharePopup'
 
@@ -36,12 +35,9 @@ export default function HotelClient({ hotelId, hotelName, slug, initialHotelData
   const [setRoomsRef, isRoomsVisible] = useOnScreen({ threshold: 0.2,  })
 
   useEffect(() => {
-    // Données hôtel déjà chargées côté serveur — vérifier uniquement les favoris
-    if (authService.isAuthenticated()) {
-      favoriService.list().catch(() => ({ data: [] })).then(favoris => {
-        setIsSaved((favoris as { data: { hotel_id: number }[] }).data.some(f => f.hotel_id === hotelId))
-      })
-    }
+    favoriService.list()
+      .then(favoris => setIsSaved((favoris as { data: { hotel_id: number }[] }).data.some(f => f.hotel_id === hotelId)))
+      .catch(() => {})
   }, [hotelId])
 
   // Scroll pour le carrousel des chambres
@@ -91,10 +87,6 @@ export default function HotelClient({ hotelId, hotelName, slug, initialHotelData
   }
 
   const handleSave = async () => {
-    if (!authService.isAuthenticated()) {
-      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`)
-      return
-    }
     try {
       if (isSaved) {
         await favoriService.remove(hotelId)

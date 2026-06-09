@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { ActivityIndicator, Dimensions, ImageBackground, Platform, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { OffersCard } from '../../components/molecules/OffersCard';
 import { publicService, Offre } from '../../services/public';
@@ -26,13 +26,22 @@ export default function OffersScreen() {
   const [offres, setOffres] = useState<Offre[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadOffres = () => {
+    setLoading(true);
+    setError(null);
     publicService.getOffres()
       .then((data) => setOffres(Array.isArray(data) ? data : []))
-      .catch(() => setOffres([]))
+      .catch((e: any) => setError(e?.message ?? 'Impossible de charger les offres.'))
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadOffres();
+    }, [])
+  );
 
   const filtered = offres.filter((o) =>
     `${o.titre ?? ''} ${o.description ?? ''}`.toLowerCase().includes(search.toLowerCase())
@@ -95,6 +104,17 @@ export default function OffersScreen() {
         {loading ? (
           <View style={{ alignItems: 'center', paddingTop: 40 }}>
             <ActivityIndicator size="large" color="#01BDA5" />
+          </View>
+        ) : error ? (
+          <View style={{ alignItems: 'center', paddingTop: 40, paddingHorizontal: 32 }}>
+            <Ionicons name="cloud-offline-outline" size={52} color="#ccc" />
+            <Text style={{ color: '#9ca3af', marginTop: 12, fontWeight: '600', textAlign: 'center' }}>{error}</Text>
+            <TouchableOpacity
+              onPress={loadOffres}
+              style={{ marginTop: 16, backgroundColor: '#01BDA5', paddingHorizontal: 24, paddingVertical: 10, borderRadius: 100 }}
+            >
+              <Text style={{ color: '#fff', fontWeight: '700' }}>Réessayer</Text>
+            </TouchableOpacity>
           </View>
         ) : (
           <View style={{ alignItems: 'center' }}>

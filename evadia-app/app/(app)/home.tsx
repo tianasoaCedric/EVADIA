@@ -1,11 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { HotelCard } from '../../components/molecules/HotelCard';
 import { Header } from '../../components/molecules/Header';
 import { publicService, Hotel, hotelVille, hotelPhoto, hotelPrix, hotelNote } from '../../services/public';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 
 interface CitySection {
   city: string;
@@ -16,12 +16,17 @@ export default function HomePage() {
   const [sections, setSections] = useState<CitySection[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadHotels();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadHotels();
+    }, [])
+  );
+
+  const [error, setError] = useState<string | null>(null);
 
   const loadHotels = async () => {
     setLoading(true);
+    setError(null);
     try {
       const hotels = await publicService.getHotels({ per_page: 20 });
 
@@ -33,8 +38,8 @@ export default function HomePage() {
       }
 
       setSections(Array.from(map.entries()).map(([city, hs]) => ({ city, hotels: hs })));
-    } catch {
-      // keep empty on error
+    } catch (e: any) {
+      setError(e?.message ?? 'Impossible de charger les hôtels.');
     } finally {
       setLoading(false);
     }
@@ -47,6 +52,14 @@ export default function HomePage() {
       {loading ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color="#01BDA5" />
+        </View>
+      ) : error ? (
+        <View className="flex-1 items-center justify-center px-8">
+          <Ionicons name="cloud-offline-outline" size={52} color="#ccc" />
+          <Text className="text-gray-400 mt-4 font-semibold text-center">{error}</Text>
+          <TouchableOpacity className="mt-6 bg-teal-500 px-6 py-3 rounded-full" onPress={loadHotels}>
+            <Text className="text-white font-bold">Réessayer</Text>
+          </TouchableOpacity>
         </View>
       ) : (
         <ScrollView

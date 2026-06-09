@@ -1,8 +1,9 @@
-import { View, Text, ScrollView, Image, TouchableOpacity, TextInput, Dimensions, Platform } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, TextInput, Dimensions, Platform, ActivityIndicator, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
+import { api } from '../lib/api';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const IMAGE_HEIGHT = Math.round(screenHeight * 0.35);
@@ -11,11 +12,24 @@ export default function ContactScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSendMessage = () => {
-    console.log('Sending message:', { name, email, message });
-    // Action d'envoi du message...
-    router.back();
+  const handleSendMessage = async () => {
+    if (!name.trim() || !email.trim() || !message.trim()) {
+      Alert.alert('Champs requis', 'Veuillez remplir tous les champs.');
+      return;
+    }
+    setLoading(true);
+    try {
+      await api.post('/contact', { nom: name, email, message });
+      Alert.alert('Message envoyé', 'Nous vous répondrons dans les plus brefs délais.', [
+        { text: 'OK', onPress: () => router.back() },
+      ]);
+    } catch {
+      Alert.alert('Erreur', 'Impossible d\'envoyer le message. Réessayez plus tard.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -163,6 +177,7 @@ export default function ContactScreen() {
           {/* Bouton Envoyer Message */}
           <TouchableOpacity
             activeOpacity={0.8}
+            disabled={loading}
             style={{
               backgroundColor: '#01BDA5',
               borderRadius: 100,
@@ -175,12 +190,17 @@ export default function ContactScreen() {
               shadowRadius: 6,
               elevation: 4,
               marginBottom: 24,
+              opacity: loading ? 0.7 : 1,
             }}
             onPress={handleSendMessage}
           >
-            <Text style={{ color: '#ffffff', fontSize: 16, fontWeight: '700' }}>
-              Envoyez Message
-            </Text>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={{ color: '#ffffff', fontSize: 16, fontWeight: '700' }}>
+                Envoyez Message
+              </Text>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -198,16 +218,16 @@ export default function ContactScreen() {
 
           {/* Logos des réseaux sociaux */}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-            <TouchableOpacity onPress={() => console.log('Facebook')} activeOpacity={0.7}>
+            <TouchableOpacity activeOpacity={0.7}>
               <Ionicons name="logo-facebook" size={20} color="#000000" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => console.log('LinkedIn')} activeOpacity={0.7}>
+            <TouchableOpacity activeOpacity={0.7}>
               <Ionicons name="logo-linkedin" size={20} color="#000000" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => console.log('Instagram')} activeOpacity={0.7}>
+            <TouchableOpacity activeOpacity={0.7}>
               <Ionicons name="logo-instagram" size={20} color="#000000" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => console.log('TikTok')} activeOpacity={0.7}>
+            <TouchableOpacity activeOpacity={0.7}>
               <Ionicons name="logo-tiktok" size={20} color="#000000" />
             </TouchableOpacity>
           </View>

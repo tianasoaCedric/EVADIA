@@ -40,7 +40,7 @@ export const Header = ({
         
         <TouchableOpacity 
           className="w-12 h-12 rounded-full bg-gray-100 items-center justify-center ml-3"
-          onPress={() => console.log('Notifications')}
+          onPress={() => {}}
         >
           <Ionicons name="notifications-outline" size={22} color="#000" />
         </TouchableOpacity>

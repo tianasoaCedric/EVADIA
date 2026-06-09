@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 import { LogOut, User, CalendarDays, DollarSign, ChevronDown, Heart, LogIn, UserPlus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { authService } from '@/lib/services'
-import { tokenStorage } from '@/lib/api-client'
 import type { User as UserType } from '@/lib/types'
 
 interface AvatarProps {
@@ -49,15 +48,11 @@ const Avatar = ({ size = 'md', variant = 'default', className = '', onDeviseChan
     }
   }, [])
 
-  // Charger l'utilisateur connecté
+  // Charger l'utilisateur connecté — le cookie httpOnly est envoyé automatiquement
   useEffect(() => {
-    if (!tokenStorage.get()) return
     authService.me()
       .then(({ user }) => setUser(user))
-      .catch(() => {
-        tokenStorage.remove()
-        setUser(null)
-      })
+      .catch(() => setUser(null))
   }, [])
 
   // Fermer le dropdown si clic extérieur

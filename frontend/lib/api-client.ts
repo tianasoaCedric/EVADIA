@@ -1,21 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost/api'
-
-// ─── Gestion du token (côté client uniquement) ────────────────────────────────
-
-export const tokenStorage = {
-  get: (): string | null => {
-    if (typeof window === 'undefined') return null
-    return localStorage.getItem('evadia_token')
-  },
-  set: (token: string): void => {
-    if (typeof window === 'undefined') return
-    localStorage.setItem('evadia_token', token)
-  },
-  remove: (): void => {
-    if (typeof window === 'undefined') return
-    localStorage.removeItem('evadia_token')
-  },
-}
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? ''
 
 // ─── Erreur API typée ─────────────────────────────────────────────────────────
 
@@ -35,11 +18,10 @@ export class ApiError extends Error {
 interface RequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   body?: unknown
-  token?: string
-  /** Si true, une réponse 401 redirige vers /login au lieu de lever une erreur */
-  requiresAuth?: boolean
   /** Durée de revalidation Next.js en secondes (GET public uniquement). 0 = no-store */
   revalidate?: number | false
+  /** Si true, une 401 lève une ApiError sans rediriger vers /login */
+  silent?: boolean
 }
 
 // ─── Fonction de requête centrale ────────────────────────────────────────────
@@ -47,33 +29,38 @@ interface RequestOptions {
 const REQUEST_TIMEOUT_MS = 15_000
 
 async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-  const { method = 'GET', body, token, revalidate } = options
-
-  const authToken = token ?? tokenStorage.get()
+  const { method = 'GET', body, revalidate, silent = false } = options
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     Accept: 'application/json',
   }
 
-  if (authToken) {
-    headers['Authorization'] = `Bearer ${authToken}`
-  }
+  // Pour les routes internes Next.js (/api/auth/*), le cookie est envoyé
+  // automatiquement par le navigateur via credentials: 'include'.
+  const isInternalRoute = endpoint.startsWith('/api/')
 
-  const nextCache = method === 'GET' && !authToken && revalidate !== undefined
+  const nextCache = method === 'GET' && !isInternalRoute && revalidate !== undefined
     ? { next: { revalidate } }
-    : method === 'GET' && !authToken
+    : method === 'GET' && !isInternalRoute
       ? { next: { revalidate: 300 } }
       : { cache: 'no-store' as RequestCache }
 
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
 
+  const url = isInternalRoute ? endpoint : `${API_BASE_URL}${endpoint}`
+
+  // credentials: 'include' uniquement pour les routes internes Next.js (/api/auth/*)
+  // Les appels directs au backend Laravel utilisent 'omit' (token Bearer, pas cookie)
+  const credentials = isInternalRoute ? 'include' : 'omit'
+
   let response: Response
   try {
-    response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    response = await fetch(url, {
       method,
       headers,
+      credentials,
       signal: controller.signal,
       ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
       ...nextCache,
@@ -87,10 +74,8 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     clearTimeout(timeoutId)
   }
 
-  // 401 — session expirée ou action nécessitant un compte
   if (response.status === 401) {
-    tokenStorage.remove()
-    if (typeof window !== 'undefined') {
+    if (!silent && typeof window !== 'undefined') {
       const returnTo = encodeURIComponent(window.location.pathname)
       window.location.href = `/login?redirect=${returnTo}`
     }
@@ -106,7 +91,6 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     )
   }
 
-  // 204 No Content — rien à parser
   if (response.status === 204) {
     return undefined as T
   }
@@ -117,24 +101,23 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
 // ─── Client exporté ───────────────────────────────────────────────────────────
 
 export const apiClient = {
-  /** Requête publique — fonctionne sans compte (ex: liste des hôtels) */
-  get<T>(endpoint: string, token?: string, revalidate?: number | false) {
-    return request<T>(endpoint, { method: 'GET', token, revalidate })
+  get<T>(endpoint: string, revalidate?: number | false) {
+    return request<T>(endpoint, { method: 'GET', revalidate })
   },
-  /** Requête authentifiée — redirige vers /login si token absent ou expiré */
-  authGet<T>(endpoint: string) {
-    return request<T>(endpoint, { method: 'GET', requiresAuth: true })
+  /** Comme get() mais ne redirige pas vers /login sur 401 — pour les chargements silencieux */
+  silentGet<T>(endpoint: string) {
+    return request<T>(endpoint, { method: 'GET', silent: true })
   },
-  post<T>(endpoint: string, body: unknown, token?: string) {
-    return request<T>(endpoint, { method: 'POST', body, token })
+  post<T>(endpoint: string, body: unknown) {
+    return request<T>(endpoint, { method: 'POST', body })
   },
-  put<T>(endpoint: string, body: unknown, token?: string) {
-    return request<T>(endpoint, { method: 'PUT', body, token })
+  put<T>(endpoint: string, body: unknown) {
+    return request<T>(endpoint, { method: 'PUT', body })
   },
-  patch<T>(endpoint: string, body?: unknown, token?: string) {
-    return request<T>(endpoint, { method: 'PATCH', body, token })
+  patch<T>(endpoint: string, body?: unknown) {
+    return request<T>(endpoint, { method: 'PATCH', body })
   },
-  delete<T>(endpoint: string, token?: string) {
-    return request<T>(endpoint, { method: 'DELETE', token })
+  delete<T>(endpoint: string) {
+    return request<T>(endpoint, { method: 'DELETE' })
   },
 }

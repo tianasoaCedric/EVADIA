@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { DestinationCard } from '../../components/molecules/DestinationCard';
 import { Header } from '../../components/molecules/Header';
 import { api } from '../../lib/api';
@@ -18,30 +18,32 @@ export default function DestinationScreen() {
   const [selectedCategory, setSelectedCategory] = useState('Tous');
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    api.get('/destinations').then(async (res) => {
-      const dests = Array.isArray(res.data) ? res.data : res.data.data ?? [];
-      setCategories(['Tous', ...dests.map((d: any) => d.nom)]);
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      api.get('/destinations').then(async (res) => {
+        const dests = Array.isArray(res.data) ? res.data : res.data.data ?? [];
+        setCategories(['Tous', ...dests.map((d: any) => d.nom)]);
 
-      // Charger les villes de chaque destination
-      const all: VilleItem[] = [];
-      for (const dest of dests) {
-        try {
-          const r = await api.get(`/destinations/${dest.id}/villes`);
-          const villesList = r.data?.data?.villes ?? r.data?.villes ?? [];
-          for (const v of villesList) {
-            all.push({
-              id: v.id,
-              name: v.nom,
-              imageUri: v.image ?? dest.image_url ?? FALLBACK_IMAGE,
-              destinationNom: dest.nom,
-            });
-          }
-        } catch {}
-      }
-      setVilles(all);
-    }).catch(() => {}).finally(() => setLoading(false));
-  }, []);
+        const all: VilleItem[] = [];
+        for (const dest of dests) {
+          try {
+            const r = await api.get(`/destinations/${dest.id}/villes`);
+            const villesList = r.data?.data?.villes ?? r.data?.villes ?? [];
+            for (const v of villesList) {
+              all.push({
+                id: v.id,
+                name: v.nom,
+                imageUri: v.image ?? dest.image_url ?? FALLBACK_IMAGE,
+                destinationNom: dest.nom,
+              });
+            }
+          } catch {}
+        }
+        setVilles(all);
+      }).catch(() => {}).finally(() => setLoading(false));
+    }, [])
+  );
 
   const filteredVilles = villes.filter(v => {
     const matchesCategory = selectedCategory === 'Tous' || v.destinationNom === selectedCategory;

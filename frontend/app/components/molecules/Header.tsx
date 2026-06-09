@@ -48,8 +48,6 @@ const Header = ({
     const router = useRouter()
     const { theme: themeCtx, hidden } = useHeaderTheme()
     const theme = themeProp ?? themeCtx
-
-    if (hidden) return null
     const t = useTranslations('Header')
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [isSearchOpen, setIsSearchOpen] = useState(false)
@@ -180,6 +178,8 @@ const Header = ({
     }
 
     const currentTheme = themeStyles[activeTheme]
+
+    if (hidden) return null
 
     return (
         <>

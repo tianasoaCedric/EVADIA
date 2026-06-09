@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, ScrollView, Text, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import { ActivityIndicator, Dimensions, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { HotelCard } from '../../components/molecules/HotelCard';
 import { Header } from '../../components/molecules/Header';
 import { clientService, Favori } from '../../services/client';
@@ -15,13 +15,22 @@ const CARD_WIDTH = (screenWidth - 48) / 2;
 export default function FavoritesScreen() {
   const [favoris, setFavoris] = useState<Favori[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadFavoris = () => {
+    setLoading(true);
+    setError(null);
     clientService.getFavorites()
       .then((data) => setFavoris(Array.isArray(data) ? data : []))
-      .catch(() => setFavoris([]))
+      .catch((e: any) => setError(e?.message ?? 'Impossible de charger les favoris.'))
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadFavoris();
+    }, [])
+  );
 
   const handleToggleFavorite = async (hotelId: number) => {
     try {
@@ -48,6 +57,17 @@ export default function FavoritesScreen() {
         {loading ? (
           <View style={{ alignItems: 'center', paddingTop: 40 }}>
             <ActivityIndicator size="large" color="#01BDA5" />
+          </View>
+        ) : error ? (
+          <View style={{ alignItems: 'center', paddingTop: 60, paddingHorizontal: 32 }}>
+            <Ionicons name="cloud-offline-outline" size={52} color="#e5e7eb" />
+            <Text style={{ color: '#9ca3af', marginTop: 12, fontWeight: '600', textAlign: 'center' }}>{error}</Text>
+            <TouchableOpacity
+              onPress={loadFavoris}
+              style={{ marginTop: 16, backgroundColor: '#01BDA5', paddingHorizontal: 24, paddingVertical: 10, borderRadius: 100 }}
+            >
+              <Text style={{ color: '#fff', fontWeight: '700' }}>Réessayer</Text>
+            </TouchableOpacity>
           </View>
         ) : favoris.length === 0 ? (
           <View style={{ alignItems: 'center', paddingTop: 60 }}>

@@ -19,22 +19,12 @@ import { clientService } from '../../services/client';
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const IMAGE_HEIGHT = Math.round(screenHeight * 0.42);
 
-const ROOM_AMENITIES = [
-  { icon: 'wifi', label: 'Wifi ultra-rapide' },
-  { icon: 'snow', label: 'Climatisation' },
-  { icon: 'tv', label: 'Smart TV 4K' },
-  { icon: 'cafe', label: 'Machine à café' },
-  { icon: 'briefcase', label: 'Espace de travail' },
-  { icon: 'wine', label: 'Mini-bar' },
-  { icon: 'key', label: 'Coffre-fort' },
-  { icon: 'shirt', label: 'Service de blanchisserie' },
-] as const;
-
 export default function ProprieterDetailScreen() {
   const params = useLocalSearchParams();
   const roomId = params.id ? Number(params.id) : null;
   const roomName = (params.name as string) || 'Chambre de Luxe';
   const roomPrice = (params.price as string) || '225.000Ariary/nuit';
+  const roomDescription = (params.description as string) || '';
   const roomImage = (params.imageUri as string) || 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?q=80&w=800';
   const beds = parseInt((params.beds as string) || '2');
   const bathrooms = parseInt((params.bathrooms as string) || '1');
@@ -48,11 +38,7 @@ export default function ProprieterDetailScreen() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isBooking, setIsBooking] = useState(false);
 
-  const imageUris = [
-    roomImage,
-    'https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=800',
-    'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=800',
-  ];
+  const imageUris = [roomImage];
 
   // Animation d'entrée fluide (fade-in + slide-up)
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -282,7 +268,7 @@ export default function ProprieterDetailScreen() {
               >
                 <TouchableOpacity
                   activeOpacity={0.8}
-                  onPress={() => console.log('Partager')}
+                  onPress={() => {}}
                 >
                   <Ionicons
                     name="share-outline"
@@ -396,7 +382,7 @@ export default function ProprieterDetailScreen() {
                   marginBottom: 20,
                 }}
               >
-                Nichées au cœur de villas de style malagasy et du manoir, nos chambres, situées tout au long de la côte, proposent des lits jumeaux ou un lit king-size. Chaque chambre dispose d'un balcon privé. Elles peuvent accueillir soit 3 adultes, soit 2 adultes et 1 adolescent (ou 1 enfant).
+                {roomDescription || 'Chambre confortable avec tout le nécessaire pour un séjour agréable.'}
               </Text>
 
               {/* ── Details ── */}

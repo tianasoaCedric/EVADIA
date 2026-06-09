@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { authService } from '@/lib/services'
 import Loading from '@/app/components/ui/Loading'
 
 export default function AuthCallbackPage() {
@@ -25,23 +24,26 @@ export default function AuthCallbackPage() {
       return
     }
 
-    // Stocke le token puis vérifie le profil utilisateur
-    localStorage.setItem('evadia_token', token)
-
-    authService.me()
-      .then(({ user }) => {
-        const isClient = user.roles?.some((r: { code: string }) => r.code === 'client')
-        if (!isClient) {
-          localStorage.removeItem('evadia_token')
+    // Envoie le token au route handler qui le valide et pose le cookie httpOnly.
+    // Le token ne touche jamais localStorage.
+    fetch('/api/auth/google-callback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ token }),
+    })
+      .then(async (res) => {
+        if (res.status === 403) {
           router.push('/login?error=not_client')
+          return
+        }
+        if (!res.ok) {
+          router.push('/login?error=google_failed')
           return
         }
         router.push('/')
       })
-      .catch(() => {
-        localStorage.removeItem('evadia_token')
-        router.push('/login?error=google_failed')
-      })
+      .catch(() => router.push('/login?error=google_failed'))
   }, [router, searchParams])
 
   return (

@@ -72,7 +72,7 @@ export default function DetailOffersScreen() {
           {/* Bouton Partager en haut à droite */}
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => console.log('Partager offre')}
+            onPress={() => {}}
             style={{
               position: 'absolute',
               top: Platform.OS === 'ios' ? 52 : 40,
@@ -197,7 +197,7 @@ export default function DetailOffersScreen() {
             shadowRadius: 6,
             elevation: 4,
           }}
-          onPress={() => console.log('Action reserver offre')}
+          onPress={() => {}}
         >
           <Text style={{ color: '#ffffff', fontSize: 16, fontWeight: '700' }}>
             Reserver

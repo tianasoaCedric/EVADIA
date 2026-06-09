@@ -9,7 +9,6 @@ import { useTranslations } from 'next-intl'
 import { useDevise } from '@/app/context/DeviseContext'
 import { useFavoris } from '@/app/context/FavorisContext'
 import { favoriService } from '@/lib/services/favori.service'
-import { authService } from '@/lib/services/auth.service'
 
 interface CardHotelProps {
   imageUrl: string
@@ -108,11 +107,6 @@ const CardHotel = ({
     }
 
     if (!hotelId) return
-
-    if (!authService.isAuthenticated()) {
-      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`)
-      return
-    }
 
     const newState = !isFavorite
     setIsFavorite(newState)

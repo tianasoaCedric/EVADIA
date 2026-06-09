@@ -45,6 +45,7 @@ export default function HotelDetailScreen() {
   const [hotel, setHotel] = useState<Hotel | null>(null);
   const [rooms, setRooms] = useState<Propriete[]>([]);
   const [loading, setLoading] = useState(!!hotelId);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [activeRoomIndex, setActiveRoomIndex] = useState(0);
@@ -70,13 +71,16 @@ export default function HotelDetailScreen() {
 
   const loadHotel = async (id: number) => {
     setLoading(true);
+    setLoadError(null);
     try {
       const data = await publicService.getHotel(id);
       setHotel(data);
-      // getHotel normalise déjà et place les chambres dans data.chambres
       setRooms(Array.isArray((data as any).chambres) ? (data as any).chambres : []);
-    } catch {}
-    finally { setLoading(false); }
+    } catch (e: any) {
+      setLoadError(e?.message ?? 'Impossible de charger les détails.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleToggleFavorite = async () => {
@@ -156,6 +160,17 @@ export default function HotelDetailScreen() {
           <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
             <ActivityIndicator size="large" color="#01BDA5" />
           </View>
+        ) : loadError ? (
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 }}>
+            <Ionicons name="cloud-offline-outline" size={52} color="#e5e7eb" />
+            <Text style={{ color: '#9ca3af', marginTop: 12, fontWeight: '600', textAlign: 'center' }}>{loadError}</Text>
+            <TouchableOpacity
+              onPress={() => hotelId && loadHotel(hotelId)}
+              style={{ marginTop: 16, backgroundColor: '#01BDA5', paddingHorizontal: 24, paddingVertical: 10, borderRadius: 100 }}
+            >
+              <Text style={{ color: '#fff', fontWeight: '700' }}>Réessayer</Text>
+            </TouchableOpacity>
+          </View>
         ) : (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 110 }} style={{ flex: 1 }}>
             <View style={{ paddingHorizontal: 18, paddingTop: 20 }}>
@@ -215,6 +230,7 @@ export default function HotelDetailScreen() {
                                 beds: room.nb_lits ?? 1,
                                 bathrooms: room.nb_salles_bain ?? 1,
                                 persons: room.capacite ?? 2,
+                                description: room.description ?? '',
                                 location: displayVille,
                                 hotelName: hotel?.nom ?? hotelName,
                                 hotelRating: displayRating.toString(),

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { clientService, ClientProfile } from '../../services/client';
@@ -13,15 +13,20 @@ export default function ProfilePage() {
 
   const authUser = state.status === 'authenticated' ? state.user : null;
 
-  useEffect(() => {
-    clientService.getProfile()
-      .then((data: any) => {
-        const p = data?.data ?? data;
-        setProfile(p);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      clientService.getProfile()
+        .then((data: any) => {
+          const p = data?.data ?? data;
+          setProfile(p);
+        })
+        .catch(() => {
+          // profil non chargé — on affiche les données de l'AuthContext comme fallback
+        })
+        .finally(() => setLoading(false));
+    }, [])
+  );
 
   const handleLogout = async () => {
     await logout();

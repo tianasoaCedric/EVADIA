@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { favoriService } from '@/lib/services'
-import { authService } from '@/lib/services/auth.service'
 
 interface FavorisContextValue {
   favoriteIds: Set<number>
@@ -18,7 +17,6 @@ export function FavorisProvider({ children }: { children: React.ReactNode }) {
   const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set())
 
   useEffect(() => {
-    if (!authService.isAuthenticated()) return
     favoriService.list()
       .then(res => setFavoriteIds(new Set(res.data.map(f => f.hotel_id))))
       .catch(() => {})

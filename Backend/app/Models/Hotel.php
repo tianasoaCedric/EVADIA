@@ -8,12 +8,36 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Cache;
 
 class Hotel extends Model
 {
     use HasFactory;
 
     const CREATED_AT = 'date_creation';
+
+    protected static function booted(): void
+    {
+        // Vide les résultats de recherche en cache quand un hôtel change
+        $flush = fn() => static::flushSearchCache();
+
+        static::saved($flush);
+        static::deleted($flush);
+    }
+
+    public static function flushSearchCache(): void
+    {
+        $redis  = Cache::getRedis();
+        $prefix = config('cache.prefix') . ':search:';
+        $cursor = '0';
+
+        do {
+            [$cursor, $keys] = $redis->scan($cursor, 'MATCH', $prefix . '*', 'COUNT', 100);
+            if (!empty($keys)) {
+                $redis->del($keys);
+            }
+        } while ($cursor !== '0');
+    }
     const UPDATED_AT = 'updated_at';
 
     protected $fillable = [
