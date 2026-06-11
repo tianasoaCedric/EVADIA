@@ -8,6 +8,9 @@
 *.psd
 *.ai
 
+# Docker env (contient des clés sensibles)
+.env.docker
+
 # Redis dump
 dump.rdb
 *.rdb

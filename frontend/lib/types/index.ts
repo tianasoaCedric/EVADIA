@@ -113,6 +113,11 @@ export interface Hotel {
   adresse?: Adresse
   photos?: Photo[]
   types?: TypeHotel[]
+  destination_id?: number | null
+  type_hebergement_id?: number | null
+  nb_avis?: number
+  offre_type?: string | null
+  discount?: number | null
 }
 
 /** Chambre telle que retournée dans GET /hotels/{id} */

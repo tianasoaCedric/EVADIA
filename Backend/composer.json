@@ -9,6 +9,7 @@
         "php": "^8.2",
         "darkaonline/l5-swagger": "^10.1",
         "laravel/framework": "^12.0",
+        "laravel/octane": "^2.17",
         "laravel/reverb": "^1.8",
         "laravel/sanctum": "^4.3",
         "laravel/socialite": "^5.27",

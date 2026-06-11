@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'EVADIA - Espace Hôtelier')</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/Evadia_Logo BW 4.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/Evadia_Logo_BW_4.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -83,7 +83,7 @@
             <div class="relative z-10 flex flex-col justify-between h-full p-12">
                 {{-- Top: Logo + badge --}}
                 <div class="flex items-center gap-3">
-                    <img src="{{ asset('images/Evadia_Logo BW 1.png') }}" alt="EVADIA" class="h-10">
+                    <img src="{{ asset('images/Evadia_Logo_BW_1.png') }}" alt="EVADIA" class="h-10">
                     <span class="rounded-full bg-hotel-500/15 border border-hotel-500/20 px-3 py-1 text-[11px] font-semibold text-hotel-400 tracking-wider uppercase">Hôtelier</span>
                 </div>
 
@@ -132,7 +132,7 @@
 
                 {{-- Mobile logo --}}
                 <div class="lg:hidden flex items-center justify-center gap-3 mb-8">
-                    <img src="{{ asset('images/Evadia_Logo BW 4.png') }}" alt="EVADIA" class="h-10">
+                    <img src="{{ asset('images/Evadia_Logo_BW_4.png') }}" alt="EVADIA" class="h-10">
                 </div>
 
                 @if(session('success'))

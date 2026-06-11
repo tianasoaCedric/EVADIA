@@ -40,18 +40,18 @@ use Illuminate\Support\Facades\Route;
 // Auth Routes (hors groupe admin)
 // ────────────────────────────────────────────────────────
 Route::middleware('guest')->group(function () {
-    Route::get('/', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/', [AuthController::class, 'login']);
-    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
-    Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
-    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
-    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+    Route::get('/admin/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/admin/login', [AuthController::class, 'login']);
+    Route::get('/admin/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/admin/register', [AuthController::class, 'register']);
+    Route::get('/admin/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
+    Route::post('/admin/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/admin/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
+    Route::post('/admin/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
-Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
-Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
+Route::post('/admin/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
+Route::get('/admin/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
 
 // ────────────────────────────────────────────────────────
 // Admin Routes

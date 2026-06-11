@@ -36,4 +36,16 @@ export const authService = {
   me(): Promise<{ user: User }> {
     return apiClient.silentGet<{ user: User }>('/api/auth/me')
   },
+
+  async forgotPassword(payload: { email: string }): Promise<void> {
+    await apiClient.post<void>('/api/auth/forgot-password', payload)
+  },
+
+  async verifyResetCode(payload: { email: string; code: string }): Promise<void> {
+    await apiClient.post<void>('/api/auth/verify-reset-code', payload)
+  },
+
+  async resetPassword(payload: { email: string; code: string; password: string; password_confirmation: string }): Promise<void> {
+    await apiClient.post<void>('/api/auth/reset-password', payload)
+  },
 }

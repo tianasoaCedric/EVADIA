@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'EVADIA - Espace Hôtelier')</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/Evadia_Logo BW 4.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/Evadia_Logo_BW_4.png') }}">
     <meta name="description"
         content="@yield('meta_description', 'Back-office hôtelier EVADIA - Gestion de votre hôtel')">
 
@@ -193,8 +193,8 @@
             <!-- Logo -->
             <div class="flex h-16 items-center gap-3 px-4 border-b border-white/[0.06]">
                 <a href="{{ route('hotel.dashboard') }}" class="flex items-center gap-3 min-w-0">
-                    <img x-show="sidebarOpen" src="{{ asset('images/Evadia_Logo BW 1.png') }}" alt="EVADIA" class="h-8 shrink-0">
-                    <img x-show="!sidebarOpen" src="{{ asset('images/Evadia_Logo BW 4.png') }}" alt="EVADIA" class="h-8 mx-auto shrink-0">
+                    <img x-show="sidebarOpen" src="{{ asset('images/Evadia_Logo_BW_1.png') }}" alt="EVADIA" class="h-8 shrink-0">
+                    <img x-show="!sidebarOpen" src="{{ asset('images/Evadia_Logo_BW_4.png') }}" alt="EVADIA" class="h-8 mx-auto shrink-0">
                     <span x-show="sidebarOpen" class="text-[10px] font-bold uppercase tracking-widest text-hotel-400/70 shrink-0">Hôtel</span>
                 </a>
             </div>

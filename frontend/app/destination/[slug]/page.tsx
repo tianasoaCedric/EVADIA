@@ -59,9 +59,9 @@ export default async function CityPage({ params }: PageProps) {
   const cityName = getNameFromSlug(slug)
 
   const [villesRes, hotelsRes, popularRes] = await Promise.all([
-    apiClient.get<{ data: DestinationData }>(`/destinations/${cityId}/villes`, undefined, 300),
-    apiClient.get<HotelsPage>(`/destinations/${cityId}/hotels?selection=1`, undefined, 300),
-    apiClient.get<{ data: ApiHotel[] }>(`/destinations/${cityId}/hotels?popular=1`, undefined, 300),
+    apiClient.get<{ data: DestinationData }>(`/destinations/${cityId}/villes`, 300),
+    apiClient.get<HotelsPage>(`/destinations/${cityId}/hotels?selection=1`, 300),
+    apiClient.get<{ data: ApiHotel[] }>(`/destinations/${cityId}/hotels?popular=1`, 300),
   ])
 
   return (

@@ -29,8 +29,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function DestinationPage() {
   const [destRes, selectionRes] = await Promise.all([
-    apiClient.get<{ data: Destination[] }>('/destinations', undefined, 300),
-    apiClient.get<{ data: Hotel[] }>('/hotels?selection=1', undefined, 300),
+    apiClient.get<{ data: Destination[] }>('/destinations', 300),
+    apiClient.get<{ data: Hotel[] }>('/hotels?selection=1', 300),
   ])
 
   return (
