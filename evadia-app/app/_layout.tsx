@@ -13,6 +13,7 @@ function RootNavigator() {
     } else if (state.status === "unauthenticated") {
       router.replace("/(auth)/login");
     }
+    // "loading" → on ne touche pas à la navigation
   }, [state.status]);
 
   if (state.status === "loading") {

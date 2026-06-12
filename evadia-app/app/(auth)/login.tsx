@@ -139,16 +139,12 @@ export default function LoginPage() {
                   </TouchableOpacity>
 
                   <View className="items-center mb-8 mt-4">
-                    <Image source={evadiaLogo} className="w-60 h-28" resizeMode="contain" />
+                    <Image source={evadiaLogo} className="w-60 h-32" resizeMode="contain" />
                     <Text
-                      className="text-white text-center text-base mt-2 font-semibold tracking-wide"
-                      style={{
-                        textShadowColor: "rgba(0,0,0,0.4)",
-                        textShadowOffset: { width: 1, height: 1 },
-                        textShadowRadius: 3,
-                      }}
+                      className="text-white/90 text-center text-base font-semibold"
+                      style={{ marginTop: -10 }}
                     >
-                      Trouvez l'Hôtel parfait pour vous !
+                      Trouvez l'hôtel parfait pour vous !
                     </Text>
                   </View>
 
@@ -246,16 +242,12 @@ export default function LoginPage() {
                 /* ── CHOIX (CARTE BLANCHE) ── */
                 <View className="flex-1 justify-between">
                   <View className="items-center mt-10 flex-1 justify-center">
-                    <Image source={evadiaLogo} className="w-64 h-32" resizeMode="contain" />
+                    <Image source={evadiaLogo} className="w-60 h-32" resizeMode="contain" />
                     <Text
-                      className="text-white text-lg mt-2 font-semibold text-center tracking-wide"
-                      style={{
-                        textShadowColor: "rgba(0,0,0,0.4)",
-                        textShadowOffset: { width: 1, height: 1 },
-                        textShadowRadius: 3,
-                      }}
+                      className="text-white/90 text-center text-base font-semibold"
+                      style={{ marginTop: -10 }}
                     >
-                      Trouvez l'Hôtel parfait pour vous !
+                      Trouvez l'hôtel parfait pour vous !
                     </Text>
                   </View>
 

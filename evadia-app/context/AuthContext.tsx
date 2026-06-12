@@ -57,18 +57,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const res = await api.post("/auth/login", { email, password });
-    const { user, token } = res.data;
-    await SecureStore.setItemAsync(TOKEN_KEY, token);
-    setState({ status: "authenticated", user, token });
+    setState({ status: "loading" });
+    try {
+      const res = await api.post("/auth/login", { email, password });
+      const { user, token } = res.data;
+      await SecureStore.setItemAsync(TOKEN_KEY, token);
+      setState({ status: "authenticated", user, token });
+    } catch (err) {
+      setState({ status: "unauthenticated" });
+      throw err;
+    }
   };
 
   const register = async (data: RegisterData) => {
-    const payload = { ...data, password_confirmation: data.password_confirmation ?? data.password };
-    const res = await api.post("/auth/register", payload);
-    const { user, token } = res.data;
-    await SecureStore.setItemAsync(TOKEN_KEY, token);
-    setState({ status: "authenticated", user, token });
+    setState({ status: "loading" });
+    try {
+      const payload = { ...data, password_confirmation: data.password_confirmation ?? data.password };
+      const res = await api.post("/auth/register", payload);
+      const { user, token } = res.data;
+      await SecureStore.setItemAsync(TOKEN_KEY, token);
+      setState({ status: "authenticated", user, token });
+    } catch (err) {
+      setState({ status: "unauthenticated" });
+      throw err;
+    }
   };
 
   // Appelé après un OAuth (token déjà dans SecureStore)

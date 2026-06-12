@@ -63,8 +63,10 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_BASE_URL=http://localhost/api
     environment:
-      - NEXT_PUBLIC_API_URL=http://api:8000
+      - API_BASE_URL=http://api:8000/api
     restart: unless-stopped
 
   # ─── PostgreSQL ───────────────────────────────────────────────

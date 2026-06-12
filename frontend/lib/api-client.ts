@@ -1,4 +1,8 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? ''
+// Server-side uses API_BASE_URL (internal Docker network), client uses NEXT_PUBLIC_API_BASE_URL (public URL)
+const API_BASE_URL =
+  (typeof window === 'undefined' ? process.env.API_BASE_URL : undefined) ??
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  ''
 
 // ─── Erreur API typée ─────────────────────────────────────────────────────────
 

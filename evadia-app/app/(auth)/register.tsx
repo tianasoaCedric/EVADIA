@@ -81,7 +81,7 @@ export default function RegisterScreen() {
           >
             <View className="items-center pt-10 pb-8 px-6">
               <Image source={evadiaLogo} className="w-60 h-32" resizeMode="contain" />
-              <Text className="text-white/90 text-center text-base font-semibold" style={{ marginTop: -40 }}>
+              <Text className="text-white/90 text-center text-base font-semibold" style={{ marginTop: -10 }}>
                 Trouvez l'hôtel parfait pour vous !
               </Text>
 
