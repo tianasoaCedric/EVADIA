@@ -37,6 +37,7 @@ export default function LoginPage() {
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
   const handleLogin = async () => {
+    console.log('[LOGIN] handleLogin called, email:', email);
     setError("");
     if (!email || !password) {
       setError("Veuillez saisir votre email et mot de passe.");
@@ -44,9 +45,12 @@ export default function LoginPage() {
     }
     setLoading(true);
     try {
+      console.log('[LOGIN] calling login()');
       await login(email, password);
+      console.log('[LOGIN] login() done');
       // AuthContext met à jour state → _layout.tsx redirige automatiquement
     } catch (err: any) {
+      console.log('[LOGIN] error:', JSON.stringify(err?.response?.data), 'status:', err?.response?.status, 'message:', err?.message);
       const msg =
         err?.response?.data?.message ||
         err?.response?.data?.errors?.email?.[0] ||
@@ -63,7 +67,7 @@ export default function LoginPage() {
     try {
       // Ouvre le navigateur système sur la page Google OAuth du backend
       const result = await WebBrowser.openAuthSessionAsync(
-        `${API_BASE_URL}/api/auth/google`,
+        `${API_BASE_URL}/api/auth/google?platform=mobile`,
         "evadia://auth/callback"
       );
 

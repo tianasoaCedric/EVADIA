@@ -80,8 +80,11 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
 
   if (response.status === 401) {
     if (!silent && typeof window !== 'undefined') {
-      const returnTo = encodeURIComponent(window.location.pathname)
-      window.location.href = `/login?redirect=${returnTo}`
+      const pathname = window.location.pathname
+      if (!pathname.startsWith('/login') && !pathname.startsWith('/register')) {
+        const returnTo = encodeURIComponent(pathname)
+        window.location.href = `/login?redirect=${returnTo}`
+      }
     }
     throw new ApiError(401, 'Connexion requise')
   }

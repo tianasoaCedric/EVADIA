@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Mobile\MobileAuthController;
 use App\Http\Controllers\Api\Admin\AbonnementController;
 use App\Http\Controllers\Api\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Api\Admin\HotelController;
@@ -31,6 +32,22 @@ use App\Http\Controllers\Api\Hotel\PaymentController;
 use App\Http\Controllers\Api\Hotel\ReservationController as HotelReservationController;
 use App\Http\Controllers\Api\Hotel\RoomController;
 use Illuminate\Support\Facades\Route;
+
+// ============================================================
+// Routes Mobile (Bearer token, API key requis)
+// ============================================================
+Route::prefix('mobile')->middleware(['mobile.validate'])->group(function () {
+    // Auth publique mobile
+    Route::post('/auth/login',    [MobileAuthController::class, 'login'])->middleware('throttle:login');
+    Route::post('/auth/register', [MobileAuthController::class, 'register'])->middleware('throttle:register');
+
+    // Auth privée mobile
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/auth/me',         [MobileAuthController::class, 'me']);
+        Route::post('/auth/logout',    [MobileAuthController::class, 'logout']);
+        Route::post('/auth/logout-all',[MobileAuthController::class, 'logoutAll']);
+    });
+});
 
 // ============================================================
 // Routes publiques (pas d'authentification requise)

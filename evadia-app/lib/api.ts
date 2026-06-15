@@ -5,34 +5,54 @@ import { router } from "expo-router";
 export const API_BASE_URL =
   process.env.EXPO_PUBLIC_API_URL ?? "https://api.evadia.com";
 
+const MOBILE_API_KEY = process.env.EXPO_PUBLIC_MOBILE_API_KEY ?? "";
+console.log('[API] MOBILE_API_KEY present:', !!MOBILE_API_KEY, 'length:', MOBILE_API_KEY.length);
+
 export const TOKEN_KEY = "evadia_auth_token";
 
-export const api = axios.create({
-  baseURL: `${API_BASE_URL}/api`,
-  headers: {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  },
+// Headers communs à toutes les instances
+const commonHeaders = {
+  "Content-Type": "application/json",
+  Accept: "application/json",
+  "X-Mobile-Api-Key": MOBILE_API_KEY,
+};
+
+// ─── Instance auth mobile (/api/mobile/auth/*) ────────────────────────────────
+// Retourne { user, token } — Bearer token, pas de cookie
+export const mobileAuthApi = axios.create({
+  baseURL: `${API_BASE_URL}/api/mobile`,
+  headers: commonHeaders,
   timeout: 10000,
 });
 
-// Injecte le token Bearer automatiquement sur chaque requête
-api.interceptors.request.use(async (config) => {
+// ─── Instance API générale (/api/*) ───────────────────────────────────────────
+// Pour toutes les routes Laravel : /client/*, /hotels, /destinations, etc.
+export const api = axios.create({
+  baseURL: `${API_BASE_URL}/api`,
+  headers: commonHeaders,
+  timeout: 10000,
+});
+
+// Injecte le token Bearer automatiquement sur les deux instances
+const injectToken = async (config: any) => {
   const token = await SecureStore.getItemAsync(TOKEN_KEY);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
-});
+};
+
+mobileAuthApi.interceptors.request.use(injectToken);
+api.interceptors.request.use(injectToken);
 
 // Gère les 401 : token expiré → déconnexion automatique
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (error.response?.status === 401) {
-      await SecureStore.deleteItemAsync(TOKEN_KEY);
-      router.replace("/(auth)/login");
-    }
-    return Promise.reject(error);
+const handle401 = async (error: any) => {
+  if (error.response?.status === 401) {
+    await SecureStore.deleteItemAsync(TOKEN_KEY);
+    router.replace("/(auth)/login");
   }
-);
+  return Promise.reject(error);
+};
+
+mobileAuthApi.interceptors.response.use((r) => r, handle401);
+api.interceptors.response.use((r) => r, handle401);

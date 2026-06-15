@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from 'next-intl'
 import dynamic from 'next/dynamic'
@@ -33,12 +32,12 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/offres" className="hover:underline">
+                  <Link href="/offre" className="hover:underline">
                     • {t('offers')}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/a-decouvrir" className="hover:underline">
+                  <Link href="/decouvrir" className="hover:underline">
                     • {t('discover')}
                   </Link>
                 </li>

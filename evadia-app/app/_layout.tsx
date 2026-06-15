@@ -13,7 +13,6 @@ function RootNavigator() {
     } else if (state.status === "unauthenticated") {
       router.replace("/(auth)/login");
     }
-    // "loading" → on ne touche pas à la navigation
   }, [state.status]);
 
   if (state.status === "loading") {
@@ -28,7 +27,7 @@ function RootNavigator() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(app)" />
-<Stack.Screen
+      <Stack.Screen
         name="detail-offers"
         options={{ presentation: "modal", animation: "slide_from_bottom" }}
       />

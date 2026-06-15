@@ -45,7 +45,7 @@ export default function LoginClient() {
     try {
       const { user } = await authService.login({ email: email.trim(), password })
 
-      const isClient = user.roles.some((r) => r.code === 'clients')
+      const isClient = user.roles.some((r) => r.code === 'client')
       if (!isClient) {
         await authService.logout()
         setGlobalError(t('error_not_client'))
@@ -78,8 +78,7 @@ export default function LoginClient() {
   }
 
   const handleGoogleLogin = () => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000/api'
-    window.location.href = `${apiUrl}/auth/google`
+    window.location.href = '/auth/google'
   }
 
   return (

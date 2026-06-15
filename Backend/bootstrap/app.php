@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\CheckRole::class,
             'level' => \App\Http\Middleware\CheckRoleLevel::class,
             'password.change' => \App\Http\Middleware\ForcePasswordChange::class,
+            'mobile.validate' => \App\Http\Middleware\ValidateMobileRequest::class,
         ]);
 
         $middleware->redirectGuestsTo(fn ($request) => match(true) {

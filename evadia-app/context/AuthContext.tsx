@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
-import { api, TOKEN_KEY } from "../lib/api";
+import { api, mobileAuthApi, TOKEN_KEY } from "../lib/api";
 
 export type User = {
   id: number;
@@ -38,7 +38,6 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>({ status: "loading" });
 
-  // Au démarrage : vérifier si un token valide existe en SecureStore
   useEffect(() => {
     (async () => {
       try {
@@ -47,7 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setState({ status: "unauthenticated" });
           return;
         }
-        const res = await api.get("/auth/me");
+        const res = await mobileAuthApi.get("/auth/me");
         setState({ status: "authenticated", user: res.data.user ?? res.data, token });
       } catch {
         await SecureStore.deleteItemAsync(TOKEN_KEY);
@@ -59,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     setState({ status: "loading" });
     try {
-      const res = await api.post("/auth/login", { email, password });
+      const res = await mobileAuthApi.post("/auth/login", { email, password });
       const { user, token } = res.data;
       await SecureStore.setItemAsync(TOKEN_KEY, token);
       setState({ status: "authenticated", user, token });
@@ -73,7 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setState({ status: "loading" });
     try {
       const payload = { ...data, password_confirmation: data.password_confirmation ?? data.password };
-      const res = await api.post("/auth/register", payload);
+      const res = await mobileAuthApi.post("/auth/register", payload);
       const { user, token } = res.data;
       await SecureStore.setItemAsync(TOKEN_KEY, token);
       setState({ status: "authenticated", user, token });
@@ -83,16 +82,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Appelé après un OAuth (token déjà dans SecureStore)
   const loginWithToken = async () => {
-    const res = await api.get("/auth/me");
+    const res = await mobileAuthApi.get("/auth/me");
     const token = await SecureStore.getItemAsync(TOKEN_KEY);
     setState({ status: "authenticated", user: res.data.user ?? res.data, token: token! });
   };
 
   const logout = async () => {
     try {
-      await api.post("/auth/logout");
+      await mobileAuthApi.post("/auth/logout");
     } catch {}
     await SecureStore.deleteItemAsync(TOKEN_KEY);
     setState({ status: "unauthenticated" });

@@ -275,7 +275,7 @@ export default function HomePage({ popularVilles, offres, villes }: HomePageProp
                                         <div key={offer.id}>
                                             <div className="text-center mb-4">
                                                 <h2 className="text-2xl font-bold text-gray-900">{t('offer')}</h2>
-                                                <Link href="/offres" className="text-gray-600 hover:underline text-sm">
+                                                <Link href="/offre" className="text-gray-600 hover:underline text-sm">
                                                     {t('see_offer')}
                                                 </Link>
                                             </div>

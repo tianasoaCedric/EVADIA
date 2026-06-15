@@ -20,6 +20,8 @@ services:
     env_file: .env.docker
     environment:
       - DB_HOST=postgres
+    ports:
+      - "8000:8000"
     depends_on:
       postgres:
         condition: service_healthy
