@@ -24,7 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->redirectGuestsTo(fn ($request) => match(true) {
             str_starts_with($request->path(), 'api/') => null,
-            str_starts_with($request->path(), 'hotel') => '/hotel/login',
+            str_starts_with($request->path(), 'hotel-admin') => '/hotel-admin/login',
             default => '/',
         });
         $middleware->redirectUsersTo('/admin/dashboard');

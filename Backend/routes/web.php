@@ -124,7 +124,7 @@ Route::middleware(['auth', 'role:super_admin,admin_evadia'])
 // ────────────────────────────────────────────────────────
 // Hotel Auth Routes (hors middleware groupe)
 // ────────────────────────────────────────────────────────
-Route::prefix('hotel')->name('hotel.')->group(function () {
+Route::prefix('hotel-admin')->name('hotel.')->group(function () {
     Route::get('login', [HotelAuthController::class, 'showLogin'])->name('login');
     Route::post('login', [HotelAuthController::class, 'login']);
     Route::post('logout', [HotelAuthController::class, 'logout'])->name('logout');
@@ -138,7 +138,7 @@ Route::prefix('hotel')->name('hotel.')->group(function () {
 // Hotel Routes (back-office hôtelier protégé)
 // ────────────────────────────────────────────────────────
 Route::middleware(['auth:hotel', 'role:admin_hotel,gestionnaire_hotel', 'password.change'])
-    ->prefix('hotel')->name('hotel.')->group(function () {
+    ->prefix('hotel-admin')->name('hotel.')->group(function () {
 
         // Password change (exempt from ForcePasswordChange middleware)
         Route::get('password/change', [PasswordController::class, 'showChangeForm'])->name('password.change')->withoutMiddleware('password.change');
