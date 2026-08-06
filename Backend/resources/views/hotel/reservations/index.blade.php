@@ -10,10 +10,11 @@
         @php
             $tabs = [
                 '' => ['label' => 'Toutes', 'count' => $counts['all']],
-                'draft' => ['label' => 'Brouillons', 'count' => $counts['draft']],
-                'pending' => ['label' => 'En attente', 'count' => $counts['pending']],
-                'paid' => ['label' => 'Payées', 'count' => $counts['paid']],
-                'cancelled' => ['label' => 'Annulées', 'count' => $counts['cancelled']],
+                'en_attente' => ['label' => 'En attente', 'count' => $counts['en_attente']],
+                'acceptee' => ['label' => 'Acceptées', 'count' => $counts['acceptee']],
+                'refusee' => ['label' => 'Refusées', 'count' => $counts['refusee']],
+                'terminee' => ['label' => 'Terminées', 'count' => $counts['terminee']],
+                'annulee' => ['label' => 'Annulées', 'count' => $counts['annulee']],
             ];
         @endphp
         @foreach($tabs as $value => $tab)
@@ -91,8 +92,8 @@
                             </td>
                             <td class="py-3 px-4">
                                 @php
-                                    $statusColors = ['draft' => 'bg-gray-100 text-gray-700', 'pending' => 'bg-amber-50 text-amber-700', 'paid' => 'bg-emerald-50 text-emerald-700', 'cancelled' => 'bg-red-50 text-red-700'];
-                                    $statusLabels = ['draft' => 'Brouillon', 'pending' => 'En attente', 'paid' => 'Payée', 'cancelled' => 'Annulée'];
+                                    $statusColors = ['en_attente' => 'bg-amber-50 text-amber-700', 'acceptee' => 'bg-emerald-50 text-emerald-700', 'refusee' => 'bg-red-50 text-red-700', 'terminee' => 'bg-gray-100 text-gray-700', 'annulee' => 'bg-red-50 text-red-700'];
+                                    $statusLabels = ['en_attente' => 'En attente', 'acceptee' => 'Acceptée', 'refusee' => 'Refusée', 'terminee' => 'Terminée', 'annulee' => 'Annulée'];
                                 @endphp
                                 <span class="px-2.5 py-1 rounded-full text-xs font-medium {{ $statusColors[$reservation->statut] ?? 'bg-gray-100 text-gray-700' }}">
                                     {{ $statusLabels[$reservation->statut] ?? ucfirst($reservation->statut) }}

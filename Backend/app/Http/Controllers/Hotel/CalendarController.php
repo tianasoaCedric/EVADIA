@@ -47,7 +47,7 @@ class CalendarController extends Controller
 
         // Reservations on this period
         $reservations = Reservation::where('propriete_id', $propriete->id)
-            ->whereIn('statut', ['pending', 'paid'])
+            ->whereIn('statut', ['en_attente', 'acceptee'])
             ->where('date_debut', '<=', $fin)
             ->where('date_fin', '>=', $debut)
             ->with('client')
@@ -76,7 +76,7 @@ class CalendarController extends Controller
 
         // Check no active reservation
         $hasReservation = Reservation::where('propriete_id', $request->propriete_id)
-            ->whereIn('statut', ['pending', 'paid'])
+            ->whereIn('statut', ['en_attente', 'acceptee'])
             ->where('date_debut', '<=', $request->date)
             ->where('date_fin', '>', $request->date)
             ->exists();
@@ -122,7 +122,7 @@ class CalendarController extends Controller
 
             // Check no active reservation
             $hasReservation = Reservation::where('propriete_id', $request->propriete_id)
-                ->whereIn('statut', ['pending', 'paid'])
+                ->whereIn('statut', ['en_attente', 'acceptee'])
                 ->where('date_debut', '<=', $dateStr)
                 ->where('date_fin', '>', $dateStr)
                 ->exists();

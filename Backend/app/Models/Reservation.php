@@ -35,6 +35,9 @@ class Reservation extends Model
         'offre_id',
         'prix_avant_reduction',
         'montant_reduction',
+        'repondue_par',
+        'date_reponse',
+        'raison_refus',
     ];
 
     protected function casts(): array
@@ -49,6 +52,7 @@ class Reservation extends Model
             'nb_enfants'          => 'integer',
             'nb_bebes'            => 'integer',
             'date_reservation'    => 'datetime',
+            'date_reponse'        => 'datetime',
         ];
     }
 
@@ -67,9 +71,14 @@ class Reservation extends Model
         return $this->belongsTo(User::class, 'annulee_par');
     }
 
-    public function paiements(): HasMany
+    public function repondueParUser(): BelongsTo
     {
-        return $this->hasMany(Paiement::class);
+        return $this->belongsTo(User::class, 'repondue_par');
+    }
+
+    public function facture(): HasOne
+    {
+        return $this->hasOne(Facture::class);
     }
 
     public function avis(): HasOne
@@ -85,6 +94,11 @@ class Reservation extends Model
     public function notifications(): HasMany
     {
         return $this->hasMany(Notification::class);
+    }
+
+    public function messages(): HasMany
+    {
+        return $this->hasMany(Message::class);
     }
 
     // Generate unique reservation code

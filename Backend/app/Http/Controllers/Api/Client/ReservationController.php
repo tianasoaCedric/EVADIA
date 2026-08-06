@@ -8,8 +8,10 @@ use App\Models\Offre;
 use App\Models\OffreUtilisation;
 use App\Models\Propriete;
 use App\Models\Reservation;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use OpenApi\Attributes as OA;
 
@@ -23,7 +25,7 @@ class ReservationController extends Controller
         security: [['bearerAuth' => []]],
         parameters: [
             new OA\Parameter(name: 'page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', default: 1)),
-            new OA\Parameter(name: 'statut', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['en_attente', 'confirmee', 'annulee', 'terminee'])),
+            new OA\Parameter(name: 'statut', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['en_attente', 'acceptee', 'refusee', 'annulee', 'terminee'])),
         ],
         responses: [
             new OA\Response(
@@ -37,7 +39,7 @@ class ReservationController extends Controller
                             new OA\Property(property: 'date_debut', type: 'string', format: 'date'),
                             new OA\Property(property: 'date_fin', type: 'string', format: 'date'),
                             new OA\Property(property: 'prix_total', type: 'number', format: 'float', example: 720.00),
-                            new OA\Property(property: 'statut', type: 'string', example: 'confirmee'),
+                            new OA\Property(property: 'statut', type: 'string', example: 'acceptee'),
                             new OA\Property(property: 'propriete', type: 'object', properties: [
                                 new OA\Property(property: 'nom', type: 'string', example: 'Suite Deluxe'),
                                 new OA\Property(property: 'hotel', type: 'object', properties: [
@@ -80,7 +82,7 @@ class ReservationController extends Controller
     )]
     public function show(Request $request, int $id): JsonResponse
     {
-        $reservation = Reservation::with(['propriete.hotel', 'propriete.photos', 'paiements', 'services', 'avis'])
+        $reservation = Reservation::with(['propriete.hotel', 'propriete.photos', 'facture', 'services', 'avis'])
             ->where('client_id', $request->user()->id)
             ->find($id);
 
@@ -146,6 +148,7 @@ class ReservationController extends Controller
             'nb_bebes'       => 'nullable|integer|min:0',
             'demande_speciale' => 'nullable|string|max:1000',
             'code_promo'     => 'nullable|string|max:50',
+            'devise'         => 'nullable|string|in:MGA,EUR',
         ]);
 
         $propriete = Propriete::with(['currentPrix', 'hotel'])->findOrFail($validated['propriete_id']);
@@ -162,7 +165,7 @@ class ReservationController extends Controller
 
         // Vérification des conflits de réservation
         $conflit = Reservation::where('propriete_id', $propriete->id)
-            ->whereIn('statut', ['en_attente', 'confirmee'])
+            ->whereIn('statut', ['en_attente', 'acceptee'])
             ->where('date_debut', '<', $validated['date_fin'])
             ->where('date_fin', '>', $validated['date_debut'])
             ->exists();
@@ -171,9 +174,10 @@ class ReservationController extends Controller
             return response()->json(['message' => 'La chambre est déjà réservée pour ces dates.'], 409);
         }
 
-        // Calcul du prix de base
+        // Calcul du prix de base dans la devise choisie par le client
+        $devise      = strtoupper($validated['devise'] ?? 'MGA');
         $nbNuits     = (new \DateTime($validated['date_debut']))->diff(new \DateTime($validated['date_fin']))->days;
-        $prixNuit    = $propriete->currentPrix?->prix_par_nuit ?? 0;
+        $prixNuit    = $propriete->currentPrix?->getPrixPourDevise($devise) ?? 0;
         $prixBase    = $prixNuit * $nbNuits;
 
         // Résolution du code promo
@@ -204,7 +208,7 @@ class ReservationController extends Controller
         // Création de la réservation + enregistrement utilisation dans une transaction
         $reservation = DB::transaction(function () use (
             $request, $validated, $propriete, $prixBase, $prixTotal,
-            $montantReduction, $offre, $codePromoUtilise, $nbNuits
+            $montantReduction, $offre, $codePromoUtilise, $nbNuits, $devise
         ) {
             $reservation = Reservation::create([
                 'code_reservation'    => Reservation::generateCode(),
@@ -218,7 +222,7 @@ class ReservationController extends Controller
                 'prix_avant_reduction' => $offre ? $prixBase : null,
                 'montant_reduction'   => $montantReduction,
                 'prix_total'          => $prixTotal,
-                'devise_prix_total'   => $propriete->hotel?->devise_principale ?? 'MGA',
+                'devise_prix_total'   => $devise,
                 'statut'              => 'en_attente',
                 'date_reservation'    => now(),
                 'demande_speciale'    => $validated['demande_speciale'] ?? null,
@@ -459,5 +463,36 @@ class ReservationController extends Controller
         ]);
 
         return response()->json(['message' => 'Réservation annulée avec succès.']);
+    }
+
+    #[OA\Get(
+        path: '/api/client/reservations/{id}/invoice',
+        summary: 'Télécharger la facture',
+        description: 'Télécharge la facture PDF d\'une réservation acceptée.',
+        tags: ['Client - Réservations'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Fichier PDF de la facture'),
+            new OA\Response(response: 404, description: 'Réservation ou facture non trouvée'),
+        ]
+    )]
+    public function invoice(Request $request, int $id): Response
+    {
+        $reservation = Reservation::with(['client', 'propriete.hotel', 'facture'])
+            ->where('client_id', $request->user()->id)
+            ->find($id);
+
+        if (!$reservation || !$reservation->facture) {
+            abort(404, 'Facture non trouvée.');
+        }
+
+        $facture = $reservation->facture;
+
+        $pdf = Pdf::loadView('pdf.facture', compact('reservation', 'facture'));
+
+        return $pdf->download("facture-{$facture->numero_facture}.pdf");
     }
 }

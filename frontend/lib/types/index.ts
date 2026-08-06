@@ -210,10 +210,11 @@ export interface Chambre {
 
 // ─── Réservation ──────────────────────────────────────────────────────────────
 
-export type StatutReservation = 'en_attente' | 'confirmee' | 'annulee' | 'terminee'
+export type StatutReservation = 'en_attente' | 'acceptee' | 'refusee' | 'annulee' | 'terminee'
 
 export interface Reservation {
   id: number
+  code_reservation: string
   hotel_id?: number
   chambre_id?: number
   date_debut: string
@@ -223,16 +224,23 @@ export interface Reservation {
   statut: StatutReservation
   montant_total?: number
   prix_total?: number
-  devise?: string
-  notes_client?: string
+  devise_prix_total?: string
+  demande_speciale?: string
+  raison_refus?: string
+  date_reservation: string
   hotel?: Hotel
   chambre?: Chambre
   propriete?: {
     id: number
     nom: string
     hotel?: Pick<Hotel, 'id' | 'nom'>
+    photo_principale?: { url_photo: string }
   }
-  created_at: string
+  facture?: {
+    id: number
+    numero: string
+  }
+  created_at?: string
 }
 
 export interface CreateReservationPayload {
@@ -243,6 +251,7 @@ export interface CreateReservationPayload {
   nb_enfants?: number
   nb_bebes?: number
   demande_speciale?: string
+  devise?: 'MGA' | 'EUR'
 }
 
 // ─── Favoris ──────────────────────────────────────────────────────────────────

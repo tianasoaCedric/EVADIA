@@ -23,13 +23,13 @@ use App\Http\Controllers\Hotel\RoomController;
 use App\Http\Controllers\Hotel\HotelEquipementController;
 use App\Http\Controllers\Hotel\RoomPhotoController;
 use App\Http\Controllers\Hotel\ReservationController;
+use App\Http\Controllers\Hotel\ReservationMessageController as HotelReservationMessageController;
 use App\Http\Controllers\Hotel\CalendarController;
 use App\Http\Controllers\Hotel\PricingController;
 use App\Http\Controllers\Hotel\HotelOffreController;
 use App\Http\Controllers\Hotel\OffrePhotoController;
 use App\Http\Controllers\Hotel\MessageController as HotelMessageController;
 use App\Http\Controllers\Hotel\NotificationController as HotelNotificationController;
-use App\Http\Controllers\Hotel\PaymentController;
 use App\Http\Controllers\Hotel\SubscriptionController as HotelSubscriptionController;
 use Illuminate\Support\Facades\Route;
 
@@ -182,7 +182,10 @@ Route::middleware(['auth:hotel', 'role:admin_hotel,gestionnaire_hotel', 'passwor
         // Reservations
         Route::get('reservations', [ReservationController::class, 'index'])->name('reservations.index');
         Route::get('reservations/{reservation}', [ReservationController::class, 'show'])->name('reservations.show');
-        Route::patch('reservations/{reservation}/status', [ReservationController::class, 'updateStatus'])->name('reservations.update-status');
+        Route::patch('reservations/{reservation}/accept', [ReservationController::class, 'accept'])->name('reservations.accept');
+        Route::patch('reservations/{reservation}/reject', [ReservationController::class, 'reject'])->name('reservations.reject');
+        Route::get('reservations/{reservation}/messages', [HotelReservationMessageController::class, 'show'])->name('reservations.messages');
+        Route::post('reservations/{reservation}/messages', [HotelReservationMessageController::class, 'store'])->name('reservations.messages.store');
 
         // Calendar
         Route::get('calendar', [CalendarController::class, 'index'])->name('calendar.index');
@@ -204,11 +207,6 @@ Route::middleware(['auth:hotel', 'role:admin_hotel,gestionnaire_hotel', 'passwor
         Route::post('messages', [HotelMessageController::class, 'store'])->name('messages.store');
         Route::post('messages/reply', [HotelMessageController::class, 'reply'])->name('messages.reply');
         Route::patch('messages/{message}/read', [HotelMessageController::class, 'markAsRead'])->name('messages.mark-read');
-
-        // Payments
-        Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
-        Route::get('payments/export', [PaymentController::class, 'export'])->name('payments.export');
-        Route::get('payments/{paiement}', [PaymentController::class, 'show'])->name('payments.show');
 
         // Subscription
         Route::get('subscription', [HotelSubscriptionController::class, 'index'])->name('subscription.index');

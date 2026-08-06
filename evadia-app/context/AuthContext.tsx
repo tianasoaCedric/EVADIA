@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
-import { api, mobileAuthApi, TOKEN_KEY } from "../lib/api";
+import { mobileAuthApi, TOKEN_KEY, setAuthToken } from "../lib/api";
 
 export type User = {
   id: number;
@@ -46,6 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setState({ status: "unauthenticated" });
           return;
         }
+        setAuthToken(token);
         const res = await mobileAuthApi.get("/auth/me");
         setState({ status: "authenticated", user: res.data.user ?? res.data, token });
       } catch {
@@ -56,10 +57,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    setState({ status: "loading" });
     try {
       const res = await mobileAuthApi.post("/auth/login", { email, password });
       const { user, token } = res.data;
+      setAuthToken(token);
       await SecureStore.setItemAsync(TOKEN_KEY, token);
       setState({ status: "authenticated", user, token });
     } catch (err) {
@@ -69,11 +70,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const register = async (data: RegisterData) => {
-    setState({ status: "loading" });
     try {
       const payload = { ...data, password_confirmation: data.password_confirmation ?? data.password };
       const res = await mobileAuthApi.post("/auth/register", payload);
       const { user, token } = res.data;
+      setAuthToken(token);
       await SecureStore.setItemAsync(TOKEN_KEY, token);
       setState({ status: "authenticated", user, token });
     } catch (err) {
@@ -92,6 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await mobileAuthApi.post("/auth/logout");
     } catch {}
+    setAuthToken(null);
     await SecureStore.deleteItemAsync(TOKEN_KEY);
     setState({ status: "unauthenticated" });
   };

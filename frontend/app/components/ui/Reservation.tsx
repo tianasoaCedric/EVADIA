@@ -36,6 +36,7 @@ export interface ReservationData {
     subtotal: number
     discountAmount: number
     total: number
+    devise: 'MGA' | 'EUR'
 }
 
 export default function Reservation({
@@ -49,7 +50,7 @@ export default function Reservation({
     bookedDates = []
 }: ReservationProps) {
     const t = useTranslations('Reservation')
-    const { getPrix, symbole } = useDevise()
+    const { getPrix, symbole, devise } = useDevise()
     const effectivePrice = getPrix(prixMga, prixEur) ?? pricePerNight
     const [currentMonth, setCurrentMonth] = useState(new Date())
     const [selectedCheckIn, setSelectedCheckIn] = useState<Date | null>(null)
@@ -165,7 +166,8 @@ export default function Reservation({
             serviceFees,
             subtotal,
             discountAmount,
-            total
+            total,
+            devise
         }
         onReserve?.(reservationData)
     }

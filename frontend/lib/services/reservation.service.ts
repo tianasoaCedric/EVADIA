@@ -23,7 +23,7 @@ export const reservationService = {
     return apiClient.post<{ data: Reservation }>('/api/client/reservations', payload)
   },
 
-  cancel(id: number): Promise<{ data: Reservation }> {
-    return apiClient.patch<{ data: Reservation }>(`/api/client/reservations/${id}/cancel`)
+  cancel(id: number, raison?: string): Promise<{ data: Reservation }> {
+    return apiClient.patch<{ data: Reservation }>(`/api/client/reservations/${id}/cancel`, raison ? { raison } : undefined)
   },
 }

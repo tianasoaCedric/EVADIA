@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Hotel\Traits\BelongsToHotel;
 use App\Models\Avis;
 use App\Models\Message;
-use App\Models\Paiement;
 use App\Models\Propriete;
 use App\Models\Reservation;
 use App\Traits\LogsAdminAction;
@@ -23,16 +22,16 @@ class DashboardController extends Controller
         $stats = [
             // Reservations
             'reservations_total' => Reservation::whereHas('propriete', fn($q) => $q->where('hotel_id', $hotel->id))->count(),
-            'reservations_pending' => Reservation::whereHas('propriete', fn($q) => $q->where('hotel_id', $hotel->id))->where('statut', 'pending')->count(),
-            'reservations_paid' => Reservation::whereHas('propriete', fn($q) => $q->where('hotel_id', $hotel->id))->where('statut', 'paid')->count(),
-            'reservations_draft' => Reservation::whereHas('propriete', fn($q) => $q->where('hotel_id', $hotel->id))->where('statut', 'draft')->count(),
+            'reservations_pending' => Reservation::whereHas('propriete', fn($q) => $q->where('hotel_id', $hotel->id))->where('statut', 'en_attente')->count(),
+            'reservations_paid' => Reservation::whereHas('propriete', fn($q) => $q->where('hotel_id', $hotel->id))->where('statut', 'acceptee')->count(),
+            'reservations_draft' => Reservation::whereHas('propriete', fn($q) => $q->where('hotel_id', $hotel->id))->where('statut', 'en_attente')->count(),
 
             // Revenue
-            'revenus_mois' => Paiement::whereHas('reservation.propriete', fn($q) => $q->where('hotel_id', $hotel->id))
-                ->where('statut', 'completed')
-                ->whereMonth('date_paiement', now()->month)
-                ->whereYear('date_paiement', now()->year)
-                ->sum('montant'),
+            'revenus_mois' => Reservation::whereHas('propriete', fn($q) => $q->where('hotel_id', $hotel->id))
+                ->whereIn('statut', ['acceptee', 'terminee'])
+                ->whereMonth('date_reponse', now()->month)
+                ->whereYear('date_reponse', now()->year)
+                ->sum('prix_total'),
 
             // Properties
             'total_proprietes' => Propriete::where('hotel_id', $hotel->id)->count(),
@@ -54,16 +53,16 @@ class DashboardController extends Controller
             ->groupBy('mois')->orderBy('mois')->get();
 
         // Charts - revenue by month
-        $revenus_par_mois = Paiement::whereHas('reservation.propriete', fn($q) => $q->where('hotel_id', $hotel->id))
-            ->where('statut', 'completed')
-            ->selectRaw("TO_CHAR(date_paiement, 'YYYY-MM') as mois, SUM(montant) as total")
-            ->where('date_paiement', '>=', now()->subMonths(12))
+        $revenus_par_mois = Reservation::whereHas('propriete', fn($q) => $q->where('hotel_id', $hotel->id))
+            ->whereIn('statut', ['acceptee', 'terminee'])
+            ->selectRaw("TO_CHAR(date_reponse, 'YYYY-MM') as mois, SUM(prix_total) as total")
+            ->where('date_reponse', '>=', now()->subMonths(12))
             ->groupBy('mois')->orderBy('mois')->get();
 
         // Upcoming arrivals (next 7 days)
         $prochaines_arrivees = Reservation::with(['client', 'propriete'])
             ->whereHas('propriete', fn($q) => $q->where('hotel_id', $hotel->id))
-            ->whereIn('statut', ['paid', 'confirmed'])
+            ->whereIn('statut', ['acceptee'])
             ->whereBetween('date_debut', [now(), now()->addDays(7)])
             ->orderBy('date_debut')->get();
 

@@ -22,7 +22,7 @@ class DashboardController extends Controller
                 ->where('est_actif', true)->count(),
             'total_hotels' => Hotel::count(),
             'new_users_week' => User::where('date_inscription', '>=', now()->subDays(7))->count(),
-            'reservations_en_cours' => Reservation::whereIn('statut', ['confirmed', 'en_cours'])->count(),
+            'reservations_en_cours' => Reservation::whereIn('statut', ['acceptee', 'en_attente'])->count(),
             'ca_abonnements_mois' => Abonnement::where('date_debut', '<=', now())
                 ->where(fn($q) => $q->whereNull('date_fin')->orWhere('date_fin', '>=', now()))
                 ->sum('prix_mensuel'),

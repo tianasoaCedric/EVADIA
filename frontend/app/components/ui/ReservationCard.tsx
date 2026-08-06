@@ -1,110 +1,85 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { Calendar, MapPin, Users, Clock, CreditCard, Download, Eye, XCircle, CheckCircle } from 'lucide-react'
+import { Calendar, Users, Clock, Download, Eye, XCircle, CheckCircle } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import type { Reservation } from '@/lib/types'
 
 interface ReservationCardProps {
-  reservation: {
-    id: number
-    hotelName: string
-    hotelId: number
-    roomName: string
-    roomId: number
-    imageUrl: string
-    city: string
-    checkIn: string
-    checkOut: string
-    guests: number
-    nights: number
-    pricePerNight: number
-    totalPrice: number
-    status: 'confirmed' | 'pending' | 'cancelled' | 'completed'
-    paymentStatus: 'paid' | 'pending' | 'refunded'
-    paymentMethod: string
-    createdAt: string
-    cancellationDeadline: string
-  }
+  reservation: Reservation
   onViewDetails: () => void
   onDownloadInvoice: () => void
   onCancel: () => void
   canCancel: boolean
 }
 
-export default function ReservationCard({ 
-  reservation, 
-  onViewDetails, 
-  onDownloadInvoice, 
-  onCancel, 
-  canCancel 
+export default function ReservationCard({
+  reservation,
+  onViewDetails,
+  onDownloadInvoice,
+  onCancel,
+  canCancel,
 }: ReservationCardProps) {
   const t = useTranslations('Reservations')
 
   const getStatusBadge = () => {
     const statuses = {
-      confirmed: { icon: <CheckCircle className="w-4 h-4" />, text: t('status_confirmed'), className: 'bg-green-100 text-green-700' },
-      pending: { icon: <Clock className="w-4 h-4" />, text: t('status_pending'), className: 'bg-yellow-100 text-yellow-700' },
-      cancelled: { icon: <XCircle className="w-4 h-4" />, text: t('status_cancelled'), className: 'bg-red-100 text-red-700' },
-      completed: { icon: <CheckCircle className="w-4 h-4" />, text: t('status_completed'), className: 'bg-blue-100 text-blue-700' },
+      en_attente: { icon: <Clock className="w-4 h-4" />, text: t('status_en_attente'), className: 'bg-yellow-100 text-yellow-700' },
+      acceptee: { icon: <CheckCircle className="w-4 h-4" />, text: t('status_acceptee'), className: 'bg-green-100 text-green-700' },
+      refusee: { icon: <XCircle className="w-4 h-4" />, text: t('status_refusee'), className: 'bg-red-100 text-red-700' },
+      annulee: { icon: <XCircle className="w-4 h-4" />, text: t('status_annulee'), className: 'bg-gray-100 text-gray-700' },
+      terminee: { icon: <CheckCircle className="w-4 h-4" />, text: t('status_terminee'), className: 'bg-blue-100 text-blue-700' },
     }
-    return statuses[reservation.status]
-  }
-
-  const getPaymentStatusBadge = () => {
-    const statuses = {
-      paid: { text: t('payment_paid'), className: 'bg-green-100 text-green-700' },
-      pending: { text: t('payment_pending'), className: 'bg-yellow-100 text-yellow-700' },
-      refunded: { text: t('payment_refunded'), className: 'bg-gray-100 text-gray-700' },
-    }
-    return statuses[reservation.paymentStatus]
+    return statuses[reservation.statut]
   }
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
   }
 
+  const hotelName = reservation.propriete?.hotel?.nom ?? '—'
+  const hotelId = reservation.propriete?.hotel?.id
+  const roomName = reservation.propriete?.nom ?? '—'
+  const imageUrl = reservation.propriete?.photo_principale?.url_photo || '/photos/hotels/ecolodge-1.jpg'
+  const totalPrice = Number(reservation.prix_total ?? 0)
+  const nights = Math.max(
+    1,
+    Math.round((new Date(reservation.date_fin).getTime() - new Date(reservation.date_debut).getTime()) / (1000 * 60 * 60 * 24)),
+  )
   const statusBadge = getStatusBadge()
-  const paymentBadge = getPaymentStatusBadge()
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
       <div className="flex flex-col md:flex-row">
         {/* Image */}
         <div className="relative w-full md:w-48 h-48 md:h-auto">
-          <Image
-            src={reservation.imageUrl}
-            alt={reservation.hotelName}
-            fill
-            className="object-cover"
-          />
+          <Image src={imageUrl} alt={hotelName} fill className="object-cover" />
         </div>
-        
+
         {/* Contenu */}
         <div className="flex-1 p-6">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <Link href={`/hotel/${reservation.hotelId}`} className="text-xl font-semibold text-gray-800 hover:text-[#01BDA5] transition-colors">
-                  {reservation.hotelName}
-                </Link>
+                {hotelId ? (
+                  <Link href={`/hotel/${hotelId}`} className="text-xl font-semibold text-gray-800 hover:text-[#01BDA5] transition-colors">
+                    {hotelName}
+                  </Link>
+                ) : (
+                  <span className="text-xl font-semibold text-gray-800">{hotelName}</span>
+                )}
                 <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusBadge.className}`}>
                   {statusBadge.icon}
                   {statusBadge.text}
                 </div>
               </div>
-              <p className="text-gray-500 text-sm mb-2">{reservation.roomName}</p>
-              <div className="flex items-center gap-1 text-sm text-gray-500">
-                <MapPin className="w-4 h-4" />
-                <span>{reservation.city}</span>
-              </div>
+              <p className="text-gray-500 text-sm mb-2">{roomName}</p>
+              <p className="text-xs text-gray-400">{t('code')} {reservation.code_reservation}</p>
             </div>
             <div className="text-right">
               <p className="text-2xl font-bold text-gray-900">
-                {reservation.totalPrice.toLocaleString('fr-FR')} Ar
-              </p>
-              <p className="text-sm text-gray-500">
-                {reservation.pricePerNight.toLocaleString('fr-FR')} Ar / nuit
+                {totalPrice.toLocaleString('fr-FR')} {reservation.devise_prix_total ?? 'MGA'}
               </p>
             </div>
           </div>
@@ -114,32 +89,32 @@ export default function ReservationCard({
               <Calendar className="w-4 h-4 text-gray-400" />
               <div>
                 <p className="text-gray-500">{t('check_in')}</p>
-                <p className="font-medium text-gray-800">{formatDate(reservation.checkIn)}</p>
+                <p className="font-medium text-gray-800">{formatDate(reservation.date_debut)}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="w-4 h-4 text-gray-400" />
               <div>
                 <p className="text-gray-500">{t('check_out')}</p>
-                <p className="font-medium text-gray-800">{formatDate(reservation.checkOut)}</p>
+                <p className="font-medium text-gray-800">{formatDate(reservation.date_fin)}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <Users className="w-4 h-4 text-gray-400" />
               <div>
                 <p className="text-gray-500">{t('guests')}</p>
-                <p className="font-medium text-gray-800">{reservation.guests} {t('persons')}</p>
+                <p className="font-medium text-gray-800">{reservation.nb_adultes + (reservation.nb_enfants ?? 0)} {t('persons')}</p>
               </div>
             </div>
           </div>
 
+          {reservation.statut === 'refusee' && reservation.raison_refus && (
+            <p className="mt-4 text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{reservation.raison_refus}</p>
+          )}
+
           <div className="flex flex-wrap gap-4 mt-4">
-            <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${paymentBadge.className}`}>
-              <CreditCard className="w-3 h-3" />
-              {paymentBadge.text}
-            </div>
             <span className="text-xs text-gray-400">
-              {t('reserved_on')} {formatDate(reservation.createdAt)}
+              {t('reserved_on')} {formatDate(reservation.date_reservation)}
             </span>
           </div>
 
@@ -152,15 +127,17 @@ export default function ReservationCard({
               <Eye className="w-4 h-4" />
               {t('view_details')}
             </button>
-            
-            <button
-              onClick={onDownloadInvoice}
-              className="flex items-center gap-1 px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:border-[#01BDA5] hover:text-[#01BDA5] transition-colors text-sm"
-            >
-              <Download className="w-4 h-4" />
-              {t('download_invoice')}
-            </button>
-            
+
+            {reservation.statut === 'acceptee' && (
+              <button
+                onClick={onDownloadInvoice}
+                className="flex items-center gap-1 px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:border-[#01BDA5] hover:text-[#01BDA5] transition-colors text-sm"
+              >
+                <Download className="w-4 h-4" />
+                {t('download_invoice')}
+              </button>
+            )}
+
             {canCancel && (
               <button
                 onClick={onCancel}

@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Api\Hotel;
 
+use App\Actions\Reservation\RespondToReservationAction;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Hotel\Traits\BelongsToHotel;
 use App\Models\Reservation;
+use DomainException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
@@ -21,7 +23,7 @@ class ReservationController extends Controller
         security: [['bearerAuth' => []]],
         parameters: [
             new OA\Parameter(name: 'page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', default: 1)),
-            new OA\Parameter(name: 'statut', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['en_attente', 'confirmee', 'annulee', 'terminee'])),
+            new OA\Parameter(name: 'statut', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['en_attente', 'acceptee', 'refusee', 'annulee', 'terminee'])),
             new OA\Parameter(name: 'date_debut', in: 'query', required: false, description: 'Filtrer à partir de cette date', schema: new OA\Schema(type: 'string', format: 'date')),
             new OA\Parameter(name: 'date_fin', in: 'query', required: false, description: 'Filtrer jusqu\'à cette date', schema: new OA\Schema(type: 'string', format: 'date')),
         ],
@@ -39,7 +41,7 @@ class ReservationController extends Controller
                             new OA\Property(property: 'nb_adultes', type: 'integer', example: 2),
                             new OA\Property(property: 'nb_enfants', type: 'integer', example: 1),
                             new OA\Property(property: 'prix_total', type: 'number', format: 'float', example: 720.00),
-                            new OA\Property(property: 'statut', type: 'string', example: 'confirmee'),
+                            new OA\Property(property: 'statut', type: 'string', example: 'acceptee'),
                             new OA\Property(property: 'client', type: 'object', properties: [
                                 new OA\Property(property: 'id', type: 'integer', example: 10),
                                 new OA\Property(property: 'nom', type: 'string', example: 'Leclerc'),
@@ -107,7 +109,7 @@ class ReservationController extends Controller
         $hotel = $this->getHotel();
         $proprieteIds = $hotel->proprietes()->pluck('id');
 
-        $reservation = Reservation::with(['client', 'propriete', 'paiements.methodePaiement', 'services', 'avis'])
+        $reservation = Reservation::with(['client', 'propriete', 'facture', 'services', 'avis'])
             ->whereIn('propriete_id', $proprieteIds)
             ->find($id);
 
@@ -119,9 +121,40 @@ class ReservationController extends Controller
     }
 
     #[OA\Patch(
-        path: '/api/hotel/reservations/{id}/status',
-        summary: 'Changer le statut d\'une réservation',
-        description: 'Met à jour le statut d\'une réservation (confirmee, annulee, terminee, etc.).',
+        path: '/api/hotel/reservations/{id}/accept',
+        summary: 'Accepter une demande de réservation',
+        description: 'L\'hôtel accepte une réservation en attente. Génère une facture et envoie un email de confirmation au client.',
+        tags: ['Hôtel - Réservations'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Réservation acceptée'),
+            new OA\Response(response: 404, description: 'Réservation non trouvée'),
+            new OA\Response(response: 409, description: 'Transition non autorisée'),
+        ]
+    )]
+    public function accept(Request $request, int $id): JsonResponse
+    {
+        $hotel = $this->getHotel();
+        $proprieteIds = $hotel->proprietes()->pluck('id');
+
+        $reservation = Reservation::whereIn('propriete_id', $proprieteIds)->findOrFail($id);
+
+        try {
+            $reservation = app(RespondToReservationAction::class)->accept($reservation, auth()->id());
+        } catch (DomainException $e) {
+            return response()->json(['message' => $e->getMessage()], 409);
+        }
+
+        return response()->json(['message' => 'Réservation acceptée.', 'statut' => $reservation->statut]);
+    }
+
+    #[OA\Patch(
+        path: '/api/hotel/reservations/{id}/reject',
+        summary: 'Refuser une demande de réservation',
+        description: 'L\'hôtel refuse une réservation en attente. Envoie un email de refus au client.',
         tags: ['Hôtel - Réservations'],
         security: [['bearerAuth' => []]],
         parameters: [
@@ -130,44 +163,36 @@ class ReservationController extends Controller
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ['statut'],
+                required: ['raison'],
                 properties: [
-                    new OA\Property(property: 'statut', type: 'string', enum: ['en_attente', 'confirmee', 'annulee', 'terminee'], example: 'confirmee'),
-                    new OA\Property(property: 'raison_annulation', type: 'string', nullable: true, example: 'Demande du client'),
+                    new OA\Property(property: 'raison', type: 'string', example: 'Chambre indisponible pour ces dates'),
                 ]
             )
         ),
         responses: [
-            new OA\Response(response: 200, description: 'Statut mis à jour', content: new OA\JsonContent(
-                properties: [
-                    new OA\Property(property: 'message', type: 'string', example: 'Statut mis à jour.'),
-                    new OA\Property(property: 'statut', type: 'string', example: 'confirmee'),
-                ]
-            )),
+            new OA\Response(response: 200, description: 'Réservation refusée'),
             new OA\Response(response: 404, description: 'Réservation non trouvée'),
+            new OA\Response(response: 409, description: 'Transition non autorisée'),
             new OA\Response(response: 422, description: 'Erreur de validation'),
         ]
     )]
-    public function updateStatus(Request $request, int $id): JsonResponse
+    public function reject(Request $request, int $id): JsonResponse
     {
+        $request->validate([
+            'raison' => 'required|string|max:1000',
+        ]);
+
         $hotel = $this->getHotel();
         $proprieteIds = $hotel->proprietes()->pluck('id');
 
         $reservation = Reservation::whereIn('propriete_id', $proprieteIds)->findOrFail($id);
 
-        $request->validate([
-            'statut' => 'required|in:en_attente,confirmee,annulee,terminee',
-            'raison_annulation' => 'nullable|string',
-        ]);
-
-        $data = ['statut' => $request->statut];
-        if ($request->statut === 'annulee') {
-            $data['annulee_par'] = auth()->id();
-            $data['raison_annulation'] = $request->raison_annulation;
+        try {
+            $reservation = app(RespondToReservationAction::class)->reject($reservation, auth()->id(), $request->raison);
+        } catch (DomainException $e) {
+            return response()->json(['message' => $e->getMessage()], 409);
         }
 
-        $reservation->update($data);
-
-        return response()->json(['message' => 'Statut mis à jour.', 'statut' => $reservation->statut]);
+        return response()->json(['message' => 'Réservation refusée.', 'statut' => $reservation->statut]);
     }
 }

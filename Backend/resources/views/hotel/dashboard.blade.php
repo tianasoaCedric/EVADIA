@@ -136,8 +136,8 @@
                             </div>
                             <span
                                 class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
-                                    {{ $reservation->statut === 'paid' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">
-                                {{ $reservation->statut === 'paid' ? 'Confirmée' : ucfirst($reservation->statut) }}
+                                    {{ $reservation->statut === 'acceptee' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">
+                                {{ $reservation->statut === 'acceptee' ? 'Confirmée' : ucfirst($reservation->statut) }}
                             </span>
                         </div>
                     @empty

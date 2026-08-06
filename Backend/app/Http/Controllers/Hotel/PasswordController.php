@@ -44,7 +44,7 @@ class PasswordController extends Controller
             'force_password_change' => false,
         ]);
 
-        return redirect('/hotel/dashboard')
+        return redirect('/hotel-admin/dashboard')
             ->with('success', 'Mot de passe modifié avec succès.');
     }
 }

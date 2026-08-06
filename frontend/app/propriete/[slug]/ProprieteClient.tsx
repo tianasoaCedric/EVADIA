@@ -12,7 +12,7 @@ import { useTranslations } from 'next-intl'
 import { useOnScreen } from '@/hooks/useOnScreen'
 import Bouton from '../../components/ui/Bouton'
 import HotelPhoto from '../../components/ui/HotelPhoto'
-import Reservation from '../../components/ui/Reservation'
+import Reservation, { type ReservationData } from '../../components/ui/Reservation'
 import HotelInfo from '../../components/ui/HotelInfo'
 import SharePopup from '../../components/ui/SharePopup'
 import { proprieteService } from '@/lib/services/propriete.service'
@@ -91,7 +91,7 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
     setIsShareOpen(true)
   }
 
-  const handleReservation = async (data: any) => {
+  const handleReservation = async (data: ReservationData) => {
     setIsSubmitting(true)
     try {
       const fmt = (d: Date) => d.toISOString().split('T')[0]
@@ -100,6 +100,7 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
         date_debut: fmt(data.checkIn),
         date_fin: fmt(data.checkOut),
         nb_adultes: data.guests,
+        devise: data.devise,
       })
       router.push('/reservations')
     } catch (error) {

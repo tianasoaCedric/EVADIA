@@ -1,19 +1,31 @@
-import { Stack, router } from "expo-router";
-import { useEffect } from "react";
+import { Stack, router, useSegments } from "expo-router";
+import { useEffect, useRef } from "react";
 import { ActivityIndicator, View } from "react-native";
 import "../global.css";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 
 function RootNavigator() {
   const { state } = useAuth();
+  const segments = useSegments();
+  const isNavigating = useRef(false);
 
   useEffect(() => {
-    if (state.status === "authenticated") {
+    if (state.status === "loading") return;
+    if (isNavigating.current) return;
+
+    const inAuthGroup = segments[0] === "(auth)";
+    const inAppGroup = segments[0] === "(app)";
+
+    if (state.status === "authenticated" && inAuthGroup) {
+      isNavigating.current = true;
       router.replace("/(app)/home");
-    } else if (state.status === "unauthenticated") {
+    } else if (state.status === "unauthenticated" && inAppGroup) {
+      isNavigating.current = true;
       router.replace("/(auth)/login");
+    } else {
+      isNavigating.current = false;
     }
-  }, [state.status]);
+  }, [state.status, segments]);
 
   if (state.status === "loading") {
     return (

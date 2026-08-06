@@ -28,9 +28,11 @@ use App\Http\Controllers\Api\Hotel\CalendarController;
 use App\Http\Controllers\Api\Hotel\DashboardController as HotelDashboardController;
 use App\Http\Controllers\Api\Hotel\MessageController as HotelMessageController;
 use App\Http\Controllers\Api\Hotel\OffreController as HotelOffreController;
-use App\Http\Controllers\Api\Hotel\PaymentController;
 use App\Http\Controllers\Api\Hotel\ReservationController as HotelReservationController;
+use App\Http\Controllers\Api\Hotel\ReservationMessageController as HotelReservationMessageController;
 use App\Http\Controllers\Api\Hotel\RoomController;
+use App\Http\Controllers\Api\Client\ReservationMessageController as ClientReservationMessageController;
+use Illuminate\Broadcasting\BroadcastController;
 use Illuminate\Support\Facades\Route;
 
 // ============================================================
@@ -92,6 +94,11 @@ Route::get('/decouverte/villes/{slug}/lieux', [DecouverteController::class, 'lie
 // ============================================================
 Route::middleware('auth:sanctum')->group(function () {
 
+    // Authentification des canaux WebSocket privés (Reverb) pour les clients mobile,
+    // distincte de /broadcasting/auth (session web) utilisée par le dashboard hôtel.
+    Route::match(['get', 'post'], '/broadcasting/auth', [BroadcastController::class, 'authenticate'])
+        ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+
     // ----------------------------------------------------------
     // Auth : gestion de session
     // ----------------------------------------------------------
@@ -149,7 +156,10 @@ Route::middleware('auth:sanctum')->group(function () {
         // Réservations
         Route::get('reservations', [HotelReservationController::class, 'index']);
         Route::get('reservations/{id}', [HotelReservationController::class, 'show']);
-        Route::patch('reservations/{id}/status', [HotelReservationController::class, 'updateStatus']);
+        Route::patch('reservations/{id}/accept', [HotelReservationController::class, 'accept']);
+        Route::patch('reservations/{id}/reject', [HotelReservationController::class, 'reject']);
+        Route::get('reservations/{id}/messages', [HotelReservationMessageController::class, 'index']);
+        Route::post('reservations/{id}/messages', [HotelReservationMessageController::class, 'store']);
 
         // Calendrier & Disponibilités
         Route::get('calendar', [CalendarController::class, 'index']);
@@ -165,10 +175,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('messages', [HotelMessageController::class, 'index']);
         Route::get('messages/conversation/{userId}', [HotelMessageController::class, 'conversation']);
         Route::post('messages', [HotelMessageController::class, 'store']);
-
-        // Paiements
-        Route::get('payments', [PaymentController::class, 'index']);
-        Route::get('payments/{id}', [PaymentController::class, 'show']);
     });
 
     // ----------------------------------------------------------
@@ -184,6 +190,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('reservations', [ClientReservationController::class, 'store']);
         Route::get('reservations/{id}', [ClientReservationController::class, 'show']);
         Route::patch('reservations/{id}/cancel', [ClientReservationController::class, 'cancel']);
+        Route::get('reservations/{id}/invoice', [ClientReservationController::class, 'invoice']);
+        Route::get('reservations/{id}/messages', [ClientReservationMessageController::class, 'index']);
+        Route::post('reservations/{id}/messages', [ClientReservationMessageController::class, 'store']);
         Route::get('promo/{code}', [ClientReservationController::class, 'verifierPromo']);
 
         // Favoris

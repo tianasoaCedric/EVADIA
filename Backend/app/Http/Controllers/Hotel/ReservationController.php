@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\Hotel;
 
+use App\Actions\Reservation\RespondToReservationAction;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Hotel\Traits\BelongsToHotel;
-use App\Models\Notification;
-use App\Models\PolitiqueAnnulation;
 use App\Models\Reservation;
 use App\Traits\LogsAdminAction;
+use DomainException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class ReservationController extends Controller
 {
@@ -24,13 +23,14 @@ class ReservationController extends Controller
         // Counts per status
         $counts = [
             'all' => (clone $baseQuery)->count(),
-            'draft' => (clone $baseQuery)->where('statut', 'draft')->count(),
-            'pending' => (clone $baseQuery)->where('statut', 'pending')->count(),
-            'paid' => (clone $baseQuery)->where('statut', 'paid')->count(),
-            'cancelled' => (clone $baseQuery)->where('statut', 'cancelled')->count(),
+            'en_attente' => (clone $baseQuery)->where('statut', 'en_attente')->count(),
+            'acceptee' => (clone $baseQuery)->where('statut', 'acceptee')->count(),
+            'refusee' => (clone $baseQuery)->where('statut', 'refusee')->count(),
+            'terminee' => (clone $baseQuery)->where('statut', 'terminee')->count(),
+            'annulee' => (clone $baseQuery)->where('statut', 'annulee')->count(),
         ];
 
-        $reservations = Reservation::with(['client', 'propriete', 'paiements'])
+        $reservations = Reservation::with(['client', 'propriete', 'facture'])
             ->whereHas('propriete', fn($q) => $q->where('hotel_id', $hotel->id))
             ->when($request->statut, fn($q, $s) => $q->where('statut', $s))
             ->when($request->search, function ($q, $s) {
@@ -54,7 +54,7 @@ class ReservationController extends Controller
     {
         $hotel = $this->getHotel();
 
-        $reservation = Reservation::with(['client', 'propriete', 'paiements', 'annuleePar'])
+        $reservation = Reservation::with(['client', 'propriete', 'facture', 'annuleePar', 'repondueParUser'])
             ->whereHas('propriete', fn($q) => $q->where('hotel_id', $hotel->id))
             ->where('id', $id)
             ->firstOrFail();
@@ -62,54 +62,39 @@ class ReservationController extends Controller
         return view('hotel.reservations.show', compact('reservation', 'hotel'));
     }
 
-    public function updateStatus(Request $request, $id)
+    public function accept(Request $request, $id)
+    {
+        $hotel = $this->getHotel();
+        $reservation = Reservation::whereHas('propriete', fn($q) => $q->where('hotel_id', $hotel->id))
+            ->where('id', $id)->firstOrFail();
+
+        try {
+            app(RespondToReservationAction::class)->accept($reservation, auth()->id());
+            $this->logAction('reservation_accepted', "Réservation {$reservation->code_reservation} acceptée");
+        } catch (DomainException $e) {
+            return back()->withErrors(['statut' => $e->getMessage()]);
+        }
+
+        return back()->with('success', 'Réservation acceptée, email de confirmation envoyé au client.');
+    }
+
+    public function reject(Request $request, $id)
     {
         $request->validate([
-            'statut' => 'required|in:pending,paid,cancelled',
-            'raison_annulation' => 'required_if:statut,cancelled|nullable|string',
+            'raison_refus' => 'required|string',
         ]);
 
         $hotel = $this->getHotel();
         $reservation = Reservation::whereHas('propriete', fn($q) => $q->where('hotel_id', $hotel->id))
             ->where('id', $id)->firstOrFail();
 
-        // Transition rules
-        $allowedTransitions = [
-            'pending' => ['paid', 'cancelled'],
-            'paid' => ['cancelled'],
-            'draft' => ['cancelled'],
-        ];
-
-        if (!in_array($request->statut, $allowedTransitions[$reservation->statut] ?? [])) {
-            return back()->withErrors(['statut' => 'Transition de statut non autorisée.']);
+        try {
+            app(RespondToReservationAction::class)->reject($reservation, auth()->id(), $request->raison_refus);
+            $this->logAction('reservation_rejected', "Réservation {$reservation->code_reservation} refusée");
+        } catch (DomainException $e) {
+            return back()->withErrors(['statut' => $e->getMessage()]);
         }
 
-        DB::transaction(function () use ($reservation, $request) {
-            $originalStatut = $reservation->statut;
-
-            $reservation->update([
-                'statut' => $request->statut,
-                'annulee_par' => $request->statut === 'cancelled' ? auth()->id() : null,
-                'raison_annulation' => $request->raison_annulation,
-            ]);
-
-            // Notify client
-            Notification::create([
-                'user_id' => $reservation->client_id,
-                'type_notification' => 'reservation_' . $request->statut,
-                'titre' => 'Mise à jour de votre réservation ' . $reservation->code_reservation,
-                'contenu' => $request->statut === 'cancelled'
-                    ? "Votre réservation a été annulée. Raison : {$request->raison_annulation}"
-                    : "Votre réservation est maintenant confirmée et payée.",
-                'lien' => '/reservations/' . $reservation->id,
-                'reservation_id' => $reservation->id,
-                'canal' => 'in_app',
-                'date_envoi' => now(),
-            ]);
-
-            $this->logAction('reservation_status_changed', "Réservation {$reservation->code_reservation} → {$request->statut}");
-        });
-
-        return back()->with('success', 'Statut de la réservation mis à jour.');
+        return back()->with('success', 'Réservation refusée, email envoyé au client.');
     }
 }

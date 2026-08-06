@@ -33,9 +33,18 @@ export const api = axios.create({
   timeout: 10000,
 });
 
-// Injecte le token Bearer automatiquement sur les deux instances
+// Token gardé en mémoire pour éviter toute course avec SecureStore (écriture async)
+let inMemoryToken: string | null = null;
+
+export const setAuthToken = (token: string | null) => {
+  inMemoryToken = token;
+};
+
+// Injecte le token Bearer automatiquement sur les deux instances.
+// Priorité au token en mémoire (dispo immédiatement après login),
+// fallback sur SecureStore (au démarrage de l'app).
 const injectToken = async (config: any) => {
-  const token = await SecureStore.getItemAsync(TOKEN_KEY);
+  const token = inMemoryToken ?? (await SecureStore.getItemAsync(TOKEN_KEY));
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -48,6 +57,7 @@ api.interceptors.request.use(injectToken);
 // Gère les 401 : token expiré → déconnexion automatique
 const handle401 = async (error: any) => {
   if (error.response?.status === 401) {
+    inMemoryToken = null;
     await SecureStore.deleteItemAsync(TOKEN_KEY);
     router.replace("/(auth)/login");
   }

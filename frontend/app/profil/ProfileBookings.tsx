@@ -9,8 +9,9 @@ import type { Reservation, StatutReservation } from '@/lib/types'
 import Loading from '../components/ui/Loading'
 
 const STATUT_TO_FILTER: Record<StatutReservation, string> = {
-  confirmee: 'confirmed',
+  acceptee: 'confirmed',
   en_attente: 'pending',
+  refusee: 'rejected',
   annulee: 'cancelled',
   terminee: 'terminated',
 }
@@ -38,8 +39,9 @@ export default function ProfileBookings() {
     const styles: Record<string, string> = {
       confirmed: 'bg-green-100 text-green-700',
       pending: 'bg-yellow-100 text-yellow-700',
-      cancelled: 'bg-red-100 text-red-700',
-      terminated: 'bg-gray-100 text-gray-600',
+      rejected: 'bg-red-100 text-red-700',
+      cancelled: 'bg-gray-100 text-gray-600',
+      terminated: 'bg-blue-100 text-blue-700',
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return { text: t(`status_${key}` as any), className: styles[key] ?? styles.pending }
@@ -79,7 +81,7 @@ export default function ProfileBookings() {
 
         {/* Filtres */}
         <div className="flex flex-wrap gap-2 mb-6">
-          {(['all', 'confirmed', 'pending', 'cancelled', 'terminated'] as const).map((status) => (
+          {(['all', 'confirmed', 'pending', 'rejected', 'cancelled', 'terminated'] as const).map((status) => (
             <button
               key={status}
               onClick={() => setFilter(status)}
@@ -207,7 +209,7 @@ export default function ProfileBookings() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">{t('reservation_date')}</p>
-                    <p className="font-medium">{formatDate(selectedBooking.created_at)}</p>
+                    <p className="font-medium">{formatDate(selectedBooking.date_reservation ?? selectedBooking.created_at ?? '')}</p>
                   </div>
                 </div>
 

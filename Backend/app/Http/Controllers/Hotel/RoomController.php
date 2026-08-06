@@ -5,11 +5,11 @@ namespace App\Http\Controllers\Hotel;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Hotel\Traits\BelongsToHotel;
 use App\Models\Equipement;
-use App\Models\Paiement;
 use App\Models\Photo;
 use App\Models\Propriete;
 use App\Models\ProprietePrix;
 use App\Models\ProprieteStatut;
+use App\Models\Reservation;
 use App\Traits\LogsAdminAction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -136,7 +136,7 @@ class RoomController extends Controller
         // Stats
         $stats = [
             'total_reservations' => $propriete->reservations()->count(),
-            'revenu_total' => Paiement::whereHas('reservation', fn($q) => $q->where('propriete_id', $propriete->id))->where('statut', 'completed')->sum('montant'),
+            'revenu_total' => Reservation::where('propriete_id', $propriete->id)->whereIn('statut', ['acceptee', 'terminee'])->sum('prix_total'),
             'note_moyenne' => $propriete->avis()->avg('note'),
             'taux_occupation' => $this->calculateOccupancy($propriete),
         ];
@@ -234,7 +234,7 @@ class RoomController extends Controller
     {
         $totalDays = 30; // last 30 days
         $occupiedDays = $propriete->reservations()
-            ->whereIn('statut', ['paid', 'confirmed'])
+            ->whereIn('statut', ['acceptee', 'terminee'])
             ->where('date_debut', '<=', now())
             ->where('date_fin', '>=', now()->subDays(30))
             ->get()

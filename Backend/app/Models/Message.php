@@ -13,6 +13,7 @@ class Message extends Model
     protected $fillable = [
         'expediteur_id',
         'destinataire_id',
+        'reservation_id',
         'sujet',
         'contenu',
         'lu',
@@ -35,5 +36,10 @@ class Message extends Model
     public function destinataire(): BelongsTo
     {
         return $this->belongsTo(User::class, 'destinataire_id');
+    }
+
+    public function reservation(): BelongsTo
+    {
+        return $this->belongsTo(Reservation::class);
     }
 }

@@ -179,7 +179,7 @@
                                     <td class="py-2.5 px-3 text-gray-600">{{ $reservation->date_debut?->format('d/m/Y') }} - {{ $reservation->date_fin?->format('d/m/Y') }}</td>
                                     <td class="py-2.5 px-3">
                                         @php
-                                            $resStatusColors = ['draft' => 'bg-gray-100 text-gray-700', 'pending' => 'bg-amber-50 text-amber-700', 'paid' => 'bg-emerald-50 text-emerald-700', 'cancelled' => 'bg-red-50 text-red-700'];
+                                            $resStatusColors = ['en_attente' => 'bg-amber-50 text-amber-700', 'acceptee' => 'bg-emerald-50 text-emerald-700', 'refusee' => 'bg-red-50 text-red-700', 'terminee' => 'bg-gray-100 text-gray-700', 'annulee' => 'bg-red-50 text-red-700'];
                                         @endphp
                                         <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $resStatusColors[$reservation->statut] ?? 'bg-gray-100 text-gray-700' }}">{{ ucfirst($reservation->statut) }}</span>
                                     </td>

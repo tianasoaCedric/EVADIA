@@ -31,11 +31,18 @@ async function proxy(req: NextRequest, path: string[]) {
     cache: 'no-store',
   })
 
+  const responseContentType = res.headers.get('content-type') ?? 'application/json'
+  const responseHeaders: Record<string, string> = { 'Content-Type': responseContentType }
+  const contentDisposition = res.headers.get('content-disposition')
+  if (contentDisposition) responseHeaders['Content-Disposition'] = contentDisposition
+
+  if (responseContentType.includes('application/pdf')) {
+    const data = await res.arrayBuffer()
+    return new NextResponse(data, { status: res.status, headers: responseHeaders })
+  }
+
   const data = await res.text()
-  return new NextResponse(data, {
-    status: res.status,
-    headers: { 'Content-Type': res.headers.get('content-type') ?? 'application/json' },
-  })
+  return new NextResponse(data, { status: res.status, headers: responseHeaders })
 }
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {

@@ -55,7 +55,7 @@ class DashboardController extends Controller
         $occupeesAujourdhui = Reservation::whereIn('propriete_id', $proprieteIds)
             ->where('date_debut', '<=', $now->toDateString())
             ->where('date_fin', '>=', $now->toDateString())
-            ->where('statut', 'confirmee')
+            ->where('statut', 'acceptee')
             ->count();
 
         return response()->json([

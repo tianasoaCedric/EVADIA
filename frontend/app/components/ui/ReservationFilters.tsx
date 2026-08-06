@@ -21,10 +21,11 @@ export default function ReservationFilters({
 
   const filters = [
     { id: 'all', label: t('filter_all') },
-    { id: 'confirmed', label: t('filter_confirmed') },
-    { id: 'pending', label: t('filter_pending') },
-    { id: 'cancelled', label: t('filter_cancelled') },
-    { id: 'completed', label: t('filter_completed') },
+    { id: 'en_attente', label: t('filter_en_attente') },
+    { id: 'acceptee', label: t('filter_acceptee') },
+    { id: 'refusee', label: t('filter_refusee') },
+    { id: 'annulee', label: t('filter_annulee') },
+    { id: 'terminee', label: t('filter_terminee') },
   ]
 
   return (
