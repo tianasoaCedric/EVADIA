@@ -1,17 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Animated, FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SearchBar } from '../../components/atoms/SearchBar';
 import { DestinationHotelCard } from '../../components/molecules/DestinationHotelCard';
 import { publicService, Hotel, hotelVille, hotelPhoto, hotelPhotos, hotelPrix, hotelNote } from '../../services/public';
 import { clientService } from '../../services/client';
+import { useDevise } from '../../context/DeviseContext';
 
 export default function DestinationDetailScreen() {
+  const { t } = useTranslation();
   const params = useLocalSearchParams();
-  const destinationName = (params.name as string) || 'Destination';
+  const destinationName = (params.name as string) || t('DestinationDetail.default_title');
   const villeId = params.villeId ? Number(params.villeId) : null;
+  const { devise, symbole } = useDevise();
 
   const [hotels, setHotels] = useState<Hotel[]>([]);
   const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
@@ -92,7 +96,7 @@ export default function DestinationDetailScreen() {
           </TouchableOpacity>
         </View>
 
-        <Text style={{ fontSize: 20, fontWeight: '800', color: '#111827', paddingHorizontal: 18, marginBottom: 12 }}>
+        <Text style={{ fontSize: 20, fontFamily: 'Outfit_800ExtraBold', color: '#111827', paddingHorizontal: 18, marginBottom: 12 }}>
           {destinationName}
         </Text>
 
@@ -108,14 +112,14 @@ export default function DestinationDetailScreen() {
             contentContainerStyle={{ paddingHorizontal: 18, paddingBottom: 110 }}
             showsVerticalScrollIndicator={false}
             renderItem={({ item }) => {
-              const prix = hotelPrix(item);
+              const prix = hotelPrix(item, devise);
               const note = hotelNote(item);
               const ville = hotelVille(item);
               const photos = hotelPhotos(item);
               return (
                 <DestinationHotelCard
                   name={item.nom}
-                  price={prix ? `${prix.toLocaleString('fr-FR')}ar/Nuitée` : 'Prix sur demande'}
+                  price={prix ? `${prix.toLocaleString('fr-FR')}${symbole}/Nuitée` : t('DestinationDetail.price_on_request')}
                   rating={note}
                   location={ville}
                   imageUri={photos[0]}
@@ -143,8 +147,8 @@ export default function DestinationDetailScreen() {
             ListEmptyComponent={
               <View style={{ alignItems: 'center', paddingTop: 60 }}>
                 <Ionicons name="search-outline" size={48} color="#ccc" />
-                <Text style={{ color: '#9ca3af', marginTop: 12, fontWeight: '600' }}>
-                  Aucun hôtel trouvé
+                <Text style={{ color: '#9ca3af', marginTop: 12, fontFamily: 'Outfit_600SemiBold' }}>
+                  {t('DestinationDetail.no_hotels')}
                 </Text>
               </View>
             }

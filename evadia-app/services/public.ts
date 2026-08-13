@@ -17,8 +17,11 @@ export interface Hotel {
   ville?: string | null; // champ plat dans certains endpoints
   prix_min?: string | number | null;
   prix_min_mga?: string | number | null;
+  prix_min_eur?: string | number | null;
   note_moyenne?: string | number | null;
   nb_avis?: number;
+  exige_acompte?: boolean;
+  pourcentage_acompte?: string | number | null;
   // détail seulement
   chambres?: Propriete[];
   services?: { id: number; nom: string; type_service?: string }[];
@@ -123,9 +126,9 @@ export function hotelPhotos(h: Hotel): string[] {
   return [fallback];
 }
 
-/** Retourne le prix minimum numérique d'un hôtel. */
-export function hotelPrix(h: Hotel): number {
-  const raw = h.prix_min_mga ?? h.prix_min;
+/** Retourne le prix minimum numérique d'un hôtel, dans la devise indiquée (MGA par défaut). */
+export function hotelPrix(h: Hotel, devise: "MGA" | "EUR" = "MGA"): number {
+  const raw = devise === "EUR" ? h.prix_min_eur ?? h.prix_min_mga ?? h.prix_min : h.prix_min_mga ?? h.prix_min;
   if (!raw) return 0;
   return typeof raw === "number" ? raw : parseFloat(raw) || 0;
 }
@@ -137,9 +140,9 @@ export function hotelNote(h: Hotel): number {
   return typeof raw === "number" ? raw : parseFloat(raw as string) || 0;
 }
 
-/** Retourne le prix d'une propriete/chambre en nombre. */
-export function proprietePrix(p: Propriete): number {
-  const raw = p.prix_mga ?? p.prix_par_nuit;
+/** Retourne le prix d'une propriete/chambre en nombre, dans la devise indiquée (MGA par défaut). */
+export function proprietePrix(p: Propriete, devise: "MGA" | "EUR" = "MGA"): number {
+  const raw = devise === "EUR" ? p.prix_eur ?? p.prix_mga ?? p.prix_par_nuit : p.prix_mga ?? p.prix_par_nuit;
   if (!raw) return 0;
   return typeof raw === "number" ? raw : parseFloat(raw as string) || 0;
 }
@@ -237,7 +240,8 @@ export const publicService = {
 
   async getTypesHotels(): Promise<{ id: number; nom: string }[]> {
     const res = await api.get("/types-hotels");
-    return Array.isArray(res.data) ? res.data : [];
+    if (Array.isArray(res.data)) return res.data;
+    return Array.isArray(res.data?.data) ? res.data.data : [];
   },
 
   async search(params: Record<string, any>): Promise<{ hotels: Hotel[]; total: number }> {

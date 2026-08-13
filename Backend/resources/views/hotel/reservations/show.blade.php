@@ -23,14 +23,25 @@
                     class="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
                     Refuser
                 </button>
-                <form method="POST" action="{{ route('hotel.reservations.accept', $reservation->id) }}">
-                    @csrf
-                    @method('PATCH')
-                    <button type="submit"
-                        class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors">
-                        Accepter
-                    </button>
-                </form>
+                @if($reservation->statut_paiement_acompte === 'en_attente')
+                    <form method="POST" action="{{ route('hotel.reservations.mark-deposit-paid', $reservation->id) }}">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit"
+                            class="rounded-lg bg-[#01BDA5] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-colors">
+                            Confirmer réception acompte
+                        </button>
+                    </form>
+                @else
+                    <form method="POST" action="{{ route('hotel.reservations.accept', $reservation->id) }}">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit"
+                            class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors">
+                            Accepter
+                        </button>
+                    </form>
+                @endif
             @endif
         </div>
     </div>
@@ -158,6 +169,28 @@
                     </div>
                 </div>
             </div>
+
+            @if($reservation->statut_paiement_acompte !== 'non_requis')
+                <div class="bg-[#01BDA5]/10 rounded-xl border border-[#01BDA5]/30 p-6">
+                    <h3 class="text-sm font-semibold text-gray-900 mb-3">Acompte</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Statut</span>
+                            <span class="font-medium {{ $reservation->statut_paiement_acompte === 'paye' ? 'text-[#01BDA5]' : 'text-amber-600' }}">
+                                {{ $reservation->statut_paiement_acompte === 'paye' ? 'Reçu' : 'En attente' }}
+                            </span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Montant acompte</span>
+                            <span class="font-medium text-gray-900">{{ number_format((float) $reservation->montant_acompte, 0, ',', ' ') }} {{ $reservation->devise_prix_total }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Solde restant</span>
+                            <span class="font-medium text-gray-900">{{ number_format($reservation->soldeRestant(), 0, ',', ' ') }} {{ $reservation->devise_prix_total }}</span>
+                        </div>
+                    </div>
+                </div>
+            @endif
 
             @if($reservation->statut === 'refusee' && $reservation->repondueParUser)
                 <div class="bg-red-50 rounded-xl border border-red-200 p-6">

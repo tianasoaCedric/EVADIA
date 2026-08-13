@@ -3,18 +3,20 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
+import { useTranslation } from 'react-i18next';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const IMAGE_HEIGHT = Math.round(screenHeight * 0.45);
 
 export default function DetailOffersScreen() {
+  const { t } = useTranslation();
   const params = useLocalSearchParams();
-  
+
   const imageUri = (params.imageUri as string) || 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=600';
-  const badgeText = (params.badgeText as string) || 'Offres -20% du 01 au 05 Nov';
+  const badgeText = (params.badgeText as string) || t('DetailOffers.default_badge');
   const titleBold = (params.titleBold as string) || 'Ylang';
   const titleNormal = (params.titleNormal as string) || 'Nosy Be';
-  const description = (params.description as string) || 'Profitez de l\'offre exclusive : la côte vous appelle.';
+  const description = (params.description as string) || t('DetailOffers.default_description');
 
   return (
     <View style={{ flex: 1, backgroundColor: '#ffffff' }}>
@@ -31,8 +33,8 @@ export default function DetailOffersScreen() {
             width: screenWidth,
             height: IMAGE_HEIGHT,
             backgroundColor: '#e5e7eb',
-            borderBottomLeftRadius: 36,
-            borderBottomRightRadius: 36,
+            borderBottomLeftRadius: 20,
+            borderBottomRightRadius: 20,
             overflow: 'hidden',
             position: 'relative',
           }}
@@ -111,36 +113,36 @@ export default function DetailOffersScreen() {
               marginBottom: 12,
             }}
           >
-            <Text style={{ color: '#ffffff', fontSize: 13, fontWeight: '700' }}>
+            <Text style={{ color: '#ffffff', fontSize: 13, fontFamily: 'Outfit_700Bold' }}>
               {badgeText}
             </Text>
           </View>
 
           {/* Titre de l'hébergement */}
           <Text style={{ fontSize: 18, color: '#111827', marginBottom: 8 }}>
-            <Text style={{ fontWeight: '800' }}>{titleBold}</Text>
+            <Text style={{ fontFamily: 'Outfit_800ExtraBold' }}>{titleBold}</Text>
             {titleNormal ? `, ${titleNormal}` : ''}
           </Text>
 
           {/* Description principale */}
-          <Text style={{ fontSize: 14, color: '#374151', fontWeight: '500', lineHeight: 20, marginBottom: 28 }}>
+          <Text style={{ fontSize: 14, color: '#374151', fontFamily: 'Outfit_500Medium', lineHeight: 20, marginBottom: 28 }}>
             {description}
           </Text>
 
           {/* Section Services inclus */}
-          <Text style={{ fontSize: 16, fontWeight: '700', color: '#111827', marginBottom: 14 }}>
-            Services inclus
+          <Text style={{ fontSize: 16, fontFamily: 'Outfit_700Bold', color: '#111827', marginBottom: 14 }}>
+            {t('DetailOffers.included_services_title')}
           </Text>
           <View style={{ marginBottom: 24 }}>
             {[
-              'Pétit déjeuner buffet',
-              'Forfait All-Inclusive pendant tout le séjour',
-              'Transfert gratuit de l\'aéroport à l\'hôtel',
-              'Accès à toutes les activités de l\'hôtel'
+              t('DetailOffers.service_breakfast'),
+              t('DetailOffers.service_all_inclusive'),
+              t('DetailOffers.service_transfer'),
+              t('DetailOffers.service_activities')
             ].map((item, index) => (
               <View key={`service-${index}`} style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 10, paddingLeft: 6 }}>
                 <Text style={{ fontSize: 14, color: '#4b5563', marginRight: 8, lineHeight: 18 }}>•</Text>
-                <Text style={{ fontSize: 14, color: '#4b5563', fontWeight: '500', lineHeight: 18, flex: 1 }}>
+                <Text style={{ fontSize: 14, color: '#4b5563', fontFamily: 'Outfit_500Medium', lineHeight: 18, flex: 1 }}>
                   {item}
                 </Text>
               </View>
@@ -148,17 +150,17 @@ export default function DetailOffersScreen() {
           </View>
 
           {/* Section Informations supplémentaires */}
-          <Text style={{ fontSize: 16, fontWeight: '700', color: '#111827', marginBottom: 14 }}>
-            Informations supplémentaires
+          <Text style={{ fontSize: 16, fontFamily: 'Outfit_700Bold', color: '#111827', marginBottom: 14 }}>
+            {t('DetailOffers.additional_info_title')}
           </Text>
           <View style={{ marginBottom: 10 }}>
             {[
-              'Offre valable uniquement sur réservation',
-              'Annulation du réservation non remboursable'
+              t('DetailOffers.info_booking_only'),
+              t('DetailOffers.info_non_refundable')
             ].map((item, index) => (
               <View key={`info-${index}`} style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 10, paddingLeft: 6 }}>
                 <Text style={{ fontSize: 14, color: '#4b5563', marginRight: 8, lineHeight: 18 }}>•</Text>
-                <Text style={{ fontSize: 14, color: '#4b5563', fontWeight: '500', lineHeight: 18, flex: 1 }}>
+                <Text style={{ fontSize: 14, color: '#4b5563', fontFamily: 'Outfit_500Medium', lineHeight: 18, flex: 1 }}>
                   {item}
                 </Text>
               </View>
@@ -199,8 +201,8 @@ export default function DetailOffersScreen() {
           }}
           onPress={() => {}}
         >
-          <Text style={{ color: '#ffffff', fontSize: 16, fontWeight: '700' }}>
-            Reserver
+          <Text style={{ color: '#ffffff', fontSize: 16, fontFamily: 'Outfit_700Bold' }}>
+            {t('DetailOffers.reserve_button')}
           </Text>
         </TouchableOpacity>
       </View>

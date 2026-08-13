@@ -68,7 +68,7 @@ export const DestinationCard = ({ name, imageUri, onPress }: DestinationCardProp
           <Text
             style={{
               color: '#fff',
-              fontWeight: '700',
+              fontFamily: 'Outfit_400Regular',
               fontSize: 20,
               textShadowColor: 'rgba(0,0,0,0.5)',
               textShadowOffset: { width: 0, height: 1 },

@@ -97,4 +97,20 @@ class ReservationController extends Controller
 
         return back()->with('success', 'Réservation refusée, email envoyé au client.');
     }
+
+    public function markDepositPaid($id)
+    {
+        $hotel = $this->getHotel();
+        $reservation = Reservation::whereHas('propriete', fn($q) => $q->where('hotel_id', $hotel->id))
+            ->where('id', $id)->firstOrFail();
+
+        try {
+            app(RespondToReservationAction::class)->markDepositPaid($reservation);
+            $this->logAction('reservation_deposit_paid', "Acompte confirmé pour la réservation {$reservation->code_reservation}");
+        } catch (DomainException $e) {
+            return back()->withErrors(['statut' => $e->getMessage()]);
+        }
+
+        return back()->with('success', 'Acompte confirmé. Vous pouvez maintenant accepter la réservation.');
+    }
 }

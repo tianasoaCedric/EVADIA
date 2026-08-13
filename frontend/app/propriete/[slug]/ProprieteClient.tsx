@@ -13,6 +13,7 @@ import { useOnScreen } from '@/hooks/useOnScreen'
 import Bouton from '../../components/ui/Bouton'
 import HotelPhoto from '../../components/ui/HotelPhoto'
 import Reservation, { type ReservationData } from '../../components/ui/Reservation'
+import ReservationConfirmModal from '../../components/ui/ReservationConfirmModal'
 import HotelInfo from '../../components/ui/HotelInfo'
 import SharePopup from '../../components/ui/SharePopup'
 import { proprieteService } from '@/lib/services/propriete.service'
@@ -61,6 +62,7 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
   const [propriete, setPropriete] = useState<ProprietePublic | null>(null)
   const [bookedDates, setBookedDates] = useState<string[]>([])
   const [isShareOpen, setIsShareOpen] = useState(false)
+  const [pendingReservation, setPendingReservation] = useState<ReservationData | null>(null)
 
   const [setMainRef, isMainVisible] = useOnScreen({ threshold: 0.2,  })
 
@@ -91,22 +93,28 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
     setIsShareOpen(true)
   }
 
-  const handleReservation = async (data: ReservationData) => {
+  const handleReservation = (data: ReservationData) => {
+    setPendingReservation(data)
+  }
+
+  const handleConfirmReservation = async () => {
+    if (!pendingReservation) return
     setIsSubmitting(true)
     try {
       const fmt = (d: Date) => d.toISOString().split('T')[0]
       await reservationService.create({
         propriete_id: proprieteId,
-        date_debut: fmt(data.checkIn),
-        date_fin: fmt(data.checkOut),
-        nb_adultes: data.guests,
-        devise: data.devise,
+        date_debut: fmt(pendingReservation.checkIn),
+        date_fin: fmt(pendingReservation.checkOut),
+        nb_adultes: pendingReservation.guests,
+        devise: pendingReservation.devise,
       })
       router.push('/reservations')
     } catch (error) {
       console.error(t('reservation_log'), error)
     } finally {
       setIsSubmitting(false)
+      setPendingReservation(null)
     }
   }
 
@@ -226,6 +234,18 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
         text={t('share_text', { name: propriete.nom })}
         url={typeof window !== 'undefined' ? window.location.href : ''}
       />
+
+      {/* Popup de confirmation de réservation */}
+      {pendingReservation && (
+        <ReservationConfirmModal
+          data={pendingReservation}
+          roomName={propriete.nom}
+          isSubmitting={isSubmitting}
+          depositPercent={propriete.hotel.exige_acompte ? propriete.hotel.pourcentage_acompte : undefined}
+          onConfirm={handleConfirmReservation}
+          onClose={() => setPendingReservation(null)}
+        />
+      )}
     </>
   )
 }

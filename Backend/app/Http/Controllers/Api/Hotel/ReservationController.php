@@ -195,4 +195,38 @@ class ReservationController extends Controller
 
         return response()->json(['message' => 'Réservation refusée.', 'statut' => $reservation->statut]);
     }
+
+    #[OA\Patch(
+        path: '/api/hotel/reservations/{id}/mark-deposit-paid',
+        summary: 'Confirmer la réception de l\'acompte',
+        description: 'L\'hôtel confirme manuellement (paiement hors-ligne) que l\'acompte requis a été reçu, débloquant l\'acceptation de la réservation.',
+        tags: ['Hôtel - Réservations'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Acompte confirmé'),
+            new OA\Response(response: 404, description: 'Réservation non trouvée'),
+            new OA\Response(response: 409, description: 'Aucun acompte en attente'),
+        ]
+    )]
+    public function markDepositPaid(int $id): JsonResponse
+    {
+        $hotel = $this->getHotel();
+        $proprieteIds = $hotel->proprietes()->pluck('id');
+
+        $reservation = Reservation::whereIn('propriete_id', $proprieteIds)->findOrFail($id);
+
+        try {
+            $reservation = app(RespondToReservationAction::class)->markDepositPaid($reservation);
+        } catch (DomainException $e) {
+            return response()->json(['message' => $e->getMessage()], 409);
+        }
+
+        return response()->json([
+            'message' => 'Acompte confirmé.',
+            'statut_paiement_acompte' => $reservation->statut_paiement_acompte,
+        ]);
+    }
 }

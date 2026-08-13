@@ -25,6 +25,9 @@ export default function ReservationDetailsModal({ reservation, onClose }: Reserv
     Math.round((new Date(reservation.date_fin).getTime() - new Date(reservation.date_debut).getTime()) / (1000 * 60 * 60 * 24)),
   )
   const pricePerNight = nights > 0 ? totalPrice / nights : totalPrice
+  const hasDeposit = (reservation.statut_paiement_acompte ?? 'non_requis') !== 'non_requis'
+  const depositAmount = Number(reservation.montant_acompte ?? 0)
+  const balanceDue = Math.max(0, totalPrice - depositAmount)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={onClose}>
@@ -92,6 +95,25 @@ export default function ReservationDetailsModal({ reservation, onClose }: Reserv
                 <p className="text-xl font-bold text-gray-900">{totalPrice.toLocaleString('fr-FR')} {devise}</p>
               </div>
             </div>
+
+            {hasDeposit && (
+              <div className="bg-[#01BDA5]/10 border border-[#01BDA5]/30 rounded-xl p-4">
+                <div className="flex justify-between">
+                  <p className="text-gray-600">{t('deposit_status')}</p>
+                  <p className={`font-medium ${reservation.statut_paiement_acompte === 'paye' ? 'text-[#01BDA5]' : 'text-yellow-600'}`}>
+                    {reservation.statut_paiement_acompte === 'paye' ? t('deposit_paid') : t('deposit_pending')}
+                  </p>
+                </div>
+                <div className="flex justify-between mt-1">
+                  <p className="text-gray-500 text-sm">{t('deposit_amount')}</p>
+                  <p className="font-medium text-sm">{depositAmount.toLocaleString('fr-FR')} {devise}</p>
+                </div>
+                <div className="flex justify-between mt-1">
+                  <p className="text-gray-500 text-sm">{t('balance_due')}</p>
+                  <p className="font-medium text-sm">{balanceDue.toLocaleString('fr-FR')} {devise}</p>
+                </div>
+              </div>
+            )}
 
             {reservation.statut === 'en_attente' && (
               <div className="bg-yellow-50 rounded-xl p-4">

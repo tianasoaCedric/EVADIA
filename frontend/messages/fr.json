@@ -198,6 +198,22 @@
     "booked": "Réservé",
     "selected": "Sélectionné"
   },
+  "ReservationConfirm": {
+    "title": "Confirmer la réservation",
+    "check_in": "Check In",
+    "check_out": "Check Out",
+    "nights": "Nuits",
+    "guests": "Voyageurs",
+    "stay": "Séjour ({nights} nuits)",
+    "service_fees": "Frais de services",
+    "discount": "Réduction ({percent}%)",
+    "total": "Total",
+    "deposit_required": "Cet hôtel exige un acompte de {percent}%",
+    "deposit_amount": "Acompte à payer",
+    "balance_due": "Solde à régler à l'arrivée",
+    "cancel": "Annuler",
+    "confirm": "Confirmer"
+  },
   "ProprietePage": {
     "meta_title": "{name} | Evadia",
     "meta_description": "Découvrez {name} sur Evadia. Réservez votre chambre en ligne aux meilleurs prix. Profitez de nos offres exclusives.",
@@ -559,7 +575,12 @@
     "no_reservations": "Vous n'avez pas encore de réservation",
     "discover_hotels": "Découvrir des hôtels",
     "price_per_night": "Prix par nuit",
-    "total_price": "Prix total"
+    "total_price": "Prix total",
+    "deposit_status": "Acompte",
+    "deposit_paid": "Payé",
+    "deposit_pending": "En attente",
+    "deposit_amount": "Montant de l'acompte",
+    "balance_due": "Solde restant"
   },
   "SearchSuggestions": {
     "loading": "Chargement...",

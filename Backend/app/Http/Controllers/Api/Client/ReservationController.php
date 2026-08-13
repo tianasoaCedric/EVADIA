@@ -205,10 +205,21 @@ class ReservationController extends Controller
             $codePromoUtilise = strtoupper($validated['code_promo']);
         }
 
+        // Calcul de l'acompte si l'hôtel l'exige
+        $hotel = $propriete->hotel;
+        $montantAcompte = null;
+        $statutPaiementAcompte = 'non_requis';
+
+        if ($hotel && $hotel->exige_acompte && $hotel->pourcentage_acompte > 0) {
+            $montantAcompte = round($prixTotal * (float) $hotel->pourcentage_acompte / 100, 2);
+            $statutPaiementAcompte = 'en_attente';
+        }
+
         // Création de la réservation + enregistrement utilisation dans une transaction
         $reservation = DB::transaction(function () use (
             $request, $validated, $propriete, $prixBase, $prixTotal,
-            $montantReduction, $offre, $codePromoUtilise, $nbNuits, $devise
+            $montantReduction, $offre, $codePromoUtilise, $nbNuits, $devise,
+            $montantAcompte, $statutPaiementAcompte
         ) {
             $reservation = Reservation::create([
                 'code_reservation'    => Reservation::generateCode(),
@@ -223,6 +234,8 @@ class ReservationController extends Controller
                 'montant_reduction'   => $montantReduction,
                 'prix_total'          => $prixTotal,
                 'devise_prix_total'   => $devise,
+                'montant_acompte'     => $montantAcompte,
+                'statut_paiement_acompte' => $statutPaiementAcompte,
                 'statut'              => 'en_attente',
                 'date_reservation'    => now(),
                 'demande_speciale'    => $validated['demande_speciale'] ?? null,

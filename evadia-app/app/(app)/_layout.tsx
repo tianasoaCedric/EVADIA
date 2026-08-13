@@ -1,5 +1,5 @@
 import { Tabs, usePathname } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { Text } from 'react-native';
 
 export default function AppLayout() {
@@ -27,7 +27,7 @@ export default function AppLayout() {
         },
         tabBarLabelStyle: {
           fontSize: 11,
-          fontWeight: '700', // Un peu en gras
+          fontFamily: 'Outfit_300Light',
           marginTop: 2,
         }
       }}
@@ -36,8 +36,8 @@ export default function AppLayout() {
         name="home" 
         options={{
           title: 'Accueil',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "home" : "home-outline"} size={28} color={color} />
+          tabBarIcon: ({ color }) => (
+            <Feather name="home" size={26} color={color} />
           ),
         }} 
       />
@@ -47,19 +47,19 @@ export default function AppLayout() {
         options={{
           tabBarLabel: ({ focused }) => (
             <Text style={{ 
-              color: focused || isDestinationActive ? '#01BDA5' : '#737373', 
-              fontSize: 11, 
-              fontWeight: '700', 
-              marginTop: 2 
+              color: focused || isDestinationActive ? '#01BDA5' : '#737373',
+              fontSize: 11,
+              fontFamily: 'Outfit_300Light',
+              marginTop: 2
             }}>
               Destination
             </Text>
           ),
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons 
-              name={focused || isDestinationActive ? "location" : "location-outline"} 
-              size={28} 
-              color={focused || isDestinationActive ? '#01BDA5' : color} 
+            <Feather
+              name="map-pin"
+              size={26}
+              color={focused || isDestinationActive ? '#01BDA5' : color}
             />
           ),
         }} 
@@ -69,8 +69,8 @@ export default function AppLayout() {
         name="favorites" 
         options={{
           title: 'Favoris',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "heart" : "heart-outline"} size={28} color={color} />
+          tabBarIcon: ({ color }) => (
+            <Feather name="heart" size={26} color={color} />
           ),
         }} 
       />
@@ -79,8 +79,8 @@ export default function AppLayout() {
         name="offers" 
         options={{
           title: 'Offres',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "pricetag" : "pricetag-outline"} size={28} color={color} />
+          tabBarIcon: ({ color }) => (
+            <Feather name="tag" size={26} color={color} />
           ),
         }} 
       />
@@ -108,11 +108,18 @@ export default function AppLayout() {
       />
 
       <Tabs.Screen
-        name="profile" 
+        name="notifications"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="profile"
         options={{
           title: 'Vous',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "person" : "person-outline"} size={28} color={color} />
+          tabBarIcon: ({ color }) => (
+            <Feather name="user" size={26} color={color} />
           ),
         }} 
       />

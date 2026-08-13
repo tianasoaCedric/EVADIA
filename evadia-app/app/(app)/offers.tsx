@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Dimensions, ImageBackground, Platform, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { OffersCard } from '../../components/molecules/OffersCard';
 import { publicService, Offre } from '../../services/public';
@@ -13,16 +14,17 @@ function getOfferImage(offre: Offre): string {
   return offre.photo ?? 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800';
 }
 
-function getBadgeText(offre: Offre): string {
+function getBadgeText(offre: Offre, t: (key: string, opts?: any) => string): string {
   const pct = (offre.discount ?? offre.reduction_pct) ? `-${offre.discount ?? offre.reduction_pct}%` : '';
   const dates =
     offre.date_debut && offre.date_fin
-      ? ` du ${offre.date_debut} au ${offre.date_fin}`
+      ? ` ${t('Offers.badge_dates', { start: offre.date_debut, end: offre.date_fin })}`
       : '';
-  return `Offre ${pct}${dates}`.trim() || 'Offre Exclusive';
+  return `${t('Offers.badge_prefix')} ${pct}${dates}`.trim() || t('Offers.badge_exclusive');
 }
 
 export default function OffersScreen() {
+  const { t } = useTranslation();
   const [offres, setOffres] = useState<Offre[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -33,7 +35,7 @@ export default function OffersScreen() {
     setError(null);
     publicService.getOffres()
       .then((data) => setOffres(Array.isArray(data) ? data : []))
-      .catch((e: any) => setError(e?.message ?? 'Impossible de charger les offres.'))
+      .catch((e: any) => setError(e?.message ?? t('Offers.load_error')))
       .finally(() => setLoading(false));
   };
 
@@ -57,23 +59,23 @@ export default function OffersScreen() {
         <ImageBackground
           source={{ uri: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800' }}
           style={{ width: screenWidth, height: HEADER_HEIGHT }}
-          imageStyle={{ borderBottomLeftRadius: 36, borderBottomRightRadius: 36 }}
+          imageStyle={{ borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }}
         >
           <LinearGradient
             colors={['rgba(0,0,0,0.45)', 'rgba(1,189,165,0.2)', '#01BDA5']}
             locations={[0, 0.6, 1]}
-            style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, borderBottomLeftRadius: 36, borderBottomRightRadius: 36 }}
+            style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }}
           >
             <SafeAreaView style={{ flex: 1, justifyContent: 'space-between' }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, marginTop: Platform.OS === 'android' ? 12 : 6 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, backgroundColor: '#ffffff', paddingHorizontal: 16, borderRadius: 100, height: 48, elevation: 2 }}>
-                  <Ionicons name="search" size={20} color="#6b7280" />
+                <View style={{ flex: 1, backgroundColor: '#ffffff', paddingHorizontal: 16, borderRadius: 100, height: 48, justifyContent: 'center', elevation: 2 }}>
+                  <Ionicons name="search" size={20} color="#6b7280" style={{ position: 'absolute', left: 16 }} />
                   <TextInput
-                    placeholder="Recherche"
+                    placeholder={t('Common.search')}
                     placeholderTextColor="#9ca3af"
                     value={search}
                     onChangeText={setSearch}
-                    style={{ flex: 1, marginLeft: 10, fontSize: 15, fontWeight: '600', color: '#1f2937', padding: 0 }}
+                    style={{ fontSize: 15, fontFamily: 'Outfit_400Regular', color: '#1f2937', padding: 0, margin: 0, height: '100%', textAlign: 'center', textAlignVertical: 'center', includeFontPadding: false }}
                   />
                 </View>
                 <TouchableOpacity
@@ -85,8 +87,8 @@ export default function OffersScreen() {
               </View>
 
               <View style={{ paddingHorizontal: 18, marginBottom: 20 }}>
-                <Text style={{ fontSize: 30, fontWeight: '800', color: '#ffffff', textShadowColor: 'rgba(0,0,0,0.25)', textShadowOffset: { width: 0, height: 1.5 }, textShadowRadius: 3 }}>
-                  Offres Exclusives
+                <Text style={{ fontSize: 30, fontFamily: 'Outfit_300Light', color: '#ffffff', textShadowColor: 'rgba(0,0,0,0.25)', textShadowOffset: { width: 0, height: 1.5 }, textShadowRadius: 3 }}>
+                  {t('Offers.title')}
                 </Text>
               </View>
             </SafeAreaView>
@@ -95,8 +97,8 @@ export default function OffersScreen() {
 
         <View style={{ alignSelf: 'flex-start', marginLeft: 18, marginTop: 22, marginBottom: 18 }}>
           <View style={{ borderBottomWidth: 1, borderBottomColor: '#374151', paddingBottom: 2 }}>
-            <Text style={{ fontSize: 14, fontWeight: '600', color: '#374151' }}>
-              Découvrez toutes les offres exclusives
+            <Text style={{ fontSize: 14, fontFamily: 'Outfit_600SemiBold', color: '#374151' }}>
+              {t('Offers.subtitle')}
             </Text>
           </View>
         </View>
@@ -108,12 +110,12 @@ export default function OffersScreen() {
         ) : error ? (
           <View style={{ alignItems: 'center', paddingTop: 40, paddingHorizontal: 32 }}>
             <Ionicons name="cloud-offline-outline" size={52} color="#ccc" />
-            <Text style={{ color: '#9ca3af', marginTop: 12, fontWeight: '600', textAlign: 'center' }}>{error}</Text>
+            <Text style={{ color: '#9ca3af', marginTop: 12, fontFamily: 'Outfit_600SemiBold', textAlign: 'center' }}>{error}</Text>
             <TouchableOpacity
               onPress={loadOffres}
               style={{ marginTop: 16, backgroundColor: '#01BDA5', paddingHorizontal: 24, paddingVertical: 10, borderRadius: 100 }}
             >
-              <Text style={{ color: '#fff', fontWeight: '700' }}>Réessayer</Text>
+              <Text style={{ color: '#fff', fontFamily: 'Outfit_700Bold' }}>{t('Common.retry')}</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -122,7 +124,7 @@ export default function OffersScreen() {
               <OffersCard
                 key={offre.id}
                 imageUri={getOfferImage(offre)}
-                badgeText={getBadgeText(offre)}
+                badgeText={getBadgeText(offre, t)}
                 titleBold={(offre.hotel_nom ?? offre.titre ?? '').split(' ')[0]}
                 titleNormal={offre.city ?? ''}
                 description={offre.description ?? ''}
@@ -132,7 +134,7 @@ export default function OffersScreen() {
                     params: {
                       id: offre.id,
                       imageUri: getOfferImage(offre),
-                      badgeText: getBadgeText(offre),
+                      badgeText: getBadgeText(offre, t),
                       titleBold: (offre.hotel_nom ?? offre.titre ?? '').split(' ')[0],
                       titleNormal: offre.city ?? '',
                       description: offre.description ?? '',
@@ -145,8 +147,8 @@ export default function OffersScreen() {
             {filtered.length === 0 && (
               <View style={{ alignItems: 'center', paddingTop: 40 }}>
                 <Ionicons name="pricetag-outline" size={48} color="#ccc" />
-                <Text style={{ color: '#9ca3af', marginTop: 12, fontWeight: '600' }}>
-                  Aucune offre disponible
+                <Text style={{ color: '#9ca3af', marginTop: 12, fontFamily: 'Outfit_600SemiBold' }}>
+                  {t('Offers.no_offers')}
                 </Text>
               </View>
             )}

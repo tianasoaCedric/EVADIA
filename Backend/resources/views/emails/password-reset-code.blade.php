@@ -8,7 +8,7 @@ Vous avez demandé à réinitialiser votre mot de passe Evadia.
 Voici votre code de vérification :
 
 @component('mail::panel')
-<div style="text-align:center; font-size: 32px; font-weight: bold; letter-spacing: 10px;">
+<div style="text-align:center; font-size: 32px; font-weight: bold; letter-spacing: 10px; color: #01BDA5;">
 {{ $code }}
 </div>
 @endcomponent

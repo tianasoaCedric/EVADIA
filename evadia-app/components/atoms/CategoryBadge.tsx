@@ -10,11 +10,11 @@ export const CategoryBadge = ({ label, isActive = false, onPress }: CategoryBadg
   return (
     <TouchableOpacity
       onPress={onPress}
-      className={`rounded-full px-5 py-2.5 ${isActive ? 'bg-[#01BDA5]' : 'bg-gray-100'}`}
+      className={`rounded-full px-3 py-1 ${isActive ? 'bg-[#01BDA5]' : 'bg-gray-100'}`}
       style={{
         alignItems: 'center',
         justifyContent: 'center',
-        height: 38,
+        height: 30,
       }}
     >
       <Text className={`font-semibold text-sm ${isActive ? 'text-white' : 'text-gray-800'}`}>

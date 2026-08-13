@@ -1,11 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { HotelCard } from '../../components/molecules/HotelCard';
 import { Header } from '../../components/molecules/Header';
 import { publicService, Hotel, hotelVille, hotelPhoto, hotelPrix, hotelNote } from '../../services/public';
 import { clientService } from '../../services/client';
+import { useDevise } from '../../context/DeviseContext';
 import { router, useFocusEffect } from 'expo-router';
 
 interface CitySection {
@@ -14,9 +16,14 @@ interface CitySection {
 }
 
 export default function HomePage() {
-  const [sections, setSections] = useState<CitySection[]>([]);
+  const { t } = useTranslation();
+  const { devise, symbole } = useDevise();
+  const [hotels, setHotels] = useState<Hotel[]>([]);
   const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState('Tous');
 
   useFocusEffect(
     useCallback(() => {
@@ -24,32 +31,40 @@ export default function HomePage() {
     }, [])
   );
 
-  const [error, setError] = useState<string | null>(null);
-
   const loadHotels = async () => {
     setLoading(true);
     setError(null);
     try {
-      const [hotels, favs] = await Promise.all([
+      const [types, allHotels, favs] = await Promise.all([
+        publicService.getTypesHotels().catch(() => []),
         publicService.getHotels({ per_page: 20 }),
         clientService.getFavorites().catch(() => []),
       ]);
 
-      const map = new Map<string, Hotel[]>();
-      for (const hotel of hotels) {
-        const city = hotelVille(hotel);
-        if (!map.has(city)) map.set(city, []);
-        map.get(city)!.push(hotel);
-      }
-
-      setSections(Array.from(map.entries()).map(([city, hs]) => ({ city, hotels: hs })));
+      setCategories(['Tous', ...types.map((t) => t.nom)]);
+      setHotels(allHotels);
       setFavoriteIds(new Set(favs.map((f) => f.hotel.id)));
     } catch (e: any) {
-      setError(e?.message ?? 'Impossible de charger les hôtels.');
+      setError(e?.message ?? t('Home.load_error'));
     } finally {
       setLoading(false);
     }
   };
+
+  const filteredHotels = hotels.filter((hotel) => {
+    if (selectedCategory === 'Tous') return true;
+    return (hotel.types ?? []).some((t) => t.nom === selectedCategory);
+  });
+
+  const sections: CitySection[] = (() => {
+    const map = new Map<string, Hotel[]>();
+    for (const hotel of filteredHotels) {
+      const city = hotelVille(hotel);
+      if (!map.has(city)) map.set(city, []);
+      map.get(city)!.push(hotel);
+    }
+    return Array.from(map.entries()).map(([city, hs]) => ({ city, hotels: hs }));
+  })();
 
   const handleFavoriteToggle = async (hotelId: number, newState: boolean) => {
     setFavoriteIds((prev) => {
@@ -74,7 +89,11 @@ export default function HomePage() {
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
-      <Header />
+      <Header
+        categories={categories.length > 0 ? categories : undefined}
+        defaultCategory="Tous"
+        onCategoryChange={setSelectedCategory}
+      />
 
       {loading ? (
         <View className="flex-1 items-center justify-center">
@@ -85,7 +104,7 @@ export default function HomePage() {
           <Ionicons name="cloud-offline-outline" size={52} color="#ccc" />
           <Text className="text-gray-400 mt-4 font-semibold text-center">{error}</Text>
           <TouchableOpacity className="mt-6 bg-teal-500 px-6 py-3 rounded-full" onPress={loadHotels}>
-            <Text className="text-white font-bold">Réessayer</Text>
+            <Text className="text-white font-bold">{t('Common.retry')}</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -101,7 +120,7 @@ export default function HomePage() {
                 onPress={() => {}}
               >
                 <Text className="text-[16px] font-bold text-gray-900">
-                  Selection d'hebergement a {section.city}
+                  {t('Home.selection_in_city', { city: section.city })}
                 </Text>
                 <Ionicons name="chevron-forward" size={18} color="#000" />
               </TouchableOpacity>
@@ -112,7 +131,7 @@ export default function HomePage() {
                 contentContainerStyle={{ paddingRight: 8 }}
               >
                 {section.hotels.map((hotel) => {
-                  const prix = hotelPrix(hotel);
+                  const prix = hotelPrix(hotel, devise);
                   const note = hotelNote(hotel);
                   const photo = hotelPhoto(hotel);
                   const ville = hotelVille(hotel);
@@ -122,7 +141,7 @@ export default function HomePage() {
                       key={`${hotel.id}-${isFav}`}
                       imageUri={photo}
                       name={hotel.nom}
-                      price={prix ? `${prix.toLocaleString('fr-FR')}Ar/nuité` : ''}
+                      price={prix ? `${prix.toLocaleString('fr-FR')}${symbole}/nuité` : ''}
                       rating={note}
                       defaultFavorite={isFav}
                       onPress={() =>
@@ -149,7 +168,7 @@ export default function HomePage() {
           {sections.length === 0 && (
             <View className="flex-1 items-center justify-center pt-20">
               <Ionicons name="business-outline" size={48} color="#ccc" />
-              <Text className="text-gray-400 mt-4 font-semibold">Aucun hôtel disponible</Text>
+              <Text className="text-gray-400 mt-4 font-semibold">{t('Home.no_hotels')}</Text>
             </View>
           )}
         </ScrollView>

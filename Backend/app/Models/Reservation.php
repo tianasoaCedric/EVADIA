@@ -26,6 +26,9 @@ class Reservation extends Model
         'nb_bebes',
         'prix_total',
         'devise_prix_total',
+        'montant_acompte',
+        'statut_paiement_acompte',
+        'date_paiement_acompte',
         'statut',
         'date_reservation',
         'demande_speciale',
@@ -48,11 +51,13 @@ class Reservation extends Model
             'prix_total'          => 'decimal:2',
             'prix_avant_reduction' => 'decimal:2',
             'montant_reduction'   => 'decimal:2',
+            'montant_acompte'     => 'decimal:2',
             'nb_adultes'          => 'integer',
             'nb_enfants'          => 'integer',
             'nb_bebes'            => 'integer',
             'date_reservation'    => 'datetime',
             'date_reponse'        => 'datetime',
+            'date_paiement_acompte' => 'datetime',
         ];
     }
 
@@ -99,6 +104,20 @@ class Reservation extends Model
     public function messages(): HasMany
     {
         return $this->hasMany(Message::class);
+    }
+
+    public function acompteRequis(): bool
+    {
+        return $this->statut_paiement_acompte !== 'non_requis';
+    }
+
+    public function soldeRestant(): float
+    {
+        if (!$this->acompteRequis()) {
+            return (float) $this->prix_total;
+        }
+
+        return max(0, (float) $this->prix_total - (float) $this->montant_acompte);
     }
 
     // Generate unique reservation code

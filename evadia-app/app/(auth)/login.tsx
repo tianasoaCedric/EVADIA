@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Animated,
@@ -27,6 +28,7 @@ const evadiaLogo = require("../../assets/evadia.png");
 const googleIcon = require("../../assets/google-icon.png");
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const { login, loginWithToken } = useAuth();
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [email, setEmail] = useState("");
@@ -40,7 +42,7 @@ export default function LoginPage() {
     console.log('[LOGIN] handleLogin called, email:', email);
     setError("");
     if (!email || !password) {
-      setError("Veuillez saisir votre email et mot de passe.");
+      setError(t('Login.error_missing_fields'));
       return;
     }
     setLoading(true);
@@ -54,7 +56,7 @@ export default function LoginPage() {
       const msg =
         err?.response?.data?.message ||
         err?.response?.data?.errors?.email?.[0] ||
-        "Identifiants incorrects.";
+        t('Login.error_invalid_credentials');
       setError(msg);
     } finally {
       setLoading(false);
@@ -85,14 +87,14 @@ export default function LoginPage() {
         const code = errorMatch[1];
         setError(
           code === "not_client"
-            ? "Ce compte n'est pas un compte client."
-            : "La connexion Google a échoué. Réessayez."
+            ? t('Login.error_not_client')
+            : t('Login.error_google_failed')
         );
         return;
       }
 
       if (!tokenMatch) {
-        setError("Token non reçu. Réessayez.");
+        setError(t('Login.error_no_token'));
         return;
       }
 
@@ -101,7 +103,7 @@ export default function LoginPage() {
       await loginWithToken();
       // AuthContext met à jour state → _layout.tsx redirige vers /(app)/home
     } catch {
-      setError("Une erreur est survenue. Réessayez.");
+      setError(t('Login.error_generic'));
     } finally {
       setLoading(false);
     }
@@ -139,7 +141,7 @@ export default function LoginPage() {
                     style={{ zIndex: 10 }}
                   >
                     <Ionicons name="arrow-back" size={24} color="#fff" />
-                    <Text className="text-white text-base font-semibold">Retour</Text>
+                    <Text className="text-white text-base font-semibold">{t('Login.back')}</Text>
                   </TouchableOpacity>
 
                   <View className="items-center mb-8 mt-4">
@@ -148,11 +150,11 @@ export default function LoginPage() {
                       className="text-white/90 text-center text-base font-semibold"
                       style={{ marginTop: -10 }}
                     >
-                      Trouvez l'hôtel parfait pour vous !
+                      {t('Login.tagline')}
                     </Text>
                   </View>
 
-                  <Text className="text-3xl font-bold text-center text-white mb-6">Connexion</Text>
+                  <Text className="text-3xl font-bold text-center text-white mb-6">{t('Login.title')}</Text>
 
                   {error ? <ErrorBanner message={error} /> : null}
 
@@ -171,7 +173,7 @@ export default function LoginPage() {
                     >
                       <Ionicons name="mail-outline" size={20} color="rgba(255,255,255,0.8)" />
                       <TextInput
-                        placeholder="exemple@email.com"
+                        placeholder={t('Login.email_placeholder')}
                         placeholderTextColor="rgba(255,255,255,0.6)"
                         value={email}
                         onChangeText={setEmail}
@@ -195,7 +197,7 @@ export default function LoginPage() {
                     >
                       <Ionicons name="shield-outline" size={20} color="rgba(255,255,255,0.8)" />
                       <TextInput
-                        placeholder="votre mot de passe"
+                        placeholder={t('Login.password_placeholder')}
                         placeholderTextColor="rgba(255,255,255,0.6)"
                         value={password}
                         onChangeText={setPassword}
@@ -228,17 +230,17 @@ export default function LoginPage() {
                       {loading ? (
                         <ActivityIndicator color="#fff" size="small" />
                       ) : (
-                        <Text style={{ fontSize: 14, fontWeight: "600", color: "#fff" }}>
-                          Se connecter
+                        <Text style={{ fontSize: 14, fontFamily: "Outfit_600SemiBold", color: "#fff" }}>
+                          {t('Login.login_button')}
                         </Text>
                       )}
                     </TouchableOpacity>
                   </View>
 
                   <View className="flex-row justify-center mt-6">
-                    <Text className="text-white/80">Vous n'avez pas encore de compte ? </Text>
+                    <Text className="text-white/80">{t('Login.no_account')}</Text>
                     <TouchableOpacity onPress={() => router.push("/(auth)/register")}>
-                      <Text className="text-white font-semibold">S'inscrire</Text>
+                      <Text className="text-white font-semibold">{t('Login.signup')}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -251,7 +253,7 @@ export default function LoginPage() {
                       className="text-white/90 text-center text-base font-semibold"
                       style={{ marginTop: -10 }}
                     >
-                      Trouvez l'hôtel parfait pour vous !
+                      {t('Login.tagline')}
                     </Text>
                   </View>
 
@@ -286,13 +288,13 @@ export default function LoginPage() {
                         activeOpacity={0.85}
                         onPress={() => animate(true)}
                       >
-                        <Text style={{ fontSize: 14, fontWeight: "600", color: "#fff" }}>
-                          Continuer avec votre Email
+                        <Text style={{ fontSize: 14, fontFamily: "Outfit_600SemiBold", color: "#fff" }}>
+                          {t('Login.continue_with_email')}
                         </Text>
                       </TouchableOpacity>
 
                       <View style={{ width: "100%" }}>
-                        <Divider text="ou" />
+                        <Divider text={t('Login.or')} />
                       </View>
 
                       <TouchableOpacity onPress={handleGoogleLogin} className="items-center justify-center">
@@ -301,9 +303,9 @@ export default function LoginPage() {
                     </View>
 
                     <View className="flex-row justify-center mt-6">
-                      <Text className="text-gray-600 text-sm">Vous n'avez pas de compte ? </Text>
+                      <Text className="text-gray-600 text-sm">{t('Login.no_account_short')}</Text>
                       <TouchableOpacity onPress={() => router.push("/(auth)/register")}>
-                        <Text className="text-gray-800 font-bold text-sm">S'inscrire</Text>
+                        <Text className="text-gray-800 font-bold text-sm">{t('Login.signup')}</Text>
                       </TouchableOpacity>
                     </View>
                   </View>

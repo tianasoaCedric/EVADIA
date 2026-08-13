@@ -55,10 +55,15 @@ class HotelContentController extends Controller
             'pays' => 'required|max:100',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
+            'exige_acompte' => 'nullable|boolean',
+            'pourcentage_acompte' => 'nullable|required_if:exige_acompte,1|numeric|min:1|max:100',
         ]);
 
         DB::transaction(function () use ($hotel, $request) {
-            $hotel->update($request->only(['nom', 'description', 'email_contact', 'telephone', 'site_web', 'etoiles']));
+            $hotel->update($request->only(['nom', 'description', 'email_contact', 'telephone', 'site_web', 'etoiles']) + [
+                'exige_acompte' => $request->boolean('exige_acompte'),
+                'pourcentage_acompte' => $request->boolean('exige_acompte') ? $request->pourcentage_acompte : null,
+            ]);
             $hotel->types()->sync($request->types);
 
             if ($hotel->adresse) {

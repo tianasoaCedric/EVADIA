@@ -1,5 +1,6 @@
 import { router } from "expo-router";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Image,
@@ -22,6 +23,7 @@ const evadiaLogo = require("../../assets/evadia.png");
 const googleIcon = require("../../assets/google-icon.png");
 
 export default function RegisterScreen() {
+  const { t } = useTranslation();
   const { register } = useAuth();
   const [nom, setNom] = useState("");
   const [prenom, setPrenom] = useState("");
@@ -34,11 +36,11 @@ export default function RegisterScreen() {
   const handleRegister = async () => {
     setError("");
     if (!nom || !prenom || !email || !password) {
-      setError("Veuillez remplir tous les champs.");
+      setError(t('Register.error_missing_fields'));
       return;
     }
     if (password.length < 8) {
-      setError("Le mot de passe doit contenir au moins 8 caractères.");
+      setError(t('Register.error_password_min'));
       return;
     }
     setLoading(true);
@@ -49,7 +51,7 @@ export default function RegisterScreen() {
       const errors = err?.response?.data?.errors;
       const msg = errors
         ? Object.values(errors).flat().join("\n")
-        : err?.response?.data?.message || "Une erreur est survenue.";
+        : err?.response?.data?.message || t('Register.error_generic');
       setError(msg);
     } finally {
       setLoading(false);
@@ -82,32 +84,32 @@ export default function RegisterScreen() {
             <View className="items-center pt-10 pb-8 px-6">
               <Image source={evadiaLogo} className="w-60 h-32" resizeMode="contain" />
               <Text className="text-white/90 text-center text-base font-semibold" style={{ marginTop: -10 }}>
-                Trouvez l'hôtel parfait pour vous !
+                {t('Register.tagline')}
               </Text>
 
-              <Text className="text-3xl font-bold text-white text-center mt-6 mb-4">S'inscrire</Text>
+              <Text className="text-3xl font-bold text-white text-center mt-6 mb-4">{t('Register.title')}</Text>
 
               {error ? <ErrorBanner message={error} /> : null}
 
               <View style={{ width: 353, gap: 12, marginTop: 12 }}>
                 <View style={inputStyle}>
                   <Ionicons name="person-outline" size={20} color="rgba(255,255,255,0.8)" />
-                  <TextInput placeholder="Entrez votre Nom" placeholderTextColor="rgba(255,255,255,0.6)" value={nom} onChangeText={setNom} style={{ flex: 1, fontSize: 13, color: "#fff", paddingVertical: 0 }} />
+                  <TextInput placeholder={t('Register.last_name_placeholder')} placeholderTextColor="rgba(255,255,255,0.6)" value={nom} onChangeText={setNom} style={{ flex: 1, fontSize: 13, color: "#fff", paddingVertical: 0 }} />
                 </View>
 
                 <View style={inputStyle}>
                   <Ionicons name="person-outline" size={20} color="rgba(255,255,255,0.8)" />
-                  <TextInput placeholder="Entrez votre Prénom" placeholderTextColor="rgba(255,255,255,0.6)" value={prenom} onChangeText={setPrenom} style={{ flex: 1, fontSize: 13, color: "#fff", paddingVertical: 0 }} />
+                  <TextInput placeholder={t('Register.first_name_placeholder')} placeholderTextColor="rgba(255,255,255,0.6)" value={prenom} onChangeText={setPrenom} style={{ flex: 1, fontSize: 13, color: "#fff", paddingVertical: 0 }} />
                 </View>
 
                 <View style={inputStyle}>
                   <Ionicons name="mail-outline" size={20} color="rgba(255,255,255,0.8)" />
-                  <TextInput placeholder="Entrez votre Adresse Email" placeholderTextColor="rgba(255,255,255,0.6)" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" style={{ flex: 1, fontSize: 13, color: "#fff", paddingVertical: 0 }} />
+                  <TextInput placeholder={t('Register.email_placeholder')} placeholderTextColor="rgba(255,255,255,0.6)" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" style={{ flex: 1, fontSize: 13, color: "#fff", paddingVertical: 0 }} />
                 </View>
 
                 <View style={inputStyle}>
                   <Ionicons name="shield-outline" size={20} color="rgba(255,255,255,0.8)" />
-                  <TextInput placeholder="Entrez votre mot de passe" placeholderTextColor="rgba(255,255,255,0.6)" value={password} onChangeText={setPassword} secureTextEntry={!showPassword} style={{ flex: 1, fontSize: 13, color: "#fff", paddingVertical: 0 }} />
+                  <TextInput placeholder={t('Register.password_placeholder')} placeholderTextColor="rgba(255,255,255,0.6)" value={password} onChangeText={setPassword} secureTextEntry={!showPassword} style={{ flex: 1, fontSize: 13, color: "#fff", paddingVertical: 0 }} />
                   <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                     <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={18} color="rgba(255,255,255,0.8)" />
                   </TouchableOpacity>
@@ -122,14 +124,14 @@ export default function RegisterScreen() {
                   {loading ? (
                     <ActivityIndicator color="#fff" size="small" />
                   ) : (
-                    <Text style={{ fontSize: 14, fontWeight: "600", color: "#fff" }}>S'inscrire</Text>
+                    <Text style={{ fontSize: 14, fontFamily: "Outfit_600SemiBold", color: "#fff" }}>{t('Register.register_button')}</Text>
                   )}
                 </TouchableOpacity>
               </View>
 
               <View className="flex-row items-center w-[353px] my-6">
                 <View className="flex-1 h-px bg-white/50" />
-                <Text className="mx-4 text-white/80 text-sm">OU</Text>
+                <Text className="mx-4 text-white/80 text-sm">{t('Register.or')}</Text>
                 <View className="flex-1 h-px bg-white/50" />
               </View>
 
@@ -138,9 +140,9 @@ export default function RegisterScreen() {
               </TouchableOpacity>
 
               <View className="flex-row justify-center mt-6 mb-10">
-                <Text className="text-white/80">Vous avez déjà un compte ? </Text>
+                <Text className="text-white/80">{t('Register.have_account')}</Text>
                 <TouchableOpacity onPress={() => router.push("/(auth)/login")}>
-                  <Text className="text-white font-semibold">Se connecter</Text>
+                  <Text className="text-white font-semibold">{t('Register.login')}</Text>
                 </TouchableOpacity>
               </View>
             </View>

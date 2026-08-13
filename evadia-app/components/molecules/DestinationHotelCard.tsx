@@ -202,7 +202,7 @@ export const DestinationHotelCard = ({
           <Text
             style={{
               fontSize: 16,
-              fontWeight: '700',
+              fontFamily: 'Outfit_700Bold',
               color: '#111827',
               flex: 1,
               marginRight: 8,
@@ -217,7 +217,7 @@ export const DestinationHotelCard = ({
               style={{
                 fontSize: 12,
                 color: '#6b7280',
-                fontWeight: '600',
+                fontFamily: 'Outfit_600SemiBold',
               }}
               numberOfLines={1}
             >
@@ -232,7 +232,7 @@ export const DestinationHotelCard = ({
             style={{
               fontSize: 14,
               color: '#374151',
-              fontWeight: '600',
+              fontFamily: 'Outfit_600SemiBold',
             }}
           >
             {price}
@@ -243,7 +243,7 @@ export const DestinationHotelCard = ({
               style={{
                 fontSize: 12,
                 color: '#6b7280',
-                fontWeight: '700',
+                fontFamily: 'Outfit_700Bold',
                 marginLeft: 4,
               }}
             >

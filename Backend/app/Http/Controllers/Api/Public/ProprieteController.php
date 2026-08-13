@@ -61,6 +61,8 @@ class ProprieteController extends Controller
                     'ville' => $propriete->hotel->adresse->ville,
                     'pays'  => $propriete->hotel->adresse->pays,
                 ] : null,
+                'exige_acompte'       => $propriete->hotel->exige_acompte,
+                'pourcentage_acompte' => $propriete->hotel->pourcentage_acompte,
             ],
         ]);
     }

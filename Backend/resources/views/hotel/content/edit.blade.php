@@ -83,6 +83,28 @@
                         @error('types') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
 
+                    <div class="md:col-span-2 border-t border-gray-200 pt-4 mt-2">
+                        <h3 class="text-sm font-semibold text-gray-800 mb-3">Politique d'acompte</h3>
+                        <label class="flex items-center gap-2 mb-3">
+                            <input type="checkbox" id="exige_acompte" name="exige_acompte" value="1"
+                                {{ old('exige_acompte', $hotel->exige_acompte) ? 'checked' : '' }}
+                                onchange="document.getElementById('pourcentage_acompte_wrap').classList.toggle('hidden', !this.checked)"
+                                class="rounded border-gray-300 text-hotel-600 focus:ring-hotel-500">
+                            <span class="text-sm text-gray-700">Exiger un acompte à la réservation</span>
+                        </label>
+                        <div id="pourcentage_acompte_wrap" class="max-w-xs {{ old('exige_acompte', $hotel->exige_acompte) ? '' : 'hidden' }}">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Pourcentage de l'acompte</label>
+                            <div class="relative">
+                                <input type="number" name="pourcentage_acompte" min="1" max="100" step="1"
+                                    value="{{ old('pourcentage_acompte', $hotel->pourcentage_acompte) }}"
+                                    class="w-full rounded-lg border border-gray-300 px-4 py-2.5 pr-8 text-sm focus:border-hotel-500 focus:ring-hotel-500">
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">%</span>
+                            </div>
+                            @error('pourcentage_acompte') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                            <p class="mt-1 text-xs text-gray-500">Le client verra ce montant avant de réserver. L'hôtel confirme la réception hors-ligne avant d'accepter la réservation.</p>
+                        </div>
+                    </div>
+
                     {{-- Hidden address fields for full form submission --}}
                     <input type="hidden" name="adresse_ligne1" value="{{ $hotel->adresse?->adresse_ligne1 }}">
                     <input type="hidden" name="code_postal" value="{{ $hotel->adresse?->code_postal }}">

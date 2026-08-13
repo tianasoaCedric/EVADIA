@@ -12,6 +12,8 @@ export interface Reservation {
   statut: "pending" | "confirmed" | "cancelled";
   code_promo?: string;
   remise?: number;
+  montant_acompte?: number | null;
+  statut_paiement_acompte?: "non_requis" | "en_attente" | "paye";
   created_at?: string;
 }
 

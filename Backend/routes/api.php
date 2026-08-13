@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\Auth\RegisterController;
 use App\Http\Controllers\Api\Client\AvisController;
 use App\Http\Controllers\Api\Client\FavoriController;
 use App\Http\Controllers\Api\Client\HotelController as ClientHotelController;
+use App\Http\Controllers\Api\Client\NotificationController as ClientNotificationController;
 use App\Http\Controllers\Api\Client\ProfileController;
 use App\Http\Controllers\Api\Client\ReservationController as ClientReservationController;
 use App\Http\Controllers\Api\Public\DecouverteController;
@@ -158,6 +159,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('reservations/{id}', [HotelReservationController::class, 'show']);
         Route::patch('reservations/{id}/accept', [HotelReservationController::class, 'accept']);
         Route::patch('reservations/{id}/reject', [HotelReservationController::class, 'reject']);
+        Route::patch('reservations/{id}/mark-deposit-paid', [HotelReservationController::class, 'markDepositPaid']);
         Route::get('reservations/{id}/messages', [HotelReservationMessageController::class, 'index']);
         Route::post('reservations/{id}/messages', [HotelReservationMessageController::class, 'store']);
 
@@ -203,6 +205,14 @@ Route::middleware('auth:sanctum')->group(function () {
         // Avis
         Route::get('reviews', [AvisController::class, 'index']);
         Route::post('reviews', [AvisController::class, 'store']);
+
+        // Notifications
+        Route::get('notifications', [ClientNotificationController::class, 'index']);
+        Route::get('notifications/unread-count', [ClientNotificationController::class, 'unreadCount']);
+        Route::patch('notifications/{id}/read', [ClientNotificationController::class, 'markRead']);
+        Route::patch('notifications/read-all', [ClientNotificationController::class, 'markAllRead']);
+        Route::post('notifications/device-token', [ClientNotificationController::class, 'registerDeviceToken']);
+        Route::delete('notifications/device-token', [ClientNotificationController::class, 'unregisterDeviceToken']);
 
         // Profil
         Route::get('profile', [ProfileController::class, 'show']);

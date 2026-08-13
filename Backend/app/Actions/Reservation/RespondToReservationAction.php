@@ -7,6 +7,7 @@ use App\Mail\ReservationRejectedMail;
 use App\Models\Facture;
 use App\Models\Notification;
 use App\Models\Reservation;
+use App\Services\ExpoPushService;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -15,9 +16,14 @@ use Throwable;
 
 class RespondToReservationAction
 {
+    public function __construct(private ExpoPushService $expoPush)
+    {
+    }
+
     public function accept(Reservation $reservation, int $staffUserId): Reservation
     {
         $this->assertPending($reservation);
+        $this->assertDepositPaid($reservation);
 
         $reservation = DB::transaction(function () use ($reservation, $staffUserId) {
             $reservation->update([
@@ -46,11 +52,34 @@ class RespondToReservationAction
             return $reservation;
         });
 
+        $this->expoPush->sendToUser(
+            $reservation->client,
+            'Réservation confirmée',
+            "Votre réservation {$reservation->code_reservation} a été acceptée par l'hôtel.",
+            ['type' => 'reservation_acceptee', 'reservation_id' => $reservation->id]
+        );
+
         $this->sendMailSafely(function () use ($reservation) {
             Mail::to($reservation->client->email)->send(
                 new ReservationAcceptedMail($reservation->fresh(['client', 'propriete.hotel']), $reservation->facture)
             );
         }, $reservation);
+
+        return $reservation->fresh();
+    }
+
+    public function markDepositPaid(Reservation $reservation): Reservation
+    {
+        if ($reservation->statut_paiement_acompte !== 'en_attente') {
+            throw new DomainException(
+                'Aucun acompte en attente de confirmation pour cette réservation.'
+            );
+        }
+
+        $reservation->update([
+            'statut_paiement_acompte' => 'paye',
+            'date_paiement_acompte'   => now(),
+        ]);
 
         return $reservation->fresh();
     }
@@ -77,6 +106,13 @@ class RespondToReservationAction
             return $reservation;
         });
 
+        $this->expoPush->sendToUser(
+            $reservation->client,
+            'Réservation refusée',
+            "Votre réservation {$reservation->code_reservation} a été refusée. Raison : {$raison}",
+            ['type' => 'reservation_refusee', 'reservation_id' => $reservation->id]
+        );
+
         $this->sendMailSafely(function () use ($reservation, $raison) {
             Mail::to($reservation->client->email)->send(
                 new ReservationRejectedMail($reservation->fresh(['client', 'propriete.hotel']), $raison)
@@ -91,6 +127,15 @@ class RespondToReservationAction
         if ($reservation->statut !== 'en_attente') {
             throw new DomainException(
                 'Cette réservation ne peut plus être acceptée ou refusée (statut actuel : ' . $reservation->statut . ').'
+            );
+        }
+    }
+
+    private function assertDepositPaid(Reservation $reservation): void
+    {
+        if ($reservation->statut_paiement_acompte === 'en_attente') {
+            throw new DomainException(
+                "L'acompte de {$reservation->montant_acompte} {$reservation->devise_prix_total} n'a pas encore été confirmé. Marquez-le comme reçu avant d'accepter la réservation."
             );
         }
     }

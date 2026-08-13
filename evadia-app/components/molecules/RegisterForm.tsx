@@ -1,5 +1,6 @@
 import { View } from 'react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Input } from '../atoms/Input';
 import { Button } from '../atoms/Button';
 
@@ -14,6 +15,7 @@ interface RegisterFormProps {
 }
 
 export const RegisterForm = ({ onSubmit, loading = false }: RegisterFormProps) => {
+  const { t } = useTranslation();
   const [nom, setNom] = useState('');
   const [prenom, setPrenom] = useState('');
   const [email, setEmail] = useState('');
@@ -26,7 +28,7 @@ export const RegisterForm = ({ onSubmit, loading = false }: RegisterFormProps) =
   return (
     <View style={{ width: 353 }}>
       <Input 
-        placeholder="Entrez votre Nom"
+        placeholder={t('Register.last_name_placeholder')}
         value={nom}
         onChangeText={setNom}
         iconName="person-outline"
@@ -35,7 +37,7 @@ export const RegisterForm = ({ onSubmit, loading = false }: RegisterFormProps) =
       <View style={{ height: 16 }} />
 
       <Input 
-        placeholder="Entrez votre Prénom"
+        placeholder={t('Register.first_name_placeholder')}
         value={prenom}
         onChangeText={setPrenom}
         iconName="person-outline"
@@ -44,7 +46,7 @@ export const RegisterForm = ({ onSubmit, loading = false }: RegisterFormProps) =
       <View style={{ height: 16 }} />
 
       <Input 
-        placeholder="Entrez votre Adresse Email"
+        placeholder={t('Register.email_placeholder')}
         value={email}
         onChangeText={setEmail}
         iconName="mail-outline"
@@ -54,7 +56,7 @@ export const RegisterForm = ({ onSubmit, loading = false }: RegisterFormProps) =
       <View style={{ height: 16 }} />
 
       <Input 
-        placeholder="Entrez votre mot de passe"
+        placeholder={t('Register.password_placeholder')}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -64,7 +66,7 @@ export const RegisterForm = ({ onSubmit, loading = false }: RegisterFormProps) =
       <View style={{ height: 24 }} />
 
       <Button 
-        title="S'inscrire"
+        title={t('Register.register_button')}
         onPress={handleSubmit}
         loading={loading}
         variant="primary"

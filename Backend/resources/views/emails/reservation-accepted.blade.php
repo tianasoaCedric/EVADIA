@@ -13,6 +13,10 @@ Bonne nouvelle : votre demande de réservation **{{ $reservation->code_reservati
 | **Départ** | {{ $reservation->date_fin->format('d/m/Y') }} |
 | **Voyageurs** | {{ $reservation->nb_adultes }} adulte(s), {{ $reservation->nb_enfants }} enfant(s) |
 | **Montant total** | {{ number_format((float) $reservation->prix_total, 2) }} {{ $reservation->devise_prix_total }} |
+@if($reservation->acompteRequis())
+| **Acompte payé** | {{ number_format((float) $reservation->montant_acompte, 2) }} {{ $reservation->devise_prix_total }} |
+| **Solde restant à régler à l'arrivée** | {{ number_format($reservation->soldeRestant(), 2) }} {{ $reservation->devise_prix_total }} |
+@endif
 | **N° de facture** | {{ $facture->numero_facture }} |
 @endcomponent
 

@@ -121,6 +121,11 @@ class User extends Authenticatable
         return $this->hasMany(Notification::class)->where('lu', false);
     }
 
+    public function deviceTokens(): HasMany
+    {
+        return $this->hasMany(DeviceToken::class);
+    }
+
     public function messagesEnvoyes(): HasMany
     {
         return $this->hasMany(Message::class, 'expediteur_id');

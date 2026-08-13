@@ -3,12 +3,14 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const IMAGE_HEIGHT = Math.round(screenHeight * 0.35);
 
 export default function ContactScreen() {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
@@ -16,17 +18,17 @@ export default function ContactScreen() {
 
   const handleSendMessage = async () => {
     if (!name.trim() || !email.trim() || !message.trim()) {
-      Alert.alert('Champs requis', 'Veuillez remplir tous les champs.');
+      Alert.alert(t('Contact.required_fields_title'), t('Contact.required_fields_message'));
       return;
     }
     setLoading(true);
     try {
       await api.post('/contact', { nom: name, email, message });
-      Alert.alert('Message envoyé', 'Nous vous répondrons dans les plus brefs délais.', [
-        { text: 'OK', onPress: () => router.back() },
+      Alert.alert(t('Contact.success_title'), t('Contact.success_message'), [
+        { text: t('Contact.ok'), onPress: () => router.back() },
       ]);
     } catch {
-      Alert.alert('Erreur', 'Impossible d\'envoyer le message. Réessayez plus tard.');
+      Alert.alert(t('Contact.error_title'), t('Contact.error_message'));
     } finally {
       setLoading(false);
     }
@@ -47,8 +49,8 @@ export default function ContactScreen() {
             width: screenWidth,
             height: IMAGE_HEIGHT,
             backgroundColor: '#e5e7eb',
-            borderBottomLeftRadius: 36,
-            borderBottomRightRadius: 36,
+            borderBottomLeftRadius: 20,
+            borderBottomRightRadius: 20,
             overflow: 'hidden',
             position: 'relative',
           }}
@@ -92,12 +94,12 @@ export default function ContactScreen() {
           <Text
             style={{
               fontSize: 24,
-              fontWeight: '800',
+              fontFamily: 'Outfit_800ExtraBold',
               color: '#111827',
               marginBottom: 8,
             }}
           >
-            Contactez-nous !
+            {t('Contact.title')}
           </Text>
 
           {/* Description */}
@@ -105,17 +107,17 @@ export default function ContactScreen() {
             style={{
               fontSize: 14,
               color: '#4b5563',
-              fontWeight: '500',
+              fontFamily: 'Outfit_500Medium',
               lineHeight: 20,
               marginBottom: 20,
             }}
           >
-            Nous serons ravis d’échanger avec vous ! Laissez-nous un message via le formulaire, et nous vous répondrons dans les plus brefs délais.
+            {t('Contact.description')}
           </Text>
 
           {/* Saisie : Nom */}
           <TextInput
-            placeholder="Votre Nom"
+            placeholder={t('Contact.name_placeholder')}
             placeholderTextColor="#9ca3af"
             value={name}
             onChangeText={setName}
@@ -125,7 +127,7 @@ export default function ContactScreen() {
               height: 52,
               paddingHorizontal: 20,
               fontSize: 15,
-              fontWeight: '600',
+              fontFamily: 'Outfit_600SemiBold',
               color: '#1f2937',
               marginBottom: 12,
             }}
@@ -133,7 +135,7 @@ export default function ContactScreen() {
 
           {/* Saisie : Email */}
           <TextInput
-            placeholder="Votre adresse Email"
+            placeholder={t('Contact.email_placeholder')}
             placeholderTextColor="#9ca3af"
             keyboardType="email-address"
             autoCapitalize="none"
@@ -145,7 +147,7 @@ export default function ContactScreen() {
               height: 52,
               paddingHorizontal: 20,
               fontSize: 15,
-              fontWeight: '600',
+              fontFamily: 'Outfit_600SemiBold',
               color: '#1f2937',
               marginBottom: 12,
             }}
@@ -153,7 +155,7 @@ export default function ContactScreen() {
 
           {/* Saisie : Message */}
           <TextInput
-            placeholder="Votre Message"
+            placeholder={t('Contact.message_placeholder')}
             placeholderTextColor="#9ca3af"
             multiline
             numberOfLines={6}
@@ -167,7 +169,7 @@ export default function ContactScreen() {
               paddingTop: 16,
               paddingBottom: 16,
               fontSize: 15,
-              fontWeight: '600',
+              fontFamily: 'Outfit_600SemiBold',
               color: '#1f2937',
               textAlignVertical: 'top',
               marginBottom: 20,
@@ -197,8 +199,8 @@ export default function ContactScreen() {
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={{ color: '#ffffff', fontSize: 16, fontWeight: '700' }}>
-                Envoyez Message
+              <Text style={{ color: '#ffffff', fontSize: 16, fontFamily: 'Outfit_700Bold' }}>
+                {t('Contact.send_button')}
               </Text>
             )}
           </TouchableOpacity>
@@ -208,10 +210,10 @@ export default function ContactScreen() {
         <View style={{ borderTopWidth: 1, borderTopColor: '#e5e7eb', marginHorizontal: 24, paddingTop: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           {/* Infos de contact textuelles */}
           <View>
-            <Text style={{ fontSize: 15, fontWeight: '800', color: '#111827', marginBottom: 2 }}>
+            <Text style={{ fontSize: 15, fontFamily: 'Outfit_800ExtraBold', color: '#111827', marginBottom: 2 }}>
               + 261 34 00 000 00
             </Text>
-            <Text style={{ fontSize: 13, fontWeight: '500', color: '#6b7280' }}>
+            <Text style={{ fontSize: 13, fontFamily: 'Outfit_500Medium', color: '#6b7280' }}>
               adressemail@gmail.com
             </Text>
           </View>

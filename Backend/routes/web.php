@@ -184,6 +184,7 @@ Route::middleware(['auth:hotel', 'role:admin_hotel,gestionnaire_hotel', 'passwor
         Route::get('reservations/{reservation}', [ReservationController::class, 'show'])->name('reservations.show');
         Route::patch('reservations/{reservation}/accept', [ReservationController::class, 'accept'])->name('reservations.accept');
         Route::patch('reservations/{reservation}/reject', [ReservationController::class, 'reject'])->name('reservations.reject');
+        Route::patch('reservations/{reservation}/mark-deposit-paid', [ReservationController::class, 'markDepositPaid'])->name('reservations.mark-deposit-paid');
         Route::get('reservations/{reservation}/messages', [HotelReservationMessageController::class, 'show'])->name('reservations.messages');
         Route::post('reservations/{reservation}/messages', [HotelReservationMessageController::class, 'store'])->name('reservations.messages.store');
 

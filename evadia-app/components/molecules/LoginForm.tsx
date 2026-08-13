@@ -1,5 +1,6 @@
 import { View } from 'react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Input } from '../atoms/Input';
 import { Button } from '../atoms/Button';
 
@@ -13,6 +14,7 @@ interface LoginFormProps {
 }
 
 export const LoginForm = ({ onSubmit, loading = false, theme = 'dark' }: LoginFormProps) => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -23,7 +25,7 @@ export const LoginForm = ({ onSubmit, loading = false, theme = 'dark' }: LoginFo
   return (
     <View style={{ width: 353 }}>
       <Input 
-        placeholder="exemple@email.com"
+        placeholder={t('Login.email_placeholder')}
         value={email}
         onChangeText={setEmail}
         iconName="mail-outline"
@@ -34,7 +36,7 @@ export const LoginForm = ({ onSubmit, loading = false, theme = 'dark' }: LoginFo
       <View style={{ height: 16 }} />
 
       <Input 
-        placeholder="votre mot de passe"
+        placeholder={t('Login.password_placeholder')}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -45,7 +47,7 @@ export const LoginForm = ({ onSubmit, loading = false, theme = 'dark' }: LoginFo
       <View style={{ height: 24 }} />
 
       <Button 
-        title="Se connecter"
+        title={t('Login.login_button')}
         onPress={handleSubmit}
         loading={loading}
         variant="primary"

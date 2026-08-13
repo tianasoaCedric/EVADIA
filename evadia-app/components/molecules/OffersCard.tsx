@@ -73,7 +73,7 @@ export const OffersCard = ({
               style={{
                 color: '#ffffff',
                 fontSize: 12,
-                fontWeight: '700',
+                fontFamily: 'Outfit_700Bold',
               }}
             >
               {badgeText}
@@ -88,7 +88,7 @@ export const OffersCard = ({
               marginBottom: 4,
             }}
           >
-            <Text style={{ fontWeight: '800' }}>{titleBold}</Text>
+            <Text style={{ fontFamily: 'Outfit_800ExtraBold' }}>{titleBold}</Text>
             {titleNormal ? `, ${titleNormal}` : ''}
           </Text>
 
@@ -97,7 +97,7 @@ export const OffersCard = ({
             style={{
               color: 'rgba(255, 255, 255, 0.9)',
               fontSize: 12,
-              fontWeight: '500',
+              fontFamily: 'Outfit_500Medium',
               lineHeight: 16,
             }}
             numberOfLines={2}

@@ -50,6 +50,8 @@ class Hotel extends Model
         'note_moyenne',
         'nb_avis',
         'devise_principale',
+        'exige_acompte',
+        'pourcentage_acompte',
         'date_creation',
         'updated_at',
         'created_by',
@@ -61,6 +63,8 @@ class Hotel extends Model
             'etoiles' => 'integer',
             'note_moyenne' => 'decimal:2',
             'nb_avis' => 'integer',
+            'exige_acompte' => 'boolean',
+            'pourcentage_acompte' => 'decimal:2',
             'date_creation' => 'datetime',
             'updated_at' => 'datetime',
         ];

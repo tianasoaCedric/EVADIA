@@ -14,15 +14,19 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { clientService } from '../../services/client';
+import { useDevise } from '../../context/DeviseContext';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const IMAGE_HEIGHT = Math.round(screenHeight * 0.42);
 
 export default function ProprieterDetailScreen() {
+  const { t } = useTranslation();
+  const { symbole } = useDevise();
   const params = useLocalSearchParams();
   const roomId = params.id ? Number(params.id) : null;
-  const roomName = (params.name as string) || 'Chambre de Luxe';
+  const roomName = (params.name as string) || t('ProprieterDetail.default_room_name');
   const roomPrice = (params.price as string) || '225.000Ariary/nuit';
   const roomDescription = (params.description as string) || '';
   const roomImage = (params.imageUri as string) || 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?q=80&w=800';
@@ -101,8 +105,10 @@ export default function ProprieterDetailScreen() {
   const [calendarYear, setCalendarYear] = useState(2026);
 
   const MONTH_NAMES = [
-    'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+    t('ProprieterDetail.month_january'), t('ProprieterDetail.month_february'), t('ProprieterDetail.month_march'),
+    t('ProprieterDetail.month_april'), t('ProprieterDetail.month_may'), t('ProprieterDetail.month_june'),
+    t('ProprieterDetail.month_july'), t('ProprieterDetail.month_august'), t('ProprieterDetail.month_september'),
+    t('ProprieterDetail.month_october'), t('ProprieterDetail.month_november'), t('ProprieterDetail.month_december')
   ];
 
   const getDaysInMonth = (month: number, year: number) => {
@@ -168,7 +174,7 @@ export default function ProprieterDetailScreen() {
   const totalCost = stayCost - discountCost;
 
   const formatPrice = (val: number) => {
-    return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + 'ar';
+    return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + symbole;
   };
 
   return (
@@ -179,8 +185,8 @@ export default function ProprieterDetailScreen() {
           style={{
             width: screenWidth,
             height: IMAGE_HEIGHT,
-            borderBottomLeftRadius: 36,
-            borderBottomRightRadius: 36,
+            borderBottomLeftRadius: 20,
+            borderBottomRightRadius: 20,
             backgroundColor: '#fff',
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 6 },
@@ -194,8 +200,8 @@ export default function ProprieterDetailScreen() {
             style={{
               width: '100%',
               height: '100%',
-              borderBottomLeftRadius: 36,
-              borderBottomRightRadius: 36,
+              borderBottomLeftRadius: 20,
+              borderBottomRightRadius: 20,
               overflow: 'hidden',
               backgroundColor: '#e5e7eb',
             }}
@@ -334,7 +340,7 @@ export default function ProprieterDetailScreen() {
               <Text
                 style={{
                   fontSize: 20,
-                  fontWeight: '700',
+                  fontFamily: 'Outfit_700Bold',
                   color: '#111827',
                   letterSpacing: -0.3,
                 }}
@@ -357,7 +363,7 @@ export default function ProprieterDetailScreen() {
                   color="#6b7280"
                   style={{ marginRight: 6 }}
                 />
-                <Text style={{ fontSize: 13, color: '#4b5563', fontWeight: '500' }}>
+                <Text style={{ fontSize: 13, color: '#4b5563', fontFamily: 'Outfit_500Medium' }}>
                   {location}
                 </Text>
               </View>
@@ -366,35 +372,35 @@ export default function ProprieterDetailScreen() {
               <Text
                 style={{
                   fontSize: 16,
-                  fontWeight: '700',
+                  fontFamily: 'Outfit_700Bold',
                   color: '#111827',
                   marginBottom: 8,
                 }}
               >
-                A propos
+                {t('ProprieterDetail.about')}
               </Text>
               <Text
                 style={{
                   fontSize: 13,
                   color: '#4b5563',
                   lineHeight: 20,
-                  fontWeight: '400',
+                  fontFamily: 'Outfit_400Regular',
                   marginBottom: 20,
                 }}
               >
-                {roomDescription || 'Chambre confortable avec tout le nécessaire pour un séjour agréable.'}
+                {roomDescription || t('ProprieterDetail.default_description')}
               </Text>
 
               {/* ── Details ── */}
               <Text
                 style={{
                   fontSize: 16,
-                  fontWeight: '700',
+                  fontFamily: 'Outfit_700Bold',
                   color: '#111827',
                   marginBottom: 10,
                 }}
               >
-                Details
+                {t('ProprieterDetail.details')}
               </Text>
               <View
                 style={{
@@ -406,20 +412,20 @@ export default function ProprieterDetailScreen() {
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Ionicons name="bed-outline" size={24} color="#111827" />
-                  <Text style={{ fontSize: 14, color: '#111827', fontWeight: '500', marginLeft: 8 }}>
-                    Lits :  {beds}
+                  <Text style={{ fontSize: 14, color: '#111827', fontFamily: 'Outfit_500Medium', marginLeft: 8 }}>
+                    {t('ProprieterDetail.beds_label')} :  {beds}
                   </Text>
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Ionicons name="water-outline" size={24} color="#111827" />
-                  <Text style={{ fontSize: 14, color: '#111827', fontWeight: '500', marginLeft: 8 }}>
-                    SDB :  {bathrooms}
+                  <Text style={{ fontSize: 14, color: '#111827', fontFamily: 'Outfit_500Medium', marginLeft: 8 }}>
+                    {t('ProprieterDetail.bathrooms_label')} :  {bathrooms}
                   </Text>
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Ionicons name="people-outline" size={24} color="#111827" />
-                  <Text style={{ fontSize: 14, color: '#111827', fontWeight: '500', marginLeft: 8 }}>
-                    Pers :  {persons}
+                  <Text style={{ fontSize: 14, color: '#111827', fontFamily: 'Outfit_500Medium', marginLeft: 8 }}>
+                    {t('ProprieterDetail.persons_label')} :  {persons}
                   </Text>
                 </View>
               </View>
@@ -428,12 +434,12 @@ export default function ProprieterDetailScreen() {
               <Text
                 style={{
                   fontSize: 16,
-                  fontWeight: '700',
+                  fontFamily: 'Outfit_700Bold',
                   color: '#111827',
                   marginBottom: 14,
                 }}
               >
-                Équipements
+                {t('ProprieterDetail.equipments')}
               </Text>
               <View
                 style={{
@@ -442,14 +448,14 @@ export default function ProprieterDetailScreen() {
                 }}
               >
                 {[
-                  { icon: 'wifi-outline', label: 'Wi-Fi haut débit' },
-                  { icon: 'restaurant-outline', label: 'Cuisine équipée' },
-                  { icon: 'tv-outline', label: 'Télévision 4K' },
-                  { icon: 'barbell-outline', label: 'Salle de sport' },
-                  { icon: 'snow-outline', label: 'Climatisation' },
-                  { icon: 'shirt-outline', label: 'Lave-linge' },
-                  { icon: 'water-outline', label: 'Piscine privée' },
-                  { icon: 'shield-checkmark-outline', label: 'Détecteur de fumée' },
+                  { icon: 'wifi-outline', label: t('ProprieterDetail.equip_wifi') },
+                  { icon: 'restaurant-outline', label: t('ProprieterDetail.equip_kitchen') },
+                  { icon: 'tv-outline', label: t('ProprieterDetail.equip_tv') },
+                  { icon: 'barbell-outline', label: t('ProprieterDetail.equip_gym') },
+                  { icon: 'snow-outline', label: t('ProprieterDetail.equip_ac') },
+                  { icon: 'shirt-outline', label: t('ProprieterDetail.equip_washer') },
+                  { icon: 'water-outline', label: t('ProprieterDetail.equip_private_pool') },
+                  { icon: 'shield-checkmark-outline', label: t('ProprieterDetail.equip_smoke_detector') },
                 ].map((item, idx) => (
                   <View
                     key={idx}
@@ -465,7 +471,7 @@ export default function ProprieterDetailScreen() {
                       style={{
                         fontSize: 13,
                         color: '#4b5563',
-                        fontWeight: '500',
+                        fontFamily: 'Outfit_500Medium',
                         marginLeft: 10,
                       }}
                     >
@@ -488,11 +494,11 @@ export default function ProprieterDetailScreen() {
                 }}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
-                  <Text style={{ fontSize: 24, fontWeight: '800', color: '#111827' }}>
+                  <Text style={{ fontSize: 24, fontFamily: 'Outfit_800ExtraBold', color: '#111827' }}>
                     {cleanPrice}
                   </Text>
-                  <Text style={{ fontSize: 13, color: '#6b7280', fontWeight: '600', marginLeft: 2 }}>
-                    /nuit
+                  <Text style={{ fontSize: 13, color: '#6b7280', fontFamily: 'Outfit_600SemiBold', marginLeft: 2 }}>
+                    {t('ProprieterDetail.per_night')}
                   </Text>
                 </View>
                 <View
@@ -503,8 +509,8 @@ export default function ProprieterDetailScreen() {
                     borderRadius: 20,
                   }}
                 >
-                  <Text style={{ color: '#fff', fontSize: 12, fontWeight: '700' }}>
-                    Offre 20%
+                  <Text style={{ color: '#fff', fontSize: 12, fontFamily: 'Outfit_700Bold' }}>
+                    {t('ProprieterDetail.offer_20')}
                   </Text>
                 </View>
               </View>
@@ -516,36 +522,36 @@ export default function ProprieterDetailScreen() {
               <View style={{ paddingHorizontal: 18, gap: 16 }}>
                 {/* Check In */}
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Text style={{ fontSize: 13, color: '#6b7280', fontWeight: '500' }}>Check In</Text>
+                  <Text style={{ fontSize: 13, color: '#6b7280', fontFamily: 'Outfit_500Medium' }}>{t('ProprieterDetail.check_in')}</Text>
                   <TouchableOpacity
                     activeOpacity={0.7}
                     onPress={() => openDatePicker('in')}
                     style={{ flexDirection: 'row', alignItems: 'center' }}
                   >
                     <Ionicons name="calendar-outline" size={20} color="#01BDA5" style={{ marginRight: 8 }} />
-                    <Text style={{ fontSize: 14, color: '#4b5563', fontWeight: '600' }}>{formatDate(checkInDate)}</Text>
+                    <Text style={{ fontSize: 14, color: '#4b5563', fontFamily: 'Outfit_600SemiBold' }}>{formatDate(checkInDate)}</Text>
                   </TouchableOpacity>
                 </View>
 
                 {/* Check Out */}
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Text style={{ fontSize: 13, color: '#6b7280', fontWeight: '500' }}>Check Out</Text>
+                  <Text style={{ fontSize: 13, color: '#6b7280', fontFamily: 'Outfit_500Medium' }}>{t('ProprieterDetail.check_out')}</Text>
                   <TouchableOpacity
                     activeOpacity={0.7}
                     onPress={() => openDatePicker('out')}
                     style={{ flexDirection: 'row', alignItems: 'center' }}
                   >
                     <Ionicons name="calendar-outline" size={20} color="#01BDA5" style={{ marginRight: 8 }} />
-                    <Text style={{ fontSize: 14, color: '#4b5563', fontWeight: '600' }}>{formatDate(checkOutDate)}</Text>
+                    <Text style={{ fontSize: 14, color: '#4b5563', fontFamily: 'Outfit_600SemiBold' }}>{formatDate(checkOutDate)}</Text>
                   </TouchableOpacity>
                 </View>
 
                 {/* Nombre de voyageurs */}
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Text style={{ fontSize: 13, color: '#6b7280', fontWeight: '500' }}>Nombre de voyageurs</Text>
+                  <Text style={{ fontSize: 13, color: '#6b7280', fontFamily: 'Outfit_500Medium' }}>{t('ProprieterDetail.travelers_count')}</Text>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Ionicons name="people-outline" size={20} color="#111827" style={{ marginRight: 8 }} />
-                    <Text style={{ fontSize: 14, color: '#4b5563', fontWeight: '600' }}>{persons} personnes</Text>
+                    <Text style={{ fontSize: 14, color: '#4b5563', fontFamily: 'Outfit_600SemiBold' }}>{t('ProprieterDetail.persons_count', { count: persons })}</Text>
                   </View>
                 </View>
               </View>
@@ -556,16 +562,16 @@ export default function ProprieterDetailScreen() {
               {/* Section Tarification */}
               <View style={{ paddingHorizontal: 18, gap: 12 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Text style={{ fontSize: 13, color: '#6b7280', fontWeight: '500' }}>Sejour ({nights} {nights > 1 ? 'nuits' : 'nuit'})</Text>
-                  <Text style={{ fontSize: 14, color: '#111827', fontWeight: '600' }}>{formatPrice(stayCost)}</Text>
+                  <Text style={{ fontSize: 13, color: '#6b7280', fontFamily: 'Outfit_500Medium' }}>{t('ProprieterDetail.stay_nights', { count: nights })}</Text>
+                  <Text style={{ fontSize: 14, color: '#111827', fontFamily: 'Outfit_600SemiBold' }}>{formatPrice(stayCost)}</Text>
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Text style={{ fontSize: 13, color: '#6b7280', fontWeight: '500' }}>Frais de services</Text>
-                  <Text style={{ fontSize: 14, color: '#111827', fontWeight: '600' }}>0ar</Text>
+                  <Text style={{ fontSize: 13, color: '#6b7280', fontFamily: 'Outfit_500Medium' }}>{t('ProprieterDetail.service_fees')}</Text>
+                  <Text style={{ fontSize: 14, color: '#111827', fontFamily: 'Outfit_600SemiBold' }}>0ar</Text>
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Text style={{ fontSize: 13, color: '#6b7280', fontWeight: '500' }}>Reduction (20%)</Text>
-                  <Text style={{ fontSize: 14, color: '#111827', fontWeight: '600' }}>{formatPrice(discountCost)}</Text>
+                  <Text style={{ fontSize: 13, color: '#6b7280', fontFamily: 'Outfit_500Medium' }}>{t('ProprieterDetail.discount_20')}</Text>
+                  <Text style={{ fontSize: 14, color: '#111827', fontFamily: 'Outfit_600SemiBold' }}>{formatPrice(discountCost)}</Text>
                 </View>
               </View>
 
@@ -582,8 +588,8 @@ export default function ProprieterDetailScreen() {
                   marginBottom: 10,
                 }}
               >
-                <Text style={{ fontSize: 15, fontWeight: '800', color: '#1f2937' }}>Total</Text>
-                <Text style={{ fontSize: 24, fontWeight: '800', color: '#111827' }}>{formatPrice(totalCost)}</Text>
+                <Text style={{ fontSize: 15, fontFamily: 'Outfit_800ExtraBold', color: '#1f2937' }}>{t('ProprieterDetail.total')}</Text>
+                <Text style={{ fontSize: 24, fontFamily: 'Outfit_800ExtraBold', color: '#111827' }}>{formatPrice(totalCost)}</Text>
               </View>
             </View>
           )}
@@ -616,12 +622,12 @@ export default function ProprieterDetailScreen() {
         >
           <View>
             <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
-              <Text style={{ fontSize: 17, fontWeight: '800', color: '#111827' }}>
+              <Text style={{ fontSize: 17, fontFamily: 'Outfit_800ExtraBold', color: '#111827' }}>
                 {cleanPrice}
               </Text>
-              <Text style={{ fontSize: 12, color: '#111827', fontWeight: '700' }}>/Nuit</Text>
+              <Text style={{ fontSize: 12, color: '#111827', fontFamily: 'Outfit_700Bold' }}>{t('ProprieterDetail.per_night_short')}</Text>
             </View>
-            <Text style={{ fontSize: 12, color: '#6b7280', fontWeight: '500', marginTop: 2 }}>
+            <Text style={{ fontSize: 12, color: '#6b7280', fontFamily: 'Outfit_500Medium', marginTop: 2 }}>
               {formatDateRangeShort(checkInDate, checkOutDate)}
             </Text>
           </View>
@@ -645,8 +651,8 @@ export default function ProprieterDetailScreen() {
               elevation: 4,
             }}
           >
-            <Text style={{ color: '#fff', fontSize: 15, fontWeight: '800' }}>
-              Reserver
+            <Text style={{ color: '#fff', fontSize: 15, fontFamily: 'Outfit_800ExtraBold' }}>
+              {t('ProprieterDetail.reserve')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -676,7 +682,7 @@ export default function ProprieterDetailScreen() {
             disabled={submitting}
             onPress={async () => {
               if (!roomId) {
-                Alert.alert('Erreur', 'Chambre introuvable.');
+                Alert.alert(t('ProprieterDetail.error_title'), t('ProprieterDetail.room_not_found'));
                 return;
               }
               setSubmitting(true);
@@ -688,12 +694,12 @@ export default function ProprieterDetailScreen() {
                   check_out: toISO(checkOutDate),
                   nb_adultes: persons,
                 });
-                Alert.alert('Réservation confirmée !', 'Votre réservation a bien été enregistrée.', [
-                  { text: 'OK', onPress: () => router.replace('/(app)/home') },
+                Alert.alert(t('ProprieterDetail.reservation_confirmed'), t('ProprieterDetail.reservation_confirmed_message'), [
+                  { text: t('Contact.ok'), onPress: () => router.replace('/(app)/home') },
                 ]);
               } catch (err: any) {
-                const msg = err?.data?.message ?? err?.message ?? 'Une erreur est survenue.';
-                Alert.alert('Erreur de réservation', msg);
+                const msg = err?.data?.message ?? err?.message ?? t('Common.error_generic');
+                Alert.alert(t('ProprieterDetail.reservation_error_title'), msg);
               } finally {
                 setSubmitting(false);
               }
@@ -712,8 +718,8 @@ export default function ProprieterDetailScreen() {
               width: '100%',
             }}
           >
-            <Text style={{ color: '#fff', fontSize: 16, fontWeight: '800' }}>
-              Reserver
+            <Text style={{ color: '#fff', fontSize: 16, fontFamily: 'Outfit_800ExtraBold' }}>
+              {t('ProprieterDetail.reserve')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -770,7 +776,7 @@ export default function ProprieterDetailScreen() {
                 <Ionicons name="chevron-back" size={24} color="#1f2937" />
               </TouchableOpacity>
 
-              <Text style={{ fontSize: 16, fontWeight: '700', color: '#1f2937' }}>
+              <Text style={{ fontSize: 16, fontFamily: 'Outfit_700Bold', color: '#1f2937' }}>
                 {MONTH_NAMES[calendarMonth]} {calendarYear}
               </Text>
 
@@ -798,7 +804,7 @@ export default function ProprieterDetailScreen() {
                     flex: 1,
                     textAlign: 'center',
                     fontSize: 12,
-                    fontWeight: '600',
+                    fontFamily: 'Outfit_600SemiBold',
                     color: '#9ca3af',
                   }}
                 >
@@ -842,7 +848,7 @@ export default function ProprieterDetailScreen() {
                     <Text
                       style={{
                         fontSize: 13,
-                        fontWeight: isSelected ? '700' : '500',
+                        fontFamily: isSelected ? 'Outfit_700Bold' : 'Outfit_500Medium',
                         color: isSelected 
                           ? '#fff' 
                           : (isPast || isDisabled) 
@@ -868,8 +874,8 @@ export default function ProprieterDetailScreen() {
                 borderRadius: 16,
               }}
             >
-              <Text style={{ fontSize: 14, fontWeight: '700', color: '#4b5563' }}>
-                Annuler
+              <Text style={{ fontSize: 14, fontFamily: 'Outfit_700Bold', color: '#4b5563' }}>
+                {t('Common.cancel')}
               </Text>
             </TouchableOpacity>
           </View>

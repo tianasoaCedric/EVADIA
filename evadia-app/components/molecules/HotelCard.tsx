@@ -1,5 +1,6 @@
 import { View, Text, Image, TouchableOpacity, DimensionValue, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 interface HotelCardProps {
   imageUri: string;
@@ -24,6 +25,7 @@ export const HotelCard = ({
   onPress,
   onFavoriteToggle,
 }: HotelCardProps) => {
+  const { t } = useTranslation();
   const safeRating = typeof rating === 'number' && !isNaN(rating) ? rating : 0;
 
   const renderStars = () => {
@@ -92,7 +94,7 @@ export const HotelCard = ({
 
         {/* Sous-titre disponibilité */}
         <Text className="text-gray-400 font-semibold text-[11px] mt-0.5 mb-0.5">
-          Disponibilité
+          {t('HotelCard.availability')}
         </Text>
 
         {/* Prix de la nuité */}

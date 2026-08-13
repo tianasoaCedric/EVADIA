@@ -98,6 +98,11 @@
                                 <span class="px-2.5 py-1 rounded-full text-xs font-medium {{ $statusColors[$reservation->statut] ?? 'bg-gray-100 text-gray-700' }}">
                                     {{ $statusLabels[$reservation->statut] ?? ucfirst($reservation->statut) }}
                                 </span>
+                                @if($reservation->statut_paiement_acompte === 'en_attente')
+                                    <span class="ml-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[#01BDA5]/10 text-[#01BDA5]">
+                                        Acompte en attente
+                                    </span>
+                                @endif
                             </td>
                             <td class="py-3 px-4 text-right font-medium text-gray-900">{{ number_format($reservation->prix_total ?? 0, 0, ',', ' ') }}</td>
                             <td class="py-3 px-4 text-right">

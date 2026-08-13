@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, FlatList, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
@@ -12,6 +13,7 @@ const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1469854523086-cc02fe5d
 type VilleItem = { id: number; name: string; imageUri: string; destinationNom: string };
 
 export default function DestinationScreen() {
+  const { t } = useTranslation();
   const [categories, setCategories] = useState<string[]>([]);
   const [villes, setVilles] = useState<VilleItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,7 +84,7 @@ export default function DestinationScreen() {
           ListHeaderComponent={
             <View className="px-4 mb-5 mt-2">
               <Text className="text-[27px] font-bold text-gray-950 tracking-tight">
-                Trouvez votre destination
+                {t('Destination.title')}
               </Text>
             </View>
           }
@@ -100,7 +102,7 @@ export default function DestinationScreen() {
             <View className="flex-1 items-center justify-center pt-20 px-6">
               <Ionicons name="search-outline" size={48} color="#cccccc" />
               <Text className="text-gray-500 font-semibold text-center mt-4">
-                Aucune destination trouvée pour "{searchQuery}"
+                {t('Destination.no_results', { query: searchQuery })}
               </Text>
             </View>
           }

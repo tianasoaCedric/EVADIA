@@ -1,11 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Animated, Dimensions, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RoomCard } from '../../components/molecules/RoomCard';
 import { publicService, Hotel, Propriete, hotelVille, hotelPhotos, hotelNote, proprietePrix, proprietePhotos } from '../../services/public';
 import { clientService } from '../../services/client';
+import { useDevise } from '../../context/DeviseContext';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const IMAGE_HEIGHT = Math.round(screenHeight * 0.42);
@@ -30,9 +32,11 @@ function getEquipIcon(name: string): string {
 }
 
 export default function HotelDetailScreen() {
+  const { t } = useTranslation();
+  const { devise, symbole } = useDevise();
   const params = useLocalSearchParams();
   const hotelId = params.id ? Number(params.id) : null;
-  const hotelName = (params.name as string) || 'Hôtel';
+  const hotelName = (params.name as string) || t('HotelDetail.default_hotel_name');
   const hotelLocation = (params.location as string) || '';
   const fromVilleId = params.fromVilleId ? Number(params.fromVilleId) : null;
   const fromVilleName = (params.fromVilleName as string) || '';
@@ -85,7 +89,7 @@ export default function HotelDetailScreen() {
       setHotel(data);
       setRooms(Array.isArray((data as any).chambres) ? (data as any).chambres : []);
     } catch (e: any) {
-      setLoadError(e?.message ?? 'Impossible de charger les détails.');
+      setLoadError(e?.message ?? t('HotelDetail.load_error'));
     } finally {
       setLoading(false);
     }
@@ -109,7 +113,7 @@ export default function HotelDetailScreen() {
   const displayRating = hotel ? hotelNote(hotel) : hotelRating;
   const displayVille = hotel ? hotelVille(hotel) : hotelLocation;
   const nbAvis = hotel?.nb_avis ?? 0;
-  const description = hotel?.description ?? 'Détendez-vous dans notre établissement confortable avec 3 villas indépendantes et 5 bungalows. Calme, familial et à quelques pas de la mer.';
+  const description = hotel?.description ?? t('HotelDetail.default_description');
   const services = (hotel as any)?.services ?? [];
 
   const handleScroll = (event: any) => {
@@ -125,7 +129,7 @@ export default function HotelDetailScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={[]}>
       <Animated.View style={{ flex: 1, opacity: fadeAnim, transform: [{ translateY: translateYAnim }] }}>
         {/* Image carousel */}
-        <View style={{ width: screenWidth, height: IMAGE_HEIGHT, borderBottomLeftRadius: 36, borderBottomRightRadius: 36, overflow: 'hidden', backgroundColor: '#e5e7eb', zIndex: 10 }}>
+        <View style={{ width: screenWidth, height: IMAGE_HEIGHT, borderBottomLeftRadius: 20, borderBottomRightRadius: 20, overflow: 'hidden', backgroundColor: '#e5e7eb', zIndex: 10 }}>
           <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} onScroll={handleScroll} scrollEventThrottle={16} style={{ width: screenWidth, height: IMAGE_HEIGHT }}>
             {imageUris.map((uri, idx) => (
               <Image key={idx} source={{ uri }} style={{ width: screenWidth, height: IMAGE_HEIGHT, resizeMode: 'cover' }} />
@@ -175,58 +179,58 @@ export default function HotelDetailScreen() {
         ) : loadError ? (
           <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 }}>
             <Ionicons name="cloud-offline-outline" size={52} color="#e5e7eb" />
-            <Text style={{ color: '#9ca3af', marginTop: 12, fontWeight: '600', textAlign: 'center' }}>{loadError}</Text>
+            <Text style={{ color: '#9ca3af', marginTop: 12, fontFamily: 'Outfit_600SemiBold', textAlign: 'center' }}>{loadError}</Text>
             <TouchableOpacity
               onPress={() => hotelId && loadHotel(hotelId)}
               style={{ marginTop: 16, backgroundColor: '#01BDA5', paddingHorizontal: 24, paddingVertical: 10, borderRadius: 100 }}
             >
-              <Text style={{ color: '#fff', fontWeight: '700' }}>Réessayer</Text>
+              <Text style={{ color: '#fff', fontFamily: 'Outfit_700Bold' }}>{t('Common.retry')}</Text>
             </TouchableOpacity>
           </View>
         ) : (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 110 }} style={{ flex: 1 }}>
             <View style={{ paddingHorizontal: 18, paddingTop: 20 }}>
-              <Text style={{ fontSize: 22, fontWeight: '800', color: '#111827', letterSpacing: -0.3 }}>
+              <Text style={{ fontSize: 22, fontFamily: 'Outfit_800ExtraBold', color: '#111827', letterSpacing: -0.3 }}>
                 {hotel?.nom ?? hotelName}
               </Text>
 
               <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6 }}>
                 <Ionicons name="location-outline" size={15} color="#6b7280" style={{ marginRight: 4 }} />
-                <Text style={{ fontSize: 13, color: '#6b7280', fontWeight: '600' }}>{displayVille}</Text>
+                <Text style={{ fontSize: 13, color: '#6b7280', fontFamily: 'Outfit_600SemiBold' }}>{displayVille}</Text>
               </View>
 
               <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
                 <Ionicons name="star" size={17} color="#111827" style={{ marginRight: 5 }} />
-                <Text style={{ fontSize: 15, fontWeight: '800', color: '#111827', marginRight: 8 }}>
+                <Text style={{ fontSize: 15, fontFamily: 'Outfit_800ExtraBold', color: '#111827', marginRight: 8 }}>
                   {displayRating.toFixed(1).replace('.', ',')}
                 </Text>
-                {nbAvis > 0 && <Text style={{ fontSize: 13, color: '#6b7280', fontWeight: '600' }}>{nbAvis} avis</Text>}
+                {nbAvis > 0 && <Text style={{ fontSize: 13, color: '#6b7280', fontFamily: 'Outfit_600SemiBold' }}>{t('HotelDetail.reviews_count', { count: nbAvis })}</Text>}
               </View>
 
               <View style={{ height: 1, backgroundColor: '#f3f4f6', marginTop: 18, marginBottom: 18 }} />
 
               {/* À propos */}
-              <Text style={{ fontSize: 17, fontWeight: '800', color: '#111827', marginBottom: 10 }}>À propos</Text>
-              <Text style={{ fontSize: 14, color: '#6b7280', lineHeight: 22, fontWeight: '500' }}>{description}</Text>
+              <Text style={{ fontSize: 17, fontFamily: 'Outfit_800ExtraBold', color: '#111827', marginBottom: 10 }}>{t('HotelDetail.about')}</Text>
+              <Text style={{ fontSize: 14, color: '#6b7280', lineHeight: 22, fontFamily: 'Outfit_500Medium' }}>{description}</Text>
 
               <View style={{ height: 1, backgroundColor: '#f3f4f6', marginTop: 22, marginBottom: 22 }} />
 
               {/* Chambres */}
-              <Text style={{ fontSize: 17, fontWeight: '800', color: '#111827', marginBottom: 14 }}>Chambres et disponibilité</Text>
+              <Text style={{ fontSize: 17, fontFamily: 'Outfit_800ExtraBold', color: '#111827', marginBottom: 14 }}>{t('HotelDetail.rooms_availability')}</Text>
 
               {rooms.length === 0 ? (
-                <Text style={{ color: '#9ca3af', fontSize: 13, marginBottom: 16 }}>Aucune chambre disponible pour le moment.</Text>
+                <Text style={{ color: '#9ca3af', fontSize: 13, marginBottom: 16 }}>{t('HotelDetail.no_rooms')}</Text>
               ) : (
                 <>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} decelerationRate="fast" snapToInterval={screenWidth - 20} snapToAlignment="start" onScroll={handleRoomScroll} scrollEventThrottle={16} style={{ width: '100%', marginBottom: 12 }}>
                     {rooms.map((room) => {
-                      const prix = proprietePrix(room);
+                      const prix = proprietePrix(room, devise);
                       const photos = proprietePhotos(room);
                       return (
                         <RoomCard
                           key={room.id}
                           name={room.nom}
-                          price={prix ? `${prix.toLocaleString('fr-FR')}Ariary/nuit` : 'Prix sur demande'}
+                          price={prix ? `${prix.toLocaleString('fr-FR')}${symbole}/nuit` : t('HotelDetail.price_on_request')}
                           imageUri={photos[0]}
                           beds={room.nb_lits ?? 1}
                           bathrooms={room.nb_salles_bain ?? 1}
@@ -237,7 +241,7 @@ export default function HotelDetailScreen() {
                               params: {
                                 id: room.id,
                                 name: room.nom,
-                                price: prix ? `${prix.toLocaleString('fr-FR')}Ariary/nuit` : 'Prix sur demande',
+                                price: prix ? `${prix.toLocaleString('fr-FR')}${symbole}/nuit` : t('HotelDetail.price_on_request'),
                                 imageUri: photos[0],
                                 beds: room.nb_lits ?? 1,
                                 bathrooms: room.nb_salles_bain ?? 1,
@@ -247,6 +251,8 @@ export default function HotelDetailScreen() {
                                 hotelName: hotel?.nom ?? hotelName,
                                 hotelRating: displayRating.toString(),
                                 hotelImageUris: JSON.stringify(imageUris),
+                                exigeAcompte: hotel?.exige_acompte ? '1' : '0',
+                                pourcentageAcompte: hotel?.pourcentage_acompte != null ? String(hotel.pourcentage_acompte) : '0',
                               },
                             })
                           }
@@ -267,26 +273,26 @@ export default function HotelDetailScreen() {
               <View style={{ height: 1, backgroundColor: '#f3f4f6', marginBottom: 22 }} />
 
               {/* Services / Équipements */}
-              <Text style={{ fontSize: 16, fontWeight: '700', color: '#111827', marginBottom: 14 }}>Équipements</Text>
+              <Text style={{ fontSize: 16, fontFamily: 'Outfit_700Bold', color: '#111827', marginBottom: 14 }}>{t('HotelDetail.equipments')}</Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                 {services.length > 0
                   ? services.map((s: any) => (
                       <View key={s.id} style={{ width: '50%', flexDirection: 'row', alignItems: 'center', marginBottom: 14 }}>
                         <Ionicons name={getEquipIcon(s.nom) as any} size={22} color="#4b5563" />
-                        <Text style={{ fontSize: 13, color: '#4b5563', fontWeight: '500', marginLeft: 10 }}>{s.nom}</Text>
+                        <Text style={{ fontSize: 13, color: '#4b5563', fontFamily: 'Outfit_500Medium', marginLeft: 10 }}>{s.nom}</Text>
                       </View>
                     ))
                   : [
-                      { icon: 'wifi-outline', label: 'Wifi gratuit' },
-                      { icon: 'water-outline', label: 'Piscine' },
-                      { icon: 'car-outline', label: 'Parking' },
-                      { icon: 'snow-outline', label: 'Climatisation' },
-                      { icon: 'restaurant-outline', label: 'Restaurant' },
-                      { icon: 'shield-checkmark-outline', label: 'Sécurité 24h' },
+                      { icon: 'wifi-outline', label: t('HotelDetail.equip_wifi') },
+                      { icon: 'water-outline', label: t('HotelDetail.equip_pool') },
+                      { icon: 'car-outline', label: t('HotelDetail.equip_parking') },
+                      { icon: 'snow-outline', label: t('HotelDetail.equip_ac') },
+                      { icon: 'restaurant-outline', label: t('HotelDetail.equip_restaurant') },
+                      { icon: 'shield-checkmark-outline', label: t('HotelDetail.equip_security') },
                     ].map((item, idx) => (
                       <View key={idx} style={{ width: '50%', flexDirection: 'row', alignItems: 'center', marginBottom: 14 }}>
                         <Ionicons name={item.icon as any} size={22} color="#4b5563" />
-                        <Text style={{ fontSize: 13, color: '#4b5563', fontWeight: '500', marginLeft: 10 }}>{item.label}</Text>
+                        <Text style={{ fontSize: 13, color: '#4b5563', fontFamily: 'Outfit_500Medium', marginLeft: 10 }}>{item.label}</Text>
                       </View>
                     ))}
               </View>

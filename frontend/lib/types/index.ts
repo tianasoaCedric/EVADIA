@@ -159,6 +159,8 @@ export interface ProprietePublic {
     nom: string
     etoiles: number
     adresse?: { ville: string; pays: string }
+    exige_acompte?: boolean
+    pourcentage_acompte?: number
   }
 }
 
@@ -225,6 +227,8 @@ export interface Reservation {
   montant_total?: number
   prix_total?: number
   devise_prix_total?: string
+  montant_acompte?: number | null
+  statut_paiement_acompte?: 'non_requis' | 'en_attente' | 'paye'
   demande_speciale?: string
   raison_refus?: string
   date_reservation: string
