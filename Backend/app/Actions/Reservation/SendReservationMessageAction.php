@@ -11,14 +11,22 @@ use Illuminate\Support\Str;
 
 class SendReservationMessageAction
 {
-    public function send(Reservation $reservation, User $expediteur, User $destinataire, string $contenu): Message
-    {
+    public function send(
+        Reservation $reservation,
+        User $expediteur,
+        User $destinataire,
+        string $contenu,
+        string $type = Message::TYPE_TEXTE,
+        ?array $metadata = null,
+    ): Message {
         $message = Message::create([
             'expediteur_id'   => $expediteur->id,
             'destinataire_id' => $destinataire->id,
             'reservation_id'  => $reservation->id,
+            'type'            => $type,
             'sujet'           => 'Réservation ' . $reservation->code_reservation,
             'contenu'         => $contenu,
+            'metadata'        => $metadata,
             'date_envoi'      => now(),
         ]);
 

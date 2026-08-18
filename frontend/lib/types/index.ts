@@ -247,6 +247,33 @@ export interface Reservation {
   created_at?: string
 }
 
+// ─── Messagerie réservation ───────────────────────────────────────────────────
+
+export type TypeMessage = 'texte' | 'systeme' | 'choix_paiement'
+
+export interface ModePaiementOption {
+  code: string
+  libelle: string
+}
+
+export interface ReservationMessage {
+  id: number
+  expediteur_id: number
+  destinataire_id: number
+  reservation_id: number
+  type: TypeMessage
+  sujet: string
+  contenu: string
+  metadata?: { options?: ModePaiementOption[]; mode_paiement?: string } | null
+  lu: boolean
+  date_envoi: string
+}
+
+export interface ReservationMessagesResponse {
+  data: ReservationMessage[]
+  chat_ferme: boolean
+}
+
 export interface CreateReservationPayload {
   propriete_id: number
   date_debut: string

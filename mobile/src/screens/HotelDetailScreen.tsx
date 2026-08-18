@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -9,19 +9,14 @@ import {
   useWindowDimensions,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { hotelsApi } from "../lib/hotels";
+import type { HotelDetail, Chambre } from "../lib/types";
+import { colors } from "../lib/tokens";
 
-const PHOTOS = [
-  require("../assets/images/hotel.jpg"),
-  require("../assets/images/hotel.jpg"),
-  require("../assets/images/hotel.jpg"),
-];
-
-const ROOMS = [
-  { id: "1", name: "Suite de Luxe", price: "225.000Ariary/nuit", beds: 2, sdb: 2, pers: 4 },
-  { id: "2", name: "Bungalow Vue Mer", price: "185.000Ariary/nuit", beds: 1, sdb: 1, pers: 2 },
-];
+const FALLBACK_PHOTO = require("../assets/images/hotel.jpg");
 
 const EQUIPEMENTS_LEFT = ["Wi-Fi haut débit", "Télévision 4K", "Climatisation", "Piscine privée", "Parking gratuit", "Machine à café"];
 const EQUIPEMENTS_RIGHT = ["Cuisine équipée", "Salle de sport", "Lave-linge", "Détecteur de fumée", "Entrée autonome", "Adapté aux enfants"];
@@ -43,11 +38,20 @@ function StarRating({ stars }: { stars: boolean[] }) {
 }
 
 export default function HotelDetailScreen({ route, navigation }: any) {
-  const { name } = route.params ?? { name: "Aara Ecolodge" };
+  const { id, name: fallbackName } = route.params;
   const { width: SW } = useWindowDimensions();
   const [photoIdx, setPhotoIdx] = useState(0);
   const [roomIdx, setRoomIdx] = useState(0);
   const [isFav, setIsFav] = useState(false);
+  const [detail, setDetail] = useState<HotelDetail | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    hotelsApi
+      .detail(id)
+      .then(setDetail)
+      .finally(() => setIsLoading(false));
+  }, [id]);
 
   const onPhotoScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     setPhotoIdx(Math.round(e.nativeEvent.contentOffset.x / SW));
@@ -55,6 +59,20 @@ export default function HotelDetailScreen({ route, navigation }: any) {
   const onRoomScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     setRoomIdx(Math.round(e.nativeEvent.contentOffset.x / (SW - 40)));
   };
+
+  if (isLoading || !detail) {
+    return (
+      <View style={[s.container, { alignItems: "center", justifyContent: "center" }]}>
+        <ActivityIndicator color={colors.primary.DEFAULT} />
+      </View>
+    );
+  }
+
+  const photos = detail.photos.length > 0 ? detail.photos.map((p) => p.url_photo) : null;
+  const name = detail.hotel.nom ?? fallbackName;
+  const adresse = detail.hotel.adresse
+    ? `${detail.hotel.adresse.ville}, ${detail.hotel.adresse.pays}`
+    : "";
 
   return (
     <View style={s.container}>
@@ -65,14 +83,19 @@ export default function HotelDetailScreen({ route, navigation }: any) {
           showsHorizontalScrollIndicator={false}
           onMomentumScrollEnd={onPhotoScroll}
         >
-          {PHOTOS.map((src, i) => (
-            <Image key={i} source={src} style={[s.photo, { width: SW }]} resizeMode="cover" />
+          {(photos ?? [null]).map((src, i) => (
+            <Image
+              key={i}
+              source={src ? { uri: src } : FALLBACK_PHOTO}
+              style={[s.photo, { width: SW }]}
+              resizeMode="cover"
+            />
           ))}
         </ScrollView>
 
         {/* Dots */}
         <View style={s.photoDots}>
-          {PHOTOS.map((_, i) => (
+          {(photos ?? [null]).map((_, i) => (
             <View key={i} style={[s.dot, i === photoIdx && s.dotActive]} />
           ))}
         </View>
@@ -105,21 +128,16 @@ export default function HotelDetailScreen({ route, navigation }: any) {
             <Text style={s.hotelName}>{name}</Text>
             <View style={s.infoRow}>
               <Ionicons name="location-outline" size={14} color="#464646" />
-              <Text style={s.infoText}>Lonkitsy, Sainte Marie - Madagascar</Text>
-            </View>
-            <View style={s.infoRow}>
-              <Ionicons name="star" size={14} color="#464646" />
-              <Text style={s.ratingBold}>4,5  <Text style={s.ratingLight}>125 avis</Text></Text>
+              <Text style={s.infoText}>{adresse}</Text>
             </View>
           </View>
 
-          {/* ── À PROPOS ── */}
-          <View style={s.section}>
-            <Text style={s.sectionTitle}>A propos</Text>
-            <Text style={s.body}>
-              Détendez-vous dans notre établissement confortable avec 3 villas indépendantes et 5 bungalows. Calme, familial et à quelque pas de la mer. A proximité des marchés et des activités.
-            </Text>
-          </View>
+          {detail.hotel.description ? (
+            <View style={s.section}>
+              <Text style={s.sectionTitle}>A propos</Text>
+              <Text style={s.body}>{detail.hotel.description}</Text>
+            </View>
+          ) : null}
 
           {/* ── CHAMBRES ── */}
           <View style={s.section}>
@@ -130,40 +148,43 @@ export default function HotelDetailScreen({ route, navigation }: any) {
               onMomentumScrollEnd={onRoomScroll}
               contentContainerStyle={{ gap: 0 }}
             >
-              {ROOMS.map((room) => (
+              {detail.chambres.map((room: Chambre) => (
                 <View key={room.id} style={[s.roomCard, { width: SW - 40 }]}>
-                  <Image source={require("../assets/images/hotel.jpg")} style={s.roomImg} resizeMode="cover" />
+                  <Image
+                    source={room.photos[0] ? { uri: room.photos[0] } : FALLBACK_PHOTO}
+                    style={s.roomImg}
+                    resizeMode="cover"
+                  />
                   <View style={s.roomInfo}>
                     <View style={s.roomTopRow}>
-                      <Text style={s.roomName}>{room.name}</Text>
-                      <Text style={s.roomPrice}>{room.price}</Text>
+                      <Text style={s.roomName}>{room.nom}</Text>
+                      <Text style={s.roomPrice}>
+                        {room.prix_mga ? `${room.prix_mga.toLocaleString("fr-FR")}Ar/nuit` : "Prix sur demande"}
+                      </Text>
                     </View>
                     <View style={s.roomMeta}>
                       <View style={s.metaItem}>
                         <Ionicons name="bed-outline" size={16} color="#383838" />
                         <Text style={s.metaLabel}>Lits :</Text>
-                        <Text style={s.metaVal}>{room.beds}</Text>
+                        <Text style={s.metaVal}>{room.nb_lits}</Text>
                       </View>
                       <View style={s.metaItem}>
                         <Ionicons name="water-outline" size={16} color="#383838" />
                         <Text style={s.metaLabel}>SDB :</Text>
-                        <Text style={s.metaVal}>{room.sdb}</Text>
+                        <Text style={s.metaVal}>{room.nb_salles_bain}</Text>
                       </View>
                       <View style={s.metaItem}>
                         <Ionicons name="person-outline" size={16} color="#383838" />
                         <Text style={s.metaLabel}>Pers :</Text>
-                        <Text style={s.metaVal}>{room.pers}</Text>
+                        <Text style={s.metaVal}>{room.capacite}</Text>
                       </View>
                     </View>
                     <TouchableOpacity
                       style={s.reserveBtn}
                       onPress={() => navigation.navigate("RoomDetail", {
-                        id: room.id,
-                        name: room.name,
-                        price: room.price,
-                        beds: room.beds,
-                        sdb: room.sdb,
-                        pers: room.pers,
+                        proprieteId: room.id,
+                        hotelId: id,
+                        hotelName: name,
                       })}
                     >
                       <Text style={s.reserveBtnText}>Reserver</Text>
@@ -175,7 +196,7 @@ export default function HotelDetailScreen({ route, navigation }: any) {
 
             {/* Room dots */}
             <View style={s.roomDots}>
-              {ROOMS.map((_, i) => (
+              {detail.chambres.map((_, i) => (
                 <View key={i} style={[s.dot, i === roomIdx && s.dotActive]} />
               ))}
             </View>

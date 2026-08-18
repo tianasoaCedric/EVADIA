@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Hotel\Traits\BelongsToHotel;
 use App\Models\Message;
 use App\Models\Notification;
+use App\Models\Reservation;
 use App\Models\User;
 use App\Traits\LogsAdminAction;
 use Illuminate\Http\Request;
@@ -20,9 +21,10 @@ class MessageController extends Controller
     {
         $hotel = $this->getHotel();
 
-        // Get conversations grouped by interlocutor
-        $conversations = Message::where('destinataire_id', auth()->id())
-            ->orWhere('expediteur_id', auth()->id())
+        // Get conversations grouped by interlocutor (support EVADIA uniquement —
+        // les messages liés à une réservation sont affichés dans leur propre section)
+        $conversations = Message::whereNull('reservation_id')
+            ->where(fn($q) => $q->where('destinataire_id', auth()->id())->orWhere('expediteur_id', auth()->id()))
             ->selectRaw('
                 CASE
                     WHEN expediteur_id = ? THEN destinataire_id
@@ -39,7 +41,8 @@ class MessageController extends Controller
         $users = User::whereIn('id', $userIds)->get()->keyBy('id');
 
         // Get unread counts per interlocutor
-        $unreadCounts = Message::where('destinataire_id', auth()->id())
+        $unreadCounts = Message::whereNull('reservation_id')
+            ->where('destinataire_id', auth()->id())
             ->where('lu', false)
             ->selectRaw('expediteur_id, COUNT(*) as count')
             ->groupBy('expediteur_id')
@@ -48,14 +51,39 @@ class MessageController extends Controller
         // Get latest message per conversation
         $lastMessages = [];
         foreach ($userIds as $userId) {
-            $lastMessages[$userId] = Message::where(function ($q) use ($userId) {
-                $q->where('expediteur_id', auth()->id())->where('destinataire_id', $userId);
-            })->orWhere(function ($q) use ($userId) {
-                $q->where('expediteur_id', $userId)->where('destinataire_id', auth()->id());
-            })->latest('date_envoi')->first();
+            $lastMessages[$userId] = Message::whereNull('reservation_id')
+                ->where(function ($q) use ($userId) {
+                    $q->where('expediteur_id', auth()->id())->where('destinataire_id', $userId);
+                })->orWhere(function ($q) use ($userId) {
+                    $q->where('expediteur_id', $userId)->where('destinataire_id', auth()->id());
+                })->latest('date_envoi')->first();
         }
 
-        return view('hotel.messages.index', compact('conversations', 'users', 'unreadCounts', 'lastMessages', 'hotel'));
+        // Conversations liées à des réservations (client <-> hôtel)
+        $reservationConversations = Reservation::with('client')
+            ->whereHas('propriete', fn($q) => $q->where('hotel_id', $hotel->id))
+            ->whereHas('messages')
+            ->withMax('messages', 'date_envoi')
+            ->withCount(['messages as unread_count' => function ($q) {
+                $q->where('destinataire_id', auth('hotel')->id())->where('lu', false);
+            }])
+            ->orderByDesc('messages_max_date_envoi')
+            ->get();
+
+        $reservationLastMessages = Message::whereIn('reservation_id', $reservationConversations->pluck('id'))
+            ->whereIn('id', function ($q) {
+                $q->selectRaw('MAX(id)')
+                    ->from('messages')
+                    ->whereNotNull('reservation_id')
+                    ->groupBy('reservation_id');
+            })
+            ->get()
+            ->keyBy('reservation_id');
+
+        return view('hotel.messages.index', compact(
+            'conversations', 'users', 'unreadCounts', 'lastMessages', 'hotel',
+            'reservationConversations', 'reservationLastMessages'
+        ));
     }
 
     public function conversation($userId)

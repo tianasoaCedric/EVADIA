@@ -118,6 +118,10 @@ export const apiClient = {
   post<T>(endpoint: string, body: unknown) {
     return request<T>(endpoint, { method: 'POST', body })
   },
+  /** Comme post() mais ne redirige pas vers /login sur 401 — pour les appels de fond */
+  silentPost<T>(endpoint: string, body: unknown) {
+    return request<T>(endpoint, { method: 'POST', body, silent: true })
+  },
   put<T>(endpoint: string, body: unknown) {
     return request<T>(endpoint, { method: 'PUT', body })
   },

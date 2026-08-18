@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,48 +9,48 @@ import {
   useWindowDimensions,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { proprietesApi } from "../lib/proprietes";
+import type { ProprieteDetail } from "../lib/types";
+import { colors } from "../lib/tokens";
 
-const PHOTOS = [
-  require("../assets/images/hotel.jpg"),
-  require("../assets/images/hotel.jpg"),
-  require("../assets/images/hotel.jpg"),
-];
-
-const EQUIP_LEFT: { icon: string; label: string }[] = [
-  { icon: "wifi-outline", label: "Wi-Fi haut débit" },
-  { icon: "tv-outline", label: "Télévision 4K" },
-  { icon: "snow-outline", label: "Climatisation" },
-  { icon: "water-outline", label: "Piscine privée" },
-  { icon: "car-outline", label: "Parking gratuit" },
-  { icon: "cafe-outline", label: "Machine à café" },
-];
-
-const EQUIP_RIGHT: { icon: string; label: string }[] = [
-  { icon: "restaurant-outline", label: "Cuisine équipée" },
-  { icon: "barbell-outline", label: "Salle de sport" },
-  { icon: "shirt-outline", label: "Lave-linge" },
-  { icon: "alert-circle-outline", label: "Détecteur de fumée" },
-  { icon: "key-outline", label: "Entrée autonome" },
-  { icon: "happy-outline", label: "Adapté aux enfants" },
-];
+const FALLBACK_PHOTO = require("../assets/images/hotel.jpg");
 
 export default function RoomDetailScreen({ route, navigation }: any) {
-  const { name, price, beds, sdb, pers } = route.params ?? {
-    name: "Suite de Luxe",
-    price: "225.000ar/Nuitée",
-    beds: 2,
-    sdb: 2,
-    pers: 4,
-  };
-
+  const { proprieteId, hotelName } = route.params;
   const { width: SW } = useWindowDimensions();
   const [photoIdx, setPhotoIdx] = useState(0);
+  const [propriete, setPropriete] = useState<ProprieteDetail | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    proprietesApi
+      .detail(proprieteId)
+      .then(setPropriete)
+      .finally(() => setIsLoading(false));
+  }, [proprieteId]);
 
   const onPhotoScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     setPhotoIdx(Math.round(e.nativeEvent.contentOffset.x / SW));
   };
+
+  if (isLoading || !propriete) {
+    return (
+      <View style={[s.root, { alignItems: "center", justifyContent: "center" }]}>
+        <ActivityIndicator color={colors.primary.DEFAULT} />
+      </View>
+    );
+  }
+
+  const photos = propriete.photos.length > 0 ? propriete.photos.map((p) => p.url_photo) : null;
+  const adresse = propriete.hotel.adresse
+    ? `${propriete.hotel.adresse.ville}, ${propriete.hotel.adresse.pays}`
+    : hotelName;
+  const priceLabel = propriete.prix_mga
+    ? `${propriete.prix_mga.toLocaleString("fr-FR")}Ar/nuit`
+    : "Prix sur demande";
 
   return (
     <View style={s.root}>
@@ -62,14 +62,19 @@ export default function RoomDetailScreen({ route, navigation }: any) {
           showsHorizontalScrollIndicator={false}
           onMomentumScrollEnd={onPhotoScroll}
         >
-          {PHOTOS.map((src, i) => (
-            <Image key={i} source={src} style={[s.photo, { width: SW }]} resizeMode="cover" />
+          {(photos ?? [null]).map((src, i) => (
+            <Image
+              key={i}
+              source={src ? { uri: src } : FALLBACK_PHOTO}
+              style={[s.photo, { width: SW }]}
+              resizeMode="cover"
+            />
           ))}
         </ScrollView>
 
         {/* Dots */}
         <View style={s.photoDots}>
-          {PHOTOS.map((_, i) => (
+          {(photos ?? [null]).map((_, i) => (
             <View key={i} style={[s.dot, i === photoIdx && s.dotActive]} />
           ))}
         </View>
@@ -95,20 +100,20 @@ export default function RoomDetailScreen({ route, navigation }: any) {
         >
           {/* Nom + localisation */}
           <View style={s.section}>
-            <Text style={s.roomName}>{name}</Text>
+            <Text style={s.roomName}>{propriete.nom}</Text>
             <View style={s.infoRow}>
               <Ionicons name="location-outline" size={14} color="#464646" />
-              <Text style={s.infoText}>Lonkitsy, Sainte Marie - Madagascar</Text>
+              <Text style={s.infoText}>{adresse}</Text>
             </View>
           </View>
 
           {/* A propos */}
-          <View style={s.section}>
-            <Text style={s.sectionTitle}>A propos</Text>
-            <Text style={s.body}>
-              Nichées au cœur de villas de style malagasy et du manoir, nos chambres, situées tout au long de la côte, proposent des lits jumeaux ou un lit king-size. Chaque chambre dispose d'un balcon privé. Elles peuvent accueillir soit 3 adultes, soit 2 adultes et 1 adolescent (ou 1 enfant).
-            </Text>
-          </View>
+          {propriete.description ? (
+            <View style={s.section}>
+              <Text style={s.sectionTitle}>A propos</Text>
+              <Text style={s.body}>{propriete.description}</Text>
+            </View>
+          ) : null}
 
           {/* Details */}
           <View style={s.section}>
@@ -117,46 +122,43 @@ export default function RoomDetailScreen({ route, navigation }: any) {
               <View style={s.detailItem}>
                 <Ionicons name="bed-outline" size={29} color="#000000" />
                 <Text style={s.detailLabel}>Lits :</Text>
-                <Text style={s.detailVal}>{beds}</Text>
+                <Text style={s.detailVal}>{propriete.nb_lits}</Text>
               </View>
               <View style={s.detailItem}>
                 <Ionicons name="water-outline" size={24} color="#000000" />
                 <Text style={s.detailLabel}>SDB :</Text>
-                <Text style={s.detailVal}>{sdb}</Text>
+                <Text style={s.detailVal}>{propriete.nb_salles_bain}</Text>
               </View>
               <View style={s.detailItem}>
                 <Ionicons name="person-outline" size={24} color="#000000" />
                 <Text style={s.detailLabel}>Pers :</Text>
-                <Text style={s.detailVal}>{pers}</Text>
+                <Text style={s.detailVal}>{propriete.capacite}</Text>
               </View>
             </View>
           </View>
 
           {/* Équipements */}
-          <View style={s.section}>
-            <Text style={s.sectionTitle}>Équipements</Text>
-            <View style={s.equipRow}>
-              <View style={s.equipCol}>
-                {EQUIP_LEFT.map((eq) => (
-                  <View key={eq.label} style={s.equipItem}>
-                    <Ionicons name={eq.icon as any} size={17} color="#464646" />
-                    <Text style={s.equipText}>{eq.label}</Text>
-                  </View>
-                ))}
-              </View>
-              <View style={s.equipCol}>
-                {EQUIP_RIGHT.map((eq) => (
-                  <View key={eq.label} style={s.equipItem}>
-                    <Ionicons name={eq.icon as any} size={17} color="#464646" />
-                    <Text style={s.equipText}>{eq.label}</Text>
-                  </View>
-                ))}
+          {propriete.equipements.length > 0 ? (
+            <View style={s.section}>
+              <Text style={s.sectionTitle}>Équipements</Text>
+              <View style={s.equipRow}>
+                <View style={s.equipCol}>
+                  {propriete.equipements.slice(0, Math.ceil(propriete.equipements.length / 2)).map((eq) => (
+                    <View key={eq.id} style={s.equipItem}>
+                      <Text style={s.equipText}>{eq.nom}</Text>
+                    </View>
+                  ))}
+                </View>
+                <View style={s.equipCol}>
+                  {propriete.equipements.slice(Math.ceil(propriete.equipements.length / 2)).map((eq) => (
+                    <View key={eq.id} style={s.equipItem}>
+                      <Text style={s.equipText}>{eq.nom}</Text>
+                    </View>
+                  ))}
+                </View>
               </View>
             </View>
-            <TouchableOpacity>
-              <Text style={s.showAll}>Afficher tous les équipements</Text>
-            </TouchableOpacity>
-          </View>
+          ) : null}
 
           {/* Spacer for bottom bar */}
           <View style={{ height: 90 }} />
@@ -166,12 +168,11 @@ export default function RoomDetailScreen({ route, navigation }: any) {
       {/* ── BOTTOM BAR ── */}
       <View style={s.bottomBar}>
         <View>
-          <Text style={s.barPrice}>{price}</Text>
-          <Text style={s.barDates}>11 - 12 Mai</Text>
+          <Text style={s.barPrice}>{priceLabel}</Text>
         </View>
         <TouchableOpacity
           style={s.reserveBtn}
-          onPress={() => navigation.navigate("Booking", { roomName: name, price })}
+          onPress={() => navigation.navigate("Booking", { proprieteId })}
         >
           <Text style={s.reserveBtnText}>Réserver</Text>
         </TouchableOpacity>

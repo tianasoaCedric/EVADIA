@@ -68,6 +68,7 @@ services:
       dockerfile: Dockerfile
       args:
         - NEXT_PUBLIC_API_BASE_URL=http://localhost/api
+        - NEXT_PUBLIC_REVERB_APP_KEY=${REVERB_APP_KEY}
     environment:
       - API_BASE_URL=http://api:8000/api
     restart: unless-stopped

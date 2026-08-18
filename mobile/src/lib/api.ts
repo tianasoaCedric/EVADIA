@@ -6,6 +6,11 @@ import * as SecureStore from "expo-secure-store";
 // Pour l'émulateur Android: http://10.0.2.2:8000
 export const API_BASE_URL = "http://192.168.100.225:8000";
 
+// Identifie l'app mobile auprès de nginx pour router /api/client/* directement
+// vers Laravel (Bearer token) plutôt que vers le proxy web (cookie httpOnly).
+// Ce n'est pas un secret d'authentification utilisateur — juste un identifiant d'app.
+const MOBILE_API_KEY = "312455a834e758c0d97c8112aabcebd6a83ff738a4bba54d8a272b00378bfad3";
+
 export const TOKEN_KEY = "evadia_auth_token";
 
 export const api = axios.create({
@@ -13,6 +18,7 @@ export const api = axios.create({
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
+    "X-Mobile-Api-Key": MOBILE_API_KEY,
   },
   timeout: 8000,
 });

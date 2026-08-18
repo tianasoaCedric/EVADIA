@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,101 +6,54 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  Dimensions,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { hotelsApi } from "../lib/hotels";
+import type { HotelSummary } from "../lib/types";
+import { colors } from "../lib/tokens";
 
-const CARD_WIDTH = Dimensions.get("window").width - 42;
-
-const MOCK_PHOTOS = [
-  require("../assets/images/hotel.jpg"),
-  require("../assets/images/hotel.jpg"),
-  require("../assets/images/hotel.jpg"),
-];
-
-const MOCK_HOTELS = Array(4).fill(null).map((_, i) => ({
-  id: String(i + 1),
-  name: "Aara Ecolodge",
-  location: "Lonkitsy, Sainte Marie",
-  price: "225.000ar/Nuitée",
-  rating: 4.25,
-  stars: [true, true, true, true, false],
-  isFavorite: false,
-  photos: MOCK_PHOTOS,
-}));
-
-function StarRating({ stars }: { stars: boolean[] }) {
+function StarRating({ note }: { note: number }) {
+  const filled = Math.round(note);
   return (
     <View style={styles.starsRow}>
-      {stars.map((filled, i) => (
-        <Ionicons key={i} name="star" size={13} color={filled ? "#FFE100" : "#E0E0E0"} />
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Ionicons key={i} name="star" size={13} color={i < filled ? "#FFE100" : "#E0E0E0"} />
       ))}
     </View>
   );
 }
 
-function HotelCard({ hotel, onFavPress, onPress }: { hotel: any; onFavPress: () => void; onPress: () => void }) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const scrollRef = useRef<ScrollView>(null);
-
-  const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const index = Math.round(e.nativeEvent.contentOffset.x / CARD_WIDTH);
-    setActiveIndex(index);
-  };
-
+function HotelCard({ hotel, onFavPress, onPress }: { hotel: HotelSummary; onFavPress: () => void; onPress: () => void }) {
   return (
     <TouchableOpacity style={styles.card} activeOpacity={0.9} onPress={onPress}>
-      {/* Carousel photos */}
       <View style={styles.imageBox}>
-        <ScrollView
-          ref={scrollRef}
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          onMomentumScrollEnd={onScroll}
-          scrollEventThrottle={16}
-        >
-          {hotel.photos.map((src: any, i: number) => (
-            <Image key={i} source={src} style={styles.image} resizeMode="cover" />
-          ))}
-        </ScrollView>
-
-        {/* Dots */}
-        <View style={styles.dots}>
-          {hotel.photos.map((_: any, i: number) => (
-            <View key={i} style={[styles.dot, i === activeIndex && styles.dotActive]} />
-          ))}
-        </View>
-
-        {/* Favori */}
+        <Image
+          source={hotel.photo_principale ? { uri: hotel.photo_principale } : require("../assets/images/hotel.jpg")}
+          style={styles.image}
+          resizeMode="cover"
+        />
         <TouchableOpacity style={styles.favBtn} onPress={onFavPress}>
-          <Ionicons
-            name={hotel.isFavorite ? "heart" : "heart-outline"}
-            size={16}
-            color={hotel.isFavorite ? "#EF4444" : "#BDBDBD"}
-          />
+          <Ionicons name="heart-outline" size={16} color="#BDBDBD" />
         </TouchableOpacity>
       </View>
 
-      {/* Infos */}
       <View style={styles.info}>
-        {/* Ligne 1 : nom + localisation */}
         <View style={styles.row}>
-          <Text style={styles.hotelName}>{hotel.name}</Text>
+          <Text style={styles.hotelName}>{hotel.nom}</Text>
           <View style={styles.locationRow}>
             <Ionicons name="location-outline" size={12} color="#434343" />
-            <Text style={styles.locationText}>{hotel.location}</Text>
+            <Text style={styles.locationText}>{hotel.ville ?? ""}</Text>
           </View>
         </View>
-        {/* Ligne 2 : prix + étoiles */}
         <View style={styles.row}>
-          <Text style={styles.price}>{hotel.price}</Text>
+          <Text style={styles.price}>
+            {hotel.prix_min_mga ? `${hotel.prix_min_mga.toLocaleString("fr-FR")}ar/Nuitée` : "Prix sur demande"}
+          </Text>
           <View style={styles.ratingsRow}>
-            <StarRating stars={hotel.stars} />
-            <Text style={styles.ratingText}>{hotel.rating}</Text>
+            <StarRating note={hotel.note_moyenne ?? 0} />
+            <Text style={styles.ratingText}>{hotel.note_moyenne ?? "-"}</Text>
           </View>
         </View>
       </View>
@@ -109,16 +62,23 @@ function HotelCard({ hotel, onFavPress, onPress }: { hotel: any; onFavPress: () 
 }
 
 export default function DestinationHotelsScreen({ route, navigation }: any) {
-  const { name } = route.params;
-  const [search, setSearch] = useState("");
-  const [favorites, setFavorites] = useState<Record<string, boolean>>({});
+  const { id, name } = route.params;
+  const [hotels, setHotels] = useState<HotelSummary[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [favorites, setFavorites] = useState<Record<number, boolean>>({});
 
-  const toggleFav = (id: string) =>
-    setFavorites((prev) => ({ ...prev, [id]: !prev[id] }));
+  useEffect(() => {
+    hotelsApi
+      .byDestination(id)
+      .then(setHotels)
+      .finally(() => setIsLoading(false));
+  }, [id]);
+
+  const toggleFav = (hotelId: number) =>
+    setFavorites((prev) => ({ ...prev, [hotelId]: !prev[hotelId] }));
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
-      {/* Header searchbar sans filtres */}
       <View style={styles.head}>
         <View style={styles.headRow}>
           <View style={styles.searchBar}>
@@ -132,7 +92,6 @@ export default function DestinationHotelsScreen({ route, navigation }: any) {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Titre avec retour */}
         <View style={styles.titleRow}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={24} color="#000" />
@@ -140,17 +99,24 @@ export default function DestinationHotelsScreen({ route, navigation }: any) {
           <Text style={styles.title}>{name}</Text>
         </View>
 
-        {/* Liste hôtels */}
-        <View style={styles.list}>
-          {MOCK_HOTELS.map((hotel) => (
-            <HotelCard
-              key={hotel.id}
-              hotel={{ ...hotel, isFavorite: favorites[hotel.id] }}
-              onFavPress={() => toggleFav(hotel.id)}
-              onPress={() => navigation.navigate("HotelDetail", { id: hotel.id, name: hotel.name })}
-            />
-          ))}
-        </View>
+        {isLoading ? (
+          <ActivityIndicator color={colors.primary.DEFAULT} style={{ marginTop: 40 }} />
+        ) : hotels.length === 0 ? (
+          <Text style={{ textAlign: "center", color: "#8A8A8A", marginTop: 40 }}>
+            Aucun hôtel trouvé pour cette destination.
+          </Text>
+        ) : (
+          <View style={styles.list}>
+            {hotels.map((hotel) => (
+              <HotelCard
+                key={hotel.id}
+                hotel={hotel}
+                onFavPress={() => toggleFav(hotel.id)}
+                onPress={() => navigation.navigate("HotelDetail", { id: hotel.id, name: hotel.nom })}
+              />
+            ))}
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -215,7 +181,6 @@ const styles = StyleSheet.create({
     gap: 28,
   },
 
-  // CARD
   card: {
     width: "100%",
     gap: 14,
@@ -227,25 +192,8 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   image: {
-    width: CARD_WIDTH,
+    width: "100%",
     height: 330,
-  },
-  dots: {
-    position: "absolute",
-    bottom: 16,
-    alignSelf: "center",
-    flexDirection: "row",
-    gap: 3,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 100,
-    backgroundColor: "#FFFFFF",
-  },
-  dotActive: {
-    width: 28,
-    backgroundColor: "#01BDA5",
   },
   favBtn: {
     position: "absolute",

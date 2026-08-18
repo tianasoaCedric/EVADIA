@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\Auth\PasswordResetController;
 use App\Http\Controllers\Api\Auth\RegisterController;
 use App\Http\Controllers\Api\Client\AvisController;
+use App\Http\Controllers\Api\Client\BroadcastingTokenController;
 use App\Http\Controllers\Api\Client\FavoriController;
 use App\Http\Controllers\Api\Client\HotelController as ClientHotelController;
 use App\Http\Controllers\Api\Client\NotificationController as ClientNotificationController;
@@ -98,7 +99,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Authentification des canaux WebSocket privés (Reverb) pour les clients mobile,
     // distincte de /broadcasting/auth (session web) utilisée par le dashboard hôtel.
     Route::match(['get', 'post'], '/broadcasting/auth', [BroadcastController::class, 'authenticate'])
-        ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+        ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
+        ->middleware('broadcasting.ability');
 
     // ----------------------------------------------------------
     // Auth : gestion de session
@@ -195,6 +197,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('reservations/{id}/invoice', [ClientReservationController::class, 'invoice']);
         Route::get('reservations/{id}/messages', [ClientReservationMessageController::class, 'index']);
         Route::post('reservations/{id}/messages', [ClientReservationMessageController::class, 'store']);
+        Route::post('reservations/{id}/messages/paiement', [ClientReservationMessageController::class, 'choisirPaiement']);
+        Route::post('broadcasting-token', [BroadcastingTokenController::class, 'store']);
         Route::get('promo/{code}', [ClientReservationController::class, 'verifierPromo']);
 
         // Favoris

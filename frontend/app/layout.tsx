@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Outfit, Rubik_Distressed } from 'next/font/google'
 import './globals.css'
 import Footer from './components/molecules/Footer'
+import ChatboxWidget from './components/ui/ChatboxWidget'
 // import Header from './components/molecules/Header'
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
@@ -43,6 +44,7 @@ export default async function RootLayout({
                 {/* <Header /> */}
                 {children}
                 <Footer/>
+                <ChatboxWidget />
               </HeaderThemeProvider>
             </FavorisProvider>
           </DeviseProvider>

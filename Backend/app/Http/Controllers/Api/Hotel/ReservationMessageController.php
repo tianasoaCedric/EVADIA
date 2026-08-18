@@ -43,7 +43,10 @@ class ReservationMessageController extends Controller
             ->where('lu', false)
             ->update(['lu' => true]);
 
-        return response()->json(['data' => $messages]);
+        return response()->json([
+            'data' => $messages,
+            'chat_ferme' => now()->gt($reservation->date_fin),
+        ]);
     }
 
     #[OA\Post(
@@ -80,6 +83,10 @@ class ReservationMessageController extends Controller
         $reservation = Reservation::with('client')
             ->whereIn('propriete_id', $hotel->proprietes()->pluck('id'))
             ->findOrFail($id);
+
+        if (now()->gt($reservation->date_fin)) {
+            return response()->json(['message' => 'Cette conversation est clôturée.'], 403);
+        }
 
         $message = app(SendReservationMessageAction::class)->send(
             $reservation,

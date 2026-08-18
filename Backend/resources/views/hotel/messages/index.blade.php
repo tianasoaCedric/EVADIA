@@ -17,7 +17,45 @@
         </button>
     </div>
 
-    {{-- Conversations List --}}
+    {{-- Conversations Réservations (client <-> hôtel) --}}
+    @if($reservationConversations->isNotEmpty())
+        <div>
+            <h3 class="text-sm font-semibold text-gray-700 mb-3">Conversations réservations</h3>
+            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden divide-y divide-gray-100">
+                @foreach($reservationConversations as $reservation)
+                    @php
+                        $lastMsg = $reservationLastMessages[$reservation->id] ?? null;
+                        $unread = $reservation->unread_count;
+                    @endphp
+                    <a href="{{ route('hotel.reservations.messages', $reservation->id) }}"
+                        class="flex items-center gap-4 px-6 py-4 hover:bg-gray-50 transition-colors {{ $unread > 0 ? 'bg-hotel-50/30' : '' }}">
+                        <div class="h-10 w-10 rounded-full bg-gradient-to-br from-evadia-500 to-evadia-700 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                            {{ substr($reservation->client->prenom, 0, 1) }}{{ substr($reservation->client->nom, 0, 1) }}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between mb-0.5">
+                                <p class="text-sm font-semibold text-gray-900">{{ $reservation->client->prenom }} {{ $reservation->client->nom }}</p>
+                                <span class="text-xs text-gray-400 shrink-0">{{ $reservation->messages_max_date_envoi ? \Carbon\Carbon::parse($reservation->messages_max_date_envoi)->diffForHumans() : '' }}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-medium text-gray-500">{{ $reservation->code_reservation }}</span>
+                                @if($lastMsg)
+                                    <span class="text-gray-300">-</span>
+                                    <p class="text-sm text-gray-500 truncate">{{ Str::limit($lastMsg->contenu, 80) }}</p>
+                                @endif
+                            </div>
+                        </div>
+                        @if($unread > 0)
+                            <span class="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-hotel-600 px-1.5 text-[10px] font-bold text-white shrink-0">{{ $unread }}</span>
+                        @endif
+                    </a>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
+    {{-- Conversations support EVADIA --}}
+    <h3 class="text-sm font-semibold text-gray-700 mb-3">Conversations avec le support EVADIA</h3>
     <div class="bg-white rounded-xl border border-gray-200 overflow-hidden divide-y divide-gray-100">
         @forelse($conversations as $conv)
             @php

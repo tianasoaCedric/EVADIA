@@ -35,10 +35,16 @@ export type OffersStackParamList = {
   OfferDetail: { id: string; badge: string; name: string; description: string };
 };
 
+export type ProfileStackParamList = {
+  ProfileHome: undefined;
+  Reservations: undefined;
+  ReservationChat: { reservationId: number };
+};
+
 export type DestinationStackParamList = {
   DestinationList: undefined;
-  DestinationHotels: { id: string; name: string };
-  HotelDetail: { id: string; name: string };
-  RoomDetail: { id: string; name: string; price: string; beds: number; sdb: number; pers: number };
-  Booking: { roomName: string; price: string };
+  DestinationHotels: { id: number; name: string };
+  HotelDetail: { id: number; name: string };
+  RoomDetail: { proprieteId: number; hotelId: number; hotelName: string };
+  Booking: { proprieteId: number };
 };

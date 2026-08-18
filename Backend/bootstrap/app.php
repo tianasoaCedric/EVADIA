@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'level' => \App\Http\Middleware\CheckRoleLevel::class,
             'password.change' => \App\Http\Middleware\ForcePasswordChange::class,
             'mobile.validate' => \App\Http\Middleware\ValidateMobileRequest::class,
+            'broadcasting.ability' => \App\Http\Middleware\RequireBroadcastingAbility::class,
         ]);
 
         $middleware->redirectGuestsTo(fn ($request) => match(true) {

@@ -6,7 +6,7 @@ import HomeScreen from "../screens/HomeScreen";
 import DestinationNavigator from "./DestinationNavigator";
 import FavoritesScreen from "../screens/FavoritesScreen";
 import OffersNavigator from "./OffersNavigator";
-import ProfileScreen from "../screens/ProfileScreen";
+import ProfileNavigator from "./ProfileNavigator";
 
 import {
   HomeTabIcon,
@@ -84,7 +84,7 @@ export default function TabNavigator() {
       />
       <Tab.Screen
         name="Profile"
-        component={ProfileScreen}
+        component={ProfileNavigator}
         options={{
           tabBarLabel: "Vous",
           tabBarIcon: ({ focused }) => <TabAvatar focused={focused} />,

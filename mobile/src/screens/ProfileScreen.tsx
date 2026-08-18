@@ -9,19 +9,24 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useAuth } from "../context/AuthContext";
+import type { ProfileStackParamList } from "../navigation/types";
+
+type Nav = NativeStackNavigationProp<ProfileStackParamList, "ProfileHome">;
 
 type RowProps =
-  | { label: string; value: string; chevron?: false }
-  | { label: string; value?: never; chevron: true };
+  | { label: string; value: string; chevron?: false; onPress?: () => void }
+  | { label: string; value?: never; chevron: true; onPress?: () => void };
 
 function SectionLabel({ title }: { title: string }) {
   return <Text style={styles.sectionLabel}>{title}</Text>;
 }
 
-function MenuRow({ label, value, chevron }: RowProps) {
+function MenuRow({ label, value, chevron, onPress }: RowProps) {
   return (
-    <TouchableOpacity style={styles.row} activeOpacity={0.7}>
+    <TouchableOpacity style={styles.row} activeOpacity={0.7} onPress={onPress}>
       <Text style={styles.rowLabel}>{label}</Text>
       {chevron ? (
         <Ionicons name="chevron-back" size={10} color="#8A8A8A" style={{ transform: [{ scaleX: -1 }] }} />
@@ -33,6 +38,7 @@ function MenuRow({ label, value, chevron }: RowProps) {
 }
 
 export default function ProfileScreen() {
+  const navigation = useNavigation<Nav>();
   const { state, logout } = useAuth();
   const user = state.status === "authenticated" ? state.user : null;
   const avatarUrl = user ? (user as any).avatar_url : null;
@@ -75,6 +81,9 @@ export default function ProfileScreen() {
 
         {/* MENU */}
         <View style={styles.menuContainer}>
+
+          <SectionLabel title="Réservations" />
+          <MenuRow label="Mes réservations" chevron onPress={() => navigation.navigate("Reservations")} />
 
           <SectionLabel title="Paiement" />
           <MenuRow label="Informations de paiement" chevron />

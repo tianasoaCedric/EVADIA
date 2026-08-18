@@ -5,6 +5,8 @@ namespace App\Actions\Reservation;
 use App\Mail\ReservationAcceptedMail;
 use App\Mail\ReservationRejectedMail;
 use App\Models\Facture;
+use App\Models\HotelAdmin;
+use App\Models\Message;
 use App\Models\Notification;
 use App\Models\Reservation;
 use App\Services\ExpoPushService;
@@ -16,8 +18,16 @@ use Throwable;
 
 class RespondToReservationAction
 {
-    public function __construct(private ExpoPushService $expoPush)
-    {
+    public const MODES_PAIEMENT_DISPONIBLES = [
+        ['code' => 'mobile_money', 'libelle' => 'Mobile Money'],
+        ['code' => 'carte_bancaire', 'libelle' => 'Carte bancaire'],
+        ['code' => 'especes_arrivee', 'libelle' => 'Espèces à l\'arrivée'],
+    ];
+
+    public function __construct(
+        private ExpoPushService $expoPush,
+        private SendReservationMessageAction $sendMessage,
+    ) {
     }
 
     public function accept(Reservation $reservation, int $staffUserId): Reservation
@@ -65,7 +75,58 @@ class RespondToReservationAction
             );
         }, $reservation);
 
+        $this->sendChatConfirmation($reservation);
+
         return $reservation->fresh();
+    }
+
+    private function sendChatConfirmation(Reservation $reservation): void
+    {
+        $reservation->loadMissing('propriete.hotel', 'client');
+
+        $expediteur = HotelAdmin::where('hotel_id', $reservation->propriete->hotel_id)
+            ->whereNull('date_fin')
+            ->orderByDesc('est_principal')
+            ->with('user')
+            ->first()
+            ?->user;
+
+        if (!$expediteur) {
+            return;
+        }
+
+        try {
+            $recap = sprintf(
+                "Votre réservation %s est confirmée !\nDu %s au %s\nMontant total : %s %s",
+                $reservation->code_reservation,
+                $reservation->date_debut->format('d/m/Y'),
+                $reservation->date_fin->format('d/m/Y'),
+                number_format((float) $reservation->prix_total, 2),
+                $reservation->devise_prix_total,
+            );
+
+            $this->sendMessage->send(
+                $reservation,
+                $expediteur,
+                $reservation->client,
+                $recap,
+                Message::TYPE_SYSTEME,
+            );
+
+            $this->sendMessage->send(
+                $reservation,
+                $expediteur,
+                $reservation->client,
+                'Merci de choisir votre mode de paiement pour le solde restant.',
+                Message::TYPE_CHOIX_PAIEMENT,
+                ['options' => self::MODES_PAIEMENT_DISPONIBLES],
+            );
+        } catch (Throwable $e) {
+            Log::error('Échec envoi message chat confirmation réservation', [
+                'reservation_id' => $reservation->id,
+                'error'          => $e->getMessage(),
+            ]);
+        }
     }
 
     public function markDepositPaid(Reservation $reservation): Reservation
