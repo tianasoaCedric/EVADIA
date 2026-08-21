@@ -93,8 +93,7 @@ export default function OfferClient({ initialData }: OfferClientProps) {
       <HeroSection
         title={t('hero_title')}
         subtitle={t('hero_subtitle')}
-        backgroundImage="/photos/offers/hero-offers.jpg"
-        videoSrc="/videos/offres.mp4"
+        backgroundImage="/photos/OFFRES.webp"
         showDownload={false}
         showScrollIndicator={true}
       />

@@ -1,7 +1,16 @@
 {
+  "Common": {
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "ok": "OK",
+    "search": "Search",
+    "error_generic": "Something went wrong."
+  },
   "Profile": {
     "title": "Profile",
     "edit_profile": "Edit profile",
+    "bookings": "Bookings",
+    "my_reservations": "My reservations",
     "payment": "Payment",
     "payment_info": "Payment information",
     "settings": "Settings",
@@ -203,5 +212,32 @@
   },
   "HotelCard": {
     "availability": "Availability"
+  },
+  "Reservations": {
+    "title": "Your reservations",
+    "detail_title": "Reservation details",
+    "empty": "No reservations yet",
+    "load_error": "Unable to load reservations.",
+    "default_name": "Reservation",
+    "statut_en_attente": "Pending",
+    "statut_acceptee": "Confirmed",
+    "statut_refusee": "Refused",
+    "statut_annulee": "Cancelled",
+    "statut_terminee": "Completed",
+    "check_in": "Check-in",
+    "check_out": "Check-out",
+    "guests": "Guests",
+    "total": "Total",
+    "open_messages": "View messages",
+    "cancel_button": "Cancel reservation",
+    "cancel_confirm_title": "Cancel reservation",
+    "cancel_confirm_message": "Are you sure you want to cancel this reservation?",
+    "cancel_confirm_action": "Cancel reservation",
+    "cancel_error_title": "Cancellation error",
+    "messages_title": "Messages",
+    "messages_empty": "No messages yet. Send the first one!",
+    "messages_placeholder": "Write a message...",
+    "messages_closed": "This conversation is closed.",
+    "messages_error_title": "Send error"
   }
 }

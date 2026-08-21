@@ -690,8 +690,8 @@ export default function ProprieterDetailScreen() {
                 const toISO = (d: Date) => d.toISOString().split('T')[0];
                 await clientService.createReservation({
                   propriete_id: roomId,
-                  check_in: toISO(checkInDate),
-                  check_out: toISO(checkOutDate),
+                  date_debut: toISO(checkInDate),
+                  date_fin: toISO(checkOutDate),
                   nb_adultes: persons,
                 });
                 Alert.alert(t('ProprieterDetail.reservation_confirmed'), t('ProprieterDetail.reservation_confirmed_message'), [

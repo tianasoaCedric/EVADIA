@@ -86,6 +86,19 @@ export default function ProfilePage() {
           </TouchableOpacity>
         </View>
 
+        {/* Reservations */}
+        <View style={{ marginBottom: 18 }}>
+          <Text style={{ fontSize: 14, fontFamily: 'Outfit_800ExtraBold', color: '#111827', marginBottom: 8 }}>{t('Profile.bookings')}</Text>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => router.push('/(app)/reservations')}
+            style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f3f4f6', borderRadius: 16, paddingHorizontal: 16, paddingVertical: 14 }}
+          >
+            <Text style={{ fontSize: 14, fontFamily: 'Outfit_600SemiBold', color: '#374151' }}>{t('Profile.my_reservations')}</Text>
+            <Ionicons name="chevron-forward" size={16} color="#6b7280" />
+          </TouchableOpacity>
+        </View>
+
         {/* Paiement */}
         <View style={{ marginBottom: 18 }}>
           <Text style={{ fontSize: 14, fontFamily: 'Outfit_800ExtraBold', color: '#111827', marginBottom: 8 }}>{t('Profile.payment')}</Text>

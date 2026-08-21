@@ -3,18 +3,32 @@ import type { Hotel, Avis } from "./public";
 
 export interface Reservation {
   id: number;
+  code_reservation?: string;
   hotel?: Hotel;
-  propriete?: { id: number; nom: string };
-  check_in: string;
-  check_out: string;
+  propriete?: { id: number; nom: string; hotel?: Hotel };
+  date_debut: string;
+  date_fin: string;
   nb_adultes?: number;
-  montant_total: number;
-  statut: "pending" | "confirmed" | "cancelled";
+  prix_total: number;
+  statut: "en_attente" | "acceptee" | "refusee" | "annulee" | "terminee";
   code_promo?: string;
   remise?: number;
   montant_acompte?: number | null;
   statut_paiement_acompte?: "non_requis" | "en_attente" | "paye";
   created_at?: string;
+}
+
+export interface ReservationMessage {
+  id: number;
+  expediteur_id: number;
+  destinataire_id: number;
+  reservation_id: number;
+  type: "texte" | "systeme" | "choix_paiement";
+  sujet?: string | null;
+  contenu: string;
+  metadata?: Record<string, any> | null;
+  lu: boolean;
+  date_envoi: string;
 }
 
 export interface Favori {
@@ -35,19 +49,19 @@ export interface ClientProfile {
 export const clientService = {
   async getReservations(): Promise<Reservation[]> {
     const res = await api.get("/client/reservations");
-    return Array.isArray(res.data) ? res.data : res.data.data ?? [];
+    return res.data?.data ?? [];
   },
 
   async getReservation(id: number): Promise<Reservation> {
     const res = await api.get(`/client/reservations/${id}`);
-    return res.data;
+    return res.data.data;
   },
 
   async createReservation(data: {
     propriete_id: number;
-    check_in: string;
-    check_out: string;
-    nb_adultes?: number;
+    date_debut: string;
+    date_fin: string;
+    nb_adultes: number;
     code_promo?: string;
   }): Promise<Reservation> {
     const res = await api.post("/client/reservations", data);
@@ -56,6 +70,24 @@ export const clientService = {
 
   async cancelReservation(id: number): Promise<void> {
     await api.patch(`/client/reservations/${id}/cancel`, {});
+  },
+
+  async getReservationMessages(reservationId: number): Promise<{ data: ReservationMessage[]; chat_ferme: boolean }> {
+    const res = await api.get(`/client/reservations/${reservationId}/messages`);
+    return res.data;
+  },
+
+  async sendReservationMessage(reservationId: number, contenu: string): Promise<ReservationMessage> {
+    const res = await api.post(`/client/reservations/${reservationId}/messages`, { contenu });
+    return res.data.data ?? res.data;
+  },
+
+  async choisirPaiement(
+    reservationId: number,
+    modePaiement: "mobile_money" | "carte_bancaire" | "especes_arrivee"
+  ): Promise<ReservationMessage> {
+    const res = await api.post(`/client/reservations/${reservationId}/messages/paiement`, { mode_paiement: modePaiement });
+    return res.data.data ?? res.data;
   },
 
   async verifyPromo(code: string): Promise<{ valide: boolean; remise_pct?: number }> {

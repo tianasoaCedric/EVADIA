@@ -50,6 +50,10 @@ export default function NotificationsScreen() {
         await notificationService.markRead(item.id);
       } catch {}
     }
+
+    if (item.reservation_id) {
+      router.push({ pathname: '/(app)/reservation-detail', params: { id: String(item.reservation_id) } });
+    }
   };
 
   const handleMarkAllRead = async () => {
@@ -142,6 +146,9 @@ export default function NotificationsScreen() {
                 <Text style={{ fontSize: 13, color: '#4b5563', marginTop: 4, lineHeight: 18 }}>{item.contenu}</Text>
                 <Text style={{ fontSize: 11, color: '#9ca3af', marginTop: 6 }}>{timeAgo(item.date_envoi, t)}</Text>
               </View>
+              {item.reservation_id && (
+                <Ionicons name="chevron-forward" size={18} color="#9ca3af" style={{ alignSelf: 'center', marginLeft: 8 }} />
+              )}
             </TouchableOpacity>
           )}
         />

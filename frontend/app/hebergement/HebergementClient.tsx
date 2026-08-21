@@ -71,8 +71,7 @@ export default function HebergementClient({ initialCategories }: HebergementClie
             <HeroSection
                 title={t('title')}
                 subtitle={t('subtitle')}
-                backgroundImage="/photos/bc.png"
-                videoSrc="/videos/hebergement.mp4"
+                backgroundImage="/photos/Background Hébergements.webp"
                 showDownload={false}
             />
 

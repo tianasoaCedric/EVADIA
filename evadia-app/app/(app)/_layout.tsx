@@ -115,6 +115,20 @@ export default function AppLayout() {
       />
 
       <Tabs.Screen
+        name="reservations"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="reservation-detail"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
         name="profile"
         options={{
           title: 'Vous',

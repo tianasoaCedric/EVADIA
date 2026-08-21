@@ -69,7 +69,7 @@ const HeroSection = ({
                         src={backgroundImage}
                         alt="Evadia - Découvrez le monde"
                         fill
-                        className="object-cover"
+                        className="object-cover object-top"
                         priority
                         quality={80}
                     />

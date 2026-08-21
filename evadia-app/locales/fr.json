@@ -1,7 +1,16 @@
 {
+  "Common": {
+    "retry": "Réessayer",
+    "cancel": "Annuler",
+    "ok": "OK",
+    "search": "Rechercher",
+    "error_generic": "Une erreur est survenue."
+  },
   "Profile": {
     "title": "Profil",
     "edit_profile": "Modifier le profil",
+    "bookings": "Réservations",
+    "my_reservations": "Mes réservations",
     "payment": "Paiement",
     "payment_info": "Informations de paiement",
     "settings": "Parametres",
@@ -203,5 +212,32 @@
   },
   "HotelCard": {
     "availability": "Disponibilité"
+  },
+  "Reservations": {
+    "title": "Vos réservations",
+    "detail_title": "Détail de la réservation",
+    "empty": "Aucune réservation pour l'instant",
+    "load_error": "Impossible de charger les réservations.",
+    "default_name": "Réservation",
+    "statut_en_attente": "En attente",
+    "statut_acceptee": "Confirmée",
+    "statut_refusee": "Refusée",
+    "statut_annulee": "Annulée",
+    "statut_terminee": "Terminée",
+    "check_in": "Arrivée",
+    "check_out": "Départ",
+    "guests": "Personnes",
+    "total": "Total",
+    "open_messages": "Voir les messages",
+    "cancel_button": "Annuler la réservation",
+    "cancel_confirm_title": "Annuler la réservation",
+    "cancel_confirm_message": "Êtes-vous sûr de vouloir annuler cette réservation ?",
+    "cancel_confirm_action": "Annuler la réservation",
+    "cancel_error_title": "Erreur d'annulation",
+    "messages_title": "Messages",
+    "messages_empty": "Aucun message pour l'instant. Envoyez le premier !",
+    "messages_placeholder": "Écrire un message...",
+    "messages_closed": "Cette conversation est clôturée.",
+    "messages_error_title": "Erreur d'envoi"
   }
 }
