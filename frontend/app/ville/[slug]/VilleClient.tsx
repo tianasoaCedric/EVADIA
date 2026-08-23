@@ -14,6 +14,7 @@ interface VilleClientProps {
   slug: string
   initialHotels: ApiHotel[]
   initialSelectionHotels: ApiHotel[]
+  images: string[]
 }
 
 export interface ApiHotel {
@@ -29,11 +30,14 @@ export interface ApiHotel {
   nb_avis: number
 }
 
+const FALLBACK_VILLE_IMAGE = '/photos/Background DESTINATION.webp'
+
 export default function VilleClient({
   villeName,
   slug,
   initialHotels,
   initialSelectionHotels,
+  images,
 }: VilleClientProps) {
   const router = useRouter()
   const t = useTranslations('VilleClient')
@@ -140,7 +144,7 @@ export default function VilleClient({
         {/* Photo de la destination */}
         <div className="py-4">
           <HotelPhoto
-            imageUrl={['/photos/destinations/nord.jpg', '/photos/destinations/nord.jpg']}
+            imageUrl={images.length > 0 ? images : [FALLBACK_VILLE_IMAGE]}
             autoPlayInterval={5000}
             className="mb-4"
           />

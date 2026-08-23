@@ -44,6 +44,34 @@ class VilleController extends Controller
     }
 
     /**
+     * Détail d'une ville.
+     * GET /api/villes/{id}
+     */
+    public function show(int $id): JsonResponse
+    {
+        $ville = \App\Models\Ville::with('photos')->find($id);
+
+        if (!$ville) {
+            return response()->json(['message' => 'Ville introuvable'], 404);
+        }
+
+        $images = $ville->photos->pluck('url')->all();
+
+        if (empty($images) && $ville->image) {
+            $images = [Storage::disk('s3')->url($ville->image)];
+        }
+
+        return response()->json([
+            'data' => [
+                'id'          => $ville->id,
+                'nom'         => $ville->nom,
+                'description' => $ville->description,
+                'images'      => $images,
+            ],
+        ]);
+    }
+
+    /**
      * Recherche de villes par nom (autocomplete).
      * GET /api/villes/search?q=nos&destination_id=1
      */

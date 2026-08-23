@@ -30,6 +30,13 @@ interface PaginatedHotels {
   total: number
 }
 
+interface ApiVille {
+  id: number
+  nom: string
+  description: string | null
+  images: string[]
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const t = await getTranslations('VillePage')
   const { slug } = await params
@@ -58,9 +65,10 @@ export default async function VillePage({ params }: PageProps) {
   const villeId = decodeIdFromSlug(slug)
   const villeName = getNameFromSlug(slug)
 
-  const [hotelsRes, selectionRes] = await Promise.all([
+  const [hotelsRes, selectionRes, villeRes] = await Promise.all([
     apiClient.get<PaginatedHotels>(`/villes/${villeId}/hotels`, 120),
     apiClient.get<{ data: ApiHotel[] }>(`/villes/${villeId}/hotels?selection=1`, 300),
+    apiClient.get<{ data: ApiVille }>(`/villes/${villeId}`, 3600),
   ])
 
   return (
@@ -69,6 +77,7 @@ export default async function VillePage({ params }: PageProps) {
       slug={slug}
       initialHotels={hotelsRes.data}
       initialSelectionHotels={selectionRes.data}
+      images={villeRes.data.images}
     />
   )
 }

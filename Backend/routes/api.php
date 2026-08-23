@@ -78,6 +78,7 @@ Route::get('/hotels/{id}', [ClientHotelController::class, 'show']);
 Route::get('/destinations', [DestinationController::class, 'index']);
 Route::get('/villes/popular', [VilleController::class, 'popular']);
 Route::get('/villes/search', [VilleController::class, 'search']);
+Route::get('/villes/{id}', [VilleController::class, 'show']);
 Route::get('/destinations/{id}/villes', [VilleController::class, 'byDestination']);
 Route::get('/destinations/{id}/hotels', [VilleController::class, 'hotels']);
 Route::get('/villes/{id}/hotels', [VilleController::class, 'hotelsByVille']);

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Ville extends Model
 {
@@ -33,5 +34,12 @@ class Ville extends Model
     public function destination(): BelongsTo
     {
         return $this->belongsTo(Destination::class);
+    }
+
+    public function photos(): HasMany
+    {
+        return $this->hasMany(Photo::class, 'entite_id')
+            ->where('entite_type', 'ville')
+            ->orderBy('ordre');
     }
 }

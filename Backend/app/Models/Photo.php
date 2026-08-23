@@ -73,6 +73,11 @@ class Photo extends Model
         return $query->where('entite_type', 'propriete')->where('entite_id', $proprieteId);
     }
 
+    public function scopeForVille(Builder $query, int $villeId): Builder
+    {
+        return $query->where('entite_type', 'ville')->where('entite_id', $villeId);
+    }
+
     // ─── Relations ─────────────────────────────────────
 
     public function propriete(): BelongsTo
