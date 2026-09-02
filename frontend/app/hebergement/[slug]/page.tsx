@@ -51,7 +51,7 @@ export default async function HebergementSlugPage({ params }: PageProps) {
   ])
   const categoryType = types.find(t => t.id === categoryId)
   const categoryDescription = categoryType?.description ?? null
-  const categoryImage = categoryType?.imageUrl ?? '/photos/bc.png'
+  const categoryImage = categoryType?.imageBackground ?? '/photos/bc.png'
 
   return <HebergementName categoryId={categoryId} categoryName={categoryName} slug={slug} initialData={initialData} categoryDescription={categoryDescription} categoryImage={categoryImage} />
 }

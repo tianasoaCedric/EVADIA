@@ -45,10 +45,19 @@ class VilleController extends Controller
             'latitude'       => 'nullable|numeric',
             'longitude'      => 'nullable|numeric',
             'image'          => 'nullable|image|max:5120',
+            'couverture'     => 'nullable|array',
+            'couverture.*'   => 'image|max:5120',
         ]);
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('villes', 's3');
+        }
+
+        if ($request->hasFile('couverture')) {
+            $validated['couverture'] = array_map(
+                fn ($file) => $file->store('villes/couverture', 's3'),
+                $request->file('couverture')
+            );
         }
 
         Ville::create($validated);
@@ -74,6 +83,8 @@ class VilleController extends Controller
             'latitude'       => 'nullable|numeric',
             'longitude'      => 'nullable|numeric',
             'image'          => 'nullable|image|max:5120',
+            'couverture'     => 'nullable|array',
+            'couverture.*'   => 'image|max:5120',
         ]);
 
         if ($request->hasFile('image')) {
@@ -83,16 +94,42 @@ class VilleController extends Controller
             $validated['image'] = $request->file('image')->store('villes', 's3');
         }
 
+        if ($request->hasFile('couverture')) {
+            $nouvelles = array_map(
+                fn ($file) => $file->store('villes/couverture', 's3'),
+                $request->file('couverture')
+            );
+            $validated['couverture'] = array_merge($ville->couverture ?? [], $nouvelles);
+        }
+
         $ville->update($validated);
 
         return redirect()->route('admin.villes.index')
             ->with('success', 'Ville mise à jour.');
     }
 
+    public function destroyCouverturePhoto(Ville $ville, int $index)
+    {
+        $couverture = $ville->couverture ?? [];
+
+        if (isset($couverture[$index])) {
+            Storage::disk('s3')->delete($couverture[$index]);
+            unset($couverture[$index]);
+            $ville->update(['couverture' => array_values($couverture)]);
+        }
+
+        return redirect()->route('admin.villes.edit', $ville)
+            ->with('success', 'Photo supprimée.');
+    }
+
     public function destroy(Ville $ville)
     {
         if ($ville->image) {
             Storage::disk('s3')->delete($ville->image);
+        }
+
+        foreach ($ville->couverture ?? [] as $chemin) {
+            Storage::disk('s3')->delete($chemin);
         }
 
         $ville->delete();

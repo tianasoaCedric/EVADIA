@@ -264,8 +264,8 @@ const Header = ({
                                         src={`/Evadia_Logo 4${activeTheme === 'dark' ? '_dark' : ''}.png`}
                                         alt={t('logo_alt')}
                                         className="block md:hidden"
-                                        width={40}
-                                        height={40}
+                                        width={50}
+                                        height={50}
                                         priority
                                     />
                                     <Image
@@ -273,8 +273,8 @@ const Header = ({
                                         alt={t('logo_alt')}
                                         className="hidden md:block"
                                         width={180}
-                                        height={40}
-                                        style={{ width: 'auto', height: '40px' }}
+                                        height={50}
+                                        style={{ width: 'auto', height: '50px' }}
                                         priority
                                     />
                                 </div>

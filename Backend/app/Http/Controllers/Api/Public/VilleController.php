@@ -57,6 +57,10 @@ class VilleController extends Controller
 
         $images = $ville->photos->pluck('url')->all();
 
+        if (empty($images) && !empty($ville->couverture)) {
+            $images = array_map(fn($chemin) => Storage::disk('s3')->url($chemin), $ville->couverture);
+        }
+
         if (empty($images) && $ville->image) {
             $images = [Storage::disk('s3')->url($ville->image)];
         }
@@ -113,6 +117,7 @@ class VilleController extends Controller
             'destination_id' => $v->destination_id,
             'description'    => $v->description,
             'image'          => $v->image ? Storage::disk('s3')->url($v->image) : null,
+            'couverture'     => array_map(fn($chemin) => Storage::disk('s3')->url($chemin), $v->couverture ?? []),
         ]);
 
         return response()->json([
@@ -122,6 +127,7 @@ class VilleController extends Controller
                     'nom'         => $destination->nom,
                     'description' => $destination->description,
                     'image_url'   => $destination->image_url ? Storage::disk('s3')->url($destination->image_url) : null,
+                    'couverture'  => array_map(fn($chemin) => Storage::disk('s3')->url($chemin), $destination->couverture ?? []),
                 ],
                 'villes' => $villes,
             ],

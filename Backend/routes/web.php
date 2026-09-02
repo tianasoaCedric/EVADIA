@@ -83,9 +83,13 @@ Route::middleware(['auth', 'role:super_admin,admin_evadia'])
 
         // Destinations
         Route::resource('destinations', DestinationController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+        Route::delete('destinations/{destination}/couverture/{index}', [DestinationController::class, 'destroyCouverturePhoto'])
+            ->name('destinations.couverture.destroy');
 
         // Villes (destinations)
         Route::resource('villes', VilleController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+        Route::delete('villes/{ville}/couverture/{index}', [VilleController::class, 'destroyCouverturePhoto'])
+            ->name('villes.couverture.destroy');
 
         // Types d'hébergement
         Route::resource('types-hebergement', TypeHebergementController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy'])

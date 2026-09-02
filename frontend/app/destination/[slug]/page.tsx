@@ -32,7 +32,7 @@ interface ApiHotel {
 }
 
 interface DestinationData {
-  destination: { id: number; nom: string; description: string; image_url: string }
+  destination: { id: number; nom: string; description: string; image_url: string; couverture?: string[] }
   villes: Ville[]
 }
 

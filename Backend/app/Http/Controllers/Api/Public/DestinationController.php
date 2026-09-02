@@ -28,6 +28,7 @@ class DestinationController extends Controller
             'nom'          => $d->nom,
             'description'  => $d->description,
             'image_url'    => $d->image_url ? Storage::disk('s3')->url($d->image_url) : null,
+            'couverture'   => array_map(fn($chemin) => Storage::disk('s3')->url($chemin), $d->couverture ?? []),
             'hotels_count' => $d->hotels_count,
         ]);
 

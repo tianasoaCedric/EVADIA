@@ -14,6 +14,7 @@ class Ville extends Model
     protected $fillable = [
         'nom',
         'image',
+        'couverture',
         'description',
         'destination_id',
         'code_postal',
@@ -25,6 +26,7 @@ class Ville extends Model
     protected function casts(): array
     {
         return [
+            'couverture' => 'array',
             'latitude' => 'decimal:8',
             'longitude' => 'decimal:8',
             'created_at' => 'datetime',

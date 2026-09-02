@@ -33,7 +33,7 @@ interface ApiHotel {
 }
 
 interface DestinationData {
-  destination: { id: number; nom: string; description: string; image_url: string }
+  destination: { id: number; nom: string; description: string; image_url: string; couverture?: string[] }
   villes: Ville[]
 }
 
@@ -121,6 +121,9 @@ const capitalizeWords = (str: string): string => {
   const scrollToIndex = (ref: React.RefObject<HTMLDivElement | null>, index: number) => ref.current?.scrollTo({ left: index * (320 + 24), behavior: 'smooth' })
 
   const destinationImage = initialData.destination.image_url || '/photos/destinations/nord.jpg'
+  const destinationImages = initialData.destination.couverture?.length
+    ? initialData.destination.couverture
+    : [destinationImage, destinationImage]
 
   return (
     <main className="min-h-screen pt-24 pb-16">
@@ -145,7 +148,7 @@ const capitalizeWords = (str: string): string => {
         {/* Photo de la destination */}
         <div className="py-4">
           <HotelPhoto
-            imageUrl={[destinationImage, destinationImage]}
+            imageUrl={destinationImages}
             autoPlayInterval={5000}
             className="mb-4"
           />

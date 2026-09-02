@@ -44,6 +44,16 @@
     </script>
 
     <!-- Alpine.js -->
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('fileInputPreview', () => ({
+                previews: [],
+                onChange(event) {
+                    this.previews = Array.from(event.target.files ?? []).map((file) => URL.createObjectURL(file));
+                },
+            }));
+        });
+    </script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <!-- Chart.js -->
