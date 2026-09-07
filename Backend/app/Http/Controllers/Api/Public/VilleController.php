@@ -111,7 +111,14 @@ class VilleController extends Controller
             return response()->json(['message' => 'Destination introuvable'], 404);
         }
 
-        $villes = $destination->villes->map(fn($v) => [
+        // Ne conserver que les villes ayant au moins un hôtel actif
+        $villesAvecHotel = $destination->villes->filter(fn($v) => Hotel::query()
+            ->whereHas('currentStatut', fn($q) => $q->where('statut', 'actif'))
+            ->whereHas('adresse', fn($q) => $q->where('ville', 'ilike', $v->nom))
+            ->exists()
+        );
+
+        $villes = $villesAvecHotel->values()->map(fn($v) => [
             'id'             => $v->id,
             'nom'            => $v->nom,
             'destination_id' => $v->destination_id,
