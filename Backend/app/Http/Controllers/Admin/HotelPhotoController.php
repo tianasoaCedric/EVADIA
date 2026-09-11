@@ -21,16 +21,21 @@ class HotelPhotoController extends Controller
         ]);
 
         $maxOrdre = $hotel->photos()->max('ordre') ?? -1;
+        $hasPrincipale = $hotel->photos()->where('est_principale', true)->exists();
 
         foreach ($request->file('photos') as $index => $photo) {
             $path = $photo->store("hotels/{$hotel->id}", 's3');
+            if (! $path) {
+                return back()->with('error', "Échec de l'upload. Vérifiez la configuration du stockage.");
+            }
             Photo::create([
                 'entite_type' => 'hotel',
                 'entite_id' => $hotel->id,
                 'url_photo' => $path,
                 'ordre' => $maxOrdre + $index + 1,
-                'est_principale' => false,
+                'est_principale' => ! $hasPrincipale && $index === 0,
                 'uploaded_by' => auth()->id(),
+                'date_upload' => now(),
             ]);
         }
 

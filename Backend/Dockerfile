@@ -10,6 +10,11 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-enable swoole \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Node (for building Vite assets)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
@@ -18,6 +23,8 @@ WORKDIR /var/www
 COPY . .
 
 RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+RUN npm ci && npm run build && rm -rf node_modules
 
 RUN chown -R www-data:www-data storage bootstrap/cache
 

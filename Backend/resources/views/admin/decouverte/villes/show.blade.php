@@ -40,7 +40,7 @@
         <div class="lg:col-span-1 space-y-4">
             <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100 overflow-hidden">
                 @if($ville->image)
-                    <img src="{{ Storage::disk('s3')->url($ville->image) }}" alt="{{ $ville->nom }}"
+                    <img src="@mediaUrl($ville->image)" alt="{{ $ville->nom }}"
                         class="w-full h-48 object-cover">
                 @else
                     <div class="w-full h-48 bg-gradient-to-br from-evadia-100 to-evadia-200 flex items-center justify-center">
@@ -85,7 +85,7 @@
                     <div class="px-6 py-4 border-b border-gray-50 last:border-0 flex items-center justify-between gap-4">
                         <div class="flex items-center gap-4 min-w-0">
                             @if($lieu->images && count($lieu->images) > 0)
-                                <img src="{{ Storage::disk('s3')->url($lieu->images[0]) }}" alt="{{ $lieu->nom }}"
+                                <img src="@mediaUrl($lieu->images[0])" alt="{{ $lieu->nom }}"
                                     class="h-12 w-16 object-cover rounded-lg flex-shrink-0">
                             @else
                                 <div class="h-12 w-16 bg-gray-100 rounded-lg flex-shrink-0 flex items-center justify-center">

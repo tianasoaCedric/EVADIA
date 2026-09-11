@@ -25,7 +25,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">Image de couverture</label>
                         @if($ville->image)
                             <div class="mb-3 flex items-center gap-3">
-                                <img src="{{ Storage::disk('s3')->url($ville->image) }}" alt="{{ $ville->nom }}"
+                                <img src="@mediaUrl($ville->image)" alt="{{ $ville->nom }}"
                                     class="h-20 w-32 rounded-xl object-cover ring-1 ring-gray-200">
                                 <p class="text-xs text-gray-400">Image actuelle — téléversez-en une nouvelle pour la remplacer</p>
                             </div>

@@ -72,6 +72,54 @@
         </div>
     </div>
 
+    <!-- Photos -->
+    <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 mb-6" x-data="{ open: false }">
+        <div class="flex items-center justify-between">
+            <h3 class="text-sm font-semibold text-gray-900">Photos ({{ $hotel->photos->count() }})</h3>
+            @if($hotel->currentStatut?->statut !== 'actif')
+                <button @click="open = !open" class="text-sm text-evadia-600 hover:text-evadia-700 font-medium">
+                    <span x-text="open ? 'Fermer' : 'Ajouter'"></span>
+                </button>
+            @endif
+        </div>
+
+        @if($hotel->currentStatut?->statut !== 'actif')
+            <div x-show="open" x-cloak class="mt-4">
+                <form method="POST" action="{{ route('admin.hotels.photos.store', $hotel) }}" enctype="multipart/form-data" class="flex items-center gap-3">
+                    @csrf
+                    <input type="file" name="photos[]" multiple accept="image/*" required
+                        class="flex-1 text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-evadia-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-evadia-700">
+                    <button type="submit" class="rounded-xl bg-evadia-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-evadia-700">Envoyer</button>
+                </form>
+                @error('photos') <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p> @enderror
+                @error('photos.*') <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p> @enderror
+            </div>
+        @endif
+
+        @if($hotel->photos->count())
+            <div class="grid grid-cols-4 gap-3 mt-4">
+                @foreach($hotel->photos as $photo)
+                    <div class="relative rounded-xl overflow-hidden h-24 ring-1 ring-gray-200 group">
+                        <img src="{{ $photo->url }}" class="h-full w-full object-cover" alt="">
+                        @if($photo->est_principale)
+                            <span class="absolute top-1 left-1 rounded bg-evadia-600 px-1.5 py-0.5 text-[10px] font-bold text-white">Principale</span>
+                        @endif
+                        @if($hotel->currentStatut?->statut !== 'actif')
+                            <form method="POST" action="{{ route('admin.hotels.photos.destroy', [$hotel, $photo->id]) }}"
+                                onsubmit="return confirm('Supprimer cette photo ?')"
+                                class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="rounded bg-red-600 px-1.5 py-0.5 text-[10px] font-bold text-white hover:bg-red-700">✕</button>
+                            </form>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <p class="mt-4 text-sm text-gray-400">Aucune photo.</p>
+        @endif
+    </div>
+
     <!-- Status Change -->
     <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 mb-6" x-data="{ open: false }">
         <div class="flex items-center justify-between">
@@ -106,6 +154,7 @@
                     <span class="font-medium text-gray-700">{{ ucfirst($statut->statut) }}</span>
                     <span class="text-gray-400">{{ $statut->date_debut->format('d/m/Y H:i') }}</span>
                     @if($statut->date_fin) <span class="text-gray-400">→ {{ $statut->date_fin->format('d/m/Y H:i') }}</span> @endif
+                    @if($statut->changedBy) <span class="text-gray-400">· {{ $statut->changedBy->prenom }} {{ $statut->changedBy->nom }}</span> @endif
                     @if($statut->raison) <span class="text-gray-400 italic">— {{ $statut->raison }}</span> @endif
                 </div>
             @endforeach

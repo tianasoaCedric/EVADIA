@@ -32,7 +32,7 @@
                         <p class="text-xs text-gray-400 mb-1.5">Photo affichée dans les listes/cards de destination.</p>
                         <template x-if="!previews.length && {{ $destination->image_url ? 'true' : 'false' }}">
                             <div class="mb-3 flex items-center gap-3">
-                                <img src="{{ Storage::disk('s3')->url($destination->image_url ?? '') }}" alt="{{ $destination->nom }}"
+                                <img src="@mediaUrl($destination->image_url ?? '')" alt="{{ $destination->nom }}"
                                     class="h-20 w-32 rounded-xl object-cover ring-1 ring-gray-200">
                                 <p class="text-xs text-gray-400">Photo actuelle — téléversez-en une nouvelle pour la remplacer</p>
                             </div>
@@ -63,7 +63,7 @@
                             <div class="mb-3 grid grid-cols-4 gap-3">
                                 @foreach($destination->couverture as $i => $chemin)
                                     <div class="relative group">
-                                        <img src="{{ Storage::disk('s3')->url($chemin) }}" alt="Photo {{ $i + 1 }}"
+                                        <img src="@mediaUrl($chemin)" alt="Photo {{ $i + 1 }}"
                                             class="h-20 w-full rounded-xl object-cover ring-1 ring-gray-200">
                                         <form method="POST" action="{{ route('admin.destinations.couverture.destroy', [$destination, $i]) }}"
                                             onsubmit="return confirm('Supprimer cette photo ?');" class="absolute top-1 right-1">

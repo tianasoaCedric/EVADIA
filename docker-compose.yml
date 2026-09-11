@@ -81,6 +81,8 @@ services:
       POSTGRES_DB: evadia
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: "1234"
+      TZ: Indian/Antananarivo
+      PGTZ: Indian/Antananarivo
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:

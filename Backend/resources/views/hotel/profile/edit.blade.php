@@ -27,7 +27,7 @@
                                 </template>
                                 <template x-if="!preview">
                                     @if($user->avatar_url)
-                                        <img src="{{ Storage::disk('s3')->url($user->avatar_url) }}"
+                                        <img src="@mediaUrl($user->avatar_url)"
                                             class="h-full w-full object-cover">
                                     @else
                                         <span>{{ substr($user->prenom, 0, 1) }}{{ substr($user->nom, 0, 1) }}</span>

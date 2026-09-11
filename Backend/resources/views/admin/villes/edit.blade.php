@@ -62,7 +62,7 @@
                         <p class="text-xs text-gray-400 mb-1.5">Photo affichée dans les listes/cards de ville.</p>
                         <template x-if="!previews.length && {{ $ville->image ? 'true' : 'false' }}">
                             <div class="mb-3 flex items-center gap-3">
-                                <img src="{{ Storage::disk('s3')->url($ville->image ?? '') }}" alt="{{ $ville->nom }}"
+                                <img src="@mediaUrl($ville->image ?? '')" alt="{{ $ville->nom }}"
                                     class="h-20 w-32 rounded-xl object-cover ring-1 ring-gray-200">
                                 <p class="text-xs text-gray-400">Photo actuelle — téléversez-en une nouvelle pour la remplacer</p>
                             </div>
@@ -93,7 +93,7 @@
                             <div class="mb-3 grid grid-cols-4 gap-3">
                                 @foreach($ville->couverture as $i => $chemin)
                                     <div class="relative group">
-                                        <img src="{{ Storage::disk('s3')->url($chemin) }}" alt="Photo {{ $i + 1 }}"
+                                        <img src="@mediaUrl($chemin)" alt="Photo {{ $i + 1 }}"
                                             class="h-20 w-full rounded-xl object-cover ring-1 ring-gray-200">
                                         <form method="POST" action="{{ route('admin.villes.couverture.destroy', [$ville, $i]) }}"
                                             onsubmit="return confirm('Supprimer cette photo ?');" class="absolute top-1 right-1">

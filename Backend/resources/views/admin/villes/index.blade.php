@@ -42,7 +42,7 @@
                     <tr class="hover:bg-gray-50/50 transition-colors">
                         <td class="px-5 py-3">
                             @if($ville->image)
-                                <img src="{{ Storage::disk('s3')->url($ville->image) }}" alt="{{ $ville->nom }}"
+                                <img src="@mediaUrl($ville->image)" alt="{{ $ville->nom }}"
                                     class="h-10 w-14 rounded-lg object-cover ring-1 ring-gray-200">
                             @else
                                 <div class="h-10 w-14 rounded-lg bg-gray-100 flex items-center justify-center">

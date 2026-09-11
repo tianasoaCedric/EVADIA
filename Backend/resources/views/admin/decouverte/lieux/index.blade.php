@@ -33,7 +33,7 @@
             <div class="px-6 py-4 border-b border-gray-50 last:border-0 flex items-center justify-between gap-4">
                 <div class="flex items-center gap-4 min-w-0">
                     @if($lieu->images && count($lieu->images) > 0)
-                        <img src="{{ Storage::disk('s3')->url($lieu->images[0]) }}" alt="{{ $lieu->nom }}"
+                        <img src="@mediaUrl($lieu->images[0])" alt="{{ $lieu->nom }}"
                             class="h-14 w-20 object-cover rounded-xl flex-shrink-0">
                     @else
                         <div class="h-14 w-20 bg-gray-100 rounded-xl flex-shrink-0 flex items-center justify-center">

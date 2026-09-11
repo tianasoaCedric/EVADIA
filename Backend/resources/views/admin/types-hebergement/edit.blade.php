@@ -31,7 +31,7 @@
                         <p class="text-xs text-gray-400 mb-1.5">Affichée dans la liste des types d'hébergement.</p>
                         <template x-if="!previews.length && {{ $type->image ? 'true' : 'false' }}">
                             <div class="mb-3 flex items-center gap-3">
-                                <img src="{{ Storage::disk('s3')->url($type->image ?? '') }}" alt="{{ $type->nom }}"
+                                <img src="@mediaUrl($type->image ?? '')" alt="{{ $type->nom }}"
                                     class="h-20 w-32 rounded-xl object-cover ring-1 ring-gray-200">
                                 <p class="text-xs text-gray-400">Image actuelle — téléversez-en une nouvelle pour la remplacer</p>
                             </div>
@@ -60,7 +60,7 @@
                         <p class="text-xs text-gray-400 mb-1.5">Affichée en fond sur la page listant les hôtels de ce type.</p>
                         <template x-if="!previews.length && {{ $type->image_background ? 'true' : 'false' }}">
                             <div class="mb-3 flex items-center gap-3">
-                                <img src="{{ Storage::disk('s3')->url($type->image_background ?? '') }}" alt="{{ $type->nom }} background"
+                                <img src="@mediaUrl($type->image_background ?? '')" alt="{{ $type->nom }} background"
                                     class="h-20 w-32 rounded-xl object-cover ring-1 ring-gray-200">
                                 <p class="text-xs text-gray-400">Image actuelle — téléversez-en une nouvelle pour la remplacer</p>
                             </div>

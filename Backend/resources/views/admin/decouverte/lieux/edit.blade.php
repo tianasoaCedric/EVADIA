@@ -48,7 +48,7 @@
                                 @foreach($lieu->images as $path)
                                     <label class="relative group cursor-pointer">
                                         <input type="checkbox" name="delete_images[]" value="{{ $path }}" class="peer sr-only">
-                                        <img src="{{ Storage::disk('s3')->url($path) }}" alt="Photo"
+                                        <img src="@mediaUrl($path)" alt="Photo"
                                             class="h-24 w-full object-cover rounded-xl ring-2 ring-transparent peer-checked:ring-red-400 transition-all">
                                         <div class="absolute inset-0 rounded-xl bg-black/40 opacity-0 group-hover:opacity-100 peer-checked:opacity-100 transition-opacity flex items-center justify-center">
                                             <span class="text-white text-xs font-semibold">✕ Supprimer</span>

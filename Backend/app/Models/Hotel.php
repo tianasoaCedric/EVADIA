@@ -100,7 +100,9 @@ class Hotel extends Model
     public function photos(): HasMany
     {
         return $this->hasMany(Photo::class, 'entite_id')
-            ->where('entite_type', 'hotel');
+            ->where('entite_type', 'hotel')
+            ->orderByDesc('est_principale')
+            ->orderBy('ordre');
     }
 
     public function offres(): HasMany

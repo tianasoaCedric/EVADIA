@@ -30,7 +30,7 @@
             <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100 overflow-hidden hover:shadow-md transition-all">
                 @if($ville->image)
                     <div class="h-36 overflow-hidden">
-                        <img src="{{ Storage::disk('s3')->url($ville->image) }}" alt="{{ $ville->nom }}"
+                        <img src="@mediaUrl($ville->image)" alt="{{ $ville->nom }}"
                             class="w-full h-full object-cover">
                     </div>
                 @else

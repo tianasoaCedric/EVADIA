@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\StoreHotelRequest;
 use App\Http\Requests\Admin\UpdateHotelRequest;
 use App\Jobs\SendHotelAdminCredentials;
 use App\Models\Abonnement;
+use App\Models\AbonnementHistorique;
 use App\Models\Avis;
 use App\Models\Plan;
 use App\Models\Destination;
@@ -90,20 +91,22 @@ class HotelController extends Controller
             // 4. Attach destination
             $hotel->destinations()->attach($request->destination_id);
 
-            // 5. Upload photos (only if S3 is configured)
-            if ($request->hasFile('photos') && config('filesystems.disks.s3.bucket')) {
+            // 5. Upload photos
+            if ($request->hasFile('photos')) {
                 foreach ($request->file('photos') as $index => $photo) {
                     $path = $photo->store("hotels/{$hotel->id}", 's3');
-                    if ($path) {
-                        Photo::create([
-                            'entite_type' => 'hotel',
-                            'entite_id' => $hotel->id,
-                            'url_photo' => $path,
-                            'ordre' => $index,
-                            'est_principale' => $index === 0,
-                            'uploaded_by' => auth()->id(),
-                        ]);
+                    if (! $path) {
+                        throw new \RuntimeException("Échec de l'upload de la photo #{$index}. Vérifiez la configuration du stockage.");
                     }
+                    Photo::create([
+                        'entite_type' => 'hotel',
+                        'entite_id' => $hotel->id,
+                        'url_photo' => $path,
+                        'ordre' => $index,
+                        'est_principale' => $index === 0,
+                        'uploaded_by' => auth()->id(),
+                        'date_upload' => now(),
+                    ]);
                 }
             }
 
@@ -147,13 +150,23 @@ class HotelController extends Controller
 
             // 10. Create subscription (price from DB)
             $plan = Plan::where('code', $request->type_abonnement)->firstOrFail();
-            Abonnement::create([
+            $abonnement = Abonnement::create([
                 'hotel_id'        => $hotel->id,
                 'type_abonnement' => $request->type_abonnement,
                 'date_debut'      => $request->abonnement_date_debut,
                 'date_fin'        => $request->abonnement_date_fin ?: null,
                 'prix_mensuel'    => $plan->prix,
                 'devise'          => $plan->devise,
+            ]);
+
+            AbonnementHistorique::create([
+                'abonnement_id'   => $abonnement->id,
+                'type_abonnement' => $abonnement->type_abonnement,
+                'date_debut'      => $abonnement->date_debut,
+                'date_fin'        => $abonnement->date_fin,
+                'prix_mensuel'    => $abonnement->prix_mensuel,
+                'statut'          => 'actif',
+                'changed_by'      => auth()->id(),
             ]);
 
             // 11. Log action
@@ -179,7 +192,7 @@ class HotelController extends Controller
             'types',
             'photos',
             'proprietes',
-            'statuts' => fn($q) => $q->orderByDesc('date_debut'),
+            'statuts' => fn($q) => $q->with('changedBy')->orderByDesc('date_debut'),
             'abonnement',
             'admins.user',
             'destinations',
@@ -260,14 +273,16 @@ class HotelController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $hotel) {
+            $now = now();
+
             // Close current status
-            $hotel->statuts()->whereNull('date_fin')->update(['date_fin' => now()]);
+            $hotel->statuts()->whereNull('date_fin')->update(['date_fin' => $now]);
 
             // Create new status
             HotelStatut::create([
                 'hotel_id' => $hotel->id,
                 'statut' => $request->statut,
-                'date_debut' => now(),
+                'date_debut' => $now,
                 'raison' => $request->raison,
                 'changed_by' => auth()->id(),
             ]);

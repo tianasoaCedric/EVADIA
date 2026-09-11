@@ -263,26 +263,37 @@
                 <div class="border-b border-gray-100 bg-gray-50/60 px-6 py-4">
                     <h3 class="text-sm font-semibold text-gray-800">Abonnement</h3>
                 </div>
-                <div class="p-6 space-y-6">
+                <div class="p-6 space-y-6"
+                    x-data="{ plan: '{{ old('type_abonnement', $plans->first()->code ?? '') }}' }">
+
+                    @php
+                        $planData = $plans->map(fn($p) => [
+                            'code' => $p->code, 'nom' => $p->nom, 'label' => $p->label,
+                            'prix' => number_format($p->prix, 0, ',', ' '), 'devise' => $p->devise,
+                        ])->keyBy('code');
+                    @endphp
+
+                    <p class="text-sm text-gray-500">Cliquez sur un plan pour le sélectionner.</p>
 
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         @foreach($plans as $plan)
-                            @php $checked = old('type_abonnement', 'select') === $plan->code; @endphp
-                            <label class="relative cursor-pointer rounded-xl border-2 p-5 transition-all flex flex-col gap-3
-                                {{ $checked ? $plan->border . ' bg-gray-50' : 'border-gray-200 hover:border-gray-300' }}">
+                            <label class="relative cursor-pointer rounded-xl border-2 p-5 transition-all flex flex-col gap-3"
+                                :class="plan === '{{ $plan->code }}'
+                                    ? 'border-evadia-500 bg-evadia-50/60 ring-4 ring-evadia-500/15 shadow-md -translate-y-0.5'
+                                    : 'border-gray-200 hover:border-gray-300 opacity-70 hover:opacity-100'">
                                 <input type="radio" name="type_abonnement" value="{{ $plan->code }}"
-                                    {{ $checked ? 'checked' : '' }} class="sr-only"
-                                    onchange="this.closest('.grid').querySelectorAll('label').forEach(l => l.classList.remove('{{ $plan->border }}','bg-gray-50')); this.closest('label').classList.add('{{ $plan->border }}','bg-gray-50')">
+                                    x-model="plan" class="sr-only">
+
+                                <span x-show="plan === '{{ $plan->code }}'" x-cloak
+                                    class="absolute -top-2.5 left-4 inline-flex items-center gap-1 rounded-full bg-evadia-600 px-2 py-0.5 text-[10px] font-bold text-white shadow">
+                                    <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+                                    SÉLECTIONNÉ
+                                </span>
 
                                 <div class="flex items-start justify-between">
                                     <span class="inline-flex items-center rounded-full {{ $plan->badge_bg }} {{ $plan->badge_text }} px-2.5 py-0.5 text-[11px] font-bold">
                                         {{ $plan->label }}
                                     </span>
-                                    @if($checked)
-                                        <svg class="h-5 w-5 text-evadia-600" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                        </svg>
-                                    @endif
                                 </div>
 
                                 <div>
@@ -315,6 +326,32 @@
                         @endforeach
                     </div>
                     @error('type_abonnement') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
+
+                    <!-- Récapitulatif du plan choisi -->
+                    <div x-data="{ plans: {{ Illuminate\Support\Js::from($planData) }} }">
+                        <template x-if="plan">
+                            <div class="flex items-center gap-4 rounded-xl bg-emerald-50 border border-emerald-200 px-5 py-4">
+                                <svg class="h-8 w-8 text-emerald-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <div>
+                                    <p class="text-xs uppercase tracking-wide text-emerald-700 font-semibold">Plan sélectionné</p>
+                                    <p class="text-sm text-gray-900 mt-0.5">
+                                        <strong class="text-base" x-text="plans[plan]?.nom"></strong>
+                                        <span class="text-gray-500">(<span x-text="plans[plan]?.label"></span>)</span>
+                                        —
+                                        <strong><span x-text="plans[plan]?.prix"></span> <span x-text="plans[plan]?.devise"></span></strong>
+                                        <span class="text-gray-500">/ mois</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </template>
+                        <template x-if="!plan">
+                            <div class="rounded-xl bg-red-50 border border-red-200 px-5 py-4 text-sm text-red-700">
+                                Aucun plan sélectionné — cliquez sur une carte ci-dessus.
+                            </div>
+                        </template>
+                    </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
@@ -404,7 +441,7 @@
             const step1 = ['nom','email_contact','telephone','site_web','etoiles','types'];
             const step2 = ['adresse_ligne1','code_postal','ville','pays','destination_id'];
             const step4 = ['admin_nom','admin_prenom','admin_email','admin_telephone'];
-            const step5 = ['type_abonnement','prix_mensuel','devise_abonnement','abonnement_date_debut','abonnement_date_fin'];
+            const step5 = ['type_abonnement','abonnement_date_debut','abonnement_date_fin'];
             let initialStep = 1;
             if (errorFields.some(f => step5.some(s => f.startsWith(s)))) initialStep = 5;
             else if (errorFields.some(f => step4.some(s => f.startsWith(s)))) initialStep = 4;

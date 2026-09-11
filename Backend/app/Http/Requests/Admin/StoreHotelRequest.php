@@ -46,7 +46,7 @@ class StoreHotelRequest extends FormRequest
             'admin_telephone' => 'nullable|string|max:20',
 
             // Step 5 - Abonnement
-            'type_abonnement'      => 'required|in:explore,select,signature',
+            'type_abonnement'      => 'required|exists:plans,code',
             'abonnement_date_debut' => 'required|date',
             'abonnement_date_fin'   => 'nullable|date|after:abonnement_date_debut',
         ];
@@ -63,6 +63,8 @@ class StoreHotelRequest extends FormRequest
             'admin_prenom.required' => 'Le prénom de l\'administrateur de l\'hôtel est obligatoire.',
             'admin_email.required' => 'L\'email de l\'administrateur de l\'hôtel est obligatoire.',
             'admin_email.unique' => 'Cet email est déjà utilisé par un autre utilisateur.',
+            'type_abonnement.required' => 'Veuillez sélectionner un plan d\'abonnement.',
+            'type_abonnement.exists' => 'Le plan d\'abonnement sélectionné est invalide.',
         ];
     }
 }
