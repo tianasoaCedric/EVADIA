@@ -121,7 +121,7 @@ export default function HomePage({ popularVilles, offres, villes }: HomePageProp
                 <HeroSection
                     title={t('hero_title')}
                     subtitle={t('hero_subtitle')}
-                    backgroundImage="/photos/Background Header.webp"
+                    backgroundImage="/photos/background-accueil.webp"
                     iosLink="https://apps.apple.com/app/evadia"
                     androidLink="https://play.google.com/store/apps/evadia"
                     showDownload={true}

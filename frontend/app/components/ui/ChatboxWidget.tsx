@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { MessageCircle, X, Send, ChevronLeft } from 'lucide-react'
+import { MessageCircle, X, Send, ChevronLeft, ChevronRight, Building2 } from 'lucide-react'
 import { authService, reservationService, chatboxService } from '@/lib/services'
 import { useReverbEcho } from '@/hooks/useReverbEcho'
 import type { User as UserType, Reservation, ReservationMessage } from '@/lib/types'
@@ -123,12 +123,18 @@ export default function ChatboxWidget() {
                 <button
                   key={r.id}
                   onClick={() => setActiveReservation(r)}
-                  className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer"
+                  className="w-full flex items-center gap-3 text-left px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer"
                 >
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {r.propriete?.hotel?.nom ?? r.propriete?.nom}
-                  </p>
-                  <p className="text-xs text-gray-500">{r.code_reservation}</p>
+                  <div className="w-10 h-10 shrink-0 rounded-full bg-[#01BDA5]/10 text-[#01BDA5] flex items-center justify-center">
+                    <Building2 className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {r.propriete?.hotel?.nom ?? r.propriete?.nom}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">{r.code_reservation}</p>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-gray-300 shrink-0" />
                 </button>
               ))}
             </div>

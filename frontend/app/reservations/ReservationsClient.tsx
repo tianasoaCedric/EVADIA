@@ -98,7 +98,7 @@ export default function ReservationsClient() {
       <HeroSection
         title={t('title')}
         subtitle={t('subtitle')}
-        backgroundImage="/photos/reservation.jpg"
+        backgroundImage="/photos/reservation-new.webp"
         showDownload={false}
       />
       <div className="container mx-auto px-4">

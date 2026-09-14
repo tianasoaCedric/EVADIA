@@ -438,7 +438,7 @@
                                 <template x-for="notif in notifications" :key="notif.id">
                                     <a :href="notif.lien || '#'" @click="
                                         if(!notif.lu) {
-                                            fetch('/hotel/notifications/' + notif.id + '/read', { method: 'PATCH', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json'} });
+                                            fetch('{{ route('hotel.notifications.mark-read', ['notification' => '__ID__']) }}'.replace('__ID__', notif.id), { method: 'PATCH', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json'} });
                                             notif.lu = true; unread = Math.max(0, unread - 1);
                                         }
                                     " class="flex gap-3 px-4 py-3 hover:bg-gray-50 transition-colors" :class="!notif.lu ? 'bg-hotel-50/40' : ''">

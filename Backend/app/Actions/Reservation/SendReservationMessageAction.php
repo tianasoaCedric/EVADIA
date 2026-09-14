@@ -30,12 +30,16 @@ class SendReservationMessageAction
             'date_envoi'      => now(),
         ]);
 
+        $lien = $destinataire->hasAnyRole(['admin_hotel', 'gestionnaire_hotel'])
+            ? '/hotel-admin/reservations/' . $reservation->id . '/messages'
+            : '/reservations/' . $reservation->id;
+
         Notification::create([
             'user_id'           => $destinataire->id,
             'type_notification' => 'nouveau_message_reservation',
             'titre'             => 'Nouveau message — Réservation ' . $reservation->code_reservation,
             'contenu'           => Str::limit($contenu, 100),
-            'lien'              => '/reservations/' . $reservation->id,
+            'lien'              => $lien,
             'reservation_id'    => $reservation->id,
             'canal'             => 'in_app',
             'date_envoi'        => now(),

@@ -21,7 +21,7 @@ export const typeHotelService = {
     return data.map((type) => ({
       ...type,
       imageUrl: type.image ?? PLACEHOLDER,
-      imageBackground: type.image_background ?? type.image ?? PLACEHOLDER,
+      imageBackground: type.image_background ?? PLACEHOLDER,
     }))
   },
 }

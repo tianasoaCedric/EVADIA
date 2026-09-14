@@ -81,7 +81,7 @@ class MessageController extends Controller
             'type_notification' => 'nouveau_message',
             'titre' => 'Nouveau message de EVADIA',
             'contenu' => "Sujet : " . ($request->sujet ?? 'Sans sujet'),
-            'lien' => "/hotel/messages/conversation/" . auth()->id(),
+            'lien' => "/hotel-admin/messages/conversation/" . auth()->id(),
             'canal' => 'in_app',
         ]);
 

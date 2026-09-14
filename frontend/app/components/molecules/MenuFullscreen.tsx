@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronDown, Globe, DollarSign } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -149,14 +150,28 @@ const MenuFullscreen = ({
                 className={`
                     fixed inset-0 z-40 transition-all duration-500 ease-in-out
                     ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}
-                    ${theme === 'light' ? 'bg-black/75 backdrop-blur-md' : 'bg-gray-900/95 backdrop-blur-md'}
                 `}
                 onClick={onClose}
             >
+                {/* Image de fond */}
+                <Image
+                    src="/photos/Background Header.webp"
+                    alt=""
+                    fill
+                    priority
+                    className="object-cover"
+                />
+                <div
+                    className={`
+                        absolute inset-0
+                        ${theme === 'light' ? 'bg-black/45' : 'bg-gray-900/60'}
+                    `}
+                />
+
                 {/* Contenu du menu */}
                 <div
                     className={`
-                        h-full overflow-y-auto
+                        relative h-full overflow-y-auto
                         transform transition-all duration-500 delay-200
                         ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}
                     `}

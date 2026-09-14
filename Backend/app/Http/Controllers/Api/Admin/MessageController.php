@@ -189,7 +189,7 @@ class MessageController extends Controller
             'type_notification' => 'nouveau_message',
             'titre' => 'Nouveau message',
             'contenu' => Str::limit($request->contenu, 100),
-            'lien' => '/messages/conversation/' . auth()->id(),
+            'lien' => '/hotel-admin/messages/conversation/' . auth()->id(),
             'canal' => 'in_app',
             'date_envoi' => now(),
         ]);
