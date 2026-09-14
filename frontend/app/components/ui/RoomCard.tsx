@@ -74,9 +74,10 @@ const RoomCard = ({
   }
 
   const handleBookClick = (e: React.MouseEvent) => {
+    if (!onBookClick) return
     e.preventDefault()
     e.stopPropagation()
-    onBookClick?.()
+    onBookClick()
   }
 
   const handleTouchStart = (e: React.TouchEvent) => {
