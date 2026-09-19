@@ -10,6 +10,19 @@ import { getMessages } from 'next-intl/server';
 import { DeviseProvider } from './context/DeviseContext';
 import { FavorisProvider } from './context/FavorisContext';
 import { HeaderThemeProvider } from './context/HeaderThemeContext';
+import { SITE_URL } from '@/lib/site'
+
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  openGraph: {
+    siteName: 'Evadia',
+    images: [{ url: '/photos/background-accueil.webp', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    images: ['/photos/background-accueil.webp'],
+  },
+}
 
 // Configuration correcte de la police Outfit
 const outfit = Outfit({

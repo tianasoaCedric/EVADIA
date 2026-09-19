@@ -21,7 +21,7 @@ interface MenuFullscreenProps {
 
 interface MenuColumn {
     title: string
-    items: { label: string; href: string }[]
+    items: { label: string; href: string; count?: number }[]
 }
 
 type MenuData = [Awaited<ReturnType<typeof typeHotelService.list>>, Awaited<ReturnType<typeof destinationService.list>>, Awaited<ReturnType<typeof decouverteService.getVilles>>]
@@ -59,7 +59,7 @@ function buildMenuStructure(types: MenuData[0], destResponse: MenuData[1], ville
             title: t('destinations'),
             items: [
                 { label: t('all_destinations'), href: '/destination' },
-                ...destResponse.data.map(d => ({ label: d.nom, href: `/destination/${createSlug(d.id, d.nom)}` })),
+                ...destResponse.data.map(d => ({ label: d.nom, href: `/destination/${createSlug(d.id, d.nom)}`, count: d.hotels_count })),
             ]
         },
         { title: t('offers'), items: [{ label: t('all_offers'), href: '/offre' }] },
@@ -216,6 +216,9 @@ const MenuFullscreen = ({
                                                         `}
                                                     >
                                                         {item.label}
+                                                        {typeof item.count === 'number' && (
+                                                            <span className="ml-2 text-sm opacity-60">({item.count})</span>
+                                                        )}
                                                     </Link>
                                                 </li>
                                             ))}
@@ -306,6 +309,9 @@ const MenuFullscreen = ({
                                                                 `}
                                                             >
                                                                 {item.label}
+                                                                {typeof item.count === 'number' && (
+                                                                    <span className="ml-2 text-sm opacity-60">({item.count})</span>
+                                                                )}
                                                             </Link>
                                                         </li>
                                                     ))}
