@@ -21,7 +21,7 @@ interface MenuFullscreenProps {
 
 interface MenuColumn {
     title: string
-    items: { label: string; href: string; count?: number }[]
+    items: { label: string; href: string }[]
 }
 
 type MenuData = [Awaited<ReturnType<typeof typeHotelService.list>>, Awaited<ReturnType<typeof destinationService.list>>, Awaited<ReturnType<typeof decouverteService.getVilles>>]
@@ -59,7 +59,7 @@ function buildMenuStructure(types: MenuData[0], destResponse: MenuData[1], ville
             title: t('destinations'),
             items: [
                 { label: t('all_destinations'), href: '/destination' },
-                ...destResponse.data.map(d => ({ label: d.nom, href: `/destination/${createSlug(d.id, d.nom)}`, count: d.hotels_count })),
+                ...destResponse.data.map(d => ({ label: d.nom, href: `/destination/${createSlug(d.id, d.nom)}` })),
             ]
         },
         { title: t('offers'), items: [{ label: t('all_offers'), href: '/offre' }] },
@@ -193,13 +193,13 @@ const MenuFullscreen = ({
                                         }}
                                     >
                                         <h3 className={`
-                                            text-lg md:text-xl font-semibold uppercase tracking-wider
+                                            text-lg md:text-xl font-light uppercase tracking-wider
                                             text-[#01BDA5]
                                             border-b-2 border-[#01BDA5] inline-block pb-2
                                         `}>
                                             {column.title}
                                         </h3>
-                                        
+
                                         <ul className="space-y-3 md:space-y-4">
                                             {column.items.map((item) => (
                                                 <li key={item.href}>
@@ -207,7 +207,7 @@ const MenuFullscreen = ({
                                                         href={item.href}
                                                         onClick={onClose}
                                                         className={`
-                                                            block text-base md:text-lg lg:text-xl
+                                                            block text-base md:text-lg lg:text-xl font-light
                                                             transition-all duration-300 hover:translate-x-2
                                                             ${theme === 'light'
                                                                 ? 'text-gray-200 hover:text-[#01BDA5]'
@@ -216,9 +216,6 @@ const MenuFullscreen = ({
                                                         `}
                                                     >
                                                         {item.label}
-                                                        {typeof item.count === 'number' && (
-                                                            <span className="ml-2 text-sm opacity-60">({item.count})</span>
-                                                        )}
                                                     </Link>
                                                 </li>
                                             ))}
@@ -237,7 +234,7 @@ const MenuFullscreen = ({
                                     >
                                         <div className="flex items-center gap-2">
                                             <DollarSign className="w-5 h-5 text-[#01BDA5]" />
-                                            <h3 className="text-xl font-semibold uppercase tracking-wider text-[#01BDA5]">
+                                            <h3 className="text-xl font-light uppercase tracking-wider text-[#01BDA5]">
                                                 {t('currency')}
                                             </h3>
                                         </div>
@@ -281,7 +278,7 @@ const MenuFullscreen = ({
                                                 onClick={() => toggleSection(column.title)}
                                                 className="w-full flex items-center justify-between py-4"
                                             >
-                                                <h3 className="text-xl font-semibold uppercase tracking-wider text-[#01BDA5]">
+                                                <h3 className="text-xl font-light uppercase tracking-wider text-[#01BDA5]">
                                                     {column.title}
                                                 </h3>
                                                 <ChevronDown className={`w-5 h-5 text-[#01BDA5] transition-transform duration-300 ${isOpenSection ? 'rotate-180' : ''}`} />
@@ -300,7 +297,7 @@ const MenuFullscreen = ({
                                                                 href={item.href}
                                                                 onClick={onClose}
                                                                 className={`
-                                                                    block text-lg py-2
+                                                                    block text-lg font-light py-2
                                                                     transition-all duration-300 hover:translate-x-2
                                                                     ${theme === 'light'
                                                                         ? 'text-gray-200 hover:text-[#01BDA5]'
@@ -309,9 +306,6 @@ const MenuFullscreen = ({
                                                                 `}
                                                             >
                                                                 {item.label}
-                                                                {typeof item.count === 'number' && (
-                                                                    <span className="ml-2 text-sm opacity-60">({item.count})</span>
-                                                                )}
                                                             </Link>
                                                         </li>
                                                     ))}
