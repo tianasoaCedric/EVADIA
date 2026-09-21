@@ -201,14 +201,15 @@ const MenuFullscreen = ({
                                         </h3>
 
                                         <ul className="space-y-3 md:space-y-4">
-                                            {column.items.map((item) => (
+                                            {column.items.map((item, index) => (
                                                 <li key={item.href}>
                                                     <Link
                                                         href={item.href}
                                                         onClick={onClose}
                                                         className={`
-                                                            block text-base md:text-lg lg:text-xl font-light
+                                                            block text-base md:text-lg lg:text-xl
                                                             transition-all duration-300 hover:translate-x-2
+                                                            ${index === 0 ? 'font-medium' : 'font-light'}
                                                             ${theme === 'light'
                                                                 ? 'text-gray-200 hover:text-[#01BDA5]'
                                                                 : 'text-gray-300 hover:text-[#01BDA5]'
@@ -291,7 +292,7 @@ const MenuFullscreen = ({
                                                 `}
                                             >
                                                 <ul className="space-y-3 pb-4 pl-2">
-                                                    {column.items.map((item) => (
+                                                    {column.items.map((item, index) => (
                                                         <li key={item.href}>
                                                             <Link
                                                                 href={item.href}
@@ -299,6 +300,7 @@ const MenuFullscreen = ({
                                                                 className={`
                                                                     block text-lg font-light py-2
                                                                     transition-all duration-300 hover:translate-x-2
+                                                                    ${index === 0 ? 'font-medium' : 'font-light'}
                                                                     ${theme === 'light'
                                                                         ? 'text-gray-200 hover:text-[#01BDA5]'
                                                                         : 'text-gray-300 hover:text-[#01BDA5]'
