@@ -198,6 +198,9 @@ const CardHotel = ({
       <h3 className="font-semibold text-base sm:text-lg text-gray-900 line-clamp-1 mb-1">
         {name}{ville ? `, ${ville}` : ''}
       </h3>
+      <h3 className="text-base text-gray-900 line-clamp-1 mb-1">
+        Adresse 00 Lot XXXXXX
+      </h3>
 
       <div className="mb-1">
         <span className={`

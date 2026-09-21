@@ -128,7 +128,7 @@ const DiscoverCard = ({
 
       {/* Contenu en bas - titre et bouton + */}
       <div className="p-3 sm:p-4 flex items-center justify-between gap-3">
-        <h3 className="font-medium text-base sm:text-lg md:text-lg text-gray-900 flex-1 line-clamp-2">
+        <h3 className="font-light text-base text-gray-900 flex-1 line-clamp-2">
           {title}
         </h3>
         <div className="flex-shrink-0">
