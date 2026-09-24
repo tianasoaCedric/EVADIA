@@ -15,6 +15,7 @@ interface CardHotelProps {
   priority?: boolean
   name: string
   ville?: string
+  adresse?: string
   availability: string
   price: number
   prixMga?: number
@@ -52,6 +53,7 @@ const CardHotel = ({
   imageUrl,
   name,
   ville,
+  adresse,
   availability,
   price,
   prixMga,
@@ -198,9 +200,11 @@ const CardHotel = ({
       <h3 className="font-semibold text-base sm:text-lg text-gray-900 line-clamp-1 mb-1">
         {name}{ville ? `, ${ville}` : ''}
       </h3>
-      <h3 className="text-base text-gray-900 line-clamp-1 mb-1">
-        Adresse 00 Lot XXXXXX
-      </h3>
+      {adresse && (
+        <h3 className="text-sm text-gray-500 line-clamp-1 mb-1">
+          {adresse}
+        </h3>
+      )}
 
       <div className="mb-1">
         <span className={`

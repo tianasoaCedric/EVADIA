@@ -25,6 +25,7 @@ interface ApiHotel {
   etoiles: number
   photo_principale: string | null
   ville: string | null
+  adresse: string | null
   prix_min: number | null
   prix_min_mga?: number | null
   prix_min_eur?: number | null
@@ -230,6 +231,7 @@ const capitalizeWords = (str: string): string => {
                       imageUrl={hotel.photo_principale ?? ''}
                       name={hotel.nom}
                       ville={hotel.ville ?? undefined}
+                      adresse={hotel.adresse ?? undefined}
                       hotelId={hotel.id}
                       availability="Disponible"
                       price={hotel.prix_min ?? 0}
@@ -269,6 +271,7 @@ const capitalizeWords = (str: string): string => {
                       imageUrl={hotel.photo_principale ?? ''}
                       name={hotel.nom}
                       ville={hotel.ville ?? undefined}
+                      adresse={hotel.adresse ?? undefined}
                       hotelId={hotel.id}
                       availability="Disponible"
                       price={hotel.prix_min ?? 0}

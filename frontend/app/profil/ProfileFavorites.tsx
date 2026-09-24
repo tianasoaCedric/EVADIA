@@ -52,6 +52,7 @@ export default function ProfileFavorites() {
             imageUrl={favori.hotel.photo_principale ?? ''}
             name={favori.hotel.nom}
             ville={favori.hotel.adresse?.ville}
+            adresse={favori.hotel.adresse?.adresse_ligne1}
             hotelId={favori.hotel_id}
             availability="Disponible"
             price={favori.hotel.prix_min ?? 0}

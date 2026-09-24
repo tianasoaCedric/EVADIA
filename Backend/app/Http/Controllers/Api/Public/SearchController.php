@@ -56,6 +56,7 @@ class SearchController extends Controller
                     'id'               => $h->id,
                     'nom'              => $h->nom,
                     'ville'            => $h->adresse?->ville,
+                    'adresse'          => $h->adresse?->adresse_ligne1,
                     'pays'             => $h->adresse?->pays,
                     'etoiles'          => $h->etoiles,
                     'photo_principale' => $h->photos->first()?->url,

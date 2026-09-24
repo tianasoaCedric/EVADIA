@@ -270,6 +270,7 @@ export default function SearchClient({ searchQuery }: SearchClientProps) {
                       imageUrl={h.photo_principale ?? ''}
                       name={h.nom}
                       ville={h.ville ?? undefined}
+                      adresse={h.adresse ?? undefined}
                       hotelId={h.id}
                       availability="Disponible"
                       price={h.prix_min_mga ?? 0}

@@ -34,8 +34,9 @@ export default function LoginClient() {
   useEffect(() => {
     authService.me()
       .then(() => {
+        // searchParams.get() décode déjà la valeur — pas de second decodeURIComponent ici.
         const redirect = searchParams.get('redirect')
-        router.replace(redirect ? decodeURIComponent(redirect) : '/')
+        router.replace(redirect || '/')
       })
       .catch(() => {})
   }, [router, searchParams])
@@ -63,8 +64,9 @@ export default function LoginClient() {
         return
       }
 
+      // searchParams.get() décode déjà la valeur — pas de second decodeURIComponent ici.
       const redirect = searchParams.get('redirect')
-      router.push(redirect ? decodeURIComponent(redirect) : '/')
+      router.push(redirect || '/')
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.status === 422) {

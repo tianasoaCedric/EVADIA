@@ -274,6 +274,7 @@ class VilleController extends Controller
             'etoiles'          => $hotel->etoiles,
             'photo_principale' => $hotel->photos->first()?->url,
             'ville'            => $hotel->adresse?->ville,
+            'adresse'          => $hotel->adresse?->adresse_ligne1,
             'prix_min'         => $prixMin,
             'prix_min_mga'     => $prixMinMga,
             'prix_min_eur'     => $prixMinEur,

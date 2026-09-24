@@ -4,6 +4,7 @@ export interface SearchHotel {
   id: number
   nom: string
   ville: string | null
+  adresse: string | null
   pays: string | null
   etoiles: number
   photo_principale: string | null
