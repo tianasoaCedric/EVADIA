@@ -40,6 +40,7 @@ class HotelController extends Controller
                             new OA\Property(property: 'etoiles', type: 'integer', example: 4),
                             new OA\Property(property: 'photo_principale', type: 'string', nullable: true, example: 'https://s3.../photo.jpg'),
                             new OA\Property(property: 'adresse', type: 'object', nullable: true, properties: [
+                                new OA\Property(property: 'adresse_ligne1', type: 'string', nullable: true),
                                 new OA\Property(property: 'ville', type: 'string', example: 'Paris'),
                                 new OA\Property(property: 'pays', type: 'string', example: 'France'),
                             ]),
@@ -155,8 +156,9 @@ class HotelController extends Controller
             'etoiles'          => $hotel->etoiles,
             'photo_principale' => $hotel->photos->first()?->url,
             'adresse'          => $hotel->adresse ? [
-                'ville' => $hotel->adresse->ville,
-                'pays'  => $hotel->adresse->pays,
+                'adresse_ligne1' => $hotel->adresse->adresse_ligne1,
+                'ville'          => $hotel->adresse->ville,
+                'pays'           => $hotel->adresse->pays,
             ] : null,
             'prix_min'         => $prixMin,
             'prix_min_mga'     => $prixMinMga,

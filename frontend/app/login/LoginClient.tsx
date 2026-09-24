@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl'
 import { Mail, Lock, Eye, EyeOff, Shield } from 'lucide-react'
 import { authService } from '@/lib/services'
 import { ApiError } from '@/lib/api-client'
+import { saveReturnTo, consumeReturnTo } from '@/lib/auth-redirect'
 
 type FieldErrors = {
   email?: string
@@ -32,12 +33,11 @@ export default function LoginClient() {
   // Un cookie peut être présent mais périmé/invalide côté backend : on ne
   // redirige que si l'utilisateur est réellement authentifié.
   useEffect(() => {
+    // Mémorise ?redirect= (posé par le middleware) pour qu'il survive à
+    // Google OAuth et au passage par /register.
+    saveReturnTo(searchParams.get('redirect'))
     authService.me()
-      .then(() => {
-        // searchParams.get() décode déjà la valeur — pas de second decodeURIComponent ici.
-        const redirect = searchParams.get('redirect')
-        router.replace(redirect || '/')
-      })
+      .then(() => router.replace(consumeReturnTo(searchParams.get('redirect'))))
       .catch(() => {})
   }, [router, searchParams])
 
@@ -65,8 +65,7 @@ export default function LoginClient() {
       }
 
       // searchParams.get() décode déjà la valeur — pas de second decodeURIComponent ici.
-      const redirect = searchParams.get('redirect')
-      router.push(redirect || '/')
+      router.push(consumeReturnTo(searchParams.get('redirect')))
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.status === 422) {

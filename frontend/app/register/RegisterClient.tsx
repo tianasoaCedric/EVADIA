@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl'
 import { Mail, Lock, Eye, EyeOff, Shield, User, UserRound } from 'lucide-react'
 import { authService } from '@/lib/services'
 import { ApiError } from '@/lib/api-client'
+import { consumeReturnTo } from '@/lib/auth-redirect'
 
 type FieldErrors = {
   prenom?: string
@@ -37,7 +38,7 @@ export default function RegisterClient() {
   // redirige que si l'utilisateur est réellement authentifié.
   useEffect(() => {
     authService.me()
-      .then(() => router.replace('/'))
+      .then(() => router.replace(consumeReturnTo()))
       .catch(() => {})
   }, [router])
 
@@ -73,7 +74,7 @@ export default function RegisterClient() {
         password,
         password_confirmation: confirmPassword,
       })
-      router.push('/')
+      router.push(consumeReturnTo())
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.status === 422 && err.errors) {

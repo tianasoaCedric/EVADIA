@@ -1,3 +1,5 @@
+import { saveReturnTo } from '@/lib/auth-redirect'
+
 // Server-side uses API_BASE_URL (internal Docker network), client uses NEXT_PUBLIC_API_BASE_URL (public URL)
 const API_BASE_URL =
   (typeof window === 'undefined' ? process.env.API_BASE_URL : undefined) ??
@@ -82,8 +84,9 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     if (!silent && typeof window !== 'undefined') {
       const pathname = window.location.pathname
       if (!pathname.startsWith('/login') && !pathname.startsWith('/register')) {
-        const returnTo = encodeURIComponent(pathname)
-        window.location.href = `/login?redirect=${returnTo}`
+        const returnTo = pathname + window.location.search
+        saveReturnTo(returnTo)
+        window.location.href = `/login?redirect=${encodeURIComponent(returnTo)}`
       }
     }
     throw new ApiError(401, 'Connexion requise')

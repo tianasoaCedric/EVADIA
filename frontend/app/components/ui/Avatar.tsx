@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { LogOut, User, CalendarDays, DollarSign, ChevronDown, Heart, LogIn, UserPlus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { authService } from '@/lib/services'
+import { saveReturnTo, currentPath } from '@/lib/auth-redirect'
 import type { User as UserType } from '@/lib/types'
 
 interface AvatarProps {
@@ -204,7 +205,7 @@ const Avatar = ({ size = 'md', variant = 'default', className = '', onDeviseChan
           {/* Actions de connexion */}
           <div className="py-2">
             <button
-              onClick={() => { setIsOpen(false); router.push('/login') }}
+              onClick={() => { setIsOpen(false); saveReturnTo(currentPath()); router.push('/login') }}
               className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
             >
               <LogIn className="w-4 h-4 text-gray-400" />
@@ -212,7 +213,7 @@ const Avatar = ({ size = 'md', variant = 'default', className = '', onDeviseChan
             </button>
             
             <button
-              onClick={() => { setIsOpen(false); router.push('/register') }}
+              onClick={() => { setIsOpen(false); saveReturnTo(currentPath()); router.push('/register') }}
               className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
             >
               <UserPlus className="w-4 h-4 text-gray-400" />

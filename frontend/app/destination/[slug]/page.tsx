@@ -24,6 +24,7 @@ interface ApiHotel {
   etoiles: number
   photo_principale: string | null
   ville: string | null
+  adresse: string | null
   prix_min: number | null
   prix_min_mga?: number | null
   prix_min_eur?: number | null
