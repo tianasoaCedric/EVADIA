@@ -48,6 +48,31 @@ class ReservationMessageController extends Controller
         ]);
     }
 
+    #[OA\Get(
+        path: '/api/client/reservations/{id}/messages/unread-count',
+        summary: 'Nombre de messages non lus pour une réservation',
+        tags: ['Client - Messagerie'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Nombre de messages non lus'),
+            new OA\Response(response: 404, description: 'Réservation non trouvée'),
+        ]
+    )]
+    public function unreadCount(Request $request, int $id): JsonResponse
+    {
+        $reservation = Reservation::where('client_id', $request->user()->id)->findOrFail($id);
+
+        $count = Message::where('reservation_id', $reservation->id)
+            ->where('destinataire_id', $request->user()->id)
+            ->where('lu', false)
+            ->count();
+
+        return response()->json(['unread_count' => $count]);
+    }
+
     #[OA\Post(
         path: '/api/client/reservations/{id}/messages',
         summary: 'Envoyer un message à l\'hôtel',

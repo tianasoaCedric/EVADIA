@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Hotel;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Hotel\Traits\BelongsToHotel;
+use App\Models\HotelStatut;
 use App\Traits\LogsAdminAction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -63,6 +64,22 @@ class ProfileController extends Controller
 
         auth()->user()->update(['password_hash' => Hash::make($request->password)]);
         $this->logAction('password_changed', 'Mot de passe modifié');
+
+        $hotel = $this->getHotel();
+        if ($hotel->currentStatut?->statut === 'en_attente') {
+            $now = now();
+            $hotel->statuts()->whereNull('date_fin')->update(['date_fin' => $now]);
+
+            HotelStatut::create([
+                'hotel_id' => $hotel->id,
+                'statut' => 'actif',
+                'date_debut' => $now,
+                'raison' => 'Activation automatique après changement du mot de passe par défaut.',
+                'changed_by' => auth()->id(),
+            ]);
+
+            $this->logAction('hotel_status_updated', "Statut de l'hôtel {$hotel->nom} passé à 'actif' automatiquement après changement du mot de passe par défaut.");
+        }
 
         return back()->with('success', 'Mot de passe modifié avec succès.');
     }

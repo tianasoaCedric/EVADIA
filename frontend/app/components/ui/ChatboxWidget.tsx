@@ -18,8 +18,16 @@ export default function ChatboxWidget() {
   const [chatFerme, setChatFerme] = useState(false)
   const [input, setInput] = useState('')
   const [isSending, setIsSending] = useState(false)
+  const [unreadCounts, setUnreadCounts] = useState<Record<number, number>>({})
   const scrollRef = useRef<HTMLDivElement>(null)
   const echo = useReverbEcho(!!user)
+
+  const refreshUnreadCounts = useCallback(async (list: Reservation[]) => {
+    const counts = await Promise.all(
+      list.map((r) => chatboxService.unreadCount(r.id).then((res) => [r.id, res.unread_count] as const)),
+    )
+    setUnreadCounts(Object.fromEntries(counts))
+  }, [])
 
   useEffect(() => {
     authService.me()
@@ -27,14 +35,16 @@ export default function ChatboxWidget() {
         setUser(user)
         const res = await reservationService.list({ statut: 'acceptee' })
         setReservations(res.data)
+        void refreshUnreadCounts(res.data)
       })
       .catch(() => setUser(null))
-  }, [])
+  }, [refreshUnreadCounts])
 
   const loadMessages = useCallback(async (reservationId: number) => {
     const res = await chatboxService.messages(reservationId)
     setMessages(res.data)
     setChatFerme(res.chat_ferme)
+    setUnreadCounts((prev) => ({ ...prev, [reservationId]: 0 }))
   }, [])
 
   useEffect(() => {
@@ -45,13 +55,19 @@ export default function ChatboxWidget() {
   // Temps réel via Reverb quand la connexion WebSocket est établie ; sinon
   // repli sur un polling léger pour ne pas laisser la conversation figée.
   useEffect(() => {
-    if (!activeReservation || !user) return
+    if (!user) return
 
     if (echo) {
       const channel = echo.private(`messages.${user.id}`)
       const handler = (payload: { reservation_id?: number }) => {
-        loadMessages(activeReservation.id)
-        void payload
+        if (activeReservation && payload.reservation_id === activeReservation.id) {
+          loadMessages(activeReservation.id)
+        } else if (payload.reservation_id) {
+          setUnreadCounts((prev) => ({
+            ...prev,
+            [payload.reservation_id!]: (prev[payload.reservation_id!] ?? 0) + 1,
+          }))
+        }
       }
       channel.listen('.message.sent', handler)
       return () => {
@@ -60,9 +76,12 @@ export default function ChatboxWidget() {
       }
     }
 
-    const interval = setInterval(() => loadMessages(activeReservation.id), POLL_FALLBACK_INTERVAL_MS)
+    const interval = setInterval(() => {
+      if (activeReservation) loadMessages(activeReservation.id)
+      void refreshUnreadCounts(reservations)
+    }, POLL_FALLBACK_INTERVAL_MS)
     return () => clearInterval(interval)
-  }, [activeReservation, loadMessages, echo, user])
+  }, [activeReservation, loadMessages, echo, user, reservations, refreshUnreadCounts])
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
@@ -91,6 +110,8 @@ export default function ChatboxWidget() {
   const dernierChoixPaiement = messages.some(
     (m) => m.type === 'choix_paiement' && m.expediteur_id === user.id,
   )
+
+  const totalUnread = Object.values(unreadCounts).reduce((sum, n) => sum + n, 0)
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
@@ -134,6 +155,11 @@ export default function ChatboxWidget() {
                     </p>
                     <p className="text-xs text-gray-500 truncate">{r.code_reservation}</p>
                   </div>
+                  {!!unreadCounts[r.id] && (
+                    <span className="min-w-[1.25rem] h-5 px-1.5 rounded-full bg-red-500 text-white text-[11px] font-semibold flex items-center justify-center shrink-0">
+                      {unreadCounts[r.id]}
+                    </span>
+                  )}
                   <ChevronRight className="w-4 h-4 text-gray-300 shrink-0" />
                 </button>
               ))}
@@ -186,10 +212,15 @@ export default function ChatboxWidget() {
       ) : (
         <button
           onClick={() => setIsOpen(true)}
-          className="w-14 h-14 rounded-full bg-[#01BDA5] hover:bg-[#01A38E] text-white shadow-xl flex items-center justify-center transition-all hover:scale-105 cursor-pointer"
+          className="relative w-14 h-14 rounded-full bg-[#01BDA5] hover:bg-[#01A38E] text-white shadow-xl flex items-center justify-center transition-all hover:scale-105 cursor-pointer"
           aria-label="Ouvrir la messagerie"
         >
           <MessageCircle className="w-6 h-6" />
+          {totalUnread > 0 && (
+            <span className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1.5 rounded-full bg-red-500 text-white text-[11px] font-semibold flex items-center justify-center border-2 border-white">
+              {totalUnread}
+            </span>
+          )}
         </button>
       )}
     </div>

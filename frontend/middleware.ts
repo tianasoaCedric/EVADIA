@@ -4,15 +4,11 @@ import { COOKIE_NAME } from '@/lib/auth-cookie'
 // Pages qui nécessitent une authentification
 const PROTECTED_PATHS = ['/profil', '/reservations', '/favorite']
 
-// Pages accessibles uniquement aux visiteurs non connectés
-const AUTH_PATHS = ['/login', '/register']
-
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
   const token = req.cookies.get(COOKIE_NAME)?.value
 
   const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p))
-  const isAuthPage = AUTH_PATHS.some((p) => pathname.startsWith(p))
 
   // Redirige vers /login si la page est privée et qu'il n'y a pas de token
   if (isProtected && !token) {
@@ -22,14 +18,9 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Redirige vers / si déjà connecté et qu'on tente d'accéder à /login ou /register
-  if (isAuthPage && token) {
-    const url = req.nextUrl.clone()
-    url.pathname = '/'
-    url.searchParams.delete('redirect')
-    return NextResponse.redirect(url)
-  }
-
+  // /login et /register restent accessibles même avec un cookie présent : le
+  // token peut être expiré/invalide côté backend. Les pages elles-mêmes
+  // redirigent déjà proprement un utilisateur réellement connecté.
   return NextResponse.next()
 }
 

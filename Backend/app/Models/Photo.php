@@ -38,11 +38,11 @@ class Photo extends Model
     public function getUrlAttribute(): string
     {
         if (str_starts_with($this->url_photo, 'http')) {
-            // Already a full URL (legacy data) — swap to CloudFront if needed
-            $cfUrl = rtrim(config('filesystems.disks.s3.url', ''), '/');
-            if ($cfUrl && !str_starts_with($this->url_photo, $cfUrl)) {
+            // Already a full URL (legacy data) — swap to the current S3 base if needed
+            $base = rtrim(config('filesystems.disks.s3.url', ''), '/');
+            if ($base && !str_starts_with($this->url_photo, $base)) {
                 $path = parse_url($this->url_photo, PHP_URL_PATH);
-                return $cfUrl . $path;
+                return $base . $path;
             }
             return $this->url_photo;
         }

@@ -197,6 +197,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('reservations/{id}/cancel', [ClientReservationController::class, 'cancel']);
         Route::get('reservations/{id}/invoice', [ClientReservationController::class, 'invoice']);
         Route::get('reservations/{id}/messages', [ClientReservationMessageController::class, 'index']);
+        Route::get('reservations/{id}/messages/unread-count', [ClientReservationMessageController::class, 'unreadCount']);
         Route::post('reservations/{id}/messages', [ClientReservationMessageController::class, 'store']);
         Route::post('reservations/{id}/messages/paiement', [ClientReservationMessageController::class, 'choisirPaiement']);
         Route::post('broadcasting-token', [BroadcastingTokenController::class, 'store']);

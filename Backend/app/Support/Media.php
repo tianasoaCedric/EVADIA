@@ -22,20 +22,20 @@ class Media
             return $placeholder;
         }
 
-        // Already a full URL — optionally rewrite legacy S3 hosts to the CDN.
+        // Already a full URL — optionally rewrite to the current S3 base if it changed.
         if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
-            $cdn = rtrim((string) config('filesystems.disks.s3.url', ''), '/');
-            if ($cdn !== '' && ! str_starts_with($path, $cdn)) {
+            $base = rtrim((string) config('filesystems.disks.s3.url', ''), '/');
+            if ($base !== '' && ! str_starts_with($path, $base)) {
                 $parsed = parse_url($path, PHP_URL_PATH);
                 if (is_string($parsed) && $parsed !== '') {
-                    return $cdn . $parsed;
+                    return $base . $parsed;
                 }
             }
 
             return $path;
         }
 
-        // Preferred: build from the configured CDN / public base URL (no S3 client).
+        // Preferred: build from the configured S3 public base URL (no S3 client).
         $base = rtrim((string) config('filesystems.disks.s3.url', ''), '/');
         if ($base !== '') {
             return $base . '/' . ltrim($path, '/');

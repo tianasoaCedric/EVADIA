@@ -48,7 +48,10 @@
           "color": "#01BDA5"
         }
       ],
-      "expo-video"
+      "expo-video",
+      "expo-image",
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

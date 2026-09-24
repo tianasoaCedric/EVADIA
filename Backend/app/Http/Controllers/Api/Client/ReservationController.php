@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Disponibilite;
 use App\Models\Offre;
 use App\Models\OffreUtilisation;
+use App\Models\Photo;
 use App\Models\Propriete;
 use App\Models\Reservation;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -62,7 +63,15 @@ class ReservationController extends Controller
             $query->where('statut', $statut);
         }
 
-        return response()->json($query->latest('date_reservation')->paginate(10));
+        $reservations = $query->latest('date_reservation')->paginate(10);
+
+        $reservations->getCollection()->each(function (Reservation $reservation) {
+            if ($photo = $reservation->propriete?->photoPrincipale) {
+                $photo->url_photo = $photo->url;
+            }
+        });
+
+        return response()->json($reservations);
     }
 
     #[OA\Get(
@@ -89,6 +98,10 @@ class ReservationController extends Controller
         if (!$reservation) {
             return response()->json(['message' => 'Réservation non trouvée'], 404);
         }
+
+        $reservation->propriete?->photos->each(function (Photo $photo) {
+            $photo->url_photo = $photo->url;
+        });
 
         return response()->json(['data' => $reservation]);
     }

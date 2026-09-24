@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Bouton from '../components/ui/Bouton'
 import Input from '../components/ui/Input'
@@ -28,6 +28,17 @@ export default function LoginClient() {
   const [isLoading, setIsLoading] = useState(false)
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [globalError, setGlobalError] = useState<string | null>(null)
+
+  // Un cookie peut être présent mais périmé/invalide côté backend : on ne
+  // redirige que si l'utilisateur est réellement authentifié.
+  useEffect(() => {
+    authService.me()
+      .then(() => {
+        const redirect = searchParams.get('redirect')
+        router.replace(redirect ? decodeURIComponent(redirect) : '/')
+      })
+      .catch(() => {})
+  }, [router, searchParams])
 
   const validate = (): boolean => {
     const errors: FieldErrors = {}
