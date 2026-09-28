@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Destination;
+use App\Support\FrontendCache;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -52,6 +53,8 @@ class DestinationController extends Controller
 
         Destination::create($validated);
 
+        FrontendCache::purgerDestinationsEtVilles();
+
         return redirect()->route('admin.destinations.index')
             ->with('success', 'Destination créée avec succès.');
     }
@@ -90,6 +93,20 @@ class DestinationController extends Controller
 
         $destination->update($validated);
 
+        FrontendCache::purgerDestinationsEtVilles();
+
+        // Photo changée : on reste sur la fiche pour voir la nouvelle photo en place
+        $photos = array_filter([
+            $request->hasFile('image') ? 'photo carte remplacée' : null,
+            $request->hasFile('couverture') ? count($request->file('couverture')) . ' photo(s) de couverture ajoutée(s)' : null,
+        ]);
+
+        if ($photos) {
+            return redirect()->route('admin.destinations.edit', $destination)
+                ->with('success', 'Destination mise à jour — ' . implode(', ', $photos) . '. Le site est actualisé.')
+                ->with('photo_modifiee', true);
+        }
+
         return redirect()->route('admin.destinations.index')
             ->with('success', 'Destination mise à jour.');
     }
@@ -103,6 +120,8 @@ class DestinationController extends Controller
             unset($couverture[$index]);
             $destination->update(['couverture' => array_values($couverture)]);
         }
+
+        FrontendCache::purgerDestinationsEtVilles();
 
         return redirect()->route('admin.destinations.edit', $destination)
             ->with('success', 'Photo supprimée.');
@@ -119,6 +138,8 @@ class DestinationController extends Controller
         }
 
         $destination->delete();
+
+        FrontendCache::purgerDestinationsEtVilles();
 
         return redirect()->route('admin.destinations.index')
             ->with('success', 'Destination supprimée.');

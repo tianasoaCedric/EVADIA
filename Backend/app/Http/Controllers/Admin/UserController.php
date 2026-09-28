@@ -79,7 +79,17 @@ class UserController extends Controller
 
     public function toggleStatus(User $user)
     {
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'Vous ne pouvez pas désactiver votre propre compte.');
+        }
+
         $user->update(['est_actif' => !$user->est_actif]);
+
+        if (!$user->est_actif) {
+            // Révoque tout de suite site client, apps mobiles et API. Les sessions
+            // des back offices sont coupées par EnsureUserIsActive à la requête suivante.
+            $user->tokens()->delete();
+        }
 
         $status = $user->est_actif ? 'activé' : 'désactivé';
         $this->logAction('user_status_toggled', "Utilisateur {$user->prenom} {$user->nom} {$status}");

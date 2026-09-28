@@ -33,8 +33,12 @@
                         <template x-if="!previews.length && {{ $destination->image_url ? 'true' : 'false' }}">
                             <div class="mb-3 flex items-center gap-3">
                                 <img src="@mediaUrl($destination->image_url ?? '')" alt="{{ $destination->nom }}"
-                                    class="h-20 w-32 rounded-xl object-cover ring-1 ring-gray-200">
-                                <p class="text-xs text-gray-400">Photo actuelle — téléversez-en une nouvelle pour la remplacer</p>
+                                    class="h-20 w-32 rounded-xl object-cover {{ session('photo_modifiee') ? 'ring-2 ring-emerald-500' : 'ring-1 ring-gray-200' }}">
+                                @if(session('photo_modifiee'))
+                                    <p class="text-xs font-medium text-emerald-600">✓ Nouvelle photo enregistrée et visible sur le site</p>
+                                @else
+                                    <p class="text-xs text-gray-400">Photo actuelle — téléversez-en une nouvelle pour la remplacer</p>
+                                @endif
                             </div>
                         </template>
                         <template x-if="previews.length">

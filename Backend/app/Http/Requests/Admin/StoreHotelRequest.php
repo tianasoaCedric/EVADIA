@@ -47,8 +47,6 @@ class StoreHotelRequest extends FormRequest
 
             // Step 5 - Abonnement
             'type_abonnement'      => 'required|exists:plans,code',
-            'abonnement_date_debut' => 'required|date',
-            'abonnement_date_fin'   => 'nullable|date|after:abonnement_date_debut',
         ];
     }
 

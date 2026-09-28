@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Destination;
 use App\Models\Ville;
+use App\Support\FrontendCache;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -62,6 +63,8 @@ class VilleController extends Controller
 
         Ville::create($validated);
 
+        FrontendCache::purgerDestinationsEtVilles();
+
         return redirect()->route('admin.villes.index')
             ->with('success', 'Ville créée avec succès.');
     }
@@ -104,6 +107,20 @@ class VilleController extends Controller
 
         $ville->update($validated);
 
+        FrontendCache::purgerDestinationsEtVilles();
+
+        // Photo changée : on reste sur la fiche pour voir la nouvelle photo en place
+        $photos = array_filter([
+            $request->hasFile('image') ? 'photo carte remplacée' : null,
+            $request->hasFile('couverture') ? count($request->file('couverture')) . ' photo(s) de couverture ajoutée(s)' : null,
+        ]);
+
+        if ($photos) {
+            return redirect()->route('admin.villes.edit', $ville)
+                ->with('success', 'Ville mise à jour — ' . implode(', ', $photos) . '. Le site est actualisé.')
+                ->with('photo_modifiee', true);
+        }
+
         return redirect()->route('admin.villes.index')
             ->with('success', 'Ville mise à jour.');
     }
@@ -117,6 +134,8 @@ class VilleController extends Controller
             unset($couverture[$index]);
             $ville->update(['couverture' => array_values($couverture)]);
         }
+
+        FrontendCache::purgerDestinationsEtVilles();
 
         return redirect()->route('admin.villes.edit', $ville)
             ->with('success', 'Photo supprimée.');
@@ -133,6 +152,8 @@ class VilleController extends Controller
         }
 
         $ville->delete();
+
+        FrontendCache::purgerDestinationsEtVilles();
 
         return redirect()->route('admin.villes.index')
             ->with('success', 'Ville supprimée.');

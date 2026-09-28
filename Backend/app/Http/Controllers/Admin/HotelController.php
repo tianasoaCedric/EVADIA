@@ -153,8 +153,9 @@ class HotelController extends Controller
             $abonnement = Abonnement::create([
                 'hotel_id'        => $hotel->id,
                 'type_abonnement' => $request->type_abonnement,
-                'date_debut'      => $request->abonnement_date_debut,
-                'date_fin'        => $request->abonnement_date_fin ?: null,
+                // Période d'un mois calculée côté serveur (ex. 31/01 → 28/02, sans débordement)
+                'date_debut'      => today(),
+                'date_fin'        => today()->addMonthNoOverflow(),
                 'prix_mensuel'    => $plan->prix,
                 'devise'          => $plan->devise,
             ]);

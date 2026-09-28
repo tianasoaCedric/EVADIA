@@ -23,6 +23,9 @@ services:
     env_file: .env.docker
     environment:
       - DB_HOST=postgres
+      # Vidage du cache Next.js après modif en back office (route interne, voir frontend/app/api/revalidate)
+      - FRONTEND_INTERNAL_URL=http://frontend:3000
+      - REVALIDATE_SECRET=${REVALIDATE_SECRET:-evadia-local-revalidate}
     ports:
       - "8000:8000"
     depends_on:
@@ -72,6 +75,7 @@ services:
         - NEXT_PUBLIC_REVERB_APP_KEY=${REVERB_APP_KEY}
     environment:
       - API_BASE_URL=http://api:8000/api
+      - REVALIDATE_SECRET=${REVALIDATE_SECRET:-evadia-local-revalidate}
     restart: unless-stopped
 
   # ─── PostgreSQL ───────────────────────────────────────────────

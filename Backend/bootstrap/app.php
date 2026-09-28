@@ -15,6 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->prepend(\Illuminate\Http\Middleware\HandleCors::class);
 
+        // Compte désactivé => déconnecté à la requête suivante (sessions et tokens)
+        $middleware->appendToGroup('web', \App\Http\Middleware\EnsureUserIsActive::class);
+        $middleware->appendToGroup('api', \App\Http\Middleware\EnsureUserIsActive::class);
+
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
             'level' => \App\Http\Middleware\CheckRoleLevel::class,

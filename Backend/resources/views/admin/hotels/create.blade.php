@@ -353,18 +353,17 @@
                         </template>
                     </div>
 
+                    {{-- Période calculée automatiquement : 1 mois à partir d'aujourd'hui --}}
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Date de début <span class="text-red-400 text-xs">*</span></label>
-                            <input type="date" name="abonnement_date_debut"
-                                value="{{ old('abonnement_date_debut', now()->toDateString()) }}" required
-                                class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
-                            @error('abonnement_date_debut') <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p> @enderror
+                        <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+                            <p class="text-xs font-medium text-gray-500">Début</p>
+                            <p class="mt-0.5 text-sm font-semibold text-gray-900">{{ now()->translatedFormat('d F Y') }}</p>
+                            <p class="text-xs text-gray-400">aujourd'hui</p>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Date de fin <span class="text-gray-400 font-normal text-xs">(optionnel)</span></label>
-                            <input type="date" name="abonnement_date_fin" value="{{ old('abonnement_date_fin') }}"
-                                class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
+                        <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+                            <p class="text-xs font-medium text-gray-500">Fin (échéance)</p>
+                            <p class="mt-0.5 text-sm font-semibold text-gray-900">{{ now()->addMonthNoOverflow()->translatedFormat('d F Y') }}</p>
+                            <p class="text-xs text-gray-400">1 mois</p>
                         </div>
                     </div>
 
@@ -372,7 +371,7 @@
                         <svg class="h-5 w-5 text-blue-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
                         </svg>
-                        <p>Le premier paiement sera dû le jour de la date de début. Les suivants seront dus chaque mois à la même date.</p>
+                        <p>Les dates sont calculées automatiquement : l'abonnement court 1 mois à partir d'aujourd'hui. Le premier paiement est dû aujourd'hui ; chaque renouvellement prolonge d'un mois.</p>
                     </div>
 
                 </div>
@@ -441,7 +440,7 @@
             const step1 = ['nom','email_contact','telephone','site_web','etoiles','types'];
             const step2 = ['adresse_ligne1','code_postal','ville','pays','destination_id'];
             const step4 = ['admin_nom','admin_prenom','admin_email','admin_telephone'];
-            const step5 = ['type_abonnement','abonnement_date_debut','abonnement_date_fin'];
+            const step5 = ['type_abonnement'];
             let initialStep = 1;
             if (errorFields.some(f => step5.some(s => f.startsWith(s)))) initialStep = 5;
             else if (errorFields.some(f => step4.some(s => f.startsWith(s)))) initialStep = 4;
