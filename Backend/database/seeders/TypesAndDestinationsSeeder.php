@@ -23,24 +23,29 @@ class TypesAndDestinationsSeeder extends Seeder
             \App\Models\TypesHotel::firstOrCreate(['nom' => $type['nom']], ['description' => $type['description']]);
         }
 
-        // Destinations
+        // Destinations — image_url / couverture sont des clés S3 déjà uploadées
         $destinations = [
-            ['nom' => 'Nord',                   'description' => 'Nosy Be, Diego Suarez, Ambanja',    'image_url' => '/photos/destinations/nord.jpg'],
-            ['nom' => 'Sud',                     'description' => 'Tuléar, Fort Dauphin, Isalo',       'image_url' => '/photos/destinations/sud.jpg'],
-            ['nom' => 'Est',                     'description' => 'Tamatave, Île Sainte-Marie',         'image_url' => '/photos/destinations/est.jpg'],
-            ['nom' => 'Ouest',                   'description' => 'Morondava, Majunga, Allée des Baobabs', 'image_url' => '/photos/destinations/ouest.jpg'],
-            ['nom' => 'Hautes terres centrales', 'description' => 'Antananarivo, Antsirabe, Fianarantsoa', 'image_url' => '/photos/destinations/hautes-terres.jpg'],
+            ['nom' => 'Nord',                    'description' => 'Nosy Be, Diego Suarez, Ambanja',         'image_url' => 'destinations/yKGCERrxqF8gi5AI2YqGO19Ct10CIrh95mosVP92.webp', 'couverture' => null],
+            ['nom' => 'Sud',                     'description' => 'Tuléar, Fort Dauphin, Isalo',            'image_url' => 'destinations/vAmWACveL0mP0Hzhd1WNJxp436xOQHqyzNx6cK6D.webp', 'couverture' => null],
+            ['nom' => 'Est',                     'description' => 'Tamatave, Île Sainte-Marie',             'image_url' => 'destinations/WAVOWFGvMkgJfJZWdGfy2t2JiMHiyXSX2Z0nbfwt.webp', 'couverture' => null],
+            ['nom' => 'Ouest',                   'description' => 'Morondava, Majunga, Allée des Baobabs',  'image_url' => 'destinations/bpMA2yaxBU7JoIO03lO0R3x1fF4lknaUxDXWhT5S.webp', 'couverture' => null],
+            ['nom' => 'Hautes terres centrales', 'description' => 'Antananarivo, Antsirabe, Fianarantsoa', 'image_url' => 'destinations/47CsXwJCjPrFdJ9BAxTdHikjuiqgGMH7xJgW3usV.webp', 'couverture' => ['destinations/couverture/rU9sk1ckezPzUjqXQLHjSvLSsb2lcTMKgJubn3jC.webp']],
         ];
 
         foreach ($destinations as $dest) {
-            \App\Models\Destination::firstOrCreate(
+            $destination = \App\Models\Destination::firstOrCreate(
                 ['nom' => $dest['nom']],
-                ['description' => $dest['description'], 'image_url' => $dest['image_url']]
+                ['description' => $dest['description']]
             );
-            // Mettre à jour image_url si la ligne existait déjà sans image
-            \App\Models\Destination::where('nom', $dest['nom'])
-                ->whereNull('image_url')
-                ->update(['image_url' => $dest['image_url']]);
+
+            // Ne remplit que les champs vides : on n'écrase pas une image changée depuis l'admin
+            if (empty($destination->image_url)) {
+                $destination->image_url = $dest['image_url'];
+            }
+            if (empty($destination->couverture) && $dest['couverture']) {
+                $destination->couverture = $dest['couverture'];
+            }
+            $destination->save();
         }
     }
 }

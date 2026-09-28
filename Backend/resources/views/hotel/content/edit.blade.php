@@ -232,7 +232,20 @@
                         <img src="{{ $photo->url }}" alt="Photo hôtel"
                             class="h-40 w-full object-cover">
                         @if($photo->est_principale)
-                            <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-hotel-600 text-white text-xs font-medium">Principale</span>
+                            <span class="absolute top-2 left-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-hotel-600 text-white text-xs font-medium shadow">
+                                <svg class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M11.48 3.5a.56.56 0 011.04 0l2.13 5.11 5.52.44a.56.56 0 01.32.99l-4.2 3.6 1.28 5.38a.56.56 0 01-.84.61L12 16.73l-4.73 2.9a.56.56 0 01-.84-.61l1.28-5.38-4.2-3.6a.56.56 0 01.32-.99l5.52-.44 2.13-5.11z"/></svg>
+                                Principale
+                            </span>
+                        @else
+                            <form method="POST" action="{{ route('hotel.content.photos.principale', $photo->id) }}"
+                                class="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                @csrf @method('PATCH')
+                                <button type="submit"
+                                    class="w-full inline-flex items-center justify-center gap-1.5 rounded-lg bg-white/95 px-2 py-1.5 text-xs font-medium text-gray-800 shadow hover:bg-hotel-600 hover:text-white transition-colors">
+                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.5a.56.56 0 011.04 0l2.13 5.11 5.52.44a.56.56 0 01.32.99l-4.2 3.6 1.28 5.38a.56.56 0 01-.84.61L12 16.73l-4.73 2.9a.56.56 0 01-.84-.61l1.28-5.38-4.2-3.6a.56.56 0 01.32-.99l5.52-.44 2.13-5.11z"/></svg>
+                                    Définir comme principale
+                                </button>
+                            </form>
                         @endif
                         <form method="POST" action="{{ route('hotel.content.photos.destroy', $photo->id) }}"
                             class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">

@@ -34,6 +34,34 @@ class VillesSeeder extends Seeder
             ],
         ];
 
+        // Images des villes — clés S3 déjà uploadées, indexées par destination puis ville
+        $images = [
+            'Nord' => [
+                'Nosy Be' => ['image' => 'villes/eJ3U8wT1ZFPgPNerNBddATIgLOwLONK1q9unJJy0.webp'],
+            ],
+            'Ouest' => [
+                'Mahajanga' => ['image' => 'villes/FLk7ZerGmz1SjFZzBZtIL2zZV51xpEbTDbmngn6z.webp'],
+                'Morondava' => ['image' => 'villes/s1DYoi5Tc3Be1YzGMP8Z5bx4Bqo6PVA36eInmwo7.webp'],
+            ],
+            'Est' => [
+                'Sainte-Marie' => ['image' => 'villes/S3D0GtI8Ep3OB6mLDn6POJlB7sSUCvjW2YEcjaR1.webp'],
+            ],
+            'Hautes terres centrales' => [
+                'Antananarivo' => [
+                    'image'      => 'villes/LvZ253cNhV9wPIubbBbA4o0GQ9MSmXvEZ7h7GX99.webp',
+                    'couverture' => ['villes/couverture/quRCOiAsGsrj6H26Iku9jjpFGO3xVfCMiS5CA6Nf.webp'],
+                ],
+                'Ampefy'    => ['image' => 'villes/osf2eYhoLm5hR2HzRzdh0wJcVbYEte9cigMzcDXX.webp'],
+                'Andasibe'  => ['image' => 'villes/zBjbjcuMbb3SQRh7RLYJa8d8GMKrMJqkKfWYFpoA.webp'],
+                'Antsirabe' => ['image' => 'villes/IeSta49qMFauInRt9bpO3Z1N4gk3hTzYVg4RLKNx.webp'],
+                'Mantasoa'  => ['image' => 'villes/m51N6x3zYDWSvFYcqml4bYwKMrKkrKinWuDzg6y7.webp'],
+                'Isalo'     => ['image' => 'villes/ZK9f98zcoCicVJckMS2jld6D601HAzFGqzRNilWh.webp'],
+            ],
+            'Sud' => [
+                'Toliara' => ['image' => 'villes/U7kzHpW8imhu0o36wPzYqE2JdAXdbKXvhySXDJut.webp'],
+            ],
+        ];
+
         foreach ($villes as $destinationNom => $nomVilles) {
             $destination = Destination::where('nom', $destinationNom)->first();
 
@@ -43,9 +71,22 @@ class VillesSeeder extends Seeder
             }
 
             foreach ($nomVilles as $nom) {
-                Ville::firstOrCreate(
+                $ville = Ville::firstOrCreate(
                     ['nom' => $nom, 'destination_id' => $destination->id],
                 );
+
+                // Ne remplit que les champs vides : on n'écrase pas une image changée depuis l'admin
+                $media = $images[$destinationNom][$nom] ?? null;
+                if (!$media) {
+                    continue;
+                }
+                if (empty($ville->image)) {
+                    $ville->image = $media['image'];
+                }
+                if (empty($ville->couverture) && !empty($media['couverture'])) {
+                    $ville->couverture = $media['couverture'];
+                }
+                $ville->save();
             }
         }
     }

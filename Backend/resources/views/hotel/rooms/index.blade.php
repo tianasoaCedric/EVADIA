@@ -96,6 +96,7 @@
                     </div>
 
                     <div class="flex items-center gap-4 text-xs text-gray-500 mb-3">
+                        <span class="font-medium text-gray-700">{{ $propriete->nombre_unites }} unité(s)</span>
                         <span>{{ $propriete->capacite }} pers.</span>
                         @if($propriete->nb_chambres) <span>{{ $propriete->nb_chambres }} ch.</span> @endif
                         @if($propriete->superficie) <span>{{ $propriete->superficie }} m²</span> @endif

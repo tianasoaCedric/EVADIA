@@ -20,7 +20,7 @@ class HotelContentController extends Controller
     public function show()
     {
         $hotel = $this->getHotel();
-        $hotel->load(['adresse', 'types', 'photos', 'services']);
+        $hotel->load(['adresse', 'types', 'photos', 'services', 'currentStatut']);
 
         return view('hotel.content.show', compact('hotel'));
     }
@@ -93,8 +93,6 @@ class HotelContentController extends Controller
         ]);
 
         $maxOrdre = $hotel->photos()->max('ordre') ?? 0;
-        $isFirst = $hotel->photos()->count() === 0;
-
         foreach ($request->file('photos') as $i => $photo) {
             $path = $photo->store("hotels/{$hotel->id}", 's3');
             Photo::create([
@@ -102,10 +100,12 @@ class HotelContentController extends Controller
                 'entite_id' => $hotel->id,
                 'url_photo' => $path,
                 'ordre' => $maxOrdre + $i + 1,
-                'est_principale' => $isFirst && $i === 0,
+                'est_principale' => false,
                 'uploaded_by' => auth('hotel')->id(),
             ]);
         }
+
+        Photo::assurerPrincipale('hotel', $hotel->id);
 
         $this->logAction('hotel_photos_uploaded', count($request->file('photos')) . ' photo(s) ajoutée(s)');
 
@@ -119,10 +119,22 @@ class HotelContentController extends Controller
 
         Storage::disk('s3')->delete($hotelPhoto->url_photo);
         $hotelPhoto->delete();
+        Photo::assurerPrincipale('hotel', $hotel->id);
 
         $this->logAction('hotel_photo_deleted', "Photo supprimée");
 
         return back()->with('success', 'Photo supprimée.');
+    }
+
+    public function setPrincipalePhoto($photo)
+    {
+        $hotel = $this->getHotel();
+        $hotelPhoto = Photo::forHotel($hotel->id)->where('id', $photo)->firstOrFail();
+
+        Photo::definirPrincipale('hotel', $hotel->id, $hotelPhoto->id);
+        $this->logAction('hotel_photo_principale', "Photo principale de l'hôtel modifiée");
+
+        return back()->with('success', 'Photo principale mise à jour.');
     }
 
     public function reorderPhotos(Request $request)
@@ -144,13 +156,81 @@ class HotelContentController extends Controller
     {
         $hotel = $this->getHotel();
         $hotel->load('services');
-        $services        = $hotel->services->sortBy('type_service')->groupBy('type_service');
-        $types           = $hotel->services->pluck('type_service')->filter()->unique()->sort()->values();
-        $allEquipements  = \App\Models\Equipement::orderBy('categorie')->orderBy('nom')
-                            ->get(['id', 'nom', 'categorie'])
-                            ->groupBy('categorie');
 
-        return view('hotel.services.index', compact('hotel', 'services', 'types', 'allEquipements'));
+        $allEquipements = \App\Models\Equipement::orderBy('categorie')->orderBy('nom')
+            ->get(['id', 'nom', 'categorie']);
+
+        // Un équipement du catalogue est « coché » si l'hôtel a un service du même nom
+        $nomsServices = $hotel->services->map(fn($s) => mb_strtolower(trim($s->nom)));
+        $nomsCatalogue = $allEquipements->map(fn($e) => mb_strtolower(trim($e->nom)));
+
+        $checkedIds = $allEquipements
+            ->filter(fn($e) => $nomsServices->contains(mb_strtolower(trim($e->nom))))
+            ->pluck('id')->values();
+
+        // Services libres (hors catalogue) : gérés à la main comme avant
+        $customServices = $hotel->services
+            ->reject(fn($s) => $nomsCatalogue->contains(mb_strtolower(trim($s->nom))))
+            ->sortBy('nom')
+            ->values();
+
+        $equipementsParCategorie = $allEquipements->groupBy(fn($e) => $e->categorie ?: 'Autres');
+        $categories = $equipementsParCategorie->keys();
+
+        return view('hotel.services.index', compact(
+            'hotel', 'equipementsParCategorie', 'categories', 'checkedIds', 'customServices'
+        ));
+    }
+
+    /**
+     * Enregistre en une fois les équipements cochés : ajoute les nouveaux,
+     * retire ceux décochés. Les services libres (hors catalogue) ne sont pas touchés.
+     */
+    public function syncEquipements(Request $request)
+    {
+        $hotel = $this->getHotel();
+
+        $validated = $request->validate([
+            'equipements'   => 'nullable|array',
+            'equipements.*' => 'integer|exists:equipements,id',
+        ]);
+
+        $catalogue = \App\Models\Equipement::all(['id', 'nom', 'categorie']);
+        $cochesIds = collect($validated['equipements'] ?? [])->map(fn($id) => (int) $id);
+
+        $existants = $hotel->services()->get()
+            ->keyBy(fn($s) => mb_strtolower(trim($s->nom)));
+
+        $ajoutes = 0;
+        $retires = 0;
+
+        DB::transaction(function () use ($hotel, $catalogue, $cochesIds, $existants, &$ajoutes, &$retires) {
+            foreach ($catalogue as $equipement) {
+                $cle = mb_strtolower(trim($equipement->nom));
+                $coche = $cochesIds->contains($equipement->id);
+                $service = $existants->get($cle);
+
+                if ($coche && !$service) {
+                    $hotel->services()->create([
+                        'nom'          => $equipement->nom,
+                        'type_service' => $equipement->categorie,
+                        'devise'       => $hotel->devise_principale,
+                    ]);
+                    $ajoutes++;
+                } elseif (!$coche && $service) {
+                    $service->delete();
+                    $retires++;
+                }
+            }
+        });
+
+        $this->logAction('hotel_equipements_synced', "Équipements mis à jour (+{$ajoutes} / -{$retires})");
+
+        $message = $ajoutes || $retires
+            ? "Équipements enregistrés ({$ajoutes} ajouté(s), {$retires} retiré(s))."
+            : 'Aucun changement.';
+
+        return back()->with('success', $message);
     }
 
     public function storeService(Request $request)

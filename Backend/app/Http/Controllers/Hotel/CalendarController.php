@@ -7,6 +7,7 @@ use App\Http\Controllers\Hotel\Traits\BelongsToHotel;
 use App\Models\Disponibilite;
 use App\Models\Propriete;
 use App\Models\Reservation;
+use App\Services\DisponibiliteService;
 use App\Traits\LogsAdminAction;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -19,12 +20,12 @@ class CalendarController extends Controller
     public function index()
     {
         $hotel = $this->getHotel();
-        $proprietes = Propriete::where('hotel_id', $hotel->id)->select('id', 'nom', 'type_propriete')->get();
+        $proprietes = Propriete::where('hotel_id', $hotel->id)->select('id', 'nom', 'type_propriete', 'nombre_unites')->get();
 
         return view('hotel.calendar.index', compact('hotel', 'proprietes'));
     }
 
-    public function getData(Request $request)
+    public function getData(Request $request, DisponibiliteService $disponibiliteService)
     {
         $hotel = $this->getHotel();
 
@@ -37,26 +38,50 @@ class CalendarController extends Controller
             ->where('hotel_id', $hotel->id)->firstOrFail();
 
         $debut = Carbon::parse($request->mois)->startOfMonth();
-        $fin = Carbon::parse($request->mois)->endOfMonth();
+        $finExclusive = $debut->copy()->addMonth();
+        $total = max(1, (int) $propriete->nombre_unites);
 
-        // Disponibilites
         $disponibilites = Disponibilite::where('propriete_id', $propriete->id)
-            ->whereBetween('date', [$debut, $fin])
+            ->where('date', '>=', $debut->toDateString())
+            ->where('date', '<', $finExclusive->toDateString())
             ->get()
-            ->keyBy(fn($d) => $d->date->format('Y-m-d'));
+            ->keyBy(fn($d) => $d->date->toDateString());
 
-        // Reservations on this period
-        $reservations = Reservation::where('propriete_id', $propriete->id)
-            ->whereIn('statut', ['en_attente', 'acceptee'])
-            ->where('date_debut', '<=', $fin)
-            ->where('date_fin', '>=', $debut)
-            ->with('client')
-            ->get();
+        $reservations = $disponibiliteService->reservationsActives($propriete, $debut, $finExclusive)
+            ->load('client:id,nom,prenom,email');
+        $parNuit = $disponibiliteService->reservationsParNuit($reservations, $debut, $finExclusive);
+
+        $jours = [];
+        foreach ($parNuit as $date => $occupants) {
+            $dispo = $disponibilites->get($date);
+            $occupees = $occupants->count();
+
+            $jours[$date] = [
+                'total'          => $total,
+                'occupees'       => $occupees,
+                'restantes'      => max(0, $total - $occupees),
+                'confirmees'     => $occupants->where('statut', 'acceptee')->count(),
+                'en_attente'     => $occupants->where('statut', 'en_attente')->count(),
+                'ferme'          => $dispo && !$dispo->est_disponible,
+                'prix_special'   => $dispo?->prix_special,
+                'minimum_nuits'  => $dispo?->minimum_nuits,
+                'reservations'   => $occupants->map(fn(Reservation $r) => [
+                    'id'         => $r->id,
+                    'code'       => $r->code_reservation,
+                    'client'     => trim(($r->client?->prenom ?? '') . ' ' . ($r->client?->nom ?? '')) ?: ($r->client?->email ?? 'Client'),
+                    'statut'     => $r->statut,
+                    'date_debut' => $r->date_debut->format('d/m/Y'),
+                    'date_fin'   => $r->date_fin->format('d/m/Y'),
+                    'personnes'  => (int) $r->nb_adultes + (int) $r->nb_enfants,
+                    'url'        => route('hotel.reservations.show', $r->id),
+                ])->values(),
+            ];
+        }
 
         return response()->json([
-            'disponibilites' => $disponibilites,
-            'reservations' => $reservations,
-            'prix_base' => $propriete->currentPrix?->prix,
+            'nombre_unites' => $total,
+            'prix_base'     => $propriete->currentPrix?->prix,
+            'jours'         => $jours,
         ]);
     }
 
@@ -74,17 +99,8 @@ class CalendarController extends Controller
         $propriete = Propriete::where('id', $request->propriete_id)
             ->where('hotel_id', $hotel->id)->firstOrFail();
 
-        // Check no active reservation
-        $hasReservation = Reservation::where('propriete_id', $request->propriete_id)
-            ->whereIn('statut', ['en_attente', 'acceptee'])
-            ->where('date_debut', '<=', $request->date)
-            ->where('date_fin', '>', $request->date)
-            ->exists();
-
-        if ($hasReservation) {
-            return back()->withErrors(['date' => 'Cette date a une réservation active, impossible de la modifier.']);
-        }
-
+        // Une date avec des réservations reste modifiable : fermer la vente
+        // bloque seulement les unités restantes, les séjours en cours sont conservés.
         Disponibilite::updateOrCreate(
             ['propriete_id' => $request->propriete_id, 'date' => $request->date],
             [
@@ -115,22 +131,10 @@ class CalendarController extends Controller
             ->where('hotel_id', $hotel->id)->firstOrFail();
 
         $dates = CarbonPeriod::create($request->date_debut, $request->date_fin);
-        $skipped = 0;
 
+        // Comme pour une date seule : les réservations existantes sont conservées.
         foreach ($dates as $date) {
             $dateStr = $date->format('Y-m-d');
-
-            // Check no active reservation
-            $hasReservation = Reservation::where('propriete_id', $request->propriete_id)
-                ->whereIn('statut', ['en_attente', 'acceptee'])
-                ->where('date_debut', '<=', $dateStr)
-                ->where('date_fin', '>', $dateStr)
-                ->exists();
-
-            if ($hasReservation) {
-                $skipped++;
-                continue;
-            }
 
             Disponibilite::updateOrCreate(
                 ['propriete_id' => $request->propriete_id, 'date' => $dateStr],
@@ -144,11 +148,6 @@ class CalendarController extends Controller
             );
         }
 
-        $message = 'Disponibilités mises à jour.';
-        if ($skipped > 0) {
-            $message .= " ({$skipped} date(s) ignorée(s) car réservée(s))";
-        }
-
-        return response()->json(['success' => true, 'message' => $message]);
+        return response()->json(['success' => true, 'message' => 'Disponibilités mises à jour.']);
     }
 }

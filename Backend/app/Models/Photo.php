@@ -78,6 +78,32 @@ class Photo extends Model
         return $query->where('entite_type', 'ville')->where('entite_id', $villeId);
     }
 
+    // ─── Photo principale ──────────────────────────────
+
+    /** Fait de $photoId l'unique photo principale de l'entité. */
+    public static function definirPrincipale(string $entiteType, int $entiteId, int $photoId): void
+    {
+        \Illuminate\Support\Facades\DB::transaction(function () use ($entiteType, $entiteId, $photoId) {
+            static::where('entite_type', $entiteType)->where('entite_id', $entiteId)
+                ->update(['est_principale' => false]);
+            static::where('entite_type', $entiteType)->where('entite_id', $entiteId)
+                ->whereKey($photoId)->update(['est_principale' => true]);
+        });
+    }
+
+    /** Garantit une photo principale (la première par ordre) s'il reste des photos. */
+    public static function assurerPrincipale(string $entiteType, int $entiteId): void
+    {
+        $query = static::where('entite_type', $entiteType)->where('entite_id', $entiteId);
+
+        if ((clone $query)->where('est_principale', true)->exists()) {
+            return;
+        }
+
+        $premiere = (clone $query)->orderBy('ordre')->orderBy('id')->first();
+        $premiere?->update(['est_principale' => true]);
+    }
+
     // ─── Relations ─────────────────────────────────────
 
     public function propriete(): BelongsTo

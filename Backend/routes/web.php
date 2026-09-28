@@ -165,7 +165,9 @@ Route::middleware(['auth:hotel', 'role:admin_hotel,gestionnaire_hotel', 'passwor
         Route::post('content/photos', [HotelContentController::class, 'uploadPhotos'])->name('content.photos.store');
         Route::delete('content/photos/{photo}', [HotelContentController::class, 'deletePhoto'])->name('content.photos.destroy');
         Route::patch('content/photos/reorder', [HotelContentController::class, 'reorderPhotos'])->name('content.photos.reorder');
+        Route::patch('content/photos/{photo}/principale', [HotelContentController::class, 'setPrincipalePhoto'])->name('content.photos.principale');
         Route::post('content/services', [HotelContentController::class, 'storeService'])->name('content.services.store');
+        Route::post('content/services/equipements', [HotelContentController::class, 'syncEquipements'])->name('content.services.sync');
         Route::put('content/services/{service}', [HotelContentController::class, 'updateService'])->name('content.services.update');
         Route::delete('content/services/{service}', [HotelContentController::class, 'deleteService'])->name('content.services.destroy');
 
@@ -182,6 +184,7 @@ Route::middleware(['auth:hotel', 'role:admin_hotel,gestionnaire_hotel', 'passwor
         Route::post('rooms/{propriete}/photos', [RoomPhotoController::class, 'store'])->name('rooms.photos.store');
         Route::delete('rooms/{propriete}/photos/{photo}', [RoomPhotoController::class, 'destroy'])->name('rooms.photos.destroy');
         Route::patch('rooms/{propriete}/photos/reorder', [RoomPhotoController::class, 'reorder'])->name('rooms.photos.reorder');
+        Route::patch('rooms/{propriete}/photos/{photo}/principale', [RoomPhotoController::class, 'setPrincipale'])->name('rooms.photos.principale');
 
         // Reservations
         Route::get('reservations', [ReservationController::class, 'index'])->name('reservations.index');

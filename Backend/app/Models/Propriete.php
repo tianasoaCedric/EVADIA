@@ -21,6 +21,7 @@ class Propriete extends Model
         'nom',
         'description',
         'type_propriete',
+        'nombre_unites',
         'capacite',
         'nb_chambres',
         'nb_lits',
@@ -33,6 +34,7 @@ class Propriete extends Model
     protected function casts(): array
     {
         return [
+            'nombre_unites' => 'integer',
             'capacite' => 'integer',
             'nb_chambres' => 'integer',
             'nb_lits' => 'integer',

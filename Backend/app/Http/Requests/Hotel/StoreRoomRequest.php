@@ -17,6 +17,7 @@ class StoreRoomRequest extends FormRequest
             'nom' => 'required|max:200',
             'description' => 'nullable|string',
             'type_propriete' => 'required|in:chambre,suite,villa,appartement,bungalow,studio',
+            'nombre_unites' => 'required|integer|min:1|max:1000',
             'capacite' => 'required|integer|min:1',
             'nb_chambres' => 'nullable|integer|min:0',
             'nb_lits' => 'nullable|integer|min:0',

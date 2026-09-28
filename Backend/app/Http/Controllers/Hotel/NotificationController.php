@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Hotel;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Hotel\Traits\BelongsToHotel;
 use App\Models\Notification;
+use App\Models\Reservation;
 use Illuminate\Http\JsonResponse;
 
 class NotificationController extends Controller
@@ -34,9 +35,15 @@ class NotificationController extends Controller
             ->where('lu', false)
             ->count();
 
+        // Demandes à traiter : badge sur « Réservations » dans la sidebar
+        $reservationsEnAttente = Reservation::whereHas('propriete', fn($q) => $q->where('hotel_id', $this->getHotel()->id))
+            ->where('statut', 'en_attente')
+            ->count();
+
         return response()->json([
             'notifications' => $notifications,
             'unread_count' => $unreadCount,
+            'reservations_en_attente' => $reservationsEnAttente,
         ]);
     }
 

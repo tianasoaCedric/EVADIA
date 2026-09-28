@@ -1,4 +1,5 @@
-FROM php:8.2-cli
+# ─── base : système, extensions PHP, Node, Composer (change rarement) ─────────
+FROM php:8.2-cli AS base
 
 # System dependencies (swoole needs libssl-dev + libcurl4-openssl-dev)
 RUN apt-get update && apt-get install -y \
@@ -20,13 +21,28 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
+# ─── build : dépendances (en cache tant que les lockfiles ne changent pas) ─────
+FROM base AS build
+
+# Seuls les manifestes sont copiés ici : modifier du code PHP/Blade ne
+# relance ni composer install ni npm ci.
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-autoloader --no-interaction
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Code de l'application : seules les étapes suivantes sont rejouées à chaque modif
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+RUN composer dump-autoload --optimize --no-dev \
+    && npm run build \
+    && rm -rf node_modules
 
-RUN npm ci && npm run build && rm -rf node_modules
+# ─── final : image d'exécution, sans node_modules ─────────────────────────────
+FROM base
 
-RUN chown -R www-data:www-data storage bootstrap/cache
+COPY --from=build --chown=www-data:www-data /var/www /var/www
 
 EXPOSE 8000
 

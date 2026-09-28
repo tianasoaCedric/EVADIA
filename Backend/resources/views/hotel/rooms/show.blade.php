@@ -72,6 +72,10 @@
                         <p class="text-sm font-medium text-gray-900">{{ ucfirst($propriete->type_propriete) }}</p>
                     </div>
                     <div>
+                        <p class="text-xs text-gray-500">Nombre d'unités</p>
+                        <p class="text-sm font-medium text-gray-900">{{ $propriete->nombre_unites }} unité(s) de ce type</p>
+                    </div>
+                    <div>
                         <p class="text-xs text-gray-500">Capacité</p>
                         <p class="text-sm font-medium text-gray-900">{{ $propriete->capacite }} personne(s)</p>
                     </div>

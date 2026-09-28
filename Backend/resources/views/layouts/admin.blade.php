@@ -182,7 +182,7 @@
             :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0 lg:w-[4.5rem] sidebar-collapsed'">
 
             <!-- Logo -->
-            <div class="flex h-16 items-center gap-3 px-4 border-b border-white/[0.06]">
+            <div class="flex h-20 shrink-0 items-center gap-3 px-4 border-b border-white/[0.06]">
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 min-w-0">
                     <img x-show="sidebarOpen" src="{{ asset('images/Evadia_Logo_BW_1.png') }}" alt="EVADIA" class="h-8 shrink-0">
                     <img x-show="!sidebarOpen" src="{{ asset('images/Evadia_Logo_BW_4.png') }}" alt="EVADIA" class="h-8 mx-auto shrink-0">
@@ -375,7 +375,7 @@
 
             <!-- Header -->
             <header
-                class="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-gray-200 bg-white/80 backdrop-blur-xl px-6 shadow-sm">
+                class="sticky top-0 z-40 flex h-20 shrink-0 items-center justify-between border-b border-gray-200 bg-white/80 backdrop-blur-xl px-8 shadow-sm">
                 <!-- Left: Toggle + Breadcrumb -->
                 <div class="flex items-center gap-4">
                     <button @click="sidebarOpen = !sidebarOpen"
@@ -386,7 +386,7 @@
                                 d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                         </svg>
                     </button>
-                    <h1 class="text-lg font-semibold text-gray-900">@yield('page_title', 'Dashboard')</h1>
+                    <h1 class="text-xl font-semibold text-gray-900">@yield('page_title', 'Dashboard')</h1>
                 </div>
 
                 <!-- Right: Notifications + Profile -->

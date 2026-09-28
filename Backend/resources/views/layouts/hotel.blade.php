@@ -56,6 +56,144 @@
         }
     </script>
 
+    <!-- Notifications hôtel : store Alpine partagé (cloche, badge Réservations, alerte) -->
+    <script>
+        document.addEventListener('alpine:init', () => {
+            const ROUTES = {
+                recent: @js(route('hotel.notifications.recent')),
+                markRead: @js(route('hotel.notifications.mark-read', ['notification' => '__ID__'])),
+                markAll: @js(route('hotel.notifications.mark-all-read')),
+            };
+            const CSRF = @js(csrf_token());
+            const POLL_MS = 20000;
+            const SEEN_KEY = 'evadia:hotel:alertes-vues';
+            const TYPE_RESERVATION = 'nouvelle_reservation';
+
+            const readSeen = () => { try { return JSON.parse(sessionStorage.getItem(SEEN_KEY) || '[]'); } catch { return []; } };
+            const writeSeen = (ids) => { try { sessionStorage.setItem(SEEN_KEY, JSON.stringify(ids.slice(-200))); } catch {} };
+
+            Alpine.store('notifs', {
+                items: [],
+                unread: 0,
+                enAttente: 0,
+                alertes: [],
+                permission: ('Notification' in window) ? Notification.permission : 'unsupported',
+                _titre: document.title,
+                _blink: null,
+
+                init() {
+                    this.refresh();
+                    setInterval(() => this.refresh(), POLL_MS);
+                    document.addEventListener('visibilitychange', () => {
+                        if (!document.hidden) { this.refresh(); this.stopBlink(); }
+                    });
+                },
+
+                async refresh() {
+                    try {
+                        const res = await fetch(ROUTES.recent, { headers: { 'Accept': 'application/json' } });
+                        if (!res.ok) return;
+                        const d = await res.json();
+                        this.items = d.notifications || [];
+                        this.unread = d.unread_count || 0;
+                        this.enAttente = d.reservations_en_attente || 0;
+                        this.detecterNouvellesReservations();
+                    } catch (e) { /* réseau indisponible : on réessaie au prochain tour */ }
+                },
+
+                detecterNouvellesReservations() {
+                    const seen = readSeen();
+                    const nouvelles = this.items.filter(n =>
+                        n.type_notification === TYPE_RESERVATION && !n.lu
+                        && !seen.includes(n.id) && !this.alertes.some(a => a.id === n.id));
+                    if (!nouvelles.length) return;
+
+                    this.alertes = [...nouvelles, ...this.alertes].slice(0, 3);
+                    writeSeen([...seen, ...nouvelles.map(n => n.id)]);
+                    this.sonner();
+                    this.startBlink(nouvelles.length);
+                    if (document.hidden && this.permission === 'granted') {
+                        nouvelles.forEach(n => {
+                            const sys = new Notification(n.titre, { body: n.contenu, tag: 'reservation-' + n.id });
+                            sys.onclick = () => { window.focus(); this.ouvrir(n); };
+                        });
+                    }
+                },
+
+                fermerAlerte(n) {
+                    this.alertes = this.alertes.filter(a => a.id !== n.id);
+                    if (!this.alertes.length) this.stopBlink();
+                },
+
+                async ouvrir(n) {
+                    await this.marquerLu(n);
+                    window.location.href = n.lien || '#';
+                },
+
+                async marquerLu(n) {
+                    if (n.lu) return;
+                    n.lu = true;
+                    this.unread = Math.max(0, this.unread - 1);
+                    this.fermerAlerte(n);
+                    try {
+                        await fetch(ROUTES.markRead.replace('__ID__', n.id), {
+                            method: 'PATCH', headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+                        });
+                    } catch (e) {}
+                },
+
+                async toutMarquerLu() {
+                    await fetch(ROUTES.markAll, { method: 'POST', headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' } });
+                    this.unread = 0;
+                    this.items = this.items.map(n => ({ ...n, lu: true }));
+                    this.alertes = [];
+                    this.stopBlink();
+                },
+
+                async activerNavigateur() {
+                    if (!('Notification' in window)) return;
+                    this.permission = await Notification.requestPermission();
+                },
+
+                // Petit carillon (deux notes). Peut être bloqué par le navigateur
+                // tant que l'utilisateur n'a pas interagi avec la page.
+                sonner() {
+                    try {
+                        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                        [[880, 0], [1320, 0.18]].forEach(([freq, t]) => {
+                            const osc = ctx.createOscillator();
+                            const gain = ctx.createGain();
+                            osc.frequency.value = freq;
+                            osc.type = 'sine';
+                            gain.gain.setValueAtTime(0.0001, ctx.currentTime + t);
+                            gain.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime + t + 0.02);
+                            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + t + 0.45);
+                            osc.connect(gain).connect(ctx.destination);
+                            osc.start(ctx.currentTime + t);
+                            osc.stop(ctx.currentTime + t + 0.5);
+                        });
+                    } catch (e) {}
+                },
+
+                startBlink(count) {
+                    this.stopBlink();
+                    const alerte = '🔔 (' + count + ') Nouvelle réservation';
+                    let on = false;
+                    this._blink = setInterval(() => {
+                        on = !on;
+                        document.title = on ? alerte : this._titre;
+                    }, 1000);
+                },
+
+                stopBlink() {
+                    if (this._blink) clearInterval(this._blink);
+                    this._blink = null;
+                    document.title = this._titre;
+                },
+            });
+        });
+    </script>
+
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
@@ -64,6 +202,14 @@
 
     <style>
         [x-cloak] { display: none !important; }
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            15% { transform: rotate(-14deg); }
+            30% { transform: rotate(12deg); }
+            45% { transform: rotate(-8deg); }
+            60% { transform: rotate(4deg); }
+            75% { transform: rotate(0deg); }
+        }
 
         /* Custom scrollbar */
         ::-webkit-scrollbar { width: 6px; }
@@ -191,7 +337,7 @@
             :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0 lg:w-[4.5rem] sidebar-collapsed'">
 
             <!-- Logo -->
-            <div class="flex h-16 items-center gap-3 px-4 border-b border-white/[0.06]">
+            <div class="flex h-20 shrink-0 items-center gap-3 px-4 border-b border-white/[0.06]">
                 <a href="{{ route('hotel.dashboard') }}" class="flex items-center gap-3 min-w-0">
                     <img x-show="sidebarOpen" src="{{ asset('images/Evadia_Logo_BW_1.png') }}" alt="EVADIA" class="h-8 shrink-0">
                     <img x-show="!sidebarOpen" src="{{ asset('images/Evadia_Logo_BW_4.png') }}" alt="EVADIA" class="h-8 mx-auto shrink-0">
@@ -266,8 +412,13 @@
                                         d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
                                 </svg>
                             </div>
-                            <span x-show="sidebarOpen">Réservations</span>
+                            <span x-show="sidebarOpen" class="flex-1">Réservations</span>
                             <span x-show="!sidebarOpen" class="sidebar-tooltip">Réservations</span>
+                            <span x-show="$store.notifs.enAttente > 0" x-cloak
+                                :class="sidebarOpen ? 'ml-auto' : 'absolute top-1 right-1'"
+                                class="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-amber-500 px-1.5 text-[10px] font-bold text-white"
+                                :title="$store.notifs.enAttente + ' réservation(s) en attente de réponse'"
+                                x-text="$store.notifs.enAttente"></span>
                         </a>
 
                         <a href="{{ route('hotel.calendar.index') }}"
@@ -388,7 +539,7 @@
 
             <!-- Header -->
             <header
-                class="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-gray-200 bg-white/80 backdrop-blur-xl px-6 shadow-sm">
+                class="sticky top-0 z-40 flex h-20 shrink-0 items-center justify-between border-b border-gray-200 bg-white/80 backdrop-blur-xl px-8 shadow-sm">
                 <!-- Left: Toggle + Page title -->
                 <div class="flex items-center gap-4">
                     <button @click="sidebarOpen = !sidebarOpen"
@@ -399,59 +550,57 @@
                                 d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                         </svg>
                     </button>
-                    <h1 class="text-lg font-semibold text-gray-900">@yield('page_title', 'Dashboard')</h1>
+                    <h1 class="text-xl font-semibold text-gray-900">@yield('page_title', 'Dashboard')</h1>
                 </div>
 
-                <!-- Right: Notifications + Profile -->
+                <!-- Right: Notifications (profil & déconnexion : pied de la sidebar) -->
                 <div class="flex items-center gap-3">
-                    <!-- Notifications -->
-                    <div class="relative" x-data="{ open: false, notifications: [], unread: 0, loading: false }"
-                        x-init="
-                            fetch('{{ route('hotel.notifications.recent') }}')
-                                .then(r => r.json())
-                                .then(d => { notifications = d.notifications; unread = d.unread_count; });
-                        ">
-                        <button @click="open = !open; if(open && !loading) { loading = true; fetch('{{ route('hotel.notifications.recent') }}').then(r => r.json()).then(d => { notifications = d.notifications; unread = d.unread_count; loading = false; }); }"
-                            class="relative rounded-lg p-2 hover:bg-gray-100 transition-colors">
-                            <svg class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open; if (open) $store.notifs.refresh()"
+                            class="relative rounded-lg p-2 hover:bg-gray-100 transition-colors" aria-label="Notifications">
+                            <svg class="h-5 w-5" :class="$store.notifs.alertes.length ? 'text-hotel-600 animate-[wiggle_1s_ease-in-out_infinite]' : 'text-gray-500'" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                             </svg>
-                            <span x-show="unread > 0" x-text="unread > 99 ? '99+' : unread"
-                                class="absolute -top-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white"></span>
+                            <span x-show="$store.notifs.unread > 0" x-cloak x-text="$store.notifs.unread > 99 ? '99+' : $store.notifs.unread"
+                                class="absolute -top-0.5 -right-0.5 flex h-5 min-w-[1.25rem] px-1 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white"></span>
                         </button>
 
                         <!-- Dropdown -->
                         <div x-show="open" x-cloak @click.away="open = false"
                             x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
                             x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-                            class="absolute right-0 mt-2 w-96 rounded-xl bg-white shadow-xl ring-1 ring-gray-200 z-50">
+                            class="absolute right-0 mt-2 w-96 max-w-[calc(100vw-2rem)] rounded-xl bg-white shadow-xl ring-1 ring-gray-200 z-50">
                             <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
                                 <h3 class="text-sm font-semibold text-gray-900">Notifications</h3>
-                                <button x-show="unread > 0" @click.prevent="
-                                    fetch('{{ route('hotel.notifications.mark-all-read') }}', { method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json'} })
-                                        .then(() => { unread = 0; notifications = notifications.map(n => ({...n, lu: true})); });
-                                " class="text-xs text-hotel-600 hover:text-hotel-700 font-medium">Tout marquer lu</button>
+                                <button x-show="$store.notifs.unread > 0" @click.prevent="$store.notifs.toutMarquerLu()"
+                                    class="text-xs text-hotel-600 hover:text-hotel-700 font-medium">Tout marquer lu</button>
+                            </div>
+                            <div x-show="$store.notifs.permission === 'default'" class="flex items-center justify-between gap-3 bg-amber-50 px-4 py-2.5 border-b border-amber-100">
+                                <p class="text-xs text-amber-800">Être alerté même quand l'onglet est en arrière-plan</p>
+                                <button @click="$store.notifs.activerNavigateur()" class="shrink-0 rounded-md bg-amber-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-amber-700">Activer</button>
                             </div>
                             <div class="max-h-80 overflow-y-auto divide-y divide-gray-50">
-                                <template x-for="notif in notifications" :key="notif.id">
-                                    <a :href="notif.lien || '#'" @click="
-                                        if(!notif.lu) {
-                                            fetch('{{ route('hotel.notifications.mark-read', ['notification' => '__ID__']) }}'.replace('__ID__', notif.id), { method: 'PATCH', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json'} });
-                                            notif.lu = true; unread = Math.max(0, unread - 1);
-                                        }
-                                    " class="flex gap-3 px-4 py-3 hover:bg-gray-50 transition-colors" :class="!notif.lu ? 'bg-hotel-50/40' : ''">
+                                <template x-for="notif in $store.notifs.items" :key="notif.id">
+                                    <a :href="notif.lien || '#'" @click="$store.notifs.marquerLu(notif)"
+                                        class="flex gap-3 px-4 py-3 hover:bg-gray-50 transition-colors" :class="!notif.lu ? 'bg-hotel-50/40' : ''">
                                         <div class="shrink-0 mt-0.5">
-                                            <div class="h-8 w-8 rounded-full flex items-center justify-center" :class="!notif.lu ? 'bg-hotel-100 text-hotel-600' : 'bg-gray-100 text-gray-400'">
-                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                            <div class="h-8 w-8 rounded-full flex items-center justify-center"
+                                                :class="notif.type_notification === 'nouvelle_reservation'
+                                                    ? (!notif.lu ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-400')
+                                                    : (!notif.lu ? 'bg-hotel-100 text-hotel-600' : 'bg-gray-100 text-gray-400')">
+                                                <svg x-show="notif.type_notification === 'nouvelle_reservation'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                                </svg>
+                                                <svg x-show="notif.type_notification !== 'nouvelle_reservation'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                                                 </svg>
                                             </div>
                                         </div>
                                         <div class="min-w-0 flex-1">
                                             <p class="text-sm text-gray-900 truncate" :class="!notif.lu ? 'font-semibold' : 'font-medium'" x-text="notif.titre"></p>
-                                            <p class="text-xs text-gray-500 truncate mt-0.5" x-text="notif.contenu"></p>
+                                            <p class="text-xs text-gray-500 line-clamp-2 mt-0.5" x-text="notif.contenu"></p>
                                             <p class="text-[10px] text-gray-400 mt-1" x-text="notif.date_envoi ? new Date(notif.date_envoi).toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'}) : ''"></p>
                                         </div>
                                         <div x-show="!notif.lu" class="shrink-0 mt-2">
@@ -459,61 +608,13 @@
                                         </div>
                                     </a>
                                 </template>
-                                <div x-show="notifications.length === 0" class="px-4 py-8 text-center">
+                                <div x-show="$store.notifs.items.length === 0" class="px-4 py-8 text-center">
                                     <p class="text-sm text-gray-400">Aucune notification</p>
                                 </div>
                             </div>
                             <div class="border-t border-gray-100 px-4 py-2.5">
                                 <a href="{{ route('hotel.notifications.index') }}" class="block text-center text-xs text-hotel-600 hover:text-hotel-700 font-medium">Voir toutes les notifications</a>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Profile Dropdown -->
-                    <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open"
-                            class="flex items-center gap-2 rounded-lg px-3 py-1.5 hover:bg-gray-100 transition-colors">
-                            <div
-                                class="h-8 w-8 rounded-full bg-gradient-to-br from-hotel-500 to-hotel-700 flex items-center justify-center text-white text-sm font-bold">
-                                {{ substr(auth('hotel')->user()->prenom, 0, 1) }}{{ substr(auth('hotel')->user()->nom, 0, 1) }}
-                            </div>
-                            <span class="text-sm font-medium text-gray-700 hidden sm:block">{{ auth('hotel')->user()->prenom }}
-                                {{ auth('hotel')->user()->nom }}</span>
-                            <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                            </svg>
-                        </button>
-
-                        <div x-show="open" @click.away="open = false" x-cloak
-                            x-transition:enter="transition ease-out duration-100"
-                            x-transition:enter-start="transform opacity-0 scale-95"
-                            x-transition:enter-end="transform opacity-100 scale-100"
-                            x-transition:leave="transition ease-in duration-75"
-                            x-transition:leave-start="transform opacity-100 scale-100"
-                            x-transition:leave-end="transform opacity-0 scale-95"
-                            class="absolute right-0 mt-2 w-48 rounded-xl bg-white py-2 shadow-lg ring-1 ring-gray-200">
-                            <a href="{{ route('hotel.profile.edit') }}"
-                                class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                                </svg>
-                                Mon profil
-                            </a>
-                            <form method="POST" action="{{ route('hotel.logout') }}">
-                                @csrf
-                                <button type="submit"
-                                    class="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                        stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-                                    </svg>
-                                    Déconnexion
-                                </button>
-                            </form>
                         </div>
                     </div>
                 </div>
@@ -585,6 +686,40 @@
                 @yield('content')
             </main>
         </div>
+    </div>
+
+    <!-- ═══════════════ ALERTE NOUVELLE RÉSERVATION ═══════════════ -->
+    <div class="fixed top-24 right-4 z-[70] flex w-[26rem] max-w-[calc(100vw-2rem)] flex-col gap-3" aria-live="assertive">
+        <template x-for="n in $store.notifs.alertes" :key="n.id">
+            <div x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0"
+                class="overflow-hidden rounded-2xl bg-white shadow-2xl ring-2 ring-emerald-400">
+                <div class="flex items-center gap-3 bg-gradient-to-r from-emerald-500 to-hotel-600 px-4 py-3 text-white">
+                    <span class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/20">
+                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/30"></span>
+                        <svg class="relative h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                        </svg>
+                    </span>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-base font-bold leading-tight">Nouvelle réservation !</p>
+                        <p class="text-xs text-white/85 truncate" x-text="n.titre"></p>
+                    </div>
+                    <button type="button" @click="$store.notifs.fermerAlerte(n)" class="rounded-lg p-1 text-white/80 hover:bg-white/15 hover:text-white" aria-label="Fermer">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+                <div class="px-4 py-3">
+                    <p class="text-sm text-gray-700" x-text="n.contenu"></p>
+                    <p class="mt-1 text-xs text-amber-600 font-medium">En attente de votre réponse</p>
+                    <div class="mt-3 flex justify-end gap-2">
+                        <button type="button" @click="$store.notifs.fermerAlerte(n)"
+                            class="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50">Plus tard</button>
+                        <button type="button" @click="$store.notifs.ouvrir(n)"
+                            class="rounded-lg bg-hotel-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-hotel-700">Voir la réservation</button>
+                    </div>
+                </div>
+            </div>
+        </template>
     </div>
 
     @stack('scripts')

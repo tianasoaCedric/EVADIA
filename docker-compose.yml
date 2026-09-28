@@ -14,7 +14,9 @@ services:
     restart: unless-stopped
 
   # ─── API Laravel Octane ──────────────────────────────────────
+  # L'image est construite une seule fois ici puis réutilisée par queue et reverb.
   api:
+    image: evadia-backend:latest
     build:
       context: ./Backend
       dockerfile: Dockerfile
@@ -34,9 +36,8 @@ services:
 
   # ─── Queue Worker ─────────────────────────────────────────────
   queue:
-    build:
-      context: ./Backend
-      dockerfile: Dockerfile
+    image: evadia-backend:latest
+    pull_policy: never
     command: php artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
     env_file: .env.docker
     environment:
@@ -48,9 +49,8 @@ services:
 
   # ─── WebSocket Reverb ────────────────────────────────────────
   reverb:
-    build:
-      context: ./Backend
-      dockerfile: Dockerfile
+    image: evadia-backend:latest
+    pull_policy: never
     command: php artisan reverb:start --host=0.0.0.0 --port=6001
     env_file: .env.docker
     environment:

@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers\Api\Client;
 
+use App\Actions\Reservation\NotifyHotelOfNewReservationAction;
 use App\Http\Controllers\Controller;
-use App\Models\Disponibilite;
 use App\Models\Offre;
 use App\Models\OffreUtilisation;
 use App\Models\Photo;
 use App\Models\Propriete;
 use App\Models\Reservation;
+use App\Services\DisponibiliteService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
+use DomainException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -150,7 +153,7 @@ class ReservationController extends Controller
             new OA\Response(response: 422, description: 'Erreur de validation ou code promo invalide'),
         ]
     )]
-    public function store(Request $request): JsonResponse
+    public function store(Request $request, DisponibiliteService $disponibilites, NotifyHotelOfNewReservationAction $notifyHotel): JsonResponse
     {
         $validated = $request->validate([
             'propriete_id'   => 'required|exists:proprietes,id',
@@ -166,26 +169,8 @@ class ReservationController extends Controller
 
         $propriete = Propriete::with(['currentPrix', 'hotel'])->findOrFail($validated['propriete_id']);
 
-        // Vérification de disponibilité
-        $indisponible = Disponibilite::where('propriete_id', $propriete->id)
-            ->where('est_disponible', false)
-            ->whereBetween('date', [$validated['date_debut'], $validated['date_fin']])
-            ->exists();
-
-        if ($indisponible) {
-            return response()->json(['message' => 'La chambre n\'est pas disponible pour ces dates.'], 409);
-        }
-
-        // Vérification des conflits de réservation
-        $conflit = Reservation::where('propriete_id', $propriete->id)
-            ->whereIn('statut', ['en_attente', 'acceptee'])
-            ->where('date_debut', '<', $validated['date_fin'])
-            ->where('date_fin', '>', $validated['date_debut'])
-            ->exists();
-
-        if ($conflit) {
-            return response()->json(['message' => 'La chambre est déjà réservée pour ces dates.'], 409);
-        }
+        // La disponibilité (fermetures + stock d'unités) est vérifiée dans la
+        // transaction ci-dessous, sous verrou, pour éviter la sur-réservation.
 
         // Calcul du prix de base dans la devise choisie par le client
         $devise      = strtoupper($validated['devise'] ?? 'MGA');
@@ -229,48 +214,69 @@ class ReservationController extends Controller
         }
 
         // Création de la réservation + enregistrement utilisation dans une transaction
-        $reservation = DB::transaction(function () use (
-            $request, $validated, $propriete, $prixBase, $prixTotal,
-            $montantReduction, $offre, $codePromoUtilise, $nbNuits, $devise,
-            $montantAcompte, $statutPaiementAcompte
-        ) {
-            $reservation = Reservation::create([
-                'code_reservation'    => Reservation::generateCode(),
-                'client_id'           => $request->user()->id,
-                'propriete_id'        => $propriete->id,
-                'date_debut'          => $validated['date_debut'],
-                'date_fin'            => $validated['date_fin'],
-                'nb_adultes'          => $validated['nb_adultes'],
-                'nb_enfants'          => $validated['nb_enfants'] ?? 0,
-                'nb_bebes'            => $validated['nb_bebes'] ?? 0,
-                'prix_avant_reduction' => $offre ? $prixBase : null,
-                'montant_reduction'   => $montantReduction,
-                'prix_total'          => $prixTotal,
-                'devise_prix_total'   => $devise,
-                'montant_acompte'     => $montantAcompte,
-                'statut_paiement_acompte' => $statutPaiementAcompte,
-                'statut'              => 'en_attente',
-                'date_reservation'    => now(),
-                'demande_speciale'    => $validated['demande_speciale'] ?? null,
-                'code_promo_utilise'  => $codePromoUtilise,
-                'offre_id'            => $offre?->id,
-            ]);
+        try {
+            $reservation = DB::transaction(function () use (
+                $request, $validated, $propriete, $prixBase, $prixTotal,
+                $montantReduction, $offre, $codePromoUtilise, $nbNuits, $devise,
+                $montantAcompte, $statutPaiementAcompte, $disponibilites
+            ) {
+                // Verrou sur la propriété : deux réservations simultanées de la
+                // dernière unité ne peuvent pas passer toutes les deux.
+                Propriete::whereKey($propriete->id)->lockForUpdate()->first();
 
-            // Enregistrer chaque utilisation d'avantage
-            if ($offre) {
-                foreach ($offre->avantages as $avantage) {
-                    OffreUtilisation::create([
-                        'avantage_id'      => $avantage->id,
-                        'reservation_id'   => $reservation->id,
-                        'client_id'        => $request->user()->id,
-                        'date_utilisation' => now(),
-                        'quantite_utilisee' => 1,
-                    ]);
+                $nuitsIndisponibles = $disponibilites->nuitsIndisponibles(
+                    $propriete,
+                    Carbon::parse($validated['date_debut']),
+                    Carbon::parse($validated['date_fin'])
+                );
+
+                if ($nuitsIndisponibles) {
+                    $dates = implode(', ', array_map(fn($d) => Carbon::parse($d)->format('d/m/Y'), $nuitsIndisponibles));
+                    throw new DomainException("Plus aucune chambre disponible pour la nuit du : {$dates}.");
                 }
-            }
 
-            return $reservation;
-        });
+                $reservation = Reservation::create([
+                    'code_reservation'    => Reservation::generateCode(),
+                    'client_id'           => $request->user()->id,
+                    'propriete_id'        => $propriete->id,
+                    'date_debut'          => $validated['date_debut'],
+                    'date_fin'            => $validated['date_fin'],
+                    'nb_adultes'          => $validated['nb_adultes'],
+                    'nb_enfants'          => $validated['nb_enfants'] ?? 0,
+                    'nb_bebes'            => $validated['nb_bebes'] ?? 0,
+                    'prix_avant_reduction' => $offre ? $prixBase : null,
+                    'montant_reduction'   => $montantReduction,
+                    'prix_total'          => $prixTotal,
+                    'devise_prix_total'   => $devise,
+                    'montant_acompte'     => $montantAcompte,
+                    'statut_paiement_acompte' => $statutPaiementAcompte,
+                    'statut'              => 'en_attente',
+                    'date_reservation'    => now(),
+                    'demande_speciale'    => $validated['demande_speciale'] ?? null,
+                    'code_promo_utilise'  => $codePromoUtilise,
+                    'offre_id'            => $offre?->id,
+                ]);
+
+                // Enregistrer chaque utilisation d'avantage
+                if ($offre) {
+                    foreach ($offre->avantages as $avantage) {
+                        OffreUtilisation::create([
+                            'avantage_id'      => $avantage->id,
+                            'reservation_id'   => $reservation->id,
+                            'client_id'        => $request->user()->id,
+                            'date_utilisation' => now(),
+                            'quantite_utilisee' => 1,
+                        ]);
+                    }
+                }
+
+                return $reservation;
+            });
+        } catch (DomainException $e) {
+            return response()->json(['message' => $e->getMessage()], 409);
+        }
+
+        $notifyHotel->handle($reservation);
 
         $responseData = [
             'id'               => $reservation->id,

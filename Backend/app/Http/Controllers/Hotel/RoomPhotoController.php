@@ -24,8 +24,6 @@ class RoomPhotoController extends Controller
         ]);
 
         $maxOrdre = $propriete->photos()->max('ordre') ?? 0;
-        $isFirst = $propriete->photos()->count() === 0;
-
         foreach ($request->file('photos') as $i => $photo) {
             $path = $photo->store("proprietes/{$propriete->id}", 's3');
             Photo::create([
@@ -33,10 +31,12 @@ class RoomPhotoController extends Controller
                 'entite_id' => $propriete->id,
                 'url_photo' => $path,
                 'ordre' => $maxOrdre + $i + 1,
-                'est_principale' => $isFirst && $i === 0,
+                'est_principale' => false,
                 'uploaded_by' => auth()->id(),
             ]);
         }
+
+        Photo::assurerPrincipale('propriete', $propriete->id);
 
         return back()->with('success', 'Photos ajoutées avec succès.');
     }
@@ -48,8 +48,19 @@ class RoomPhotoController extends Controller
 
         Storage::disk('s3')->delete($photo->url_photo);
         $photo->delete();
+        Photo::assurerPrincipale('propriete', $propriete->id);
 
         return back()->with('success', 'Photo supprimée.');
+    }
+
+    public function setPrincipale($proprieteId, $photoId)
+    {
+        $propriete = $this->scopePropriete($proprieteId);
+        $photo = Photo::forPropriete($propriete->id)->where('id', $photoId)->firstOrFail();
+
+        Photo::definirPrincipale('propriete', $propriete->id, $photo->id);
+
+        return back()->with('success', 'Photo principale mise à jour.');
     }
 
     public function reorder(Request $request, $proprieteId)

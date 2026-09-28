@@ -58,12 +58,19 @@
                     </select>
                 </div>
                 <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Nombre d'unités de ce type *</label>
+                    <input type="number" name="nombre_unites" value="{{ old('nombre_unites', $propriete->nombre_unites) }}" min="1" max="1000" required
+                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-hotel-500 focus:ring-hotel-500">
+                    <p class="mt-1 text-xs text-gray-500">Ex. 10 chambres « Standard » identiques.</p>
+                    @error('nombre_unites') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+                <div>
                     <label class="block text-xs font-medium text-gray-500 mb-1">Capacité (pers.) *</label>
                     <input type="number" name="capacite" value="{{ old('capacite', $propriete->capacite) }}" min="1" required
                         class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-hotel-500 focus:ring-hotel-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-500 mb-1">Nb chambres</label>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Chambres par logement</label>
                     <input type="number" name="nb_chambres" value="{{ old('nb_chambres', $propriete->nb_chambres) }}" min="0"
                         class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-hotel-500 focus:ring-hotel-500">
                 </div>
@@ -154,18 +161,30 @@
 
         {{-- Photos existantes --}}
         @if($propriete->photos->isNotEmpty())
-            <p class="text-xs text-gray-400 mb-3">Faites glisser pour réordonner. La première photo sera la photo principale.</p>
+            <p class="text-xs text-gray-400 mb-3">Faites glisser pour réordonner. Survolez une photo et cliquez sur « Principale » pour la mettre en avant.</p>
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-5">
                 @foreach($propriete->photos->sortBy('ordre') as $photo)
-                    <div class="relative group rounded-lg overflow-hidden bg-gray-100 aspect-[4/3] cursor-grab"
+                    <div class="relative group rounded-lg overflow-hidden bg-gray-100 aspect-[4/3] cursor-grab {{ $photo->est_principale ? 'ring-2 ring-hotel-500' : '' }}"
                          draggable="true"
                          @dragstart="dragStart({{ $photo->id }})"
                          @dragover.prevent="dragOver({{ $photo->id }})"
-                         @dragend="saveOrder()"
-                         :class="order.indexOf({{ $photo->id }}) === 0 ? 'ring-2 ring-hotel-500' : ''">
+                         @dragend="saveOrder()">
                         <img src="{{ $photo->url }}" alt="Photo" class="w-full h-full object-cover">
-                        @if($loop->first)
-                            <span class="absolute top-1 left-1 bg-hotel-600 text-white text-[10px] px-1.5 py-0.5 rounded font-medium">Principale</span>
+                        @if($photo->est_principale)
+                            <span class="absolute top-1 left-1 inline-flex items-center gap-1 bg-hotel-600 text-white text-[10px] px-1.5 py-0.5 rounded font-medium shadow">
+                                <svg class="h-2.5 w-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M11.48 3.5a.56.56 0 011.04 0l2.13 5.11 5.52.44a.56.56 0 01.32.99l-4.2 3.6 1.28 5.38a.56.56 0 01-.84.61L12 16.73l-4.73 2.9a.56.56 0 01-.84-.61l1.28-5.38-4.2-3.6a.56.56 0 01.32-.99l5.52-.44 2.13-5.11z"/></svg>
+                                Principale
+                            </span>
+                        @else
+                            <form method="POST" action="{{ route('hotel.rooms.photos.principale', [$propriete->id, $photo->id]) }}"
+                                  class="absolute bottom-1 left-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="w-full inline-flex items-center justify-center gap-1 rounded bg-white/95 px-1.5 py-1 text-[11px] font-medium text-gray-800 shadow hover:bg-hotel-600 hover:text-white transition-colors">
+                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.5a.56.56 0 011.04 0l2.13 5.11 5.52.44a.56.56 0 01.32.99l-4.2 3.6 1.28 5.38a.56.56 0 01-.84.61L12 16.73l-4.73 2.9a.56.56 0 01-.84-.61l1.28-5.38-4.2-3.6a.56.56 0 01.32-.99l5.52-.44 2.13-5.11z"/></svg>
+                                    Principale
+                                </button>
+                            </form>
                         @endif
                         <form method="POST" action="{{ route('hotel.rooms.photos.destroy', [$propriete->id, $photo->id]) }}"
                               class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"

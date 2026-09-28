@@ -49,17 +49,7 @@
                 <div>
                     <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</dt>
                     <dd class="mt-1">
-                        @php
-                            $statusColors = [
-                                'actif' => 'bg-emerald-50 text-emerald-700',
-                                'en_attente' => 'bg-amber-50 text-amber-700',
-                                'suspendu' => 'bg-red-50 text-red-700',
-                            ];
-                        @endphp
-                        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium {{ $statusColors[$hotel->statut] ?? 'bg-gray-50 text-gray-700' }}">
-                            <span class="h-1.5 w-1.5 rounded-full {{ str_replace('bg-', 'bg-', str_replace('-50', '-500', $statusColors[$hotel->statut] ?? 'bg-gray-500')) }}"></span>
-                            {{ ucfirst(str_replace('_', ' ', $hotel->statut)) }}
-                        </span>
+                        @include('hotel.partials.statut-badge', ['hotel' => $hotel])
                     </dd>
                 </div>
 

@@ -52,12 +52,19 @@
                         </select>
                     </div>
                     <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre d'unités de ce type *</label>
+                        <input type="number" name="nombre_unites" value="{{ old('nombre_unites', 1) }}" min="1" max="1000" required
+                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-hotel-500 focus:ring-hotel-500">
+                        <p class="mt-1 text-xs text-gray-500">Ex. 10 si vous avez 10 chambres « Standard » identiques. Complet quand toutes sont réservées.</p>
+                        @error('nombre_unites') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Capacité (personnes) *</label>
                         <input type="number" name="capacite" value="{{ old('capacite', 2) }}" min="1" required
                             class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-hotel-500 focus:ring-hotel-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de chambres</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Chambres par logement</label>
                         <input type="number" name="nb_chambres" value="{{ old('nb_chambres') }}" min="0"
                             class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-hotel-500 focus:ring-hotel-500">
                     </div>
