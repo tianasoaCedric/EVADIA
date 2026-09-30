@@ -10,6 +10,7 @@ use App\Models\Abonnement;
 use App\Models\AbonnementHistorique;
 use App\Models\Avis;
 use App\Models\Plan;
+use App\Services\AbonnementService;
 use App\Models\Destination;
 use App\Models\Hotel;
 use App\Models\HotelAdmin;
@@ -169,6 +170,9 @@ class HotelController extends Controller
                 'statut'          => 'actif',
                 'changed_by'      => auth()->id(),
             ]);
+
+            // Premier mois compté comme payé dans le suivi des abonnements
+            app(AbonnementService::class)->demarrer($abonnement, auth()->id());
 
             // 11. Log action
             $this->logAction('hotel_created', "Hôtel {$hotel->nom} créé (ID: {$hotel->id}). Admin: {$adminUser->email}");

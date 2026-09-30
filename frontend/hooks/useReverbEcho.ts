@@ -25,20 +25,24 @@ export function useReverbEcho(enabled: boolean): Echo<'reverb'> | null {
 
     const connect = async () => {
       try {
-        const { token, expires_at } = await broadcastingService.issueToken()
+        const { token, expires_at, reverb_key } = await broadcastingService.issueToken()
         if (cancelled) return
+
+        // Clé fournie par l'API ; la variable de build n'est qu'un repli.
+        const key = reverb_key || process.env.NEXT_PUBLIC_REVERB_APP_KEY
+        if (!key) return
 
         echoRef.current?.disconnect()
 
         const instance = new Echo({
           broadcaster: 'reverb',
-          key: process.env.NEXT_PUBLIC_REVERB_APP_KEY,
+          key,
           wsHost: window.location.hostname,
           wsPort: window.location.protocol === 'https:' ? 443 : 80,
           wssPort: 443,
           forceTLS: window.location.protocol === 'https:',
           enabledTransports: ['ws', 'wss'],
-          wsPath: '/app',
+          // Pas de wsPath : pusher-js ajoute déjà « /app/<clé> », servi par nginx → Reverb.
           authEndpoint: '/api/broadcasting/auth',
           auth: {
             headers: {

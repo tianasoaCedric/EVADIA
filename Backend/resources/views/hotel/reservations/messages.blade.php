@@ -64,32 +64,28 @@
 @endsection
 
 @push('scripts')
-@vite(['resources/js/app.js'])
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById('messages-container');
     if (container) container.scrollTop = container.scrollHeight;
 
-    if (window.Echo) {
-        window.Echo.private('messages.{{ auth("hotel")->id() }}')
-            .listen('.message.sent', (e) => {
-                if (e.expediteur_id == {{ $reservation->client_id }}) {
-                    const msgHtml = `
-                        <div class="flex justify-start">
-                            <div class="max-w-[70%]">
-                                <div class="rounded-2xl px-4 py-2.5 bg-gray-100 text-gray-800 rounded-bl-md">
-                                    <p class="text-sm whitespace-pre-wrap">${e.contenu}</p>
-                                </div>
-                                <p class="text-[10px] text-gray-400 mt-1">
-                                    ${new Date(e.date_envoi).toLocaleString('fr-FR', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'})}
-                                </p>
-                            </div>
-                        </div>`;
-                    container.insertAdjacentHTML('beforeend', msgHtml);
-                    container.scrollTop = container.scrollHeight;
-                }
-            });
-    }
+    // Message du client pour CETTE réservation (relayé par resources/js/bootstrap.js)
+    window.addEventListener('evadia-message', ({ detail: e }) => {
+        if (!container || e.reservation_id != {{ $reservation->id }} || e.expediteur_id != {{ $reservation->client_id }}) return;
+
+        container.insertAdjacentHTML('beforeend', `
+            <div class="flex justify-start">
+                <div class="max-w-[70%]">
+                    <div class="rounded-2xl px-4 py-2.5 bg-gray-100 text-gray-800 rounded-bl-md">
+                        <p class="text-sm whitespace-pre-wrap">${window.evadiaEscape(e.contenu)}</p>
+                    </div>
+                    <p class="text-[10px] text-gray-400 mt-1">
+                        ${new Date(e.date_envoi).toLocaleString('fr-FR', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'})}
+                    </p>
+                </div>
+            </div>`);
+        container.scrollTop = container.scrollHeight;
+    });
 });
 </script>
 @endpush

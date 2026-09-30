@@ -16,8 +16,8 @@
         </button>
     </div>
 
-    {{-- Conversations List --}}
-    <div class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-100 overflow-hidden divide-y divide-gray-100">
+    {{-- Conversations List (mise à jour en direct à chaque message reçu) --}}
+    <div data-live="conversations" class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-100 overflow-hidden divide-y divide-gray-100">
         @forelse($conversations as $conv)
             <a href="{{ route('admin.messages.conversation', $conv->interlocuteur) }}"
                 class="flex items-center gap-4 px-6 py-4 hover:bg-gray-50 transition-colors {{ $conv->non_lus > 0 ? 'bg-evadia-50/30' : '' }}">
@@ -121,3 +121,10 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    // Nouveau message reçu : la liste des conversations (dernier message, non lus) se met à jour seule.
+    window.addEventListener('evadia-message', () => window.evadiaRefreshLive && window.evadiaRefreshLive());
+</script>
+@endpush

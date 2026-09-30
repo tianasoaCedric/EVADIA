@@ -22,17 +22,38 @@ class EnsureUserIsActive
 
     public function handle(Request $request, Closure $next): Response
     {
-        // Sessions des back offices (le groupe `api` n'a pas de session)
-        foreach ($request->hasSession() ? ['web' => 'login', 'hotel' => 'hotel.login'] : [] as $guard => $loginRoute) {
-            $user = Auth::guard($guard)->user();
-            if ($user && !$user->est_actif) {
-                Auth::guard($guard)->logout();
+        // Sessions des back offices (le groupe `api` n'a pas de session).
+        // Les deux guards partagent le même cookie de session : un navigateur peut être
+        // connecté à la fois en admin Evadia et en hôtelier. On ne déconnecte que le
+        // guard du compte désactivé, sans toucher à l'autre.
+        if ($request->hasSession()) {
+            $guards = ['web' => 'login', 'hotel' => 'hotel.login'];
+            $zone = str_starts_with($request->path(), 'hotel-admin') ? 'hotel' : 'web';
+            $bloque = null;
+            $deconnecte = false;
+
+            foreach ($guards as $guard => $loginRoute) {
+                $user = Auth::guard($guard)->user();
+                if ($user && !$user->est_actif) {
+                    Auth::guard($guard)->logout();   // retire uniquement la clé de ce guard
+                    $deconnecte = true;
+                    if ($guard === $zone) {
+                        $bloque = $loginRoute;
+                    }
+                }
+            }
+
+            // Plus personne de connecté dans cette session : on la détruit entièrement.
+            if ($deconnecte && !Auth::guard('web')->check() && !Auth::guard('hotel')->check()) {
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
+            }
 
+            // Redirection seulement si la page demandée appartient au compte désactivé.
+            if ($bloque) {
                 return $request->expectsJson()
                     ? response()->json(['message' => self::MESSAGE], 401)
-                    : redirect()->route($loginRoute)->withErrors(['email' => self::MESSAGE]);
+                    : redirect()->route($bloque)->withErrors(['email' => self::MESSAGE]);
             }
         }
 

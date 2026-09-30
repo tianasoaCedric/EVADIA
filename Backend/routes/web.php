@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\HotelController;
 use App\Http\Controllers\Admin\HotelPhotoController;
 use App\Http\Controllers\Admin\AbonnementController;
+use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\DestinationController;
 use App\Http\Controllers\Admin\VilleController;
 use App\Http\Controllers\Admin\TypeHebergementController;
@@ -76,10 +77,21 @@ Route::middleware(['auth', 'role:super_admin,admin_evadia'])
         Route::post('hotels/{hotel}/photos', [HotelPhotoController::class, 'store'])->name('hotels.photos.store');
         Route::delete('hotels/{hotel}/photos/{photo}', [HotelPhotoController::class, 'destroy'])->name('hotels.photos.destroy');
 
+        // Formules d'abonnement (plans)
+        Route::resource('plans', PlanController::class)->except(['show', 'destroy']);
+        Route::patch('plans/{plan}/toggle', [PlanController::class, 'toggle'])->name('plans.toggle');
+
         // Subscriptions (Abonnements)
         Route::resource('subscriptions', AbonnementController::class)->parameters([
             'subscriptions' => 'subscription',
         ]);
+        Route::post('subscriptions/{subscription}/paiement', [AbonnementController::class, 'enregistrerPaiement'])
+            ->name('subscriptions.paiement');
+        Route::post('subscriptions/{subscription}/pause', [AbonnementController::class, 'planifierPause'])
+            ->name('subscriptions.pause');
+        Route::post('pauses/{pause}/reprendre', [AbonnementController::class, 'reprendrePause'])->name('pauses.reprendre');
+        Route::patch('pauses/{pause}', [AbonnementController::class, 'modifierPause'])->name('pauses.update');
+        Route::delete('pauses/{pause}', [AbonnementController::class, 'annulerPause'])->name('pauses.destroy');
 
         // Destinations
         Route::resource('destinations', DestinationController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);

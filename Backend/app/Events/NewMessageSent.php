@@ -35,6 +35,11 @@ class NewMessageSent implements ShouldBroadcast
         return [
             'id' => $this->message->id,
             'expediteur_id' => $this->message->expediteur_id,
+            'destinataire_id' => $this->message->destinataire_id,
+            // Messages liés à une réservation (chat client ↔ hôtel) : permet à l'écran
+            // ouvert de savoir quelle conversation rafraîchir.
+            'reservation_id' => $this->message->reservation_id,
+            'type' => $this->message->type,
             'expediteur_nom' => $this->message->expediteur?->full_name,
             'sujet' => $this->message->sujet,
             'contenu' => $this->message->contenu,

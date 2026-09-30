@@ -25,16 +25,13 @@
                         <span class="text-sm font-semibold text-gray-800">{{ $subscription->hotel?->nom }}</span>
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Type <span class="text-red-400 text-xs">*</span></label>
-                        <select name="type_abonnement" required
-                            class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
-                            @foreach(['basic', 'premium', 'enterprise'] as $type)
-                                <option value="{{ $type }}" {{ $subscription->type_abonnement === $type ? 'selected' : '' }}>
-                                    {{ ucfirst($type) }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                    @include('admin.subscriptions.partials.formule', [
+                        'plans'           => $plans,
+                        'selection'       => old('type_abonnement', $subscription->type_abonnement),
+                        'prix'            => old('prix_mensuel', $subscription->prix_mensuel),
+                        'devise'          => old('devise', $subscription->devise ?: 'MGA'),
+                        'formuleActuelle' => $subscription->type_abonnement,
+                    ])
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
@@ -49,19 +46,9 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Prix mensuel <span class="text-red-400 text-xs">*</span></label>
-                            <input type="number" name="prix_mensuel" step="0.01" value="{{ $subscription->prix_mensuel }}" required
-                                class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Devise</label>
-                            <input type="text" name="devise" value="{{ $subscription->devise }}" maxlength="3"
-                                class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
-                        </div>
-                    </div>
-
+                    <p class="text-xs text-gray-500">
+                        Repousser la date de fin accorde un délai (sans paiement). Pour enregistrer un mois payé, utilisez plutôt « Enregistrer un paiement » sur la fiche.
+                    </p>
                 </div>
             </div>
 

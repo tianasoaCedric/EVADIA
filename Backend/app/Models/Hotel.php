@@ -117,6 +117,12 @@ class Hotel extends Model
         });
     }
 
+    /** Abonnement le plus récent, qu'il soit à jour, en retard ou suspendu. */
+    public function dernierAbonnement(): HasOne
+    {
+        return $this->hasOne(Abonnement::class)->latestOfMany();
+    }
+
     public function abonnements(): HasMany
     {
         return $this->hasMany(Abonnement::class);

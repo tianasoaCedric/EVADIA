@@ -24,6 +24,16 @@
                     @endfor
                 </select>
 
+                {{-- Statut filter --}}
+                <select name="statut" onchange="this.form.submit()"
+                    class="rounded-xl border-gray-300 bg-white px-4 py-2.5 text-sm shadow-sm focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20">
+                    <option value="">Tous les statuts</option>
+                    <option value="actif" @selected($statut === 'actif')>À jour</option>
+                    <option value="retard" @selected($statut === 'retard')>En retard</option>
+                    <option value="suspendu" @selected($statut === 'suspendu')>Suspendus (impayé)</option>
+                    <option value="pause" @selected($statut === 'pause')>En pause</option>
+                </select>
+
                 <button type="submit" class="rounded-xl bg-evadia-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-evadia-700 transition-colors">
                     Filtrer
                 </button>
@@ -38,13 +48,35 @@
             </a>
         </div>
 
+        {{-- Compteurs --}}
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            @foreach([
+                'actif'    => ['À jour', 'text-emerald-700', 'ring-emerald-100'],
+                'retard'   => ['En retard (délai de grâce)', 'text-amber-700', 'ring-amber-100'],
+                'suspendu' => ['Suspendus pour impayé', 'text-red-700', 'ring-red-100'],
+                'pause'    => ['En pause', 'text-indigo-700', 'ring-indigo-100'],
+            ] as $cle => [$libelle, $couleur, $anneau])
+                <a href="{{ route('admin.subscriptions.index', ['statut' => $cle, 'year' => $year]) }}"
+                    class="rounded-2xl bg-white p-4 shadow-sm ring-1 {{ $anneau }} hover:shadow transition-shadow {{ $statut === $cle ? 'ring-2' : '' }}">
+                    <p class="text-xs font-medium text-gray-500">{{ $libelle }}</p>
+                    <p class="mt-1 text-2xl font-bold {{ $couleur }}">{{ $compteurs[$cle] }}</p>
+                </a>
+            @endforeach
+        </div>
+
         {{-- Legend --}}
-        <div class="flex items-center gap-6 text-xs text-gray-500">
+        <div class="flex flex-wrap items-center gap-6 text-xs text-gray-500">
             <div class="flex items-center gap-1.5">
-                <span class="inline-block h-3 w-3 rounded bg-emerald-500"></span> Actif
+                <span class="inline-block h-3 w-3 rounded bg-emerald-400"></span> Payé
             </div>
             <div class="flex items-center gap-1.5">
-                <span class="inline-block h-3 w-3 rounded bg-red-400"></span> Expire
+                <span class="inline-block h-3 w-3 rounded bg-amber-400"></span> En retard / à payer
+            </div>
+            <div class="flex items-center gap-1.5">
+                <span class="inline-block h-3 w-3 rounded bg-red-400"></span> Impayé / suspendu
+            </div>
+            <div class="flex items-center gap-1.5">
+                <span class="inline-block h-3 w-3 rounded bg-indigo-400"></span> Pause
             </div>
             <div class="flex items-center gap-1.5">
                 <span class="inline-block h-3 w-3 rounded bg-gray-200"></span> Pas d'abonnement
@@ -70,9 +102,6 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @forelse($hotels as $hotel)
-                            @php
-                                $hotelAbos = $abonnements->get($hotel->id, collect());
-                            @endphp
                             <tr class="hover:bg-gray-50/50">
                                 {{-- Hotel name (sticky) --}}
                                 <td class="sticky left-0 z-10 bg-white px-6 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
@@ -84,32 +113,23 @@
                                 {{-- Month cells --}}
                                 @foreach($months as $monthNum => $label)
                                     @php
-                                        $monthStart = \Carbon\Carbon::create($year, $monthNum, 1);
-                                        $monthEnd = $monthStart->copy()->endOfMonth();
-
-                                        $abo = $hotelAbos->first(function ($a) use ($monthStart, $monthEnd) {
-                                            $start = \Carbon\Carbon::parse($a->date_debut);
-                                            $end = $a->date_fin ? \Carbon\Carbon::parse($a->date_fin) : null;
-                                            return $start <= $monthEnd && (!$end || $end >= $monthStart);
-                                        });
-
-                                        $isCurrent = false;
-                                        $isExpired = false;
-                                        if ($abo) {
-                                            $aboEnd = $abo->date_fin ? \Carbon\Carbon::parse($abo->date_fin) : null;
-                                            $isExpired = $aboEnd && $aboEnd->lt(now());
-                                            $isCurrent = !$isExpired;
-                                        }
-
+                                        $cell = $cellules[$hotel->id][$monthNum];
                                         $isCurrentMonth = ($monthNum == now()->month && $year == now()->year);
+                                        $classes = [
+                                            'paye'     => 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200',
+                                            'a_payer'  => 'bg-amber-100 text-amber-700 hover:bg-amber-200',
+                                            'retard'   => 'bg-amber-100 text-amber-700 hover:bg-amber-200',
+                                            'impaye'   => 'bg-red-100 text-red-600 hover:bg-red-200',
+                                            'suspendu' => 'bg-red-200 text-red-700 hover:bg-red-300',
+                                            'pause'    => 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200',
+                                        ][$cell['etat']] ?? null;
                                     @endphp
                                     <td class="px-1.5 py-2.5 text-center {{ $isCurrentMonth ? 'bg-evadia-50/30' : '' }}">
-                                        @if($abo)
-                                            <a href="{{ route('admin.subscriptions.show', $abo) }}"
-                                                class="inline-flex items-center justify-center h-8 w-full rounded-lg text-[10px] font-semibold transition-colors
-                                                    {{ $isCurrent ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-red-100 text-red-600 hover:bg-red-200' }}"
-                                                title="{{ ucfirst($abo->type_abonnement) }} — {{ number_format($abo->prix_mensuel, 0, ',', ' ') }} {{ $abo->devise }}/mois">
-                                                {{ ucfirst(substr($abo->type_abonnement, 0, 4)) }}
+                                        @if($classes && $cell['abonnement_id'])
+                                            <a href="{{ route('admin.subscriptions.show', $cell['abonnement_id']) }}"
+                                                class="inline-flex items-center justify-center h-8 w-full rounded-lg text-[10px] font-semibold transition-colors {{ $classes }}"
+                                                title="{{ $cell['titre'] }}">
+                                                {{ $cell['label'] }}
                                             </a>
                                         @else
                                             <span class="inline-flex items-center justify-center h-8 w-full rounded-lg bg-gray-100 text-gray-300 text-xs">
@@ -121,7 +141,7 @@
 
                                 {{-- Actions --}}
                                 <td class="px-4 py-3 text-center whitespace-nowrap">
-                                    @php $latestAbo = $hotelAbos->sortByDesc('created_at')->first(); @endphp
+                                    @php $latestAbo = $hotel->dernierAbonnement; @endphp
                                     @if($latestAbo)
                                         <a href="{{ route('admin.subscriptions.show', $latestAbo) }}"
                                             class="rounded-lg p-1.5 text-gray-400 hover:text-evadia-600 hover:bg-evadia-50 transition-colors inline-block"

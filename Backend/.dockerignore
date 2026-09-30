@@ -1,6 +1,9 @@
 vendor
 node_modules
 public/build
+# Laissé par « npm run dev » en local : dans l'image, il ferait charger le JS depuis
+# le serveur Vite de développement (localhost:5173) au lieu du bundle compilé.
+public/hot
 .git
 *.log
 .env.*

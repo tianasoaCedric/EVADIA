@@ -24,21 +24,19 @@
                             class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
                             <option value="">Sélectionner</option>
                             @foreach($hotels as $hotel)
-                                <option value="{{ $hotel->id }}">{{ $hotel->nom }}</option>
+                                <option value="{{ $hotel->id }}" @selected((int) old('hotel_id', $hotelId) === $hotel->id)>{{ $hotel->nom }}</option>
                             @endforeach
                         </select>
                         @error('hotel_id') <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p> @enderror
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Type <span class="text-red-400 text-xs">*</span></label>
-                        <select name="type_abonnement" required
-                            class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
-                            <option value="basic">Basic</option>
-                            <option value="premium">Premium</option>
-                            <option value="enterprise">Enterprise</option>
-                        </select>
-                    </div>
+                    @php $premiere = $plans->first(); @endphp
+                    @include('admin.subscriptions.partials.formule', [
+                        'plans'     => $plans,
+                        'selection' => old('type_abonnement', $premiere?->code ?? ''),
+                        'prix'      => old('prix_mensuel', $premiere?->prix ?? ''),
+                        'devise'    => old('devise', $premiere?->devise ?? 'MGA'),
+                    ])
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
@@ -48,24 +46,14 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">Date fin</label>
-                            <input type="date" name="date_fin" value="{{ old('date_fin') }}"
+                            <input type="date" name="date_fin" value="{{ old('date_fin', today()->addMonthNoOverflow()->format('Y-m-d')) }}"
                                 class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Prix mensuel <span class="text-red-400 text-xs">*</span></label>
-                            <input type="number" name="prix_mensuel" step="0.01" value="{{ old('prix_mensuel') }}" required
-                                class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Devise</label>
-                            <input type="text" name="devise" value="{{ old('devise', 'EUR') }}" maxlength="3"
-                                class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
-                        </div>
-                    </div>
-
+                    <p class="text-xs text-gray-500">
+                        Le premier mois (du début à la fin) est enregistré comme payé. Pour un changement de formule, ce nouvel abonnement remplace l'ancien dans le suivi.
+                    </p>
                 </div>
             </div>
 

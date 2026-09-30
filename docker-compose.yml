@@ -50,6 +50,19 @@ services:
       - redis
     restart: unless-stopped
 
+  # ─── Scheduler (tâches planifiées : échéances d'abonnement…) ──
+  scheduler:
+    image: evadia-backend:latest
+    pull_policy: never
+    command: php artisan schedule:work
+    env_file: .env.docker
+    environment:
+      - DB_HOST=postgres
+    depends_on:
+      - api
+      - redis
+    restart: unless-stopped
+
   # ─── WebSocket Reverb ────────────────────────────────────────
   reverb:
     image: evadia-backend:latest

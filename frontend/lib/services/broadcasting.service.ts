@@ -3,6 +3,8 @@ import { apiClient } from '@/lib/api-client'
 export interface BroadcastingToken {
   token: string
   expires_at: string
+  /** Clé publique Reverb, fournie par l'API (le build n'en a pas besoin). */
+  reverb_key?: string
 }
 
 export const broadcastingService = {

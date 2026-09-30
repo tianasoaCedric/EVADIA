@@ -84,6 +84,8 @@
                 init() {
                     this.refresh();
                     setInterval(() => this.refresh(), POLL_MS);
+                    // Nouveau message reçu en direct : la cloche se met à jour sans attendre le polling.
+                    window.addEventListener('evadia-message', () => this.refresh());
                     document.addEventListener('visibilitychange', () => {
                         if (!document.hidden) { this.refresh(); this.stopBlink(); }
                     });
@@ -620,6 +622,54 @@
                 </div>
             </header>
 
+            <!-- Pause d'abonnement (décidée par Evadia) -->
+            @if($pauseAbonnement ?? null)
+                <div class="mx-6 mt-4 flex items-start gap-3 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-800 shadow-sm">
+                    <svg class="h-5 w-5 shrink-0 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9v6m-4.5 0V9M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="flex-1">
+                        @if($pauseAbonnement->statut === 'en_cours')
+                            Votre hôtel est en pause jusqu'au <strong>{{ $pauseAbonnement->date_reprise->format('d/m/Y') }}</strong> : il n'est pas visible sur EVADIA et ne reçoit pas de nouvelles réservations. Vous pouvez préparer votre retour (tarifs, photos, disponibilités).
+                        @else
+                            Pause prévue du <strong>{{ $pauseAbonnement->date_debut->format('d/m/Y') }}</strong> au <strong>{{ $pauseAbonnement->date_reprise->format('d/m/Y') }}</strong> : aucune réservation ne peut être prise sur ces dates.
+                        @endif
+                        Pour reprendre plus tôt ou prolonger, contactez l'équipe EVADIA.
+                    </p>
+                    <a href="{{ route('hotel.messages.index') }}" class="shrink-0 font-medium underline">Contacter EVADIA</a>
+                </div>
+            @endif
+
+            <!-- Échéance d'abonnement -->
+            @if(($alerteAbonnement ?? null) && !($pauseAbonnement ?? null))
+                @php
+                    $ab = $alerteAbonnement;
+                    $joursAb = $ab->joursAvantExpiration();
+                    $bandeau = match (true) {
+                        $ab->statut === \App\Models\Abonnement::STATUT_SUSPENDU => [
+                            'red', "Votre hôtel est suspendu : abonnement impayé depuis le {$ab->date_fin->format('d/m/Y')}. Il n'apparaît plus sur le site et n'accepte plus de nouvelles réservations (les réservations existantes restent valables). Contactez l'équipe EVADIA pour régulariser.",
+                        ],
+                        $ab->statut === \App\Models\Abonnement::STATUT_RETARD => [
+                            'red', "Votre abonnement a expiré le {$ab->date_fin->format('d/m/Y')}. Sans paiement, votre hôtel sera retiré du site le {$ab->dateSuspensionPrevue()->format('d/m/Y')}.",
+                        ],
+                        $joursAb !== null && $joursAb >= 0 && $joursAb <= 7 => [
+                            'amber', 'Votre abonnement expire ' . ($joursAb === 0 ? "aujourd'hui" : ($joursAb === 1 ? 'demain' : "dans {$joursAb} jours")) . " ({$ab->date_fin->format('d/m/Y')}). Pensez à régler le mois suivant.",
+                        ],
+                        default => null,
+                    };
+                @endphp
+                @if($bandeau)
+                    <div class="mx-6 mt-4 flex items-start gap-3 rounded-xl border px-4 py-3 text-sm shadow-sm {{ $bandeau[0] === 'red' ? 'bg-red-50 border-red-200 text-red-800' : 'bg-amber-50 border-amber-200 text-amber-800' }}">
+                        <svg class="h-5 w-5 shrink-0 {{ $bandeau[0] === 'red' ? 'text-red-500' : 'text-amber-500' }}" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                        </svg>
+                        <p class="flex-1">{{ $bandeau[1] }}</p>
+                        <a href="{{ route('hotel.subscription.index') }}" class="shrink-0 font-medium underline">Mon abonnement</a>
+                    </div>
+                @endif
+            @endif
+
             <!-- Toast Notifications -->
             @if(session('success'))
                 <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
@@ -721,6 +771,12 @@
             </div>
         </template>
     </div>
+
+    {{-- Temps réel (Echo/Reverb) : configuration lue à l'exécution par resources/js/bootstrap.js --}}
+    <script>
+        window.EVADIA_REVERB = { key: @js(config('broadcasting.connections.reverb.key')), userId: @js(auth('hotel')->id()) };
+    </script>
+    @vite(['resources/js/app.js'])
 
     @stack('scripts')
 </body>

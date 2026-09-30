@@ -80,7 +80,7 @@ class UserController extends Controller
     public function toggleStatus(User $user)
     {
         if ($user->id === auth()->id()) {
-            return back()->with('error', 'Vous ne pouvez pas désactiver votre propre compte.');
+            return redirect()->back(fallback: route('admin.users.index'))->with('error', 'Vous ne pouvez pas désactiver votre propre compte.');
         }
 
         $user->update(['est_actif' => !$user->est_actif]);
@@ -94,6 +94,7 @@ class UserController extends Controller
         $status = $user->est_actif ? 'activé' : 'désactivé';
         $this->logAction('user_status_toggled', "Utilisateur {$user->prenom} {$user->nom} {$status}");
 
-        return back()->with('success', "Utilisateur {$status} avec succès.");
+        // Retour à la page d'origine (liste ou fiche), jamais à l'accueil si le navigateur n'envoie pas de Referer
+        return redirect()->back(fallback: route('admin.users.index'))->with('success', "Utilisateur {$status} avec succès.");
     }
 }

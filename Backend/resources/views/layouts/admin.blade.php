@@ -166,7 +166,7 @@
 </head>
 
 <body class="h-full bg-gray-50 font-sans antialiased"
-    x-data="{ sidebarOpen: true, profileOpen: false, notifOpen: false }">
+    x-data="{ sidebarOpen: true, notifOpen: false }">
 
     <div class="flex h-full">
         <!-- ═══════════════ MOBILE OVERLAY ═══════════════ -->
@@ -248,6 +248,18 @@
                             </div>
                             <span x-show="sidebarOpen">Abonnements</span>
                             <span x-show="!sidebarOpen" class="sidebar-tooltip">Abonnements</span>
+                        </a>
+
+                        <a href="{{ route('admin.plans.index') }}"
+                            class="sidebar-link group {{ request()->routeIs('admin.plans.*') ? 'active' : '' }}">
+                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg {{ request()->routeIs('admin.plans.*') ? 'bg-emerald-500/20 text-emerald-400' : 'text-white/50 group-hover:text-white/80' }} transition-colors">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+                                </svg>
+                            </div>
+                            <span x-show="sidebarOpen">Formules</span>
+                            <span x-show="!sidebarOpen" class="sidebar-tooltip">Formules</span>
                         </a>
 
                         <a href="{{ route('admin.destinations.index') }}"
@@ -389,11 +401,17 @@
                     <h1 class="text-xl font-semibold text-gray-900">@yield('page_title', 'Dashboard')</h1>
                 </div>
 
-                <!-- Right: Notifications + Profile -->
+                <!-- Right: Notifications (profil et déconnexion : pied de la sidebar) -->
                 <div class="flex items-center gap-3">
                     <!-- Notifications -->
                     <div class="relative" x-data="{ open: false, notifications: [], unread: 0, loading: false }"
                         x-init="
+                            fetch('{{ route('admin.notifications.recent') }}')
+                                .then(r => r.json())
+                                .then(d => { notifications = d.notifications; unread = d.unread_count; });
+                        "
+                        {{-- Nouveau message reçu en direct : la cloche se met à jour sans recharger --}}
+                        @evadia-message.window="
                             fetch('{{ route('admin.notifications.recent') }}')
                                 .then(r => r.json())
                                 .then(d => { notifications = d.notifications; unread = d.unread_count; });
@@ -455,45 +473,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Profile Dropdown -->
-                    <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open"
-                            class="flex items-center gap-2 rounded-lg px-3 py-1.5 hover:bg-gray-100 transition-colors">
-                            <div
-                                class="h-8 w-8 rounded-full bg-gradient-to-br from-evadia-500 to-evadia-700 flex items-center justify-center text-white text-sm font-bold">
-                                {{ substr(auth()->user()->prenom, 0, 1) }}{{ substr(auth()->user()->nom, 0, 1) }}
-                            </div>
-                            <span class="text-sm font-medium text-gray-700 hidden sm:block">{{ auth()->user()->prenom }}
-                                {{ auth()->user()->nom }}</span>
-                            <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                            </svg>
-                        </button>
-
-                        <div x-show="open" @click.away="open = false" x-cloak
-                            x-transition:enter="transition ease-out duration-100"
-                            x-transition:enter-start="transform opacity-0 scale-95"
-                            x-transition:enter-end="transform opacity-100 scale-100"
-                            x-transition:leave="transition ease-in duration-75"
-                            x-transition:leave-start="transform opacity-100 scale-100"
-                            x-transition:leave-end="transform opacity-0 scale-95"
-                            class="absolute right-0 mt-2 w-48 rounded-xl bg-white py-2 shadow-lg ring-1 ring-gray-200">
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit"
-                                    class="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                        stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-                                    </svg>
-                                    Déconnexion
-                                </button>
-                            </form>
-                        </div>
-                    </div>
                 </div>
             </header>
 
@@ -545,6 +524,12 @@
             </main>
         </div>
     </div>
+
+    {{-- Temps réel (Echo/Reverb) : configuration lue à l'exécution par resources/js/bootstrap.js --}}
+    <script>
+        window.EVADIA_REVERB = { key: @js(config('broadcasting.connections.reverb.key')), userId: @js(auth()->id()) };
+    </script>
+    @vite(['resources/js/app.js'])
 
     @stack('scripts')
 </body>

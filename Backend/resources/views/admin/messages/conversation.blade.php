@@ -63,31 +63,33 @@
 @endsection
 
 @push('scripts')
-    @vite(['resources/js/app.js'])
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const container = document.getElementById('messagesContainer');
             if (container) container.scrollTop = container.scrollHeight;
+            const MARK_READ = @js(route('admin.messages.mark-read', ['message' => '__ID__']));
 
-            // Real-time message receiving via Echo/Reverb
-            if (window.Echo) {
-                window.Echo.private('messages.{{ auth()->id() }}')
-                    .listen('.message.sent', (e) => {
-                        if (e.expediteur_id == {{ $user->id }}) {
-                            const msgHtml = `
-                                <div class="flex justify-start">
-                                    <div class="max-w-[70%] rounded-2xl px-4 py-3 bg-gray-100 text-gray-900">
-                                        <p class="text-sm whitespace-pre-line">${e.contenu}</p>
-                                        <p class="text-[10px] text-gray-400 mt-1 text-right">
-                                            ${new Date(e.date_envoi).toLocaleString('fr-FR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'})}
-                                        </p>
-                                    </div>
-                                </div>`;
-                            container.insertAdjacentHTML('beforeend', msgHtml);
-                            container.scrollTop = container.scrollHeight;
-                        }
-                    });
-            }
+            // Message reçu en direct (relayé par resources/js/bootstrap.js)
+            window.addEventListener('evadia-message', ({ detail: e }) => {
+                if (!container || e.expediteur_id != {{ $user->id }}) return;
+
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="flex justify-start">
+                        <div class="max-w-[70%] rounded-2xl px-4 py-3 bg-gray-100 text-gray-900">
+                            <p class="text-sm whitespace-pre-line">${window.evadiaEscape(e.contenu)}</p>
+                            <p class="text-[10px] text-gray-400 mt-1 text-right">
+                                ${new Date(e.date_envoi).toLocaleString('fr-FR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'})}
+                            </p>
+                        </div>
+                    </div>`);
+                container.scrollTop = container.scrollHeight;
+
+                // La conversation est ouverte : le message est lu.
+                fetch(MARK_READ.replace('__ID__', e.id), {
+                    method: 'PATCH',
+                    headers: { 'X-CSRF-TOKEN': @js(csrf_token()), 'Accept': 'application/json' },
+                });
+            });
         });
     </script>
 @endpush

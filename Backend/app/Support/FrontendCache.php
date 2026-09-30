@@ -27,6 +27,13 @@ class FrontendCache
         self::revaliderNext();
     }
 
+    /** Après un changement de visibilité d'un hôtel (suspension, réactivation). */
+    public static function purgerHotels(): void
+    {
+        \App\Models\Hotel::flushSearchCache();
+        self::purgerDestinationsEtVilles();
+    }
+
     private static function revaliderNext(): void
     {
         $url = config('services.frontend.internal_url');

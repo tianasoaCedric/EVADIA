@@ -16,9 +16,10 @@ class SubscriptionController extends Controller
     {
         $hotel = $this->getHotel();
 
+        // Abonnement en cours, même échu : un hôtel en retard ou suspendu doit
+        // voir son échéance, pas un écran « aucun abonnement ».
         $abonnementActif = Abonnement::where('hotel_id', $hotel->id)
             ->where('date_debut', '<=', now())
-            ->where(fn($q) => $q->whereNull('date_fin')->orWhere('date_fin', '>=', now()))
             ->latest('date_debut')
             ->first();
 

@@ -22,6 +22,7 @@ class BroadcastingTokenController extends Controller
                 properties: [
                     new OA\Property(property: 'token', type: 'string'),
                     new OA\Property(property: 'expires_at', type: 'string', format: 'date-time'),
+                    new OA\Property(property: 'reverb_key', type: 'string', description: 'Clé publique de l\'application Reverb'),
                 ]
             )),
         ]
@@ -39,6 +40,8 @@ class BroadcastingTokenController extends Controller
         return response()->json([
             'token' => $token->plainTextToken,
             'expires_at' => $expiresAt->toISOString(),
+            // Clé publique Reverb, fournie à l'exécution : le site n'en dépend plus au build.
+            'reverb_key' => config('broadcasting.connections.reverb.key'),
         ], 201);
     }
 }

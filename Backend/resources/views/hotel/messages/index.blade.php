@@ -17,7 +17,8 @@
         </button>
     </div>
 
-    {{-- Conversations Réservations (client <-> hôtel) --}}
+    {{-- Conversations Réservations (client <-> hôtel) — bloc toujours présent pour la mise à jour en direct --}}
+    <div data-live="reservations">
     @if($reservationConversations->isNotEmpty())
         <div>
             <h3 class="text-sm font-semibold text-gray-700 mb-3">Conversations réservations</h3>
@@ -53,10 +54,11 @@
             </div>
         </div>
     @endif
+    </div>
 
     {{-- Conversations support EVADIA --}}
     <h3 class="text-sm font-semibold text-gray-700 mb-3">Conversations avec le support EVADIA</h3>
-    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden divide-y divide-gray-100">
+    <div data-live="support" class="bg-white rounded-xl border border-gray-200 overflow-hidden divide-y divide-gray-100">
         @forelse($conversations as $conv)
             @php
                 $user = $users[$conv->interlocuteur_id] ?? null;
@@ -144,3 +146,10 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    // Nouveau message reçu : la liste des conversations (dernier message, non lus) se met à jour seule.
+    window.addEventListener('evadia-message', () => window.evadiaRefreshLive && window.evadiaRefreshLive());
+</script>
+@endpush

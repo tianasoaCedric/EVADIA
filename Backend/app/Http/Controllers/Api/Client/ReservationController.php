@@ -10,6 +10,7 @@ use App\Models\Photo;
 use App\Models\Propriete;
 use App\Models\Reservation;
 use App\Services\DisponibiliteService;
+use App\Services\PauseAbonnementService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use DomainException;
@@ -153,7 +154,7 @@ class ReservationController extends Controller
             new OA\Response(response: 422, description: 'Erreur de validation ou code promo invalide'),
         ]
     )]
-    public function store(Request $request, DisponibiliteService $disponibilites, NotifyHotelOfNewReservationAction $notifyHotel): JsonResponse
+    public function store(Request $request, DisponibiliteService $disponibilites, NotifyHotelOfNewReservationAction $notifyHotel, PauseAbonnementService $pauses): JsonResponse
     {
         $validated = $request->validate([
             'propriete_id'   => 'required|exists:proprietes,id',
@@ -167,7 +168,29 @@ class ReservationController extends Controller
             'devise'         => 'nullable|string|in:MGA,EUR',
         ]);
 
-        $propriete = Propriete::with(['currentPrix', 'hotel'])->findOrFail($validated['propriete_id']);
+        $propriete = Propriete::with(['currentPrix', 'hotel.currentStatut'])->findOrFail($validated['propriete_id']);
+
+        // Hôtel suspendu (ex. abonnement impayé), fermé ou pas encore validé :
+        // plus de nouvelles réservations, même via un lien direct vers la chambre.
+        if ($propriete->hotel?->currentStatut?->statut !== 'actif') {
+            return response()->json(['message' => "Cet établissement n'accepte pas de réservations pour le moment."], 409);
+        }
+
+        // Pause planifiée sur ces dates : l'hôtel est encore en ligne, mais sera fermé pendant le séjour.
+        $pause = $pauses->pauseSurSejour(
+            $propriete->hotel_id,
+            Carbon::parse($validated['date_debut']),
+            Carbon::parse($validated['date_fin'])
+        );
+        if ($pause) {
+            return response()->json([
+                'message' => sprintf(
+                    "Cet établissement est fermé du %s au %s. Choisissez d'autres dates.",
+                    $pause->date_debut->format('d/m/Y'),
+                    $pause->date_reprise->copy()->subDay()->format('d/m/Y'),
+                ),
+            ], 409);
+        }
 
         // La disponibilité (fermetures + stock d'unités) est vérifiée dans la
         // transaction ci-dessous, sous verrou, pour éviter la sur-réservation.
