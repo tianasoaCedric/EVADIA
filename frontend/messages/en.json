@@ -116,7 +116,7 @@
     "beds_label": "bed(s)",
     "bathrooms_label": "Bathroom",
     "persons_label": "pers",
-    "book_button": "To book",
+    "book_button": "Request a booking",
     "image": "picture",
     "previous_image": "Previous image",
     "next_image": "Next image",
@@ -194,8 +194,9 @@
     "service_fees": "Service fees",
     "discount": "Reduction ({percent}%)",
     "total": "Total",
-    "book_button": "To book",
-    "booked": "Reserve",
+    "book_button": "Request a booking",
+    "booked": "No longer available",
+    "checkout_possible": "Unavailable that night — check-out possible that day",
     "selected": "Selected"
   },
   "ReservationConfirm": {
@@ -212,7 +213,7 @@
     "deposit_amount": "Deposit due now",
     "balance_due": "Balance due on arrival",
     "cancel": "Cancel",
-    "confirm": "Confirm"
+    "confirm": "Confirm request"
   },
   "ProprietePage": {
     "meta_title": "{name} | Evadia",
@@ -229,7 +230,11 @@
     "share_alert": "Link copied to clipboard!",
     "save_log": "Saved room",
     "reservation_log": "Reservation in progress...",
-    "back_label": "Back"
+    "back_label": "Back",
+    "offer_not_applicable": "This offer does not apply to this room.",
+    "offer_saving": "You save {amount} {symbole}",
+    "offer_discount_label": "Offer “{titre}”",
+    "reservation_error": "The booking request could not be sent. Please try again."
   },
   "DestinationPage": {
     "meta_title": "Destinations | Evadia",
@@ -335,9 +340,9 @@
     "phone_label": "Phone",
     "email_label": "E-mail",
     "accept_terms": "I accept the terms and conditions",
-    "reserve_button": "Book now",
+    "reserve_button": "Request a booking",
     "terms_title": "Terms and conditions",
-    "reservation_success": "Your reservation request has been sent! We will contact you as soon as possible."
+    "not_started": "This offer can be booked from {date}."
   },
   "FavoritePage": {
     "meta_title": "My favorites | Evadia",
@@ -580,7 +585,8 @@
     "deposit_paid": "Paid",
     "deposit_pending": "Pending",
     "deposit_amount": "Deposit amount",
-    "balance_due": "Balance due"
+    "balance_due": "Balance due",
+    "offer_line": "Offer “{titre}”"
   },
   "SearchSuggestions": {
     "loading": "Loading...",
@@ -633,7 +639,11 @@
     "search": "To research",
     "search_placeholder": "To research...",
     "change_currency": "Change currency",
-    "logo_alt": "Evadia"
+    "logo_alt": "Evadia",
+    "notifications": "Notifications",
+    "notifications_unread": "{count} unread notification(s)",
+    "notifications_mark_all_read": "Mark all as read",
+    "notifications_empty": "No notifications yet"
   },
   "MenuFullscreen": {
     "accommodations": "Accommodations",
@@ -702,5 +712,10 @@
     "click_to_copy": "Click to copy",
     "copied": "Copied!",
     "close": "Close"
+  },
+  "OfferBanner": {
+    "title": "Offer “{titre}”",
+    "hint": "Choose your room: the discount will be applied automatically.",
+    "see_offer": "See offer"
   }
 }

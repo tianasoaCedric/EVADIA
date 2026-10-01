@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\NotificationCreated;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -30,6 +31,15 @@ class Notification extends Model
             'date_envoi' => 'datetime',
             'date_lecture' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::created(function (Notification $notification) {
+            if ($notification->canal === 'in_app') {
+                NotificationCreated::dispatch($notification);
+            }
+        });
     }
 
     public function user(): BelongsTo

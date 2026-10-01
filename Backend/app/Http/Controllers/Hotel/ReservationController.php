@@ -6,6 +6,7 @@ use App\Actions\Reservation\RespondToReservationAction;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Hotel\Traits\BelongsToHotel;
 use App\Models\Reservation;
+use App\Services\OffreService;
 use App\Traits\LogsAdminAction;
 use DomainException;
 use Illuminate\Http\Request;
@@ -30,7 +31,7 @@ class ReservationController extends Controller
             'annulee' => (clone $baseQuery)->where('statut', 'annulee')->count(),
         ];
 
-        $reservations = Reservation::with(['client', 'propriete', 'facture'])
+        $reservations = Reservation::with(['client', 'propriete', 'facture', 'offre:id,titre'])
             ->whereHas('propriete', fn($q) => $q->where('hotel_id', $hotel->id))
             ->when($request->statut, fn($q, $s) => $q->where('statut', $s))
             ->when($request->search, function ($q, $s) {
@@ -54,12 +55,17 @@ class ReservationController extends Controller
     {
         $hotel = $this->getHotel();
 
-        $reservation = Reservation::with(['client', 'propriete', 'facture', 'annuleePar', 'repondueParUser'])
+        $reservation = Reservation::with(['client', 'propriete', 'facture', 'annuleePar', 'repondueParUser', 'offre.avantages.type'])
             ->whereHas('propriete', fn($q) => $q->where('hotel_id', $hotel->id))
             ->where('id', $id)
             ->firstOrFail();
 
-        return view('hotel.reservations.show', compact('reservation', 'hotel'));
+        // Avantages en nature à fournir au client (petit-déjeuner offert…)
+        $avantagesEnNature = $reservation->offre
+            ? app(OffreService::class)->avantagesEnNature($reservation->offre)
+            : [];
+
+        return view('hotel.reservations.show', compact('reservation', 'hotel', 'avantagesEnNature'));
     }
 
     public function accept(Request $request, $id)

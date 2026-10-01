@@ -20,7 +20,24 @@ export interface OffreDetail extends Offre {
   phone: string | null
   email: string | null
   terms: string[]
+  hotel_id: number
+  /** Chambres auxquelles l'offre s'applique */
+  proprietes: { id: number; nom: string }[]
+  /** false pour une offre à venir : visible mais pas encore réservable */
+  en_cours: boolean
 }
+
+export type ApercuOffre =
+  | { applicable: false; message: string }
+  | {
+      applicable: true
+      offre: string
+      prix_base: number
+      montant_reduction: number
+      prix_total: number
+      devise: 'MGA' | 'EUR'
+      avantages_en_nature: string[]
+    }
 
 export interface PaginatedOffres {
   data: Offre[]
@@ -51,5 +68,16 @@ export const offreService = {
 
   get(id: number): Promise<OffreDetail> {
     return apiClient.get<OffreDetail>(`/offres/${id}`)
+  },
+
+  /** Prix avec l'offre pour une chambre et des dates (jamais mis en cache) */
+  apercu(id: number, params: { propriete_id: number; date_debut: string; date_fin: string; devise: 'MGA' | 'EUR' }): Promise<ApercuOffre> {
+    const q = new URLSearchParams({
+      propriete_id: String(params.propriete_id),
+      date_debut: params.date_debut,
+      date_fin: params.date_fin,
+      devise: params.devise,
+    })
+    return apiClient.get<ApercuOffre>(`/offres/${id}/apercu?${q}`, 0)
   },
 }

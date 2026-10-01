@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Loading from '@/app/components/ui/Loading'
 import { consumeReturnTo } from '@/lib/auth-redirect'
+import { notifyAuthChanged } from '@/lib/auth-events'
 
 export default function AuthCallbackPage() {
   const router = useRouter()
@@ -42,6 +43,7 @@ export default function AuthCallbackPage() {
           router.push('/login?error=google_failed')
           return
         }
+        notifyAuthChanged()
         router.push(consumeReturnTo())
       })
       .catch(() => router.push('/login?error=google_failed'))

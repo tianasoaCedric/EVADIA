@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Api\Public;
 
 use App\Http\Controllers\Controller;
+use App\Models\AbonnementPause;
 use App\Models\Propriete;
+use App\Services\DisponibiliteService;
+use Carbon\CarbonPeriod;
 use Illuminate\Http\JsonResponse;
 
 class ProprieteController extends Controller
@@ -65,5 +68,41 @@ class ProprieteController extends Controller
                 'pourcentage_acompte' => $propriete->hotel->pourcentage_acompte,
             ],
         ]);
+    }
+
+    /**
+     * GET /proprietes/{id}/disponibilites
+     * Nuits où la chambre ne peut plus être réservée (affichées en rouge dans le
+     * calendrier client) : complètes, fermées par l'hôtel, ou hôtel en pause.
+     * Mêmes règles que la création de réservation ; le jour du départ reste libre.
+     */
+    public function disponibilites(int $id, DisponibiliteService $dispo): JsonResponse
+    {
+        $propriete = Propriete::findOrFail($id);
+
+        // Une réservation commence au plus tôt demain (date_debut after:today)
+        $debut = today()->addDay();
+        $fin   = today()->addYear();
+
+        $nuits = $dispo->nuitsIndisponibles($propriete, $debut, $fin);
+
+        // Pauses d'abonnement de l'hôtel : fermé de date_debut à la veille de date_reprise
+        $pauses = AbonnementPause::active()
+            ->where('hotel_id', $propriete->hotel_id)
+            ->where('date_debut', '<', $fin->toDateString())
+            ->where('date_reprise', '>', $debut->toDateString())
+            ->get();
+
+        foreach ($pauses as $pause) {
+            $periode = CarbonPeriod::create($pause->date_debut->max($debut), $pause->date_reprise->copy()->subDay()->min($fin));
+            foreach ($periode as $nuit) {
+                $nuits[] = $nuit->toDateString();
+            }
+        }
+
+        $nuits = array_values(array_unique($nuits));
+        sort($nuits);
+
+        return response()->json(['dates_reservees' => $nuits]);
     }
 }

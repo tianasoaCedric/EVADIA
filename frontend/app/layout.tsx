@@ -10,6 +10,7 @@ import { getMessages } from 'next-intl/server';
 import { DeviseProvider } from './context/DeviseContext';
 import { FavorisProvider } from './context/FavorisContext';
 import { HeaderThemeProvider } from './context/HeaderThemeContext';
+import { NotificationsProvider } from './context/NotificationsContext';
 import { SITE_URL } from '@/lib/site'
 
 export const metadata: Metadata = {
@@ -53,12 +54,14 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <DeviseProvider>
             <FavorisProvider>
+              <NotificationsProvider>
               <HeaderThemeProvider>
                 {/* <Header /> */}
                 {children}
                 <Footer/>
                 <ChatboxWidget />
               </HeaderThemeProvider>
+              </NotificationsProvider>
             </FavorisProvider>
           </DeviseProvider>
         </NextIntlClientProvider>

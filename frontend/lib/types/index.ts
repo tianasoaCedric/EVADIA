@@ -227,6 +227,10 @@ export interface Reservation {
   montant_total?: number
   prix_total?: number
   devise_prix_total?: string
+  montant_reduction?: number | null
+  prix_avant_reduction?: number | null
+  /** Offre appliquée (page de l'offre ou code promo) */
+  offre?: { id: number; titre: string } | null
   montant_acompte?: number | null
   statut_paiement_acompte?: 'non_requis' | 'en_attente' | 'paye'
   demande_speciale?: string
@@ -282,6 +286,8 @@ export interface CreateReservationPayload {
   nb_enfants?: number
   nb_bebes?: number
   demande_speciale?: string
+  /** Réservation depuis la page d'une offre : réduction appliquée automatiquement */
+  offre_id?: number
   devise?: 'MGA' | 'EUR'
 }
 
@@ -370,4 +376,23 @@ export interface LieuDecouverte {
   position_image: 'left' | 'right'
   ordre: number
   actif: boolean
+}
+
+// ─── Notifications in-app ─────────────────────────────────────────────────────
+
+export type TypeNotification =
+  | 'reservation_acceptee'
+  | 'reservation_refusee'
+  | 'nouveau_message_reservation'
+  | (string & {})
+
+export interface ClientNotification {
+  id: number
+  type_notification: TypeNotification
+  titre: string
+  contenu: string
+  lien: string | null
+  reservation_id: number | null
+  lu: boolean
+  date_envoi: string
 }

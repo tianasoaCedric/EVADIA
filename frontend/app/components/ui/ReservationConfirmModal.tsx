@@ -91,7 +91,7 @@ export default function ReservationConfirmModal({
             </div>
             {data.discountAmount > 0 && (
               <div className="flex justify-between text-xs text-green-600">
-                <span>{t('discount', { percent: data.discountPercent })}</span>
+                <span>{data.discountLabel ?? t('discount', { percent: data.discountPercent })}</span>
                 <span>-{data.discountAmount.toLocaleString('fr-FR')} {data.devise}</span>
               </div>
             )}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronLeft, Share, Heart } from 'lucide-react'
 import {
@@ -18,8 +18,14 @@ import HotelInfo from '../../components/ui/HotelInfo'
 import SharePopup from '../../components/ui/SharePopup'
 import { proprieteService } from '@/lib/services/propriete.service'
 import { reservationService } from '@/lib/services/reservation.service'
+import { offreService, type ApercuOffre } from '@/lib/services/offre.service'
 import type { ProprietePublic } from '@/lib/types'
+import { ApiError } from '@/lib/api-client'
+import { useOffreParam } from '@/hooks/useOffreParam'
+import { useDevise } from '@/app/context/DeviseContext'
+import OfferBanner from '../../components/ui/OfferBanner'
 import Loading from '../../components/ui/Loading'
+import { toIsoDate } from '@/lib/dates'
 
 interface ProprieteClientProps {
   proprieteId: number
@@ -63,6 +69,13 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
   const [bookedDates, setBookedDates] = useState<string[]>([])
   const [isShareOpen, setIsShareOpen] = useState(false)
   const [pendingReservation, setPendingReservation] = useState<ReservationData | null>(null)
+  const [reservationError, setReservationError] = useState<string | null>(null)
+
+  // Arrivée depuis la page d'une offre (?offre=) : réduction appliquée automatiquement
+  const offre = useOffreParam()
+  const offreApplicable = !!offre && offre.proprietes.some((p) => p.id === proprieteId)
+  const [apercu, setApercu] = useState<ApercuOffre | null>(null)
+  const { devise, symbole } = useDevise()
 
   const [setMainRef, isMainVisible] = useOnScreen({ threshold: 0.2,  })
 
@@ -94,24 +107,47 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
   }
 
   const handleReservation = (data: ReservationData) => {
+    setReservationError(null)
     setPendingReservation(data)
   }
+
+  // Aperçu du prix avec l'offre à chaque changement de dates
+  const handleDatesChange = useCallback((checkIn: Date | null, checkOut: Date | null) => {
+    if (!offre || !offreApplicable || !checkIn || !checkOut) {
+      setApercu(null)
+      return
+    }
+    offreService.apercu(offre.id, {
+      propriete_id: proprieteId,
+      date_debut: toIsoDate(checkIn),
+      date_fin: toIsoDate(checkOut),
+      devise,
+    })
+      .then(setApercu)
+      .catch(() => setApercu(null))
+  }, [offre, offreApplicable, proprieteId, devise])
 
   const handleConfirmReservation = async () => {
     if (!pendingReservation) return
     setIsSubmitting(true)
     try {
-      const fmt = (d: Date) => d.toISOString().split('T')[0]
       await reservationService.create({
         propriete_id: proprieteId,
-        date_debut: fmt(pendingReservation.checkIn),
-        date_fin: fmt(pendingReservation.checkOut),
+        date_debut: toIsoDate(pendingReservation.checkIn),
+        date_fin: toIsoDate(pendingReservation.checkOut),
         nb_adultes: pendingReservation.guests,
         devise: pendingReservation.devise,
+        // Réservation depuis l'offre : la réduction est recalculée et liée côté serveur
+        ...(offre && offreApplicable && apercu?.applicable ? { offre_id: offre.id } : {}),
       })
       router.push('/reservations')
     } catch (error) {
       console.error(t('reservation_log'), error)
+      setReservationError(error instanceof ApiError ? error.message : t('reservation_error'))
+      // Nuit prise entre-temps par un autre client : rafraîchir les dates en rouge
+      if (error instanceof ApiError && error.status === 409) {
+        proprieteService.getBookedDates(proprieteId).then(setBookedDates).catch(() => {})
+      }
     } finally {
       setIsSubmitting(false)
       setPendingReservation(null)
@@ -208,7 +244,30 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
             </div>
 
             {/* Colonne droite : réservation */}
-            <div className="lg:sticky lg:top-24">
+            <div className="lg:sticky lg:top-24 space-y-4">
+              {offre && (
+                <OfferBanner
+                  offre={offre}
+                  warning={
+                    !offreApplicable
+                      ? t('offer_not_applicable')
+                      : apercu && !apercu.applicable ? apercu.message : null
+                  }
+                  detail={
+                    apercu?.applicable
+                      ? [
+                          t('offer_saving', { amount: apercu.montant_reduction.toLocaleString('fr-FR'), symbole }),
+                          ...apercu.avantages_en_nature,
+                        ].join(' · ')
+                      : null
+                  }
+                />
+              )}
+              {reservationError && (
+                <p className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                  {reservationError}
+                </p>
+              )}
               <Reservation
                 pricePerNight={propriete.prix_par_nuit ?? 0}
                 prixMga={propriete.prix_mga}
@@ -218,6 +277,12 @@ export default function ProprieteClient({ proprieteId, proprieteName, slug }: Pr
                 roomName={propriete.nom}
                 bookedDates={bookedDates}
                 onReserve={handleReservation}
+                onDatesChange={handleDatesChange}
+                reduction={
+                  offre && apercu?.applicable && apercu.devise === devise
+                    ? { label: t('offer_discount_label', { titre: offre.titre }), amount: apercu.montant_reduction }
+                    : null
+                }
               />
             </div>
           </div>

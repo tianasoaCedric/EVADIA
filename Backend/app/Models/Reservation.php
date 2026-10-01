@@ -71,6 +71,12 @@ class Reservation extends Model
         return $this->belongsTo(Propriete::class);
     }
 
+    /** Offre appliquée (code promo ou réservation depuis la page de l'offre) */
+    public function offre(): BelongsTo
+    {
+        return $this->belongsTo(Offre::class);
+    }
+
     public function annuleePar(): BelongsTo
     {
         return $this->belongsTo(User::class, 'annulee_par');

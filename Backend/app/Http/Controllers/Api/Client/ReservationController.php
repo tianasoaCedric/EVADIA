@@ -10,6 +10,7 @@ use App\Models\Photo;
 use App\Models\Propriete;
 use App\Models\Reservation;
 use App\Services\DisponibiliteService;
+use App\Services\OffreService;
 use App\Services\PauseAbonnementService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -60,7 +61,7 @@ class ReservationController extends Controller
     )]
     public function index(Request $request): JsonResponse
     {
-        $query = Reservation::with(['propriete.hotel', 'propriete.photoPrincipale'])
+        $query = Reservation::with(['propriete.hotel', 'propriete.photoPrincipale', 'offre:id,titre'])
             ->where('client_id', $request->user()->id);
 
         if ($statut = $request->input('statut')) {
@@ -95,7 +96,7 @@ class ReservationController extends Controller
     )]
     public function show(Request $request, int $id): JsonResponse
     {
-        $reservation = Reservation::with(['propriete.hotel', 'propriete.photos', 'facture', 'services', 'avis'])
+        $reservation = Reservation::with(['propriete.hotel', 'propriete.photos', 'facture', 'services', 'avis', 'offre:id,titre'])
             ->where('client_id', $request->user()->id)
             ->find($id);
 
@@ -154,7 +155,7 @@ class ReservationController extends Controller
             new OA\Response(response: 422, description: 'Erreur de validation ou code promo invalide'),
         ]
     )]
-    public function store(Request $request, DisponibiliteService $disponibilites, NotifyHotelOfNewReservationAction $notifyHotel, PauseAbonnementService $pauses): JsonResponse
+    public function store(Request $request, DisponibiliteService $disponibilites, NotifyHotelOfNewReservationAction $notifyHotel, PauseAbonnementService $pauses, OffreService $offres): JsonResponse
     {
         $validated = $request->validate([
             'propriete_id'   => 'required|exists:proprietes,id',
@@ -165,6 +166,8 @@ class ReservationController extends Controller
             'nb_bebes'       => 'nullable|integer|min:0',
             'demande_speciale' => 'nullable|string|max:1000',
             'code_promo'     => 'nullable|string|max:50',
+            // Réservation depuis la page d'une offre : réduction appliquée sans code
+            'offre_id'       => 'nullable|integer|prohibits:code_promo',
             'devise'         => 'nullable|string|in:MGA,EUR',
         ]);
 
@@ -207,14 +210,19 @@ class ReservationController extends Controller
         $prixTotal         = $prixBase;
         $codePromoUtilise  = null;
 
-        if (!empty($validated['code_promo'])) {
-            $resultat = $this->appliquerCodePromo(
-                $validated['code_promo'],
-                $propriete,
-                $prixBase,
-                $nbNuits,
-                $request->user()->id
-            );
+        if (!empty($validated['code_promo']) || !empty($validated['offre_id'])) {
+            $offreTrouvee = !empty($validated['code_promo'])
+                ? $offres->trouverParCode($validated['code_promo'])
+                : $offres->trouverActive((int) $validated['offre_id']);
+
+            if (!$offreTrouvee) {
+                $message = !empty($validated['code_promo'])
+                    ? 'Code promo invalide ou expiré.'
+                    : 'Cette offre n\'est plus disponible.';
+                return response()->json(['message' => $message], 422);
+            }
+
+            $resultat = $offres->calculer($offreTrouvee, $propriete, $prixBase, $nbNuits, $request->user()->id);
 
             if (!$resultat['valide']) {
                 return response()->json(['message' => $resultat['message']], 422);
@@ -223,7 +231,7 @@ class ReservationController extends Controller
             $offre            = $resultat['offre'];
             $montantReduction = $resultat['montant_reduction'];
             $prixTotal        = max(0, $prixBase - $montantReduction);
-            $codePromoUtilise = strtoupper($validated['code_promo']);
+            $codePromoUtilise = !empty($validated['code_promo']) ? $offre->code_promo : null;
         }
 
         // Calcul de l'acompte si l'hôtel l'exige
@@ -320,113 +328,6 @@ class ReservationController extends Controller
         ], 201);
     }
 
-    /**
-     * Vérifie un code promo et calcule la réduction applicable.
-     *
-     * @return array{valide: bool, message?: string, offre?: Offre, montant_reduction?: float}
-     */
-    private function appliquerCodePromo(
-        string $code,
-        Propriete $propriete,
-        float $prixBase,
-        int $nbNuits,
-        int $clientId
-    ): array {
-        $offre = Offre::with(['avantages.type', 'avantages.utilisations'])
-            ->where('code_promo', strtoupper($code))
-            ->where('statut', 'active')
-            ->where('date_debut', '<=', now())
-            ->where('date_fin', '>=', now())
-            ->first();
-
-        if (!$offre) {
-            return ['valide' => false, 'message' => 'Code promo invalide ou expiré.'];
-        }
-
-        // Vérifier que l'offre s'applique à cet hôtel ou à cette propriété
-        $hotelId     = $propriete->hotel_id;
-        $proprieteId = $propriete->id;
-        $applicable  = false;
-
-        foreach ($offre->avantages as $avantage) {
-            foreach ($avantage->applications as $application) {
-                if (
-                    ($application->entite_type === 'hotel'    && $application->entite_id === $hotelId) ||
-                    ($application->entite_type === 'propriete' && $application->entite_id === $proprieteId)
-                ) {
-                    $applicable = true;
-                    break 2;
-                }
-            }
-            // Si aucune application définie, l'offre s'applique partout (offre globale EVADIA)
-            if ($avantage->applications->isEmpty()) {
-                $applicable = true;
-                break;
-            }
-        }
-
-        if (!$applicable) {
-            return ['valide' => false, 'message' => 'Ce code promo ne s\'applique pas à cette chambre.'];
-        }
-
-        // Vérifier que le client n'a pas déjà utilisé cette offre
-        $dejaUtilise = OffreUtilisation::whereHas('avantage', fn($q) => $q->where('offre_id', $offre->id))
-            ->where('client_id', $clientId)
-            ->exists();
-
-        if ($dejaUtilise) {
-            return ['valide' => false, 'message' => 'Vous avez déjà utilisé ce code promo.'];
-        }
-
-        // Calculer la réduction totale en cumulant les avantages monétaires
-        $montantReduction = 0;
-
-        foreach ($offre->avantages as $avantage) {
-            // Vérifier que la quantité max n'est pas atteinte
-            if ($avantage->quantite_max !== null) {
-                $utilisations = $avantage->utilisations->count();
-                if ($utilisations >= $avantage->quantite_max) {
-                    continue; // cet avantage est épuisé, on passe au suivant
-                }
-            }
-
-            $code = $avantage->type?->code;
-
-            switch ($code) {
-                case 'reduction_pct':
-                    // valeur = pourcentage (ex: 20 pour -20%)
-                    $montantReduction += $prixBase * ($avantage->valeur / 100);
-                    break;
-
-                case 'reduction_montant':
-                    // valeur = montant fixe à déduire
-                    $montantReduction += $avantage->valeur;
-                    break;
-
-                case 'nuit_gratuite':
-                    // valeur = nombre de nuits gratuites offertes
-                    $nuitsGratuites    = min((int) $avantage->valeur, $nbNuits);
-                    $prixNuit          = $nbNuits > 0 ? $prixBase / $nbNuits : 0;
-                    $montantReduction += $prixNuit * $nuitsGratuites;
-                    break;
-
-                // Les autres types (petit_dejeuner, spa_offert, etc.) sont des avantages
-                // en nature — ils ne modifient pas le prix, on les enregistre quand même.
-                default:
-                    break;
-            }
-        }
-
-        // La réduction ne peut pas dépasser le prix de base
-        $montantReduction = min(round($montantReduction, 2), $prixBase);
-
-        return [
-            'valide'           => true,
-            'offre'            => $offre,
-            'montant_reduction' => $montantReduction,
-        ];
-    }
-
     #[OA\Get(
         path: '/api/client/promo/{code}',
         summary: 'Vérifier un code promo',
@@ -444,7 +345,7 @@ class ReservationController extends Controller
             new OA\Response(response: 422, description: 'Code promo invalide'),
         ]
     )]
-    public function verifierPromo(Request $request, string $code): JsonResponse
+    public function verifierPromo(Request $request, string $code, OffreService $offres): JsonResponse
     {
         $request->validate([
             'propriete_id' => 'required|exists:proprietes,id',
@@ -458,13 +359,10 @@ class ReservationController extends Controller
         $prixNuit = $propriete->currentPrix?->prix_par_nuit ?? 0;
         $prixBase = $prixNuit * $nbNuits;
 
-        $resultat = $this->appliquerCodePromo(
-            $code,
-            $propriete,
-            $prixBase,
-            $nbNuits,
-            $request->user()->id
-        );
+        $offre = $offres->trouverParCode($code);
+        $resultat = $offre
+            ? $offres->calculer($offre, $propriete, $prixBase, $nbNuits, $request->user()->id)
+            : ['valide' => false, 'message' => 'Code promo invalide ou expiré.'];
 
         if (!$resultat['valide']) {
             return response()->json(['message' => $resultat['message']], 422);

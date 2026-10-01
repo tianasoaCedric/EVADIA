@@ -14,6 +14,9 @@ import HotelInfo from '@/app/components/ui/HotelInfo'
 import { favoriService } from '@/lib/services/favori.service'
 import type { HotelDetail } from '@/lib/types'
 import SharePopup from '@/app/components/ui/SharePopup'
+import OfferBanner from '@/app/components/ui/OfferBanner'
+import { useOffreParam } from '@/hooks/useOffreParam'
+import { createSlug } from '@/lib/slug'
 
 interface HotelClientProps {
   hotelId: number
@@ -54,7 +57,14 @@ export default function HotelClient({ hotelId, hotelName, slug, initialHotelData
     }
   }, [])
 
-  const rooms = hotelData?.chambres ?? []
+  // Arrivée depuis une offre : seules les chambres concernées, et le lien vers
+  // chaque chambre garde l'offre pour appliquer la réduction à la réservation.
+  const offre = useOffreParam()
+  const allRooms = hotelData?.chambres ?? []
+  const offreRooms = offre ? allRooms.filter((r) => offre.proprietes.some((p) => p.id === r.id)) : []
+  const rooms = offreRooms.length > 0 ? offreRooms : allRooms
+  const roomHref = (room: { id: number; nom: string }) =>
+    offre ? `/propriete/${createSlug(room.id, room.nom)}?offre=${offre.id}` : undefined
 
   const getActiveIndex = () => {
     if (!scrollContainerRef.current || rooms.length === 0) return 0
@@ -184,6 +194,12 @@ export default function HotelClient({ hotelId, hotelName, slug, initialHotelData
             {t('rooms_title')}
           </h2>
 
+          {offre && (
+            <div className="mb-6">
+              <OfferBanner offre={offre} />
+            </div>
+          )}
+
           {rooms.length === 0 ? (
             <p className="text-gray-400 text-center py-8">Aucune chambre disponible</p>
           ) : rooms.length > 3 ? (
@@ -206,6 +222,7 @@ export default function HotelClient({ hotelId, hotelName, slug, initialHotelData
                   <div key={room.id} className="flex-shrink-0 w-[320px] sm:w-[320px] md:w-[340px] lg:w-[360px] xl:w-[380px]">
                     <RoomCard
                       hotelId={room.id}
+                      href={roomHref(room)}
                       imageUrl={room.photos && room.photos.length > 0 ? room.photos : '/photos/bc.png'}
                       name={room.nom}
                       beds={room.nb_lits ?? 1}
@@ -256,6 +273,7 @@ export default function HotelClient({ hotelId, hotelName, slug, initialHotelData
                       <div key={room.id} className="flex-shrink-0 w-[320px]">
                         <RoomCard
                           hotelId={room.id}
+                          href={roomHref(room)}
                           imageUrl={room.photos && room.photos.length > 0 ? room.photos : '/photos/bc.png'}
                           name={room.nom}
                           beds={room.nb_lits ?? 1}
@@ -290,6 +308,7 @@ export default function HotelClient({ hotelId, hotelName, slug, initialHotelData
                   <RoomCard
                     key={room.id}
                     hotelId={room.id}
+                    href={roomHref(room)}
                     imageUrl={room.photos && room.photos.length > 0 ? room.photos : '/photos/bc.png'}
                     name={room.nom}
                     beds={room.nb_lits ?? 1}

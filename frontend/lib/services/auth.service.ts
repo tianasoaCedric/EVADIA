@@ -1,4 +1,5 @@
 import { apiClient } from '@/lib/api-client'
+import { notifyAuthChanged } from '@/lib/auth-events'
 import type { AuthResponse, LoginPayload, RegisterPayload, User } from '@/lib/types'
 
 export const authService = {
@@ -6,28 +7,40 @@ export const authService = {
    * Connexion — le cookie httpOnly est posé par /api/auth/login
    */
   async login(payload: LoginPayload): Promise<{ user: User }> {
-    return apiClient.post<{ user: User }>('/api/auth/login', payload)
+    const res = await apiClient.post<{ user: User }>('/api/auth/login', payload)
+    notifyAuthChanged()
+    return res
   },
 
   /**
    * Inscription — le cookie httpOnly est posé par /api/auth/register
    */
   async register(payload: RegisterPayload): Promise<{ user: User }> {
-    return apiClient.post<{ user: User }>('/api/auth/register', payload)
+    const res = await apiClient.post<{ user: User }>('/api/auth/register', payload)
+    notifyAuthChanged()
+    return res
   },
 
   /**
    * Déconnexion — supprime le cookie httpOnly via /api/auth/logout
    */
   async logout(): Promise<void> {
-    await apiClient.post<void>('/api/auth/logout', {})
+    try {
+      await apiClient.post<void>('/api/auth/logout', {})
+    } finally {
+      notifyAuthChanged()
+    }
   },
 
   /**
    * Déconnexion de toutes les sessions
    */
   async logoutAll(): Promise<void> {
-    await apiClient.post<void>('/api/auth/logout', { all: true })
+    try {
+      await apiClient.post<void>('/api/auth/logout', { all: true })
+    } finally {
+      notifyAuthChanged()
+    }
   },
 
   /**

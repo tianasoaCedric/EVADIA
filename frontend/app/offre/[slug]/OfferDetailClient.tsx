@@ -9,6 +9,7 @@ import Bouton from '../../components/ui/Bouton'
 import { useOnScreen } from '@/hooks/useOnScreen'
 import type { OffreDetail } from '@/lib/services'
 import Loading from '@/app/components/ui/Loading'
+import { createSlug } from '@/lib/slug'
 
 interface OfferDetailClientProps {
   offerId: number
@@ -30,24 +31,19 @@ export default function OfferDetailClient({ offerId, offerName, slug, initialOff
   const [offer] = useState<OffreDetail | null>(initialOffer)
   const [isLoading] = useState(false)
   const [acceptedTerms, setAcceptedTerms] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
 
   const [setMainRef, isMainVisible] = useOnScreen({ threshold: 0.2,  })
 
   void slug
-  void offerId
 
-  const handleReservation = async () => {
+  // Le client choisit ses dates sur la chambre (ou l'hôtel si plusieurs chambres
+  // sont concernées) ; ?offre= y applique la réduction et la lie à la réservation.
+  const handleReservation = () => {
     if (!acceptedTerms || !offer) return
-    setIsSubmitting(true)
-    try {
-      // Point de contact : pas de réservation directe, on affiche le succès
-      await new Promise((r) => setTimeout(r, 800))
-      setSubmitted(true)
-    } finally {
-      setIsSubmitting(false)
-    }
+    const target = offer.proprietes.length === 1
+      ? `/propriete/${createSlug(offer.proprietes[0].id, offer.proprietes[0].nom)}`
+      : `/hotel/${createSlug(offer.hotel_id, offer.hotel_nom)}`
+    router.push(`${target}?offre=${offerId}`)
   }
 
   if (isLoading) {
@@ -151,10 +147,10 @@ export default function OfferDetailClient({ offerId, offerName, slug, initialOff
               )}
 
               {/* Acceptation et bouton */}
-              {submitted ? (
-                <div className="flex items-center gap-2 text-[#01BDA5] font-medium">
-                  <CheckCircle className="w-5 h-5" />
-                  <span>{t('reservation_success')}</span>
+              {!offer.en_cours ? (
+                <div className="flex items-center gap-2 text-amber-600 font-medium">
+                  <AlertCircle className="w-5 h-5" />
+                  <span>{t('not_started', { date: new Date(offer.date_debut).toLocaleDateString(locale, { day: 'numeric', month: 'long' }) })}</span>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -173,8 +169,7 @@ export default function OfferDetailClient({ offerId, offerName, slug, initialOff
                     size="large"
                     widthMode="full"
                     onClick={handleReservation}
-                    disabled={!acceptedTerms || isSubmitting}
-                    isLoading={isSubmitting}
+                    disabled={!acceptedTerms}
                   >
                     {t('reserve_button')}
                   </Bouton>

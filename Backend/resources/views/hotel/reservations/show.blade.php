@@ -155,6 +155,45 @@
 
         {{-- Sidebar --}}
         <div class="space-y-6">
+            {{-- Offre : réservation faite depuis une offre ou avec son code promo --}}
+            @if($reservation->offre)
+                <div class="bg-amber-50 rounded-xl border border-amber-200 p-6">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-amber-500 text-white text-[11px] font-semibold uppercase tracking-wide">Offre</span>
+                        <h3 class="text-sm font-semibold text-gray-900">Réservée via une offre</h3>
+                    </div>
+                    <p class="text-sm font-medium text-gray-800 mb-3">{{ $reservation->offre->titre }}</p>
+                    <div class="space-y-2">
+                        @if($reservation->code_promo_utilise)
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-500">Code promo</span>
+                                <span class="font-mono text-gray-700">{{ $reservation->code_promo_utilise }}</span>
+                            </div>
+                        @endif
+                        @if($reservation->prix_avant_reduction)
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-500">Prix avant réduction</span>
+                                <span class="text-gray-500 line-through">{{ number_format((float) $reservation->prix_avant_reduction, 0, ',', ' ') }} {{ $reservation->devise_prix_total }}</span>
+                            </div>
+                        @endif
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Réduction accordée</span>
+                            <span class="font-medium text-amber-700">−{{ number_format((float) $reservation->montant_reduction, 0, ',', ' ') }} {{ $reservation->devise_prix_total }}</span>
+                        </div>
+                    </div>
+                    @if(!empty($avantagesEnNature))
+                        <div class="mt-4 pt-3 border-t border-amber-200">
+                            <p class="text-xs font-semibold text-gray-700 mb-1.5">À fournir au client :</p>
+                            <ul class="list-disc list-inside text-sm text-gray-700 space-y-0.5">
+                                @foreach($avantagesEnNature as $avantage)
+                                    <li>{{ $avantage }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                </div>
+            @endif
+
             {{-- Résumé --}}
             <div class="bg-white rounded-xl border border-gray-200 p-6">
                 <h3 class="text-sm font-semibold text-gray-900 mb-4">Résumé</h3>

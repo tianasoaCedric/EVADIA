@@ -6,6 +6,7 @@ use App\Models\HotelAdmin;
 use App\Models\Notification;
 use App\Models\Reservation;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Throwable;
 
 /**
@@ -20,7 +21,7 @@ class NotifyHotelOfNewReservationAction
     public function handle(Reservation $reservation): void
     {
         try {
-            $reservation->loadMissing(['client', 'propriete']);
+            $reservation->loadMissing(['client', 'propriete', 'offre']);
 
             $hotelId = $reservation->propriete->hotel_id;
             $client = trim(($reservation->client?->prenom ?? '') . ' ' . ($reservation->client?->nom ?? '')) ?: 'Un client';
@@ -38,6 +39,18 @@ class NotifyHotelOfNewReservationAction
                 $personnes,
             );
 
+            // Réservation faite depuis une offre (ou avec son code promo) : l'hôtel doit le voir
+            $titre = 'Nouvelle réservation ' . $reservation->code_reservation;
+            if ($reservation->offre) {
+                $titre .= ' — offre « ' . $reservation->offre->titre . ' »';
+                $contenu .= sprintf(
+                    ' · via l\'offre « %s » (−%s %s)',
+                    $reservation->offre->titre,
+                    number_format((float) $reservation->montant_reduction, 0, ',', ' '),
+                    $reservation->devise_prix_total,
+                );
+            }
+
             $userIds = HotelAdmin::where('hotel_id', $hotelId)
                 ->whereNull('date_fin')
                 ->pluck('user_id')
@@ -47,7 +60,7 @@ class NotifyHotelOfNewReservationAction
                 Notification::create([
                     'user_id'           => $userId,
                     'type_notification' => self::TYPE,
-                    'titre'             => 'Nouvelle réservation ' . $reservation->code_reservation,
+                    'titre'             => Str::limit($titre, 250),
                     'contenu'           => $contenu,
                     'lien'              => route('hotel.reservations.show', $reservation->id, false),
                     'reservation_id'    => $reservation->id,

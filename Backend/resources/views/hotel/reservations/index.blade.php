@@ -80,7 +80,12 @@
                 <tbody class="divide-y divide-gray-100">
                     @forelse($reservations as $reservation)
                         <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="py-3 px-4 font-medium text-gray-900">{{ $reservation->code_reservation }}</td>
+                            <td class="py-3 px-4 font-medium text-gray-900">
+                                {{ $reservation->code_reservation }}
+                                @if($reservation->offre)
+                                    <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-semibold uppercase tracking-wide" title="Offre : {{ $reservation->offre->titre }}">Offre</span>
+                                @endif
+                            </td>
                             <td class="py-3 px-4 text-gray-600">
                                 <div>{{ $reservation->client?->prenom }} {{ $reservation->client?->nom }}</div>
                                 <div class="text-xs text-gray-400">{{ $reservation->client?->email }}</div>

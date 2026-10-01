@@ -90,6 +90,12 @@ export default function ReservationDetailsModal({ reservation, onClose }: Reserv
                 <p className="text-gray-500">{t('price_per_night')}</p>
                 <p className="font-medium">{pricePerNight.toLocaleString('fr-FR')} {devise}</p>
               </div>
+              {reservation.offre && Number(reservation.montant_reduction ?? 0) > 0 && (
+                <div className="flex justify-between mt-2 text-green-600">
+                  <p>{t('offer_line', { titre: reservation.offre.titre })}</p>
+                  <p className="font-medium">−{Number(reservation.montant_reduction).toLocaleString('fr-FR')} {devise}</p>
+                </div>
+              )}
               <div className="flex justify-between mt-2">
                 <p className="text-gray-500">{t('total_price')}</p>
                 <p className="text-xl font-bold text-gray-900">{totalPrice.toLocaleString('fr-FR')} {devise}</p>

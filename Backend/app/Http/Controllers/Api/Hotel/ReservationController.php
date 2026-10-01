@@ -66,7 +66,7 @@ class ReservationController extends Controller
         $hotel = $this->getHotel();
         $proprieteIds = $hotel->proprietes()->pluck('id');
 
-        $query = Reservation::with(['client', 'propriete'])
+        $query = Reservation::with(['client', 'propriete', 'offre:id,titre'])
             ->whereIn('propriete_id', $proprieteIds);
 
         if ($statut = $request->input('statut')) {
@@ -109,7 +109,7 @@ class ReservationController extends Controller
         $hotel = $this->getHotel();
         $proprieteIds = $hotel->proprietes()->pluck('id');
 
-        $reservation = Reservation::with(['client', 'propriete', 'facture', 'services', 'avis'])
+        $reservation = Reservation::with(['client', 'propriete', 'facture', 'services', 'avis', 'offre:id,titre'])
             ->whereIn('propriete_id', $proprieteIds)
             ->find($id);
 

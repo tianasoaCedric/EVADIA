@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import ToggleLangue from '../ui/ToggleLangue'
 import Avatar from '../ui/Avatar'
+import NotificationBell from '../ui/NotificationBell'
 import Input from '../ui/Input'
 import { ChevronDown, Search } from 'lucide-react'
 import { useDevise } from '../../context/DeviseContext'
@@ -321,7 +322,8 @@ const Header = ({
                                     )}
                                 </div>
 
-                                
+                                {/* Voyant de notifications (client connecté uniquement) */}
+                                <NotificationBell variant={activeTheme === 'default' ? 'default' : 'dark'} />
 
                                 {/* Avatar utilisateur */}
                                 <Avatar

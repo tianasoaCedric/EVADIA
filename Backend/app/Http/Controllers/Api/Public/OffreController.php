@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Api\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Offre;
+use App\Models\Propriete;
+use App\Services\OffreService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -24,7 +27,7 @@ class OffreController extends Controller
         ])
         ->whereNotNull('hotel_id')
         ->where('statut', 'active')
-        ->where('date_fin', '>=', now());
+        ->whereDate('date_fin', '>=', today());
 
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
@@ -57,9 +60,9 @@ class OffreController extends Controller
      * Détail d'une offre (public).
      * GET /api/offres/{id}
      */
-    public function show(int $id): JsonResponse
+    public function show(int $id, OffreService $offres): JsonResponse
     {
-        $formatted = Cache::remember("offre:{$id}", 1800, function () use ($id) {
+        $formatted = Cache::remember("offre:{$id}", 1800, function () use ($id, $offres) {
             $offre = Offre::with([
                 'photos',
                 'hotel.photos' => fn($q) => $q->where('est_principale', true),
@@ -72,17 +75,69 @@ class OffreController extends Controller
             if (!$offre) return null;
 
             $data = $this->formatOffre($offre);
+            $data['statut'] = $offre->statut;
+            $data['hotel_id'] = $offre->hotel_id;
             $data['phone'] = $offre->hotel?->telephone;
             $data['email'] = $offre->hotel?->email_contact;
             $data['terms'] = $offre->conditions ?? [];
+            // Chambres concernées : la page offre y envoie le client pour réserver
+            $data['proprietes'] = $offres->proprietesApplicables($offre)
+                ?->map(fn($p) => ['id' => $p->id, 'nom' => $p->nom])->values()->all() ?? [];
             return $data;
         });
 
-        if (!$formatted) {
+        // Contrôlé hors cache : une offre désactivée ou terminée n'est plus visible,
+        // même par lien direct (le cache n'expire pas quand la date de fin passe).
+        if (!$formatted || $formatted['statut'] !== 'active' || $formatted['date_fin'] < today()->toDateString()) {
             return response()->json(['message' => 'Offre introuvable'], 404);
         }
 
+        // Offre à venir : visible, mais pas encore réservable
+        $formatted['en_cours'] = $formatted['date_debut'] <= today()->toDateString();
+
         return response()->json($formatted);
+    }
+
+    /**
+     * Aperçu du prix avec l'offre pour une chambre et des dates (public : un
+     * visiteur voit la réduction avant de se connecter).
+     * GET /api/offres/{id}/apercu?propriete_id=&date_debut=&date_fin=&devise=
+     */
+    public function apercu(int $id, Request $request, OffreService $offres): JsonResponse
+    {
+        $validated = $request->validate([
+            'propriete_id' => 'required|integer|exists:proprietes,id',
+            'date_debut'   => 'required|date',
+            'date_fin'     => 'required|date|after:date_debut',
+            'devise'       => 'nullable|string|in:MGA,EUR',
+        ]);
+
+        $offre = $offres->trouverActive($id);
+        if (!$offre) {
+            return response()->json(['applicable' => false, 'message' => 'Cette offre n\'est plus disponible.']);
+        }
+
+        // Même calcul du prix de base que la création de réservation
+        $propriete = Propriete::with('currentPrix')->findOrFail($validated['propriete_id']);
+        $devise    = strtoupper($validated['devise'] ?? 'MGA');
+        $nbNuits   = Carbon::parse($validated['date_debut'])->diffInDays(Carbon::parse($validated['date_fin']));
+        $prixBase  = ($propriete->currentPrix?->getPrixPourDevise($devise) ?? 0) * $nbNuits;
+
+        $resultat = $offres->calculer($offre, $propriete, $prixBase, (int) $nbNuits, null);
+
+        if (!$resultat['valide']) {
+            return response()->json(['applicable' => false, 'message' => $resultat['message']]);
+        }
+
+        return response()->json([
+            'applicable'          => true,
+            'offre'               => $offre->titre,
+            'prix_base'           => $prixBase,
+            'montant_reduction'   => $resultat['montant_reduction'],
+            'prix_total'          => max(0, $prixBase - $resultat['montant_reduction']),
+            'devise'              => $devise,
+            'avantages_en_nature' => $resultat['avantages_en_nature'],
+        ]);
     }
 
     private function formatOffre(Offre $offre): array

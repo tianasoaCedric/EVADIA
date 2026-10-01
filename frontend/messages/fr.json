@@ -116,7 +116,7 @@
     "beds_label": "lit(s)",
     "bathrooms_label": "SDB",
     "persons_label": "pers",
-    "book_button": "Réserver",
+    "book_button": "Demander une réservation",
     "image": "image",
     "previous_image": "Image précédente",
     "next_image": "Image suivante",
@@ -194,8 +194,9 @@
     "service_fees": "Frais de services",
     "discount": "Réduction ({percent}%)",
     "total": "Total",
-    "book_button": "Réserver",
-    "booked": "Réservé",
+    "book_button": "Demander une réservation",
+    "booked": "Plus disponible",
+    "checkout_possible": "Plus disponible cette nuit — départ possible ce jour-là",
     "selected": "Sélectionné"
   },
   "ReservationConfirm": {
@@ -212,7 +213,7 @@
     "deposit_amount": "Acompte à payer",
     "balance_due": "Solde à régler à l'arrivée",
     "cancel": "Annuler",
-    "confirm": "Confirmer"
+    "confirm": "Confirmer la demande"
   },
   "ProprietePage": {
     "meta_title": "{name} | Evadia",
@@ -229,7 +230,11 @@
     "share_alert": "Lien copié dans le presse-papier !",
     "save_log": "Chambre sauvegardée",
     "reservation_log": "Réservation en cours...",
-    "back_label": "Retour"
+    "back_label": "Retour",
+    "offer_not_applicable": "Cette offre ne s'applique pas à cette chambre.",
+    "offer_saving": "Vous économisez {amount} {symbole}",
+    "offer_discount_label": "Offre « {titre} »",
+    "reservation_error": "La demande de réservation n'a pas pu être envoyée. Réessayez."
   },
   "DestinationPage": {
     "meta_title": "Destinations | Evadia",
@@ -335,9 +340,9 @@
     "phone_label": "Téléphone",
     "email_label": "Email",
     "accept_terms": "J'accepte les termes et conditions",
-    "reserve_button": "Réserver maintenant",
+    "reserve_button": "Demander une réservation",
     "terms_title": "Termes et conditions",
-    "reservation_success": "Votre demande de réservation a été envoyée ! Nous vous contacterons dans les plus brefs délais."
+    "not_started": "Cette offre sera réservable à partir du {date}."
   },
   "FavoritePage": {
     "meta_title": "Mes favoris | Evadia",
@@ -580,7 +585,8 @@
     "deposit_paid": "Payé",
     "deposit_pending": "En attente",
     "deposit_amount": "Montant de l'acompte",
-    "balance_due": "Solde restant"
+    "balance_due": "Solde restant",
+    "offer_line": "Offre « {titre} »"
   },
   "SearchSuggestions": {
     "loading": "Chargement...",
@@ -633,7 +639,11 @@
     "search": "Rechercher",
     "search_placeholder": "Rechercher...",
     "change_currency": "Changer de devise",
-    "logo_alt": "Evadia"
+    "logo_alt": "Evadia",
+    "notifications": "Notifications",
+    "notifications_unread": "{count} notification(s) non lue(s)",
+    "notifications_mark_all_read": "Tout marquer comme lu",
+    "notifications_empty": "Aucune notification pour le moment"
   },
   "MenuFullscreen": {
     "accommodations": "Hébergements",
@@ -696,11 +706,16 @@
     "error_resend": "Impossible de renvoyer le code, veuillez réessayer."
   },
   "SharePopup": {
-        "title": "Partager",
-        "subtitle": "Partagez ce lien avec vos amis",
-        "copy_link": "Copier le lien",
-        "click_to_copy": "Cliquez pour copier",
-        "copied": "Copié !",
-        "close": "Fermer"
-    }
+    "title": "Partager",
+    "subtitle": "Partagez ce lien avec vos amis",
+    "copy_link": "Copier le lien",
+    "click_to_copy": "Cliquez pour copier",
+    "copied": "Copié !",
+    "close": "Fermer"
+  },
+  "OfferBanner": {
+    "title": "Offre « {titre} »",
+    "hint": "Choisissez votre chambre : la réduction sera appliquée automatiquement.",
+    "see_offer": "Voir l'offre"
+  }
 }

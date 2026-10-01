@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { favoriService } from '@/lib/services'
+import { onAuthChanged } from '@/lib/auth-events'
 
 interface FavorisContextValue {
   favoriteIds: Set<number>
@@ -17,9 +18,14 @@ export function FavorisProvider({ children }: { children: React.ReactNode }) {
   const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set())
 
   useEffect(() => {
-    favoriService.list()
-      .then(res => setFavoriteIds(new Set(res.data.map(f => f.hotel_id))))
-      .catch(() => {})
+    // Rechargé à chaque connexion / déconnexion : un visiteur n'a aucun favori
+    const load = () => {
+      favoriService.list()
+        .then(res => setFavoriteIds(new Set(res.data.map(f => f.hotel_id))))
+        .catch(() => setFavoriteIds(new Set()))
+    }
+    load()
+    return onAuthChanged(load)
   }, [])
 
   const toggle = useCallback((hotelId: number, newState: boolean) => {

@@ -13,7 +13,7 @@ const REFRESH_MARGIN_MS = 60_000
  * uniquement après confirmation qu'un utilisateur est authentifié, pour ne
  * jamais interroger l'API en tant que visiteur anonyme.
  */
-export function useReverbEcho(enabled: boolean): Echo<'reverb'> | null {
+export function useReverbEcho(enabled: boolean, userId?: number): Echo<'reverb'> | null {
   const [echo, setEcho] = useState<Echo<'reverb'> | null>(null)
   const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const echoRef = useRef<Echo<'reverb'> | null>(null)
@@ -69,8 +69,10 @@ export function useReverbEcho(enabled: boolean): Echo<'reverb'> | null {
       if (refreshTimer.current) clearTimeout(refreshTimer.current)
       echoRef.current?.disconnect()
       echoRef.current = null
+      // Déconnexion / changement de compte : ne plus exposer l'ancienne instance
+      setEcho(null)
     }
-  }, [enabled])
+  }, [enabled, userId])
 
   return echo
 }

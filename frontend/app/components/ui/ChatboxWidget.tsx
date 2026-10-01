@@ -1,16 +1,16 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { MessageCircle, X, Send, ChevronLeft, ChevronRight, Building2 } from 'lucide-react'
-import { authService, reservationService, chatboxService } from '@/lib/services'
-import { useReverbEcho } from '@/hooks/useReverbEcho'
-import type { User as UserType, Reservation, ReservationMessage } from '@/lib/types'
+import { reservationService, chatboxService } from '@/lib/services'
+import { useNotifications } from '@/app/context/NotificationsContext'
+import type { Reservation, ReservationMessage } from '@/lib/types'
 
 // Filet de sécurité si le WebSocket n'est pas connecté (échec token, réseau, etc.)
 const POLL_FALLBACK_INTERVAL_MS = 15000
 
 export default function ChatboxWidget() {
-  const [user, setUser] = useState<UserType | null>(null)
+  const { user, echo, notifications, markRead, chatRequest } = useNotifications()
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [activeReservation, setActiveReservation] = useState<Reservation | null>(null)
@@ -20,7 +20,6 @@ export default function ChatboxWidget() {
   const [isSending, setIsSending] = useState(false)
   const [unreadCounts, setUnreadCounts] = useState<Record<number, number>>({})
   const scrollRef = useRef<HTMLDivElement>(null)
-  const echo = useReverbEcho(!!user)
 
   const refreshUnreadCounts = useCallback(async (list: Reservation[]) => {
     const counts = await Promise.all(
@@ -29,16 +28,45 @@ export default function ChatboxWidget() {
     setUnreadCounts(Object.fromEntries(counts))
   }, [])
 
-  useEffect(() => {
-    authService.me()
-      .then(async ({ user }) => {
-        setUser(user)
-        const res = await reservationService.list({ statut: 'acceptee' })
-        setReservations(res.data)
-        void refreshUnreadCounts(res.data)
-      })
-      .catch(() => setUser(null))
+  const loadReservations = useCallback(async () => {
+    const res = await reservationService.list({ statut: 'acceptee' })
+    setReservations(res.data)
+    void refreshUnreadCounts(res.data)
+    return res.data
   }, [refreshUnreadCounts])
+
+  useEffect(() => {
+    if (!user) {
+      // Déconnexion : rien ne doit rester de la session précédente
+      setReservations([])
+      setActiveReservation(null)
+      setMessages([])
+      setUnreadCounts({})
+      setIsOpen(false)
+      return
+    }
+    loadReservations().catch(() => {})
+  }, [user, loadReservations])
+
+  // Réservations acceptées dont la conversation n'a pas encore été ouverte :
+  // la notification « reservation_acceptee » reste non lue jusque-là.
+  const nouvellesIds = useMemo(
+    () => new Set(
+      notifications
+        .filter((n) => n.type_notification === 'reservation_acceptee' && !n.lu && n.reservation_id)
+        .map((n) => n.reservation_id as number),
+    ),
+    [notifications],
+  )
+
+  // Une réservation vient d'être acceptée : la chatbox apparaît sans recharger la page.
+  useEffect(() => {
+    if (!user) return
+    const known = new Set(reservations.map((r) => r.id))
+    if ([...nouvellesIds].some((id) => !known.has(id))) {
+      loadReservations().catch(() => {})
+    }
+  }, [user, nouvellesIds, reservations, loadReservations])
 
   const loadMessages = useCallback(async (reservationId: number) => {
     const res = await chatboxService.messages(reservationId)
@@ -51,6 +79,31 @@ export default function ChatboxWidget() {
     if (!activeReservation) return
     loadMessages(activeReservation.id)
   }, [activeReservation, loadMessages])
+
+  // Conversation ouverte : éteint les voyants liés à cette réservation (cloche comprise)
+  useEffect(() => {
+    if (!activeReservation) return
+    markRead(
+      notifications
+        .filter((n) => n.reservation_id === activeReservation.id && !n.lu)
+        .map((n) => n.id),
+    )
+  }, [activeReservation, notifications, markRead])
+
+  // Ouverture demandée depuis la cloche de notifications
+  useEffect(() => {
+    if (!chatRequest) return
+    const open = (list: Reservation[]) => {
+      const target = list.find((r) => r.id === chatRequest.reservationId)
+      if (!target) return
+      setIsOpen(true)
+      setActiveReservation(target)
+    }
+    const known = reservations.find((r) => r.id === chatRequest.reservationId)
+    if (known) open(reservations)
+    else loadReservations().then(open).catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- réagit uniquement à une nouvelle demande
+  }, [chatRequest])
 
   // Temps réel via Reverb quand la connexion WebSocket est établie ; sinon
   // repli sur un polling léger pour ne pas laisser la conversation figée.
@@ -70,9 +123,9 @@ export default function ChatboxWidget() {
         }
       }
       channel.listen('.message.sent', handler)
+      // Pas de leave() : le canal est partagé avec NotificationsContext, qui le ferme.
       return () => {
         channel.stopListening('.message.sent', handler)
-        echo.leave(`messages.${user.id}`)
       }
     }
 
@@ -155,6 +208,11 @@ export default function ChatboxWidget() {
                     </p>
                     <p className="text-xs text-gray-500 truncate">{r.code_reservation}</p>
                   </div>
+                  {nouvellesIds.has(r.id) && !unreadCounts[r.id] && (
+                    <span className="px-2 h-5 rounded-full bg-[#01BDA5] text-white text-[10px] font-semibold uppercase tracking-wide flex items-center shrink-0">
+                      Nouveau
+                    </span>
+                  )}
                   {!!unreadCounts[r.id] && (
                     <span className="min-w-[1.25rem] h-5 px-1.5 rounded-full bg-red-500 text-white text-[11px] font-semibold flex items-center justify-center shrink-0">
                       {unreadCounts[r.id]}
@@ -210,18 +268,37 @@ export default function ChatboxWidget() {
           )}
         </div>
       ) : (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="relative w-14 h-14 rounded-full bg-[#01BDA5] hover:bg-[#01A38E] text-white shadow-xl flex items-center justify-center transition-all hover:scale-105 cursor-pointer"
-          aria-label="Ouvrir la messagerie"
-        >
-          <MessageCircle className="w-6 h-6" />
-          {totalUnread > 0 && (
-            <span className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1.5 rounded-full bg-red-500 text-white text-[11px] font-semibold flex items-center justify-center border-2 border-white">
-              {totalUnread}
-            </span>
+        <div className="relative flex flex-col items-end gap-3">
+          {/* Bulle d'annonce : réservation acceptée, conversation pas encore ouverte */}
+          {nouvellesIds.size > 0 && (
+            <button
+              onClick={() => setIsOpen(true)}
+              className="max-w-[16rem] bg-white rounded-2xl rounded-br-sm shadow-xl border border-gray-100 px-4 py-3 text-left text-sm text-gray-700 cursor-pointer animate-[fadeIn_0.3s_ease-out]"
+            >
+              <span className="font-semibold text-[#01BDA5]">Réservation acceptée !</span>
+              <br />
+              Échangez avec l&apos;hôtel ici.
+            </button>
           )}
-        </button>
+          <button
+            onClick={() => setIsOpen(true)}
+            className="relative w-14 h-14 rounded-full bg-[#01BDA5] hover:bg-[#01A38E] text-white shadow-xl flex items-center justify-center transition-all hover:scale-105 cursor-pointer"
+            aria-label="Ouvrir la messagerie"
+          >
+            {/* Voyant qui pulse tant qu'il y a du nouveau */}
+            {(totalUnread > 0 || nouvellesIds.size > 0) && (
+              <span className="absolute inset-0 rounded-full bg-[#01BDA5] animate-ping opacity-40" />
+            )}
+            <MessageCircle className="relative w-6 h-6" />
+            {totalUnread > 0 ? (
+              <span className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1.5 rounded-full bg-red-500 text-white text-[11px] font-semibold flex items-center justify-center border-2 border-white">
+                {totalUnread}
+              </span>
+            ) : nouvellesIds.size > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-red-500 border-2 border-white" />
+            )}
+          </button>
+        </div>
       )}
     </div>
   )

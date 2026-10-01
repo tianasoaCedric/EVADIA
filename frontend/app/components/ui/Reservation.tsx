@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Users, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useOnScreen } from '@/hooks/useOnScreen'
 import Bouton from './Bouton'
 import { useDevise } from '@/app/context/DeviseContext'
+import { toIsoDate } from '@/lib/dates'
 
 interface ReservationProps {
     /** Prix par nuit (fallback) */
@@ -24,6 +25,10 @@ interface ReservationProps {
     onReserve?: (data: ReservationData) => void
     /** Dates déjà réservées */
     bookedDates?: string[]
+    /** Réduction calculée par le serveur (offre) : remplace le calcul par pourcentage */
+    reduction?: { label: string; amount: number } | null
+    /** Appelé quand les dates du séjour changent (aperçu du prix avec une offre) */
+    onDatesChange?: (checkIn: Date | null, checkOut: Date | null) => void
 }
 
 export interface ReservationData {
@@ -37,6 +42,8 @@ export interface ReservationData {
     discountAmount: number
     total: number
     devise: 'MGA' | 'EUR'
+    /** Libellé de la réduction (ex. offre « Été ») ; sinon le pourcentage est affiché */
+    discountLabel?: string
 }
 
 export default function Reservation({
@@ -47,7 +54,9 @@ export default function Reservation({
     serviceFees = 0,
     roomName,
     onReserve,
-    bookedDates = []
+    bookedDates = [],
+    reduction,
+    onDatesChange
 }: ReservationProps) {
     const t = useTranslations('Reservation')
     const { getPrix, symbole, devise } = useDevise()
@@ -63,6 +72,10 @@ export default function Reservation({
     useEffect(() => {
         setIsClient(true)
     }, [])
+
+    useEffect(() => {
+        onDatesChange?.(selectedCheckIn, selectedCheckOut)
+    }, [selectedCheckIn, selectedCheckOut, onDatesChange])
 
     const getDaysInMonth = (date: Date) => {
         const year = date.getFullYear()
@@ -88,12 +101,25 @@ export default function Reservation({
         return date < today
     }
 
-    const isDateBooked = (date: Date) => {
-        const dateStr = date.toISOString().split('T')[0]
-        return bookedDates.includes(dateStr)
-    }
+    // Nuits plus disponibles (complètes, fermées, hôtel en pause), en date locale
+    const bookedSet = useMemo(() => new Set(bookedDates), [bookedDates])
+    const isDateBooked = (date: Date) => bookedSet.has(toIsoDate(date))
 
-    const isDateUnavailable = (date: Date) => isDatePast(date) || isDateBooked(date)
+    // Arrivée choisie, départ en attente : le séjour [arrivée, départ[ ne peut pas
+    // enjamber une nuit indisponible, mais on peut partir le matin d'une nuit
+    // indisponible (le jour du départ n'est pas occupé).
+    const choosingCheckOut = !!selectedCheckIn && !selectedCheckOut
+    const checkOutLimit = useMemo(() => {
+        if (!selectedCheckIn || selectedCheckOut) return null
+        const from = toIsoDate(selectedCheckIn)
+        return [...bookedSet].filter((d) => d > from).sort()[0] ?? null
+    }, [bookedSet, selectedCheckIn, selectedCheckOut])
+
+    const isValidCheckOut = (date: Date) =>
+        choosingCheckOut && date > selectedCheckIn! && (checkOutLimit === null || toIsoDate(date) <= checkOutLimit)
+
+    const isDateUnavailable = (date: Date) =>
+        isDatePast(date) || (isDateBooked(date) && !isValidCheckOut(date))
 
     const isDateInRange = (date: Date) => {
         if (!selectedCheckIn || !selectedCheckOut) return false
@@ -108,26 +134,32 @@ export default function Reservation({
 
     const handleDateClick = (date: Date) => {
         if (isDateUnavailable(date)) return
-        
-        if (!selectedCheckIn || (selectedCheckIn && selectedCheckOut)) {
-            setSelectedCheckIn(date)
-            setSelectedCheckOut(null)
-        } else if (selectedCheckIn && !selectedCheckOut) {
-            if (date > selectedCheckIn) {
-                setSelectedCheckOut(date)
-            } else {
-                setSelectedCheckIn(date)
-                setSelectedCheckOut(null)
-            }
+
+        if (choosingCheckOut && isValidCheckOut(date)) {
+            setSelectedCheckOut(date)
+            return
         }
+
+        // Nouvelle arrivée (ou départ impossible : le séjour enjamberait une nuit indisponible)
+        if (isDateBooked(date)) return
+        setSelectedCheckIn(date)
+        setSelectedCheckOut(null)
     }
 
     const getDayClass = (date: Date | null) => {
         if (!date) return 'invisible'
         if (isDatePast(date)) return 'text-gray-300 cursor-not-allowed'
-        if (isDateBooked(date)) return 'text-red-300 line-through cursor-not-allowed bg-red-50 rounded-full'
         if (isSelected(date)) return 'bg-[#01BDA5] text-white rounded-full font-semibold'
+        if (isDateBooked(date)) {
+            // Nuit indisponible, mais départ possible ce matin-là
+            if (isValidCheckOut(date)) return 'text-red-500 bg-red-50 rounded-full cursor-pointer ring-1 ring-red-200 hover:ring-[#01BDA5]'
+            return 'text-red-400 line-through cursor-not-allowed bg-red-50 rounded-full'
+        }
         if (isDateInRange(date)) return 'bg-[#01BDA5]/10 text-gray-800 rounded-full'
+        // Au-delà de la première nuit indisponible : ne peut pas être une date de départ
+        if (choosingCheckOut && checkOutLimit && toIsoDate(date) > checkOutLimit) {
+            return 'text-gray-300 rounded-full cursor-pointer hover:bg-gray-100'
+        }
         return 'hover:bg-gray-100 rounded-full cursor-pointer'
     }
 
@@ -144,7 +176,9 @@ export default function Reservation({
         : 0
     
     const subtotal = effectivePrice * nights
-    const discountAmount = discountPercent > 0 ? (subtotal * discountPercent) / 100 : 0
+    const discountAmount = reduction
+        ? reduction.amount
+        : discountPercent > 0 ? (subtotal * discountPercent) / 100 : 0
     const total = subtotal - discountAmount + serviceFees
 
     const formatDate = (date: Date | null): string => {
@@ -167,7 +201,8 @@ export default function Reservation({
             subtotal,
             discountAmount,
             total,
-            devise
+            devise,
+            discountLabel: reduction?.label
         }
         onReserve?.(reservationData)
     }
@@ -238,6 +273,12 @@ export default function Reservation({
                             key={index}
                             onClick={() => date && handleDateClick(date)}
                             disabled={date ? isDateUnavailable(date) : true}
+                            title={date && isDateBooked(date) && !isDatePast(date)
+                                ? (isValidCheckOut(date) ? t('checkout_possible') : t('booked'))
+                                : undefined}
+                            aria-label={date && isDateBooked(date) && !isDatePast(date)
+                                ? `${date.getDate()} — ${t('booked')}`
+                                : undefined}
                             className={`
                                 text-[11px] w-10 h-10 aspect-square flex items-center justify-center
                                 transition-all duration-150
@@ -320,7 +361,7 @@ export default function Reservation({
                         </div>
                         {discountAmount > 0 && (
                             <div className="flex justify-between text-xs text-green-600">
-                                <span>{t('discount', { percent: discountPercent })}</span>
+                                <span>{reduction?.label ?? t('discount', { percent: discountPercent })}</span>
                                 <span>-{discountAmount.toLocaleString('fr-FR')} {symbole}</span>
                             </div>
                         )}
