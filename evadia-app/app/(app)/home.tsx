@@ -119,7 +119,10 @@ export default function HomePage() {
                 className="flex-row items-center justify-between mb-3 mt-3"
                 onPress={() => {}}
               >
-                <Text className="text-[16px] font-bold text-gray-900">
+                <Text
+                  className="text-[16px] text-gray-900"
+                  style={{ fontFamily: 'Manrope_700Bold' }}
+                >
                   {t('Home.selection_in_city', { city: section.city })}
                 </Text>
                 <Ionicons name="chevron-forward" size={18} color="#000" />

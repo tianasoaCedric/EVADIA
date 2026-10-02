@@ -403,7 +403,7 @@ export default function ReservationDetailScreen() {
           )}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Text style={{ color: '#6b7280', fontFamily: 'Outfit_600SemiBold' }}>{t('Reservations.total')}</Text>
-            <Text style={{ color: '#01BDA5', fontFamily: 'Outfit_800ExtraBold', fontSize: 16 }}>
+            <Text style={{ color: '#01BDA5', fontFamily: 'Outfit_500Medium', fontSize: 16 }}>
               {(reservation.prix_total ?? 0).toLocaleString('fr-FR')} MGA
             </Text>
           </View>

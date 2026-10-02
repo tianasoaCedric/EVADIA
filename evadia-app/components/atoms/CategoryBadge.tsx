@@ -17,7 +17,13 @@ export const CategoryBadge = ({ label, isActive = false, onPress }: CategoryBadg
         height: 30,
       }}
     >
-      <Text className={`font-semibold text-sm ${isActive ? 'text-white' : 'text-gray-800'}`}>
+      <Text
+        style={{
+          fontFamily: 'Outfit_400Regular',
+          color: isActive ? '#ffffff' : '#464646',
+          fontSize: 13,
+        }}
+      >
         {label}
       </Text>
     </TouchableOpacity>

@@ -185,8 +185,8 @@ export default function ProprieterDetailScreen() {
           style={{
             width: screenWidth,
             height: IMAGE_HEIGHT,
-            borderBottomLeftRadius: 20,
-            borderBottomRightRadius: 20,
+            borderBottomLeftRadius: 35,
+            borderBottomRightRadius: 35,
             backgroundColor: '#fff',
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 6 },
@@ -200,8 +200,8 @@ export default function ProprieterDetailScreen() {
             style={{
               width: '100%',
               height: '100%',
-              borderBottomLeftRadius: 20,
-              borderBottomRightRadius: 20,
+              borderBottomLeftRadius: 35,
+              borderBottomRightRadius: 35,
               overflow: 'hidden',
               backgroundColor: '#e5e7eb',
             }}
@@ -274,7 +274,7 @@ export default function ProprieterDetailScreen() {
               >
                 <TouchableOpacity
                   activeOpacity={0.8}
-                  onPress={() => {}}
+                  onPress={() => { }}
                 >
                   <Ionicons
                     name="share-outline"
@@ -494,10 +494,10 @@ export default function ProprieterDetailScreen() {
                 }}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
-                  <Text style={{ fontSize: 24, fontFamily: 'Outfit_800ExtraBold', color: '#111827' }}>
+                  <Text style={{ fontSize: 22, fontFamily: 'Outfit_600SemiBold', color: '#111827' }}>
                     {cleanPrice}
                   </Text>
-                  <Text style={{ fontSize: 13, color: '#6b7280', fontFamily: 'Outfit_600SemiBold', marginLeft: 2 }}>
+                  <Text style={{ fontSize: 13, color: '#6b7280', fontFamily: 'Outfit_500Medium', marginLeft: 2 }}>
                     {t('ProprieterDetail.per_night')}
                   </Text>
                 </View>
@@ -509,7 +509,7 @@ export default function ProprieterDetailScreen() {
                     borderRadius: 20,
                   }}
                 >
-                  <Text style={{ color: '#fff', fontSize: 12, fontFamily: 'Outfit_700Bold' }}>
+                  <Text style={{ color: '#fff', fontSize: 12, fontFamily: 'Outfit_600SemiBold' }}>
                     {t('ProprieterDetail.offer_20')}
                   </Text>
                 </View>
@@ -529,7 +529,7 @@ export default function ProprieterDetailScreen() {
                     style={{ flexDirection: 'row', alignItems: 'center' }}
                   >
                     <Ionicons name="calendar-outline" size={20} color="#01BDA5" style={{ marginRight: 8 }} />
-                    <Text style={{ fontSize: 14, color: '#4b5563', fontFamily: 'Outfit_600SemiBold' }}>{formatDate(checkInDate)}</Text>
+                    <Text style={{ fontSize: 14, color: '#4b5563', fontFamily: 'Outfit_500Medium' }}>{formatDate(checkInDate)}</Text>
                   </TouchableOpacity>
                 </View>
 
@@ -542,7 +542,7 @@ export default function ProprieterDetailScreen() {
                     style={{ flexDirection: 'row', alignItems: 'center' }}
                   >
                     <Ionicons name="calendar-outline" size={20} color="#01BDA5" style={{ marginRight: 8 }} />
-                    <Text style={{ fontSize: 14, color: '#4b5563', fontFamily: 'Outfit_600SemiBold' }}>{formatDate(checkOutDate)}</Text>
+                    <Text style={{ fontSize: 14, color: '#4b5563', fontFamily: 'Outfit_500Medium' }}>{formatDate(checkOutDate)}</Text>
                   </TouchableOpacity>
                 </View>
 
@@ -551,7 +551,7 @@ export default function ProprieterDetailScreen() {
                   <Text style={{ fontSize: 13, color: '#6b7280', fontFamily: 'Outfit_500Medium' }}>{t('ProprieterDetail.travelers_count')}</Text>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Ionicons name="people-outline" size={20} color="#111827" style={{ marginRight: 8 }} />
-                    <Text style={{ fontSize: 14, color: '#4b5563', fontFamily: 'Outfit_600SemiBold' }}>{t('ProprieterDetail.persons_count', { count: persons })}</Text>
+                    <Text style={{ fontSize: 14, color: '#4b5563', fontFamily: 'Outfit_500Medium' }}>{t('ProprieterDetail.persons_count', { count: persons })}</Text>
                   </View>
                 </View>
               </View>
@@ -563,20 +563,20 @@ export default function ProprieterDetailScreen() {
               <View style={{ paddingHorizontal: 18, gap: 12 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Text style={{ fontSize: 13, color: '#6b7280', fontFamily: 'Outfit_500Medium' }}>{t('ProprieterDetail.stay_nights', { count: nights })}</Text>
-                  <Text style={{ fontSize: 14, color: '#111827', fontFamily: 'Outfit_600SemiBold' }}>{formatPrice(stayCost)}</Text>
+                  <Text style={{ fontSize: 14, color: '#111827', fontFamily: 'Outfit_500Medium' }}>{formatPrice(stayCost)}</Text>
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Text style={{ fontSize: 13, color: '#6b7280', fontFamily: 'Outfit_500Medium' }}>{t('ProprieterDetail.service_fees')}</Text>
-                  <Text style={{ fontSize: 14, color: '#111827', fontFamily: 'Outfit_600SemiBold' }}>0ar</Text>
+                  <Text style={{ fontSize: 14, color: '#111827', fontFamily: 'Outfit_500Medium' }}>0{symbole.toLowerCase()}</Text>
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Text style={{ fontSize: 13, color: '#6b7280', fontFamily: 'Outfit_500Medium' }}>{t('ProprieterDetail.discount_20')}</Text>
-                  <Text style={{ fontSize: 14, color: '#111827', fontFamily: 'Outfit_600SemiBold' }}>{formatPrice(discountCost)}</Text>
+                  <Text style={{ fontSize: 14, color: '#111827', fontFamily: 'Outfit_500Medium' }}>{formatPrice(discountCost)}</Text>
                 </View>
               </View>
 
               {/* Séparateur */}
-              <View style={{ height: 1, backgroundColor: '#cbd5e1', marginHorizontal: 18, marginTop: 18, marginBottom: 24 }} />
+              <View style={{ height: 1, backgroundColor: '#cbd5e1', marginHorizontal: 18, marginTop: 18, marginBottom: 20 }} />
 
               {/* Total */}
               <View
@@ -588,299 +588,299 @@ export default function ProprieterDetailScreen() {
                   marginBottom: 10,
                 }}
               >
-                <Text style={{ fontSize: 15, fontFamily: 'Outfit_800ExtraBold', color: '#1f2937' }}>{t('ProprieterDetail.total')}</Text>
-                <Text style={{ fontSize: 24, fontFamily: 'Outfit_800ExtraBold', color: '#111827' }}>{formatPrice(totalCost)}</Text>
+                <Text style={{ fontSize: 15, fontFamily: 'Outfit_600SemiBold', color: '#1f2937' }}>{t('ProprieterDetail.total')}</Text>
+                <Text style={{ fontSize: 20, fontFamily: 'Outfit_600SemiBold', color: '#111827' }}>{formatPrice(totalCost)}</Text>
               </View>
             </View>
           )}
         </ScrollView>
 
-      {/* ── BARRE DE RÉSERVATION DYNAMIQUE EN BAS ────────────────────────── */}
-      {!isBooking ? (
-        /* Barre standard pour la vue initiale */
-        <View
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            backgroundColor: '#fff',
-            paddingHorizontal: 20,
-            paddingTop: 16,
-            paddingBottom: 32,
-            borderTopWidth: 1,
-            borderTopColor: '#f1f5f9',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: -4 },
-            shadowOpacity: 0.05,
-            shadowRadius: 10,
-            elevation: 10,
-          }}
-        >
-          <View>
-            <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
-              <Text style={{ fontSize: 17, fontFamily: 'Outfit_800ExtraBold', color: '#111827' }}>
-                {cleanPrice}
-              </Text>
-              <Text style={{ fontSize: 12, color: '#111827', fontFamily: 'Outfit_700Bold' }}>{t('ProprieterDetail.per_night_short')}</Text>
-            </View>
-            <Text style={{ fontSize: 12, color: '#6b7280', fontFamily: 'Outfit_500Medium', marginTop: 2 }}>
-              {formatDateRangeShort(checkInDate, checkOutDate)}
-            </Text>
-          </View>
-
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={() => {
-              setIsBooking(true);
-            }}
-            style={{
-              backgroundColor: '#01BDA5',
-              paddingVertical: 12,
-              paddingHorizontal: 36,
-              borderRadius: 24,
-              alignItems: 'center',
-              justifyContent: 'center',
-              shadowColor: '#01BDA5',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.2,
-              shadowRadius: 6,
-              elevation: 4,
-            }}
-          >
-            <Text style={{ color: '#fff', fontSize: 15, fontFamily: 'Outfit_800ExtraBold' }}>
-              {t('ProprieterDetail.reserve')}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        /* Grand Bouton Réserver pour la vue de validation conforme à la maquette */
-        <View
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            backgroundColor: '#fff',
-            paddingHorizontal: 20,
-            paddingTop: 14,
-            paddingBottom: 32,
-            borderTopWidth: 1,
-            borderTopColor: '#f1f5f9',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: -4 },
-            shadowOpacity: 0.05,
-            shadowRadius: 10,
-            elevation: 10,
-          }}
-        >
-          <TouchableOpacity
-            activeOpacity={0.9}
-            disabled={submitting}
-            onPress={async () => {
-              if (!roomId) {
-                Alert.alert(t('ProprieterDetail.error_title'), t('ProprieterDetail.room_not_found'));
-                return;
-              }
-              setSubmitting(true);
-              try {
-                const toISO = (d: Date) => d.toISOString().split('T')[0];
-                await clientService.createReservation({
-                  propriete_id: roomId,
-                  date_debut: toISO(checkInDate),
-                  date_fin: toISO(checkOutDate),
-                  nb_adultes: persons,
-                });
-                Alert.alert(t('ProprieterDetail.reservation_confirmed'), t('ProprieterDetail.reservation_confirmed_message'), [
-                  { text: t('Contact.ok'), onPress: () => router.replace('/(app)/home') },
-                ]);
-              } catch (err: any) {
-                const msg = err?.data?.message ?? err?.message ?? t('Common.error_generic');
-                Alert.alert(t('ProprieterDetail.reservation_error_title'), msg);
-              } finally {
-                setSubmitting(false);
-              }
-            }}
-            style={{
-              backgroundColor: '#01BDA5',
-              paddingVertical: 15,
-              borderRadius: 24,
-              alignItems: 'center',
-              justifyContent: 'center',
-              shadowColor: '#01BDA5',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.25,
-              shadowRadius: 6,
-              elevation: 4,
-              width: '100%',
-            }}
-          >
-            <Text style={{ color: '#fff', fontSize: 16, fontFamily: 'Outfit_800ExtraBold' }}>
-              {t('ProprieterDetail.reserve')}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* ── MODAL DATE PICKER ── */}
-      <Modal
-        visible={showDatePicker}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowDatePicker(false)}
-      >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: 'rgba(0, 0, 0, 0.4)',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
+        {/* ── BARRE DE RÉSERVATION DYNAMIQUE EN BAS ────────────────────────── */}
+        {!isBooking ? (
+          /* Barre standard pour la vue initiale */
           <View
             style={{
-              width: screenWidth - 40,
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
               backgroundColor: '#fff',
-              borderRadius: 24,
-              padding: 20,
+              paddingHorizontal: 20,
+              paddingTop: 10,
+              paddingBottom: 10,
+              borderTopWidth: 1,
+              borderTopColor: '#f1f5f9',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
               shadowColor: '#000',
-              shadowOffset: { width: 0, height: 10 },
-              shadowOpacity: 0.15,
-              shadowRadius: 15,
+              shadowOffset: { width: 0, height: -4 },
+              shadowOpacity: 0.05,
+              shadowRadius: 10,
               elevation: 10,
             }}
           >
-            {/* Header Calendrier */}
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: 16,
-              }}
-            >
-              <TouchableOpacity
-                onPress={() => {
-                  if (calendarMonth === 0) {
-                    setCalendarMonth(11);
-                    setCalendarYear(calendarYear - 1);
-                  } else {
-                    setCalendarMonth(calendarMonth - 1);
-                  }
-                }}
-                style={{ padding: 6 }}
-              >
-                <Ionicons name="chevron-back" size={24} color="#1f2937" />
-              </TouchableOpacity>
-
-              <Text style={{ fontSize: 16, fontFamily: 'Outfit_700Bold', color: '#1f2937' }}>
-                {MONTH_NAMES[calendarMonth]} {calendarYear}
-              </Text>
-
-              <TouchableOpacity
-                onPress={() => {
-                  if (calendarMonth === 11) {
-                    setCalendarMonth(0);
-                    setCalendarYear(calendarYear + 1);
-                  } else {
-                    setCalendarMonth(calendarMonth + 1);
-                  }
-                }}
-                style={{ padding: 6 }}
-              >
-                <Ionicons name="chevron-forward" size={24} color="#1f2937" />
-              </TouchableOpacity>
-            </View>
-
-            {/* Jours de la semaine */}
-            <View style={{ flexDirection: 'row', marginBottom: 8 }}>
-              {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, idx) => (
-                <Text
-                  key={idx}
-                  style={{
-                    flex: 1,
-                    textAlign: 'center',
-                    fontSize: 12,
-                    fontFamily: 'Outfit_600SemiBold',
-                    color: '#9ca3af',
-                  }}
-                >
-                  {day}
+            <View>
+              <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+                <Text style={{ fontSize: 16, fontFamily: 'Outfit_600SemiBold', color: '#111827' }}>
+                  {cleanPrice}
                 </Text>
-              ))}
+                <Text style={{ fontSize: 12, color: '#111827', fontFamily: 'Outfit_500Medium' }}>{t('ProprieterDetail.per_night_short')}</Text>
+              </View>
+              <Text style={{ fontSize: 12, color: '#6b7280', fontFamily: 'Outfit_500Medium', marginTop: 2 }}>
+                {formatDateRangeShort(checkInDate, checkOutDate)}
+              </Text>
             </View>
 
-            {/* Grid des jours */}
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-              {/* Espaces vides pour le premier jour du mois */}
-              {Array.from({ length: getFirstDayOfMonth(calendarMonth, calendarYear) }).map((_, idx) => (
-                <View key={`empty-${idx}`} style={{ width: `${100 / 7}%`, height: 40 }} />
-              ))}
-
-              {/* Jours du mois */}
-              {Array.from({ length: getDaysInMonth(calendarMonth, calendarYear) }).map((_, idx) => {
-                const dayNum = idx + 1;
-                const currentGridDate = new Date(calendarYear, calendarMonth, dayNum);
-                const isSelected = activePickerType === 'in' 
-                  ? checkInDate.getDate() === dayNum && checkInDate.getMonth() === calendarMonth && checkInDate.getFullYear() === calendarYear
-                  : checkOutDate.getDate() === dayNum && checkOutDate.getMonth() === calendarMonth && checkOutDate.getFullYear() === calendarYear;
-                
-                const isPast = currentGridDate < new Date(new Date().setHours(0, 0, 0, 0));
-                const isDisabled = activePickerType === 'out' && currentGridDate <= checkInDate;
-
-                return (
-                  <TouchableOpacity
-                    key={`day-${dayNum}`}
-                    onPress={() => !isPast && !isDisabled && selectDay(dayNum)}
-                    disabled={isPast || isDisabled}
-                    style={{
-                      width: `${100 / 7}%`,
-                      height: 40,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      borderRadius: 20,
-                      backgroundColor: isSelected ? '#01BDA5' : 'transparent',
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontSize: 13,
-                        fontFamily: isSelected ? 'Outfit_700Bold' : 'Outfit_500Medium',
-                        color: isSelected 
-                          ? '#fff' 
-                          : (isPast || isDisabled) 
-                            ? '#d1d5db' 
-                            : '#374151',
-                      }}
-                    >
-                      {dayNum}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-
-            {/* Bouton Annuler */}
             <TouchableOpacity
-              onPress={() => setShowDatePicker(false)}
+              activeOpacity={0.9}
+              onPress={() => {
+                setIsBooking(true);
+              }}
               style={{
-                marginTop: 20,
+                backgroundColor: '#01BDA5',
+                paddingVertical: 11,
+                paddingHorizontal: 32,
+                borderRadius: 24,
                 alignItems: 'center',
-                paddingVertical: 10,
-                backgroundColor: '#f3f4f6',
-                borderRadius: 16,
+                justifyContent: 'center',
+                shadowColor: '#01BDA5',
+                shadowOffset: { width: 0, height: 3 },
+                shadowOpacity: 0.2,
+                shadowRadius: 5,
+                elevation: 4,
               }}
             >
-              <Text style={{ fontSize: 14, fontFamily: 'Outfit_700Bold', color: '#4b5563' }}>
-                {t('Common.cancel')}
+              <Text style={{ color: '#fff', fontSize: 15, fontFamily: 'Outfit_500Medium' }}>
+                {t('ProprieterDetail.reserve')}
               </Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </Modal>
+        ) : (
+          /* Grand Bouton Réserver pour la vue de validation conforme à la maquette */
+          <View
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              backgroundColor: '#fff',
+              paddingHorizontal: 20,
+              paddingTop: 8,
+              paddingBottom: 10,
+              borderTopWidth: 1,
+              borderTopColor: '#f1f5f9',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: -3 },
+              shadowOpacity: 0.04,
+              shadowRadius: 8,
+              elevation: 8,
+            }}
+          >
+            <TouchableOpacity
+              activeOpacity={0.9}
+              disabled={submitting}
+              onPress={async () => {
+                if (!roomId) {
+                  Alert.alert(t('ProprieterDetail.error_title'), t('ProprieterDetail.room_not_found'));
+                  return;
+                }
+                setSubmitting(true);
+                try {
+                  const toISO = (d: Date) => d.toISOString().split('T')[0];
+                  await clientService.createReservation({
+                    propriete_id: roomId,
+                    date_debut: toISO(checkInDate),
+                    date_fin: toISO(checkOutDate),
+                    nb_adultes: persons,
+                  });
+                  Alert.alert(t('ProprieterDetail.reservation_confirmed'), t('ProprieterDetail.reservation_confirmed_message'), [
+                    { text: t('Contact.ok'), onPress: () => router.replace('/(app)/home') },
+                  ]);
+                } catch (err: any) {
+                  const msg = err?.data?.message ?? err?.message ?? t('Common.error_generic');
+                  Alert.alert(t('ProprieterDetail.reservation_error_title'), msg);
+                } finally {
+                  setSubmitting(false);
+                }
+              }}
+              style={{
+                backgroundColor: '#01BDA5',
+                paddingVertical: 13,
+                borderRadius: 24,
+                alignItems: 'center',
+                justifyContent: 'center',
+                shadowColor: '#01BDA5',
+                shadowOffset: { width: 0, height: 3 },
+                shadowOpacity: 0.2,
+                shadowRadius: 5,
+                elevation: 4,
+                width: '100%',
+              }}
+            >
+              <Text style={{ color: '#fff', fontSize: 15, fontFamily: 'Outfit_500Medium' }}>
+                {t('ProprieterDetail.reserve')}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* ── MODAL DATE PICKER ── */}
+        <Modal
+          visible={showDatePicker}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowDatePicker(false)}
+        >
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <View
+              style={{
+                width: screenWidth - 40,
+                backgroundColor: '#fff',
+                borderRadius: 24,
+                padding: 20,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 10 },
+                shadowOpacity: 0.15,
+                shadowRadius: 15,
+                elevation: 10,
+              }}
+            >
+              {/* Header Calendrier */}
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: 16,
+                }}
+              >
+                <TouchableOpacity
+                  onPress={() => {
+                    if (calendarMonth === 0) {
+                      setCalendarMonth(11);
+                      setCalendarYear(calendarYear - 1);
+                    } else {
+                      setCalendarMonth(calendarMonth - 1);
+                    }
+                  }}
+                  style={{ padding: 6 }}
+                >
+                  <Ionicons name="chevron-back" size={24} color="#1f2937" />
+                </TouchableOpacity>
+
+                <Text style={{ fontSize: 16, fontFamily: 'Outfit_700Bold', color: '#1f2937' }}>
+                  {MONTH_NAMES[calendarMonth]} {calendarYear}
+                </Text>
+
+                <TouchableOpacity
+                  onPress={() => {
+                    if (calendarMonth === 11) {
+                      setCalendarMonth(0);
+                      setCalendarYear(calendarYear + 1);
+                    } else {
+                      setCalendarMonth(calendarMonth + 1);
+                    }
+                  }}
+                  style={{ padding: 6 }}
+                >
+                  <Ionicons name="chevron-forward" size={24} color="#1f2937" />
+                </TouchableOpacity>
+              </View>
+
+              {/* Jours de la semaine */}
+              <View style={{ flexDirection: 'row', marginBottom: 8 }}>
+                {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, idx) => (
+                  <Text
+                    key={idx}
+                    style={{
+                      flex: 1,
+                      textAlign: 'center',
+                      fontSize: 12,
+                      fontFamily: 'Outfit_600SemiBold',
+                      color: '#9ca3af',
+                    }}
+                  >
+                    {day}
+                  </Text>
+                ))}
+              </View>
+
+              {/* Grid des jours */}
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                {/* Espaces vides pour le premier jour du mois */}
+                {Array.from({ length: getFirstDayOfMonth(calendarMonth, calendarYear) }).map((_, idx) => (
+                  <View key={`empty-${idx}`} style={{ width: `${100 / 7}%`, height: 40 }} />
+                ))}
+
+                {/* Jours du mois */}
+                {Array.from({ length: getDaysInMonth(calendarMonth, calendarYear) }).map((_, idx) => {
+                  const dayNum = idx + 1;
+                  const currentGridDate = new Date(calendarYear, calendarMonth, dayNum);
+                  const isSelected = activePickerType === 'in'
+                    ? checkInDate.getDate() === dayNum && checkInDate.getMonth() === calendarMonth && checkInDate.getFullYear() === calendarYear
+                    : checkOutDate.getDate() === dayNum && checkOutDate.getMonth() === calendarMonth && checkOutDate.getFullYear() === calendarYear;
+
+                  const isPast = currentGridDate < new Date(new Date().setHours(0, 0, 0, 0));
+                  const isDisabled = activePickerType === 'out' && currentGridDate <= checkInDate;
+
+                  return (
+                    <TouchableOpacity
+                      key={`day-${dayNum}`}
+                      onPress={() => !isPast && !isDisabled && selectDay(dayNum)}
+                      disabled={isPast || isDisabled}
+                      style={{
+                        width: `${100 / 7}%`,
+                        height: 40,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        borderRadius: 20,
+                        backgroundColor: isSelected ? '#01BDA5' : 'transparent',
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 13,
+                          fontFamily: isSelected ? 'Outfit_700Bold' : 'Outfit_500Medium',
+                          color: isSelected
+                            ? '#fff'
+                            : (isPast || isDisabled)
+                              ? '#d1d5db'
+                              : '#374151',
+                        }}
+                      >
+                        {dayNum}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              {/* Bouton Annuler */}
+              <TouchableOpacity
+                onPress={() => setShowDatePicker(false)}
+                style={{
+                  marginTop: 20,
+                  alignItems: 'center',
+                  paddingVertical: 10,
+                  backgroundColor: '#f3f4f6',
+                  borderRadius: 16,
+                }}
+              >
+                <Text style={{ fontSize: 14, fontFamily: 'Outfit_700Bold', color: '#4b5563' }}>
+                  {t('Common.cancel')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </Animated.View>
     </SafeAreaView>
   );

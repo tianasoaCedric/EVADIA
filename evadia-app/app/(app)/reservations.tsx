@@ -128,7 +128,7 @@ export default function ReservationsScreen() {
                 {formatDate(item.date_debut)} — {formatDate(item.date_fin)}
               </Text>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
-                <Text style={{ fontSize: 15, fontFamily: 'Outfit_800ExtraBold', color: '#01BDA5' }}>
+                <Text style={{ fontSize: 15, fontFamily: 'Outfit_500Medium', color: '#01BDA5' }}>
                   {(item.prix_total ?? 0).toLocaleString('fr-FR')} MGA
                 </Text>
                 <Ionicons name="chevron-forward" size={18} color="#9ca3af" />

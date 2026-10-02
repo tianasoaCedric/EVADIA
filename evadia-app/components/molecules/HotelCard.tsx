@@ -1,5 +1,5 @@
 import { View, Text, Image, TouchableOpacity, DimensionValue, Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
 interface HotelCardProps {
@@ -33,9 +33,9 @@ export const HotelCard = ({
     const fullStars = Math.floor(safeRating);
     for (let i = 1; i <= 5; i++) {
       if (i <= fullStars) {
-        stars.push(<Ionicons key={i} name="star" size={13} color="#fbbf24" style={{ marginRight: 2 }} />);
+        stars.push(<FontAwesome key={i} name="star" size={12} color="#fbbf24" style={{ marginRight: 2 }} />);
       } else {
-        stars.push(<Ionicons key={i} name="star" size={13} color="#e5e7eb" style={{ marginRight: 2 }} />);
+        stars.push(<FontAwesome key={i} name="star" size={12} color="#e5e7eb" style={{ marginRight: 2 }} />);
       }
     }
     return stars;

@@ -14,6 +14,15 @@ import {
   Outfit_800ExtraBold,
   Outfit_900Black,
 } from "@expo-google-fonts/outfit";
+import {
+  Manrope_200ExtraLight,
+  Manrope_300Light,
+  Manrope_400Regular,
+  Manrope_500Medium,
+  Manrope_600SemiBold,
+  Manrope_700Bold,
+  Manrope_800ExtraBold,
+} from "@expo-google-fonts/manrope";
 import "../global.css";
 import "../lib/i18n";
 import { loadPersistedLanguage } from "../lib/i18n";
@@ -89,6 +98,13 @@ export default function RootLayout() {
     Outfit_700Bold,
     Outfit_800ExtraBold,
     Outfit_900Black,
+    Manrope_200ExtraLight,
+    Manrope_300Light,
+    Manrope_400Regular,
+    Manrope_500Medium,
+    Manrope_600SemiBold,
+    Manrope_700Bold,
+    Manrope_800ExtraBold,
   });
   const [langLoaded, setLangLoaded] = useState(false);
 

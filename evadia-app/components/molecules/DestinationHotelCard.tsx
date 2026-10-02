@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import { useRef, useState } from 'react';
 import { Dimensions, Image, ScrollView, Text, TouchableOpacity, View, Animated } from 'react-native';
 
@@ -72,11 +72,11 @@ export const DestinationHotelCard = ({
     for (let i = 1; i <= 5; i++) {
       if (i <= floorRating) {
         stars.push(
-          <Ionicons key={`star-${i}`} name="star" size={14} color="#fbbf24" style={{ marginRight: 2 }} />
+          <FontAwesome key={`star-${i}`} name="star" size={13} color="#fbbf24" style={{ marginRight: 2 }} />
         );
       } else {
         stars.push(
-          <Ionicons key={`star-${i}`} name="star" size={14} color="#e5e7eb" style={{ marginRight: 2 }} />
+          <FontAwesome key={`star-${i}`} name="star" size={13} color="#e5e7eb" style={{ marginRight: 2 }} />
         );
       }
     }

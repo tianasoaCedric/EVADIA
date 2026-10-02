@@ -83,7 +83,10 @@ export default function DestinationScreen() {
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={
             <View className="px-4 mb-5 mt-2">
-              <Text className="text-[27px] font-bold text-gray-950 tracking-tight">
+              <Text
+                className="text-[27px] text-gray-950 tracking-tight"
+                style={{ fontFamily: 'Manrope_700Bold' }}
+              >
                 {t('Destination.title')}
               </Text>
             </View>

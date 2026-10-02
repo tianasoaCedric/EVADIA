@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -129,7 +129,7 @@ export default function HotelDetailScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={[]}>
       <Animated.View style={{ flex: 1, opacity: fadeAnim, transform: [{ translateY: translateYAnim }] }}>
         {/* Image carousel */}
-        <View style={{ width: screenWidth, height: IMAGE_HEIGHT, borderBottomLeftRadius: 20, borderBottomRightRadius: 20, overflow: 'hidden', backgroundColor: '#e5e7eb', zIndex: 10 }}>
+        <View style={{ width: screenWidth, height: IMAGE_HEIGHT, borderBottomLeftRadius: 35, borderBottomRightRadius: 35, overflow: 'hidden', backgroundColor: '#e5e7eb', zIndex: 10 }}>
           <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} onScroll={handleScroll} scrollEventThrottle={16} style={{ width: screenWidth, height: IMAGE_HEIGHT }}>
             {imageUris.map((uri, idx) => (
               <Image key={idx} source={{ uri }} style={{ width: screenWidth, height: IMAGE_HEIGHT, resizeMode: 'cover' }} />
@@ -189,37 +189,33 @@ export default function HotelDetailScreen() {
           </View>
         ) : (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 110 }} style={{ flex: 1 }}>
-            <View style={{ paddingHorizontal: 18, paddingTop: 20 }}>
-              <Text style={{ fontSize: 22, fontFamily: 'Outfit_800ExtraBold', color: '#111827', letterSpacing: -0.3 }}>
+            <View style={{ paddingHorizontal: 18, paddingTop: 18 }}>
+              <Text style={{ fontSize: 18, fontFamily: 'Outfit_700Bold', color: '#111827', letterSpacing: -0.2 }}>
                 {hotel?.nom ?? hotelName}
               </Text>
 
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6 }}>
-                <Ionicons name="location-outline" size={15} color="#6b7280" style={{ marginRight: 4 }} />
-                <Text style={{ fontSize: 13, color: '#6b7280', fontFamily: 'Outfit_600SemiBold' }}>{displayVille}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
+                <Ionicons name="location-outline" size={15} color="#4b5563" style={{ marginRight: 4 }} />
+                <Text style={{ fontSize: 13, color: '#4b5563', fontFamily: 'Outfit_400Regular' }}>{displayVille}</Text>
               </View>
 
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
-                <Ionicons name="star" size={17} color="#111827" style={{ marginRight: 5 }} />
-                <Text style={{ fontSize: 15, fontFamily: 'Outfit_800ExtraBold', color: '#111827', marginRight: 8 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6 }}>
+                <FontAwesome name="star" size={14} color="#111827" style={{ marginRight: 5 }} />
+                <Text style={{ fontSize: 14, fontFamily: 'Outfit_700Bold', color: '#111827', marginRight: 6 }}>
                   {displayRating.toFixed(1).replace('.', ',')}
                 </Text>
-                {nbAvis > 0 && <Text style={{ fontSize: 13, color: '#6b7280', fontFamily: 'Outfit_600SemiBold' }}>{t('HotelDetail.reviews_count', { count: nbAvis })}</Text>}
+                {nbAvis > 0 && <Text style={{ fontSize: 13, color: '#4b5563', fontFamily: 'Outfit_400Regular' }}>{t('HotelDetail.reviews_count', { count: nbAvis })}</Text>}
               </View>
 
-              <View style={{ height: 1, backgroundColor: '#f3f4f6', marginTop: 18, marginBottom: 18 }} />
-
               {/* À propos */}
-              <Text style={{ fontSize: 17, fontFamily: 'Outfit_800ExtraBold', color: '#111827', marginBottom: 10 }}>{t('HotelDetail.about')}</Text>
-              <Text style={{ fontSize: 14, color: '#6b7280', lineHeight: 22, fontFamily: 'Outfit_500Medium' }}>{description}</Text>
-
-              <View style={{ height: 1, backgroundColor: '#f3f4f6', marginTop: 22, marginBottom: 22 }} />
+              <Text style={{ fontSize: 15, fontFamily: 'Outfit_700Bold', color: '#111827', marginTop: 18, marginBottom: 6 }}>{t('HotelDetail.about')}</Text>
+              <Text style={{ fontSize: 12.5, color: '#4b5563', lineHeight: 18, fontFamily: 'Outfit_400Regular' }}>{description}</Text>
 
               {/* Chambres */}
-              <Text style={{ fontSize: 17, fontFamily: 'Outfit_800ExtraBold', color: '#111827', marginBottom: 14 }}>{t('HotelDetail.rooms_availability')}</Text>
+              <Text style={{ fontSize: 15, fontFamily: 'Outfit_700Bold', color: '#111827', marginTop: 18, marginBottom: 12 }}>{t('HotelDetail.rooms_availability')}</Text>
 
               {rooms.length === 0 ? (
-                <Text style={{ color: '#9ca3af', fontSize: 13, marginBottom: 16 }}>{t('HotelDetail.no_rooms')}</Text>
+                <Text style={{ color: '#9ca3af', fontSize: 13, marginBottom: 16, fontFamily: 'Outfit_400Regular' }}>{t('HotelDetail.no_rooms')}</Text>
               ) : (
                 <>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} decelerationRate="fast" snapToInterval={screenWidth - 20} snapToAlignment="start" onScroll={handleRoomScroll} scrollEventThrottle={16} style={{ width: '100%', marginBottom: 12 }}>
@@ -261,7 +257,7 @@ export default function HotelDetailScreen() {
                     })}
                   </ScrollView>
                   {rooms.length > 1 && (
-                    <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 22 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 16 }}>
                       {rooms.map((_, idx) => (
                         <View key={idx} style={{ width: idx === activeRoomIndex ? 24 : 6, height: 6, borderRadius: 3, backgroundColor: idx === activeRoomIndex ? '#01BDA5' : '#cbd5e1', marginRight: idx < rooms.length - 1 ? 6 : 0 }} />
                       ))}
@@ -270,16 +266,14 @@ export default function HotelDetailScreen() {
                 </>
               )}
 
-              <View style={{ height: 1, backgroundColor: '#f3f4f6', marginBottom: 22 }} />
-
               {/* Services / Équipements */}
-              <Text style={{ fontSize: 16, fontFamily: 'Outfit_700Bold', color: '#111827', marginBottom: 14 }}>{t('HotelDetail.equipments')}</Text>
+              <Text style={{ fontSize: 15, fontFamily: 'Outfit_700Bold', color: '#111827', marginTop: 14, marginBottom: 12 }}>{t('HotelDetail.equipments')}</Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                 {services.length > 0
                   ? services.map((s: any) => (
-                      <View key={s.id} style={{ width: '50%', flexDirection: 'row', alignItems: 'center', marginBottom: 14 }}>
-                        <Ionicons name={getEquipIcon(s.nom) as any} size={22} color="#4b5563" />
-                        <Text style={{ fontSize: 13, color: '#4b5563', fontFamily: 'Outfit_500Medium', marginLeft: 10 }}>{s.nom}</Text>
+                      <View key={s.id} style={{ width: '50%', flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                        <Ionicons name={getEquipIcon(s.nom) as any} size={20} color="#4b5563" />
+                        <Text style={{ fontSize: 13, color: '#4b5563', fontFamily: 'Outfit_400Regular', marginLeft: 8 }}>{s.nom}</Text>
                       </View>
                     ))
                   : [
@@ -290,9 +284,9 @@ export default function HotelDetailScreen() {
                       { icon: 'restaurant-outline', label: t('HotelDetail.equip_restaurant') },
                       { icon: 'shield-checkmark-outline', label: t('HotelDetail.equip_security') },
                     ].map((item, idx) => (
-                      <View key={idx} style={{ width: '50%', flexDirection: 'row', alignItems: 'center', marginBottom: 14 }}>
-                        <Ionicons name={item.icon as any} size={22} color="#4b5563" />
-                        <Text style={{ fontSize: 13, color: '#4b5563', fontFamily: 'Outfit_500Medium', marginLeft: 10 }}>{item.label}</Text>
+                      <View key={idx} style={{ width: '50%', flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                        <Ionicons name={item.icon as any} size={20} color="#4b5563" />
+                        <Text style={{ fontSize: 13, color: '#4b5563', fontFamily: 'Outfit_400Regular', marginLeft: 8 }}>{item.label}</Text>
                       </View>
                     ))}
               </View>
