@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Destination;
 use App\Support\FrontendCache;
+use App\Support\Media;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class DestinationController extends Controller
 {
@@ -76,7 +76,7 @@ class DestinationController extends Controller
 
         if ($request->hasFile('image')) {
             if ($destination->image_url) {
-                Storage::disk('s3')->delete($destination->image_url);
+                Media::delete($destination->image_url);
             }
             $validated['image_url'] = $request->file('image')->store('destinations', 's3');
         }
@@ -116,7 +116,7 @@ class DestinationController extends Controller
         $couverture = $destination->couverture ?? [];
 
         if (isset($couverture[$index])) {
-            Storage::disk('s3')->delete($couverture[$index]);
+            Media::delete($couverture[$index]);
             unset($couverture[$index]);
             $destination->update(['couverture' => array_values($couverture)]);
         }
@@ -130,11 +130,11 @@ class DestinationController extends Controller
     public function destroy(Destination $destination)
     {
         if ($destination->image_url) {
-            Storage::disk('s3')->delete($destination->image_url);
+            Media::delete($destination->image_url);
         }
 
         foreach ($destination->couverture ?? [] as $chemin) {
-            Storage::disk('s3')->delete($chemin);
+            Media::delete($chemin);
         }
 
         $destination->delete();

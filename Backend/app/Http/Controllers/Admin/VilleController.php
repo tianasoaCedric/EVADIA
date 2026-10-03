@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Destination;
 use App\Models\Ville;
 use App\Support\FrontendCache;
+use App\Support\Media;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class VilleController extends Controller
 {
@@ -92,7 +92,7 @@ class VilleController extends Controller
 
         if ($request->hasFile('image')) {
             if ($ville->image) {
-                Storage::disk('s3')->delete($ville->image);
+                Media::delete($ville->image);
             }
             $validated['image'] = $request->file('image')->store('villes', 's3');
         }
@@ -130,7 +130,7 @@ class VilleController extends Controller
         $couverture = $ville->couverture ?? [];
 
         if (isset($couverture[$index])) {
-            Storage::disk('s3')->delete($couverture[$index]);
+            Media::delete($couverture[$index]);
             unset($couverture[$index]);
             $ville->update(['couverture' => array_values($couverture)]);
         }
@@ -144,11 +144,11 @@ class VilleController extends Controller
     public function destroy(Ville $ville)
     {
         if ($ville->image) {
-            Storage::disk('s3')->delete($ville->image);
+            Media::delete($ville->image);
         }
 
         foreach ($ville->couverture ?? [] as $chemin) {
-            Storage::disk('s3')->delete($chemin);
+            Media::delete($chemin);
         }
 
         $ville->delete();

@@ -99,16 +99,13 @@
                                     <div class="relative group">
                                         <img src="@mediaUrl($chemin)" alt="Photo {{ $i + 1 }}"
                                             class="h-20 w-full rounded-xl object-cover ring-1 ring-gray-200">
-                                        <form method="POST" action="{{ route('admin.villes.couverture.destroy', [$ville, $i]) }}"
-                                            onsubmit="return confirm('Supprimer cette photo ?');" class="absolute top-1 right-1">
-                                            @csrf @method('DELETE')
-                                            <button type="submit"
-                                                class="flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-red-500 shadow hover:bg-red-50">
-                                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                                </svg>
-                                            </button>
-                                        </form>
+                                        {{-- Le formulaire de suppression est hors du formulaire principal (pas de form imbriqué) --}}
+                                        <button type="submit" form="del-couv-{{ $i }}"
+                                            class="absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-red-500 shadow hover:bg-red-50">
+                                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
                                     </div>
                                 @endforeach
                             </div>
@@ -150,5 +147,12 @@
                 </a>
             </div>
         </form>
+
+        @foreach($ville->couverture ?? [] as $i => $chemin)
+            <form id="del-couv-{{ $i }}" method="POST" action="{{ route('admin.villes.couverture.destroy', [$ville, $i]) }}"
+                onsubmit="return confirm('Supprimer cette photo ?');" class="hidden">
+                @csrf @method('DELETE')
+            </form>
+        @endforeach
     </div>
 @endsection

@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Support\FrontendCache;
+use App\Support\Media;
 use Illuminate\Database\Seeder;
 use App\Models\Destination;
 use App\Models\Ville;
@@ -75,19 +77,22 @@ class VillesSeeder extends Seeder
                     ['nom' => $nom, 'destination_id' => $destination->id],
                 );
 
-                // Ne remplit que les champs vides : on n'écrase pas une image changée depuis l'admin
+                // Ne remplit que les champs vides ou pointant vers un fichier supprimé du bucket :
+                // on n'écrase pas une image valide changée depuis l'admin
                 $media = $images[$destinationNom][$nom] ?? null;
                 if (!$media) {
                     continue;
                 }
-                if (empty($ville->image)) {
+                if (Media::missing($ville->image)) {
                     $ville->image = $media['image'];
                 }
-                if (empty($ville->couverture) && !empty($media['couverture'])) {
+                if (!empty($media['couverture']) && Media::missing($ville->couverture)) {
                     $ville->couverture = $media['couverture'];
                 }
                 $ville->save();
             }
         }
+
+        FrontendCache::purgerDestinationsEtVilles();
     }
 }

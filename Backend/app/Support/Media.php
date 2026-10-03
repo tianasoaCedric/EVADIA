@@ -50,6 +50,52 @@ class Media
     }
 
     /**
+     * Delete stored media from S3, unless disabled via MEDIA_DELETE_FILES=false.
+     * In dev the demo bucket is shared: deleting a file would break the seeders
+     * (and the databases) of every other developer pointing at it.
+     *
+     * @param  string|array<int, string|null>|null  $paths
+     */
+    public static function delete(string|array|null $paths): void
+    {
+        $paths = array_values(array_filter((array) $paths));
+
+        if ($paths === [] || ! config('filesystems.media_delete', true)) {
+            return;
+        }
+
+        Storage::disk('s3')->delete($paths);
+    }
+
+    /**
+     * True when the value is empty or points to at least one file no longer on S3.
+     * If S3 can't be queried, assume the files are there (never overwrite blindly).
+     *
+     * @param  string|array<int, string|null>|null  $paths
+     */
+    public static function missing(string|array|null $paths): bool
+    {
+        $paths = array_values(array_filter((array) $paths));
+
+        if ($paths === []) {
+            return true;
+        }
+
+        try {
+            $disk = Storage::disk('s3');
+            foreach ($paths as $path) {
+                if (! $disk->exists($path)) {
+                    return true;
+                }
+            }
+        } catch (\Throwable) {
+            return false;
+        }
+
+        return false;
+    }
+
+    /**
      * Map an array of stored paths to public URLs, dropping any that resolve to null.
      *
      * @param  iterable<int, string|null>|null  $paths

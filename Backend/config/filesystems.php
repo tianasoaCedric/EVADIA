@@ -28,6 +28,13 @@ return [
     |
     */
 
+    /*
+    | Suppression physique des médias remplacés / supprimés en back office.
+    | Mettre à false quand le bucket est partagé entre plusieurs développeurs.
+    */
+
+    'media_delete' => env('MEDIA_DELETE_FILES', true),
+
     'disks' => [
 
         'local' => [

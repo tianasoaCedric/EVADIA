@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import { apiClient } from '@/lib/api-client'
 import type { Destination, Hotel } from '@/lib/types'
 import DestinationClient from './DestinationClient'
+import Header from '@/app/components/molecules/Header'
 
 export const revalidate = 3600
 
@@ -34,9 +35,12 @@ export default async function DestinationPage() {
   ])
 
   return (
-    <DestinationClient
-      destinations={destRes.data}
-      selectionHotels={selectionRes.data}
-    />
+    <>
+      <Header />
+      <DestinationClient
+        destinations={destRes.data}
+        selectionHotels={selectionRes.data}
+      />
+    </>
   )
 }

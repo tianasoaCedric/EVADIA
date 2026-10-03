@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Support\FrontendCache;
+use App\Support\Media;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -27,7 +29,7 @@ class TypesAndDestinationsSeeder extends Seeder
         $destinations = [
             ['nom' => 'Nord',                    'description' => 'Nosy Be, Diego Suarez, Ambanja',         'image_url' => 'destinations/yKGCERrxqF8gi5AI2YqGO19Ct10CIrh95mosVP92.webp', 'couverture' => null],
             ['nom' => 'Sud',                     'description' => 'Tuléar, Fort Dauphin, Isalo',            'image_url' => 'destinations/vAmWACveL0mP0Hzhd1WNJxp436xOQHqyzNx6cK6D.webp', 'couverture' => null],
-            ['nom' => 'Est',                     'description' => 'Tamatave, Île Sainte-Marie',             'image_url' => 'destinations/WAVOWFGvMkgJfJZWdGfy2t2JiMHiyXSX2Z0nbfwt.webp', 'couverture' => null],
+            ['nom' => 'Est',                     'description' => 'Tamatave, Île Sainte-Marie',             'image_url' => 'destinations/IqPxoyVSxQvUWbf4LNRHr9XFMg2RWci4SJq6oHNW.webp', 'couverture' => null],
             ['nom' => 'Ouest',                   'description' => 'Morondava, Majunga, Allée des Baobabs',  'image_url' => 'destinations/bpMA2yaxBU7JoIO03lO0R3x1fF4lknaUxDXWhT5S.webp', 'couverture' => null],
             ['nom' => 'Hautes terres centrales', 'description' => 'Antananarivo, Antsirabe, Fianarantsoa', 'image_url' => 'destinations/47CsXwJCjPrFdJ9BAxTdHikjuiqgGMH7xJgW3usV.webp', 'couverture' => ['destinations/couverture/rU9sk1ckezPzUjqXQLHjSvLSsb2lcTMKgJubn3jC.webp']],
         ];
@@ -38,14 +40,17 @@ class TypesAndDestinationsSeeder extends Seeder
                 ['description' => $dest['description']]
             );
 
-            // Ne remplit que les champs vides : on n'écrase pas une image changée depuis l'admin
-            if (empty($destination->image_url)) {
+            // Ne remplit que les champs vides ou pointant vers un fichier supprimé du bucket :
+            // on n'écrase pas une image valide changée depuis l'admin
+            if (Media::missing($destination->image_url)) {
                 $destination->image_url = $dest['image_url'];
             }
-            if (empty($destination->couverture) && $dest['couverture']) {
+            if ($dest['couverture'] && Media::missing($destination->couverture)) {
                 $destination->couverture = $dest['couverture'];
             }
             $destination->save();
         }
+
+        FrontendCache::purgerDestinationsEtVilles();
     }
 }
