@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Support\Media;
 use App\Http\Controllers\Controller;
 use App\Models\LieuDecouverte;
 use App\Models\VilleDecouverte;
@@ -50,7 +51,7 @@ class LieuDecouverteController extends Controller
         $chemins = [];
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $file) {
-                $chemins[] = $file->store('decouverte/lieux', 's3');
+                $chemins[] = Media::storeImage($file, 'decouverte/lieux');
             }
         }
         $validated['images'] = $chemins ?: null;
@@ -91,7 +92,7 @@ class LieuDecouverteController extends Controller
         // Supprimer les images cochées
         if ($request->has('delete_images')) {
             foreach ($request->input('delete_images') as $path) {
-                Storage::disk('s3')->delete($path);
+                Media::delete($path);
                 $existingImages = array_filter($existingImages, fn($p) => $p !== $path);
             }
         }
@@ -99,7 +100,7 @@ class LieuDecouverteController extends Controller
         // Ajouter les nouvelles images
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $file) {
-                $existingImages[] = $file->store('decouverte/lieux', 's3');
+                $existingImages[] = Media::storeImage($file, 'decouverte/lieux');
             }
         }
 
@@ -115,7 +116,7 @@ class LieuDecouverteController extends Controller
     {
         if ($lieu->images) {
             foreach ($lieu->images as $path) {
-                Storage::disk('s3')->delete($path);
+                Media::delete($path);
             }
         }
 

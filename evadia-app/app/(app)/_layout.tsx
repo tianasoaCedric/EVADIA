@@ -12,6 +12,10 @@ export default function AppLayout() {
 
   return (
     <Tabs
+      // Les écrans de détail (hôtel, chambre, réservations…) sont des onglets cachés :
+      // "history" fait revenir le bouton retour à l'écran précédent (n-1)
+      // au lieu de toujours ramener à Accueil (défaut "firstRoute").
+      backBehavior="history"
       screenOptions={{
         headerShown: false, // On utilise notre propre composant Header personnalisé sur chaque écran
         tabBarActiveTintColor: '#01BDA5',

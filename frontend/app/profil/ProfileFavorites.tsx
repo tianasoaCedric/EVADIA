@@ -54,7 +54,7 @@ export default function ProfileFavorites() {
             ville={favori.hotel.adresse?.ville}
             adresse={favori.hotel.adresse?.adresse_ligne1}
             hotelId={favori.hotel_id}
-            availability="Disponible"
+            disponibilite={favori.hotel.disponibilite}
             price={favori.hotel.prix_min ?? 0}
             prixMga={favori.hotel.prix_min_mga}
             prixEur={favori.hotel.prix_min_eur}

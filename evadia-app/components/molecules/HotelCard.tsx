@@ -1,9 +1,20 @@
-import { View, Text, Image, TouchableOpacity, DimensionValue, Pressable } from 'react-native';
+import { View, Text, TouchableOpacity, DimensionValue, Pressable } from 'react-native';
+import { AppImage } from '../atoms/AppImage';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import type { HotelAvailability } from '../../services/public';
+
+// Mêmes couleurs que la carte hôtel du site (vert / rouge / orange)
+const AVAILABILITY_COLORS: Record<HotelAvailability, string> = {
+  disponible: '#16a34a',
+  complet: '#ef4444',
+  en_pause: '#f97316',
+};
 
 interface HotelCardProps {
   imageUri: string;
+  /** Disponibilité de ce soir renvoyée par l'API (`disponibilite`) */
+  availability?: HotelAvailability | null;
   name: string;
   price: string;
   rating: number;
@@ -16,6 +27,7 @@ interface HotelCardProps {
 
 export const HotelCard = ({
   imageUri,
+  availability,
   name,
   price,
   rating,
@@ -60,10 +72,11 @@ export const HotelCard = ({
           overflow: 'hidden',
         }}
       >
-        <Image 
-          source={{ uri: imageUri }} 
-          className="w-full h-full"
-          style={{ resizeMode: 'cover', borderRadius: 24 }}
+        <AppImage
+          variant="sm"
+          source={imageUri}
+          recyclingKey={imageUri}
+          style={{ width: '100%', height: '100%', borderRadius: 24 }}
         />
         
         {/* Icône Coeur de favori (sans fond blanc, flottant en haut à droite) */}
@@ -92,10 +105,15 @@ export const HotelCard = ({
           {name}
         </Text>
 
-        {/* Sous-titre disponibilité */}
-        <Text className="text-gray-400 font-semibold text-[11px] mt-0.5 mb-0.5">
-          {t('HotelCard.availability')}
-        </Text>
+        {/* Disponibilité de ce soir (calculée par l'API) ; rien si inconnue (hôtel sans chambre) */}
+        {availability ? (
+          <Text
+            style={{ color: AVAILABILITY_COLORS[availability], fontFamily: 'Outfit_600SemiBold', fontSize: 11, marginTop: 2, marginBottom: 2 }}
+            numberOfLines={1}
+          >
+            {t(`HotelCard.availability_${availability}`)}
+          </Text>
+        ) : null}
 
         {/* Prix de la nuité */}
         <Text className="text-gray-600 font-bold text-[12px] mb-2">

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { clientService, Reservation } from '../../services/client';
+import { loadErrorMessage } from '../../lib/parseError';
 
 function formatDate(dateStr?: string | null): string {
   if (!dateStr) return '—';
@@ -32,7 +33,7 @@ export default function ReservationsScreen() {
       const data = await clientService.getReservations();
       setReservations(data);
     } catch (e: any) {
-      setError(e?.message ?? t('Reservations.load_error'));
+      setError(loadErrorMessage(e, t('Reservations.load_error')));
     } finally {
       setLoading(false);
     }

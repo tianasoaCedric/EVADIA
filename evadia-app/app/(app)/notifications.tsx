@@ -6,6 +6,7 @@ import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { notificationService, AppNotification } from '../../services/notifications';
+import { loadErrorMessage, showError } from '../../lib/parseError';
 
 function timeAgo(dateStr: string, t: (key: string, opts?: any) => string): string {
   const diffMs = Date.now() - new Date(dateStr).getTime();
@@ -31,7 +32,7 @@ export default function NotificationsScreen() {
       const data = await notificationService.getNotifications();
       setNotifications(data);
     } catch (e: any) {
-      setError(e?.message ?? t('Notifications.load_error'));
+      setError(loadErrorMessage(e, t('Notifications.load_error')));
     } finally {
       setLoading(false);
     }
@@ -48,7 +49,11 @@ export default function NotificationsScreen() {
       setNotifications((prev) => prev.map((n) => (n.id === item.id ? { ...n, lu: true } : n)));
       try {
         await notificationService.markRead(item.id);
-      } catch {}
+      } catch {
+        // Pas d'alerte : l'utilisateur est déjà en train d'ouvrir la réservation.
+        // On remet seulement la pastille « non lu » pour rester fidèle au serveur.
+        setNotifications((prev) => prev.map((n) => (n.id === item.id ? { ...n, lu: false } : n)));
+      }
     }
 
     if (item.reservation_id) {
@@ -57,10 +62,14 @@ export default function NotificationsScreen() {
   };
 
   const handleMarkAllRead = async () => {
+    const before = notifications;
     setNotifications((prev) => prev.map((n) => ({ ...n, lu: true })));
     try {
       await notificationService.markAllRead();
-    } catch {}
+    } catch (err) {
+      setNotifications(before);
+      showError(t('Notifications.title'), err, { default: t('Notifications.mark_all_error') });
+    }
   };
 
   const hasUnread = notifications.some((n) => !n.lu);

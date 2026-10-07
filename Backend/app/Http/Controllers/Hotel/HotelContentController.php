@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Hotel;
 
+use App\Support\Media;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Hotel\Traits\BelongsToHotel;
 use App\Models\Destination;
@@ -94,7 +95,7 @@ class HotelContentController extends Controller
 
         $maxOrdre = $hotel->photos()->max('ordre') ?? 0;
         foreach ($request->file('photos') as $i => $photo) {
-            $path = $photo->store("hotels/{$hotel->id}", 's3');
+            $path = Media::storeImage($photo, "hotels/{$hotel->id}");
             Photo::create([
                 'entite_type' => 'hotel',
                 'entite_id' => $hotel->id,
@@ -117,7 +118,7 @@ class HotelContentController extends Controller
         $hotel = $this->getHotel();
         $hotelPhoto = Photo::forHotel($hotel->id)->where('id', $photo)->firstOrFail();
 
-        Storage::disk('s3')->delete($hotelPhoto->url_photo);
+        Media::delete($hotelPhoto->url_photo);
         $hotelPhoto->delete();
         Photo::assurerPrincipale('hotel', $hotel->id);
 

@@ -1,3 +1,4 @@
+import type { HotelDisponibilite } from '@/lib/types'
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost/api'
 
 export interface SearchHotel {
@@ -11,6 +12,7 @@ export interface SearchHotel {
   prix_min_mga: number | null
   prix_min_eur: number | null
   note_moyenne: number | null
+  disponibilite?: HotelDisponibilite | null
 }
 
 export interface SearchDestination {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Support\Media;
 use App\Http\Controllers\Controller;
 use App\Models\VilleDecouverte;
 use Illuminate\Http\Request;
@@ -47,7 +48,7 @@ class VilleDecouverteController extends Controller
         $validated['ordre']      = $validated['ordre'] ?? 0;
 
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('decouverte/villes', 's3');
+            $validated['image'] = Media::storeImage($request->file('image'), 'decouverte/villes');
         }
 
         VilleDecouverte::create($validated);
@@ -82,9 +83,9 @@ class VilleDecouverteController extends Controller
 
         if ($request->hasFile('image')) {
             if ($ville->image) {
-                Storage::disk('s3')->delete($ville->image);
+                Media::delete($ville->image);
             }
-            $validated['image'] = $request->file('image')->store('decouverte/villes', 's3');
+            $validated['image'] = Media::storeImage($request->file('image'), 'decouverte/villes');
         }
 
         $ville->update($validated);
@@ -96,7 +97,7 @@ class VilleDecouverteController extends Controller
     public function destroy(VilleDecouverte $ville)
     {
         if ($ville->image) {
-            Storage::disk('s3')->delete($ville->image);
+            Media::delete($ville->image);
         }
 
         $ville->delete();

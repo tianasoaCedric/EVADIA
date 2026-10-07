@@ -96,6 +96,9 @@ export interface TypeHotel {
   image?: string | null
 }
 
+/** Disponibilité d'un hôtel pour la nuit de ce soir, calculée par l'API. */
+export type HotelDisponibilite = 'disponible' | 'complet' | 'en_pause'
+
 export interface Hotel {
   id: number
   nom: string
@@ -118,6 +121,8 @@ export interface Hotel {
   nb_avis?: number
   offre_type?: string | null
   discount?: number | null
+  /** Listes d'hôtels et favoris : ce soir ; null si l'hôtel n'a aucune chambre */
+  disponibilite?: HotelDisponibilite | null
 }
 
 /** Chambre telle que retournée dans GET /hotels/{id} */

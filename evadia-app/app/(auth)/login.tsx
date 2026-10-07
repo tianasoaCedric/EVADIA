@@ -22,14 +22,15 @@ import ErrorBanner from "../../components/atoms/ErrorBanner";
 import { Divider } from "../../components/atoms/Divider";
 import { useAuth } from "../../context/AuthContext";
 import { API_BASE_URL, TOKEN_KEY } from "../../lib/api";
+import { errorStatus, getErrorMessage } from "../../lib/parseError";
 
-const oceanBg = require("../../assets/ocean.jpg");
+const oceanBg = require("../../assets/ocean-bg.jpg");
 const evadiaLogo = require("../../assets/evadia.png");
 const googleIcon = require("../../assets/google-icon.png");
 
 export default function LoginPage() {
   const { t } = useTranslation();
-  const { login, loginWithToken } = useAuth();
+  const { login, loginWithToken, notice, clearNotice } = useAuth();
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,27 +38,32 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const fadeAnim = useRef(new Animated.Value(1)).current;
+  // Erreur de la tentative en cours, sinon raison d'une déconnexion forcée (session expirée…)
+  const shownError = error || notice || "";
 
   const handleLogin = async () => {
-    console.log('[LOGIN] handleLogin called, email:', email);
     setError("");
+    clearNotice();
     if (!email || !password) {
       setError(t('Login.error_missing_fields'));
       return;
     }
     setLoading(true);
     try {
-      console.log('[LOGIN] calling login()');
       await login(email, password);
-      console.log('[LOGIN] login() done');
       // AuthContext met à jour state → _layout.tsx redirige automatiquement
     } catch (err: any) {
-      console.log('[LOGIN] error:', JSON.stringify(err?.response?.data), 'status:', err?.response?.status, 'message:', err?.message);
-      const msg =
-        err?.response?.data?.message ||
-        err?.response?.data?.errors?.email?.[0] ||
-        t('Login.error_invalid_credentials');
-      setError(msg);
+      const serverMessage: string = err?.response?.data?.message ?? "";
+      if (errorStatus(err) === 422 && /identifiants/i.test(serverMessage)) {
+        setError(t('Login.error_invalid_credentials'));
+      } else {
+        setError(
+          getErrorMessage(err, {
+            403: t('Login.error_not_client'),
+            429: t('Login.error_too_many_attempts'),
+          })
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -65,6 +71,7 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     setError("");
+    clearNotice();
     setLoading(true);
     try {
       // Ouvre le navigateur système sur la page Google OAuth du backend
@@ -102,8 +109,8 @@ export default function LoginPage() {
       await SecureStore.setItemAsync(TOKEN_KEY, token);
       await loginWithToken();
       // AuthContext met à jour state → _layout.tsx redirige vers /(app)/home
-    } catch {
-      setError(t('Login.error_generic'));
+    } catch (err) {
+      setError(getErrorMessage(err, { default: t('Login.error_google_failed') }));
     } finally {
       setLoading(false);
     }
@@ -156,7 +163,7 @@ export default function LoginPage() {
 
                   <Text className="text-3xl font-bold text-center text-white mb-6">{t('Login.title')}</Text>
 
-                  {error ? <ErrorBanner message={error} /> : null}
+                  {shownError ? <ErrorBanner message={shownError} /> : null}
 
                   <View style={{ width: 353, gap: 12, marginTop: 12 }}>
                     {/* Email */}
@@ -276,6 +283,11 @@ export default function LoginPage() {
                     }}
                   >
                     <View style={{ width: 353, alignItems: "center" }}>
+                      {shownError ? (
+                        <View style={{ width: "100%", marginBottom: 14 }}>
+                          <ErrorBanner message={shownError} />
+                        </View>
+                      ) : null}
                       <TouchableOpacity
                         style={{
                           backgroundColor: "#01BDA5",

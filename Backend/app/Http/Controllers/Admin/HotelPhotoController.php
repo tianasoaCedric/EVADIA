@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Support\Media;
 use App\Http\Controllers\Controller;
 use App\Models\Hotel;
 use App\Models\Photo;
@@ -24,7 +25,7 @@ class HotelPhotoController extends Controller
         $hasPrincipale = $hotel->photos()->where('est_principale', true)->exists();
 
         foreach ($request->file('photos') as $index => $photo) {
-            $path = $photo->store("hotels/{$hotel->id}", 's3');
+            $path = Media::storeImage($photo, "hotels/{$hotel->id}");
             if (! $path) {
                 return back()->with('error', "Échec de l'upload. Vérifiez la configuration du stockage.");
             }
@@ -52,7 +53,7 @@ class HotelPhotoController extends Controller
         $s3Path = str_starts_with($photo->url_photo, 'http')
             ? ltrim(parse_url($photo->url_photo, PHP_URL_PATH), '/')
             : $photo->url_photo;
-        Storage::disk('s3')->delete($s3Path);
+        Media::delete($s3Path);
 
         $photo->delete();
 

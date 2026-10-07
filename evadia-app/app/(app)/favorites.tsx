@@ -7,6 +7,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { HotelCard } from '../../components/molecules/HotelCard';
 import { Header } from '../../components/molecules/Header';
 import { clientService, Favori } from '../../services/client';
+import { loadErrorMessage, showError } from '../../lib/parseError';
 import { hotelPhoto, hotelPhotos, hotelPrix, hotelNote, hotelVille } from '../../services/public';
 import { useDevise } from '../../context/DeviseContext';
 
@@ -20,13 +21,19 @@ export default function FavoritesScreen() {
   const [favoris, setFavoris] = useState<Favori[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+
+  const query = search.trim().toLowerCase();
+  const filteredFavoris = favoris.filter((f) =>
+    `${f.hotel.nom ?? ''} ${hotelVille(f.hotel)}`.toLowerCase().includes(query)
+  );
 
   const loadFavoris = () => {
     setLoading(true);
     setError(null);
     clientService.getFavorites()
       .then((data) => setFavoris(Array.isArray(data) ? data : []))
-      .catch((e: any) => setError(e?.message ?? t('Favorites.load_error')))
+      .catch((e: any) => setError(loadErrorMessage(e, t('Favorites.load_error'))))
       .finally(() => setLoading(false));
   };
 
@@ -40,12 +47,14 @@ export default function FavoritesScreen() {
     try {
       await clientService.removeFavorite(hotelId);
       setFavoris((prev) => prev.filter((f) => f.hotel.id !== hotelId));
-    } catch {}
+    } catch (err) {
+      showError(t('Favorites.toggle_error_title'), err, { default: t('Favorites.remove_error') });
+    }
   };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top']}>
-      <Header />
+      <Header searchValue={search} onSearchChange={setSearch} />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -80,9 +89,16 @@ export default function FavoritesScreen() {
               {t('Favorites.empty')}
             </Text>
           </View>
+        ) : filteredFavoris.length === 0 ? (
+          <View style={{ alignItems: 'center', paddingTop: 60, paddingHorizontal: 32 }}>
+            <Ionicons name="search-outline" size={52} color="#e5e7eb" />
+            <Text style={{ color: '#9ca3af', marginTop: 12, fontFamily: 'Outfit_600SemiBold', fontSize: 15, textAlign: 'center' }}>
+              {t('Favorites.no_results', { query: search.trim() })}
+            </Text>
+          </View>
         ) : (
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 18, justifyContent: 'space-between' }}>
-            {favoris.map((favori) => {
+            {filteredFavoris.map((favori) => {
               const h = favori.hotel;
               const prix = hotelPrix(h, devise);
               const note = hotelNote(h);
@@ -92,6 +108,7 @@ export default function FavoritesScreen() {
               return (
               <HotelCard
                 key={favori.id}
+                availability={h.disponibilite}
                 name={h.nom}
                 price={prix ? `${prix.toLocaleString('fr-FR')}${symbole}/nuité` : ''}
                 rating={note}
@@ -108,7 +125,6 @@ export default function FavoritesScreen() {
                       location: ville,
                       rating: note.toString(),
                       imageUris: JSON.stringify(photos),
-                      from: 'favorites',
                     },
                   })
                 }

@@ -2,12 +2,14 @@ import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Animated, Dimensions, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Animated, Dimensions, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { AppImage, prefetchImages } from '../../components/atoms/AppImage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RoomCard } from '../../components/molecules/RoomCard';
 import { publicService, Hotel, Propriete, hotelVille, hotelPhotos, hotelNote, proprietePrix, proprietePhotos } from '../../services/public';
 import { clientService } from '../../services/client';
 import { useDevise } from '../../context/DeviseContext';
+import { loadErrorMessage, showError } from '../../lib/parseError';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const IMAGE_HEIGHT = Math.round(screenHeight * 0.42);
@@ -38,9 +40,6 @@ export default function HotelDetailScreen() {
   const hotelId = params.id ? Number(params.id) : null;
   const hotelName = (params.name as string) || t('HotelDetail.default_hotel_name');
   const hotelLocation = (params.location as string) || '';
-  const fromVilleId = params.fromVilleId ? Number(params.fromVilleId) : null;
-  const fromVilleName = (params.fromVilleName as string) || '';
-  const from = (params.from as string) || '';
   const hotelRating = parseFloat((params.rating as string) || '0');
   const paramImageUris: string[] = params.imageUris
     ? JSON.parse(params.imageUris as string)
@@ -86,10 +85,15 @@ export default function HotelDetailScreen() {
     setLoadError(null);
     try {
       const data = await publicService.getHotel(id);
+      const chambres: Propriete[] = Array.isArray((data as any).chambres) ? (data as any).chambres : [];
       setHotel(data);
-      setRooms(Array.isArray((data as any).chambres) ? (data as any).chambres : []);
+      setRooms(chambres);
+      // Photos du carrousel et des chambres téléchargées en arrière-plan :
+      // faire défiler la galerie ou ouvrir une chambre ne les fait plus attendre.
+      prefetchImages([...hotelPhotos(data), ...chambres.flatMap((c) => proprietePhotos(c))], 'md');
+      prefetchImages(chambres.map((c) => proprietePhotos(c)[0]), 'sm'); // vignettes des RoomCard
     } catch (e: any) {
-      setLoadError(e?.message ?? t('HotelDetail.load_error'));
+      setLoadError(loadErrorMessage(e, t('HotelDetail.load_error'), { 404: t('HotelDetail.not_found') }));
     } finally {
       setLoading(false);
     }
@@ -105,8 +109,13 @@ export default function HotelDetailScreen() {
         await clientService.addFavorite(hotelId);
       }
       setIsFavorite(!isFavorite);
-    } catch {}
-    finally { setTogglingFav(false); }
+    } catch (err) {
+      showError(t('Favorites.toggle_error_title'), err, {
+        default: t(isFavorite ? 'Favorites.remove_error' : 'Favorites.add_error'),
+      });
+    } finally {
+      setTogglingFav(false);
+    }
   };
 
   const imageUris = hotel ? hotelPhotos(hotel) : paramImageUris;
@@ -132,21 +141,19 @@ export default function HotelDetailScreen() {
         <View style={{ width: screenWidth, height: IMAGE_HEIGHT, borderBottomLeftRadius: 35, borderBottomRightRadius: 35, overflow: 'hidden', backgroundColor: '#e5e7eb', zIndex: 10 }}>
           <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} onScroll={handleScroll} scrollEventThrottle={16} style={{ width: screenWidth, height: IMAGE_HEIGHT }}>
             {imageUris.map((uri, idx) => (
-              <Image key={idx} source={{ uri }} style={{ width: screenWidth, height: IMAGE_HEIGHT, resizeMode: 'cover' }} />
+              <AppImage
+                key={idx}
+                source={uri}
+                priority={idx === 0 ? 'high' : 'normal'}
+                style={{ width: screenWidth, height: IMAGE_HEIGHT }}
+              />
             ))}
           </ScrollView>
 
           {/* Back */}
           <TouchableOpacity activeOpacity={0.8} onPress={() => {
-            if (from === 'home') {
-              router.replace('/(app)/home');
-            } else if (from === 'favorites') {
-              router.replace('/(app)/favorites');
-            } else if (from === 'destination-detail' && fromVilleId) {
-              router.replace({ pathname: '/(app)/destination-detail', params: { villeId: fromVilleId, name: fromVilleName } });
-            } else {
-              router.back();
-            }
+            if (router.canGoBack()) router.back();
+            else router.replace('/(app)/home');
           }}
             style={{ position: 'absolute', top: 52, left: 18, zIndex: 20, width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
             <Ionicons name="chevron-back" size={30} color="#fff" style={{ textShadowColor: 'rgba(0,0,0,0.35)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 }} />

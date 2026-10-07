@@ -1,6 +1,7 @@
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import { useRef, useState } from 'react';
-import { Dimensions, Image, ScrollView, Text, TouchableOpacity, View, Animated } from 'react-native';
+import { Dimensions, ScrollView, Text, TouchableOpacity, View, Animated } from 'react-native';
+import { AppImage } from '../atoms/AppImage';
 
 interface DestinationHotelCardProps {
   name: string;
@@ -121,13 +122,10 @@ export const DestinationHotelCard = ({
               onPressOut={handlePressOut}
               style={{ width: cardWidth, height: 330 }}
             >
-              <Image
-                source={{ uri: img }}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  resizeMode: 'cover',
-                }}
+              <AppImage
+                source={img}
+                recyclingKey={img}
+                style={{ width: '100%', height: '100%' }}
               />
             </TouchableOpacity>
           ))}

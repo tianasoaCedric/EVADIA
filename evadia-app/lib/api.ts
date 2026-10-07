@@ -54,12 +54,24 @@ const injectToken = async (config: any) => {
 mobileAuthApi.interceptors.request.use(injectToken);
 api.interceptors.request.use(injectToken);
 
-// Gère les 401 : token expiré → déconnexion automatique
+// AuthContext s'abonne ici pour repasser en "unauthenticated" sur un 401 :
+// sans ça, la garde de routes renverrait sur l'accueil avec une session morte.
+type UnauthorizedListener = (error: any) => void;
+let onUnauthorized: UnauthorizedListener | null = null;
+export const setOnUnauthorized = (listener: UnauthorizedListener | null) => {
+  onUnauthorized = listener;
+};
+
+// Gère les 401 : token expiré ou compte désactivé → déconnexion automatique.
+// Les échecs de /auth/login et /auth/register (identifiants faux) restent à l'écran.
 const handle401 = async (error: any) => {
-  if (error.response?.status === 401) {
+  const url: string = error.config?.url ?? "";
+  const isAuthAttempt = /\/auth\/(login|register)$/.test(url);
+  if (error.response?.status === 401 && !isAuthAttempt) {
     inMemoryToken = null;
     await SecureStore.deleteItemAsync(TOKEN_KEY);
-    router.replace("/(auth)/login");
+    if (onUnauthorized) onUnauthorized(error);
+    else router.replace("/(auth)/login");
   }
   return Promise.reject(error);
 };

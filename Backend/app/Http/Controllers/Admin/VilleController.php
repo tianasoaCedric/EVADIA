@@ -51,12 +51,12 @@ class VilleController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('villes', 's3');
+            $validated['image'] = Media::storeImage($request->file('image'), 'villes');
         }
 
         if ($request->hasFile('couverture')) {
             $validated['couverture'] = array_map(
-                fn ($file) => $file->store('villes/couverture', 's3'),
+                fn ($file) => Media::storeImage($file, 'villes/couverture'),
                 $request->file('couverture')
             );
         }
@@ -94,12 +94,12 @@ class VilleController extends Controller
             if ($ville->image) {
                 Media::delete($ville->image);
             }
-            $validated['image'] = $request->file('image')->store('villes', 's3');
+            $validated['image'] = Media::storeImage($request->file('image'), 'villes');
         }
 
         if ($request->hasFile('couverture')) {
             $nouvelles = array_map(
-                fn ($file) => $file->store('villes/couverture', 's3'),
+                fn ($file) => Media::storeImage($file, 'villes/couverture'),
                 $request->file('couverture')
             );
             $validated['couverture'] = array_merge($ville->couverture ?? [], $nouvelles);

@@ -161,7 +161,7 @@ export default function HebergementName({ categoryId, categoryName, initialData,
                                                 name={hotel.nom}
                                                 ville={hotel.adresse?.ville}
                                                 adresse={hotel.adresse?.adresse_ligne1}
-                                                availability="Disponible"
+                                                disponibilite={hotel.disponibilite}
                                                 price={hotel.prix_min ?? 0}
                                                 prixMga={hotel.prix_min_mga}
                                                 prixEur={hotel.prix_min_eur}

@@ -63,6 +63,7 @@ export const clientService = {
     date_fin: string;
     nb_adultes: number;
     code_promo?: string;
+    devise?: "MGA" | "EUR";
   }): Promise<Reservation> {
     const res = await api.post("/client/reservations", data);
     return res.data;
@@ -100,12 +101,22 @@ export const clientService = {
     return Array.isArray(res.data) ? res.data : res.data.data ?? [];
   },
 
+  // Idempotents : « déjà en favori » (409) et « déjà retiré » (404) donnent
+  // l'état voulu, ce ne sont pas des erreurs pour l'utilisateur.
   async addFavorite(hotelId: number): Promise<void> {
-    await api.post("/client/favorites", { hotel_id: hotelId });
+    try {
+      await api.post("/client/favorites", { hotel_id: hotelId });
+    } catch (err: any) {
+      if (err?.response?.status !== 409) throw err;
+    }
   },
 
   async removeFavorite(hotelId: number): Promise<void> {
-    await api.delete(`/client/favorites/${hotelId}`);
+    try {
+      await api.delete(`/client/favorites/${hotelId}`);
+    } catch (err: any) {
+      if (err?.response?.status !== 404) throw err;
+    }
   },
 
   async getMyReviews(): Promise<Avis[]> {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Hotel;
 
+use App\Support\Media;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Hotel\Traits\BelongsToHotel;
 use App\Models\HotelStatut;
@@ -35,9 +36,9 @@ class ProfileController extends Controller
 
         if ($request->hasFile('avatar')) {
             if ($user->avatar_url) {
-                Storage::disk('s3')->delete($user->avatar_url);
+                Media::delete($user->avatar_url);
             }
-            $data['avatar_url'] = $request->file('avatar')->store('avatars', 's3');
+            $data['avatar_url'] = Media::storeImage($request->file('avatar'), 'avatars');
         }
 
         $user->update($data);

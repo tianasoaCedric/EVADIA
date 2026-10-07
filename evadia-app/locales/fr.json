@@ -3,8 +3,11 @@
     "retry": "Réessayer",
     "cancel": "Annuler",
     "ok": "OK",
-    "search": "Rechercher",
-    "error_generic": "Une erreur est survenue."
+    "search": "Recherche",
+    "error_generic": "Une erreur est survenue.",
+    "confirm": "Confirmer",
+    "loading": "Chargement...",
+    "close": "Fermer"
   },
   "Profile": {
     "title": "Profil",
@@ -24,14 +27,6 @@
     "version": "Version",
     "logout": "Se Deconnecter"
   },
-  "Common": {
-    "search": "Recherche",
-    "retry": "Réessayer",
-    "cancel": "Annuler",
-    "confirm": "Confirmer",
-    "loading": "Chargement...",
-    "error_generic": "Une erreur est survenue."
-  },
   "Login": {
     "back": "Retour",
     "tagline": "Trouvez l'hôtel parfait pour vous !",
@@ -45,11 +40,12 @@
     "or": "ou",
     "no_account_short": "Vous n'avez pas de compte ? ",
     "error_missing_fields": "Veuillez saisir votre email et mot de passe.",
-    "error_invalid_credentials": "Identifiants incorrects.",
+    "error_invalid_credentials": "Email ou mot de passe incorrect.",
     "error_not_client": "Ce compte n'est pas un compte client.",
     "error_google_failed": "La connexion Google a échoué. Réessayez.",
     "error_no_token": "Token non reçu. Réessayez.",
-    "error_generic": "Une erreur est survenue. Réessayez."
+    "error_generic": "Une erreur est survenue. Réessayez.",
+    "error_too_many_attempts": "Trop de tentatives de connexion. Patientez une minute avant de réessayer."
   },
   "Register": {
     "tagline": "Trouvez l'hôtel parfait pour vous !",
@@ -64,7 +60,8 @@
     "login": "Se connecter",
     "error_missing_fields": "Veuillez remplir tous les champs.",
     "error_password_min": "Le mot de passe doit contenir au moins 8 caractères.",
-    "error_generic": "Une erreur est survenue."
+    "error_generic": "Une erreur est survenue.",
+    "error_too_many_attempts": "Trop de tentatives d'inscription. Patientez une minute avant de réessayer."
   },
   "Contact": {
     "title": "Contactez-nous !",
@@ -102,16 +99,22 @@
   "Favorites": {
     "title": "Vos Favoris",
     "empty": "Aucun favori pour l'instant",
-    "load_error": "Impossible de charger les favoris."
+    "load_error": "Impossible de charger les favoris.",
+    "no_results": "Aucun favori trouvé pour \"{{query}}\"",
+    "toggle_error_title": "Favoris",
+    "add_error": "Impossible d'ajouter cet hôtel à vos favoris.",
+    "remove_error": "Impossible de retirer cet hôtel de vos favoris."
   },
   "Destination": {
     "title": "Trouvez votre destination",
-    "no_results": "Aucune destination trouvée pour \"{{query}}\""
+    "no_results": "Aucune destination trouvée pour \"{{query}}\"",
+    "load_error": "Impossible de charger les destinations."
   },
   "DestinationDetail": {
     "default_title": "Destination",
     "no_hotels": "Aucun hôtel trouvé",
-    "price_on_request": "Prix sur demande"
+    "price_on_request": "Prix sur demande",
+    "load_error": "Impossible de charger les hôtels de cette destination."
   },
   "HotelDetail": {
     "default_hotel_name": "Hôtel",
@@ -128,7 +131,8 @@
     "equip_parking": "Parking",
     "equip_ac": "Climatisation",
     "equip_restaurant": "Restaurant",
-    "equip_security": "Sécurité 24h"
+    "equip_security": "Sécurité 24h",
+    "not_found": "Cet hôtel n'existe plus ou n'est plus disponible."
   },
   "ProprieterDetail": {
     "default_room_name": "Chambre de Luxe",
@@ -176,7 +180,16 @@
     "month_september": "Septembre",
     "month_october": "Octobre",
     "month_november": "Novembre",
-    "month_december": "Décembre"
+    "month_december": "Décembre",
+    "room_unavailable": "Cette chambre n'existe plus ou n'est plus proposée.",
+    "dates_unavailable": "Ces dates ne sont plus disponibles. Choisissez d'autres dates.",
+    "offer_invalid": "Cette offre n'est plus applicable à votre réservation.",
+    "select_dates": "Choisissez vos dates",
+    "pick_check_in": "Choisissez votre date d'arrivée",
+    "pick_check_out": "Choisissez votre date de départ",
+    "legend_unavailable": "Plus disponible",
+    "legend_selected": "Sélectionné",
+    "checkout_possible": "Plus disponible cette nuit — départ possible ce jour-là"
   },
   "Offers": {
     "title": "Offres Exclusives",
@@ -195,7 +208,8 @@
     "timeAgoJustNow": "à l'instant",
     "timeAgoMinutes": "il y a {{count}} min",
     "timeAgoHours": "il y a {{count}} h",
-    "timeAgoDays": "il y a {{count}} j"
+    "timeAgoDays": "il y a {{count}} j",
+    "mark_all_error": "Impossible de marquer les notifications comme lues."
   },
   "Header": {
     "category_luxury_hotel": "Hotel de Luxe",
@@ -211,7 +225,9 @@
     "reserve": "Reserver"
   },
   "HotelCard": {
-    "availability": "Disponibilité"
+    "availability_disponible": "Disponible",
+    "availability_complet": "Complet ce soir",
+    "availability_en_pause": "Fermé temporairement"
   },
   "Reservations": {
     "title": "Vos réservations",
@@ -238,6 +254,33 @@
     "messages_empty": "Aucun message pour l'instant. Envoyez le premier !",
     "messages_placeholder": "Écrire un message...",
     "messages_closed": "Cette conversation est clôturée.",
-    "messages_error_title": "Erreur d'envoi"
+    "messages_error_title": "Erreur d'envoi",
+    "not_found": "Cette réservation est introuvable.",
+    "cancel_not_allowed": "Cette réservation ne peut plus être annulée.",
+    "messages_load_error": "Impossible de charger les messages.",
+    "payment_error_title": "Mode de paiement",
+    "payment_error": "Impossible d'enregistrer votre choix de paiement."
+  },
+  "Errors": {
+    "generic": "Une erreur est survenue. Réessayez.",
+    "network": "Impossible de joindre le serveur. Vérifiez votre connexion internet.",
+    "timeout": "Le serveur met trop de temps à répondre. Réessayez dans un instant.",
+    "server": "Le service est momentanément indisponible. Réessayez plus tard.",
+    "session_expired": "Votre session a expiré. Reconnectez-vous.",
+    "account_disabled": "Votre compte a été désactivé. Contactez l'équipe Evadia.",
+    "forbidden": "Vous n'avez pas accès à cette action.",
+    "not_found": "L'élément demandé est introuvable.",
+    "conflict": "Cette action n'est plus possible.",
+    "invalid": "Certaines informations sont invalides.",
+    "too_many_requests": "Trop de tentatives. Patientez une minute avant de réessayer.",
+    "email_taken": "Cette adresse email est déjà utilisée.",
+    "value_taken": "Cette valeur est déjà utilisée.",
+    "email_invalid": "L'adresse email n'est pas valide.",
+    "password_min": "Le mot de passe doit contenir au moins {{min}} caractères.",
+    "too_short": "Ce champ doit contenir au moins {{min}} caractères.",
+    "too_long": "Un des champs est trop long.",
+    "password_mismatch": "Les mots de passe ne correspondent pas.",
+    "field_required": "Veuillez remplir tous les champs obligatoires.",
+    "invalid_dates": "Les dates choisies ne sont pas valides."
   }
 }

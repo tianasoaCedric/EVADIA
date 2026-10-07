@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Client;
 use App\Http\Controllers\Controller;
 use App\Models\Favori;
 use App\Models\Hotel;
+use App\Services\DisponibiliteService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
@@ -39,7 +40,7 @@ class FavoriController extends Controller
             new OA\Response(response: 401, description: 'Non authentifié'),
         ]
     )]
-    public function index(): JsonResponse
+    public function index(DisponibiliteService $disponibilites): JsonResponse
     {
         $favoris = Favori::with([
                 'hotel' => fn($q) => $q->with([
@@ -52,7 +53,9 @@ class FavoriController extends Controller
             ->latest('created_at')
             ->get();
 
-        $data = $favoris->map(function ($favori) {
+        $statuts = $disponibilites->statutsHotelsCeSoir($favoris->pluck('hotel_id')->filter()->unique()->values()->all());
+
+        $data = $favoris->map(function ($favori) use ($statuts) {
             $hotel     = $favori->hotel;
             $photo     = $hotel?->photos->first();
             $proprietes = $hotel?->proprietes ?? collect();
@@ -71,6 +74,8 @@ class FavoriController extends Controller
                     'prix_min_mga'     => $proprietes->min(fn($p) => $p->currentPrix?->prix_mga),
                     'prix_min_eur'     => $proprietes->min(fn($p) => $p->currentPrix?->prix_eur),
                     'adresse'          => $hotel->adresse,
+                    // Ce soir : disponible | complet | en_pause (null : aucune chambre)
+                    'disponibilite'    => $statuts[$hotel->id] ?? null,
                 ] : null,
             ];
         });

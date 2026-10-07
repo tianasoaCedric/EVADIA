@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Public;
 use App\Http\Controllers\Controller;
 use App\Models\Destination;
 use App\Models\Hotel;
+use App\Services\DisponibiliteService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -185,7 +186,7 @@ class VilleController extends Controller
         }
 
         $hotels = $query->paginate(12);
-        $hotels->getCollection()->transform(fn($h) => $this->formatHotel($h));
+        $hotels->setCollection($this->formatHotels($hotels->getCollection()));
 
         return response()->json($hotels);
     }
@@ -242,17 +243,20 @@ class VilleController extends Controller
         }
 
         $hotels = $query->paginate(12);
-        $hotels->getCollection()->transform(fn($h) => $this->formatHotel($h));
+        $hotels->setCollection($this->formatHotels($hotels->getCollection()));
 
         return response()->json($hotels);
     }
 
+    /** Formate une liste d'hôtels avec leur disponibilité de ce soir (calcul groupé). */
     private function formatHotels(\Illuminate\Support\Collection $hotels): \Illuminate\Support\Collection
     {
-        return $hotels->map(fn($h) => $this->formatHotel($h));
+        $statuts = app(DisponibiliteService::class)->statutsHotelsCeSoir($hotels->pluck('id')->all());
+
+        return $hotels->map(fn($h) => $this->formatHotel($h, $statuts[$h->id] ?? null));
     }
 
-    private function formatHotel(Hotel $hotel): array
+    private function formatHotel(Hotel $hotel, ?string $disponibilite = null): array
     {
         $proprietes = $hotel->proprietes()
             ->whereHas('currentPrix')
@@ -280,6 +284,8 @@ class VilleController extends Controller
             'prix_min_eur'     => $prixMinEur,
             'note_moyenne'     => $noteMoyenne ? round($noteMoyenne, 1) : null,
             'nb_avis'          => $hotel->proprietes()->withCount('avis')->get()->sum('avis_count'),
+            // Ce soir : disponible | complet | en_pause (null : aucune chambre)
+            'disponibilite'    => $disponibilite,
         ];
     }
 }

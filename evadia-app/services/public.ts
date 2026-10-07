@@ -3,6 +3,9 @@ import { api } from "../lib/api";
 // ── Types bruts de l'API ───────────────────────────────────────────────────
 // Les champs correspondent exactement à ce que le backend retourne.
 
+/** Disponibilité d'un hôtel pour la nuit de ce soir, calculée par l'API. */
+export type HotelAvailability = "disponible" | "complet" | "en_pause";
+
 export interface Hotel {
   id: number;
   // liste : "nom", détail : "hotel.nom"
@@ -21,6 +24,8 @@ export interface Hotel {
   note_moyenne?: string | number | null;
   nb_avis?: number;
   exige_acompte?: boolean;
+  /** Ce soir (listes /hotels et favoris) ; null si l'hôtel n'a aucune chambre */
+  disponibilite?: HotelAvailability | null;
   pourcentage_acompte?: string | number | null;
   // détail seulement
   chambres?: Propriete[];
@@ -192,6 +197,15 @@ export const publicService = {
   async getPropriete(id: number): Promise<Propriete> {
     const res = await api.get(`/proprietes/${id}`);
     return res.data;
+  },
+
+  /**
+   * Nuits plus disponibles d'une chambre sur 12 mois (complètes, fermées, hôtel en pause),
+   * au format AAAA-MM-JJ — GET /proprietes/{id}/disponibilites.
+   */
+  async getBookedDates(id: number): Promise<string[]> {
+    const res = await api.get(`/proprietes/${id}/disponibilites`);
+    return Array.isArray(res.data?.dates_reservees) ? res.data.dates_reservees : [];
   },
 
   async getDestinations(): Promise<Destination[]> {

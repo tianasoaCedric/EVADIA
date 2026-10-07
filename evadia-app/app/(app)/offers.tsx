@@ -3,9 +3,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Dimensions, ImageBackground, Platform, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Dimensions, Platform, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { AppImage } from '../../components/atoms/AppImage';
 import { OffersCard } from '../../components/molecules/OffersCard';
 import { publicService, Offre } from '../../services/public';
+import { notificationService } from '../../services/notifications';
+import { loadErrorMessage } from '../../lib/parseError';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const HEADER_HEIGHT = Math.round(screenHeight * 0.35);
@@ -29,19 +32,21 @@ export default function OffersScreen() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const loadOffres = () => {
     setLoading(true);
     setError(null);
     publicService.getOffres()
       .then((data) => setOffres(Array.isArray(data) ? data : []))
-      .catch((e: any) => setError(e?.message ?? t('Offers.load_error')))
+      .catch((e: any) => setError(loadErrorMessage(e, t('Offers.load_error'))))
       .finally(() => setLoading(false));
   };
 
   useFocusEffect(
     useCallback(() => {
       loadOffres();
+      notificationService.getUnreadCount().then(setUnreadCount).catch(() => {});
     }, [])
   );
 
@@ -56,11 +61,12 @@ export default function OffersScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
         style={{ flex: 1 }}
       >
-        <ImageBackground
-          source={{ uri: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800' }}
-          style={{ width: screenWidth, height: HEADER_HEIGHT }}
-          imageStyle={{ borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }}
-        >
+        <View style={{ width: screenWidth, height: HEADER_HEIGHT }}>
+          <AppImage
+            source="https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800"
+            priority="high"
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }}
+          />
           <LinearGradient
             colors={['rgba(0,0,0,0.45)', 'rgba(1,189,165,0.2)', '#01BDA5']}
             locations={[0, 0.6, 1]}
@@ -80,9 +86,30 @@ export default function OffersScreen() {
                 </View>
                 <TouchableOpacity
                   activeOpacity={0.8}
+                  onPress={() => router.push('/(app)/notifications')}
                   style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: '#ffffff', alignItems: 'center', justifyContent: 'center', marginLeft: 12, elevation: 2 }}
                 >
                   <Ionicons name="notifications-outline" size={22} color="#000000" />
+                  {unreadCount > 0 && (
+                    <View
+                      style={{
+                        position: 'absolute',
+                        top: 6,
+                        right: 6,
+                        minWidth: 16,
+                        height: 16,
+                        borderRadius: 8,
+                        paddingHorizontal: 3,
+                        backgroundColor: '#ff2d55',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Text style={{ fontSize: 10, fontFamily: 'Outfit_800ExtraBold', color: '#fff' }}>
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </Text>
+                    </View>
+                  )}
                 </TouchableOpacity>
               </View>
 
@@ -93,7 +120,7 @@ export default function OffersScreen() {
               </View>
             </SafeAreaView>
           </LinearGradient>
-        </ImageBackground>
+        </View>
 
         <View style={{ alignSelf: 'flex-start', marginLeft: 18, marginTop: 22, marginBottom: 18 }}>
           <View style={{ borderBottomWidth: 1, borderBottomColor: '#374151', paddingBottom: 2 }}>

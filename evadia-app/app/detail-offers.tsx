@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, Image, TouchableOpacity, Dimensions, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Dimensions, Platform } from 'react-native';
+import { AppImage } from '../components/atoms/AppImage';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -39,10 +40,7 @@ export default function DetailOffersScreen() {
             position: 'relative',
           }}
         >
-          <Image
-            source={{ uri: imageUri }}
-            style={{ width: '100%', height: '100%', resizeMode: 'cover' }}
-          />
+          <AppImage source={imageUri} priority="high" style={{ width: '100%', height: '100%' }} />
 
           {/* Bouton retour ← en haut à gauche */}
           <TouchableOpacity

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Hotel;
 
+use App\Support\Media;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Hotel\Traits\BelongsToHotel;
 use App\Models\AvantageOffre;
@@ -105,7 +106,7 @@ class HotelOffreController extends Controller
             }
 
             if ($request->hasFile('photo')) {
-                $path = $request->file('photo')->store("offres/{$offre->id}", 's3');
+                $path = Media::storeImage($request->file('photo'), "offres/{$offre->id}");
                 Photo::create([
                     'entite_type'    => 'offre',
                     'entite_id'      => $offre->id,

@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,6 +8,7 @@ import { Header } from '../../components/molecules/Header';
 import { publicService, Hotel, hotelVille, hotelPhoto, hotelPrix, hotelNote } from '../../services/public';
 import { clientService } from '../../services/client';
 import { useDevise } from '../../context/DeviseContext';
+import { loadErrorMessage, showError } from '../../lib/parseError';
 import { router, useFocusEffect } from 'expo-router';
 
 interface CitySection {
@@ -24,6 +25,13 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('Tous');
+  const [search, setSearch] = useState('');
+  // Dernière recherche envoyée à l'API : sert au rechargement au focus
+  // et à ignorer les réponses d'une recherche déjà dépassée.
+  const searchRef = useRef('');
+  const isFirstSearch = useRef(true);
+
+  const hotelParams = (q: string) => ({ per_page: 20, ...(q ? { search: q } : {}) });
 
   useFocusEffect(
     useCallback(() => {
@@ -37,7 +45,7 @@ export default function HomePage() {
     try {
       const [types, allHotels, favs] = await Promise.all([
         publicService.getTypesHotels().catch(() => []),
-        publicService.getHotels({ per_page: 20 }),
+        publicService.getHotels(hotelParams(searchRef.current)),
         clientService.getFavorites().catch(() => []),
       ]);
 
@@ -45,11 +53,34 @@ export default function HomePage() {
       setHotels(allHotels);
       setFavoriteIds(new Set(favs.map((f) => f.hotel.id)));
     } catch (e: any) {
-      setError(e?.message ?? t('Home.load_error'));
+      setError(loadErrorMessage(e, t('Home.load_error')));
     } finally {
       setLoading(false);
     }
   };
+
+  // Recherche par nom d'hôtel côté API, 300 ms après la dernière frappe.
+  useEffect(() => {
+    if (isFirstSearch.current) {
+      isFirstSearch.current = false;
+      return;
+    }
+    const q = search.trim();
+    const timer = setTimeout(async () => {
+      searchRef.current = q;
+      setLoading(true);
+      setError(null);
+      try {
+        const result = await publicService.getHotels(hotelParams(q));
+        if (searchRef.current === q) setHotels(result);
+      } catch (e: any) {
+        if (searchRef.current === q) setError(loadErrorMessage(e, t('Home.load_error')));
+      } finally {
+        if (searchRef.current === q) setLoading(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const filteredHotels = hotels.filter((hotel) => {
     if (selectedCategory === 'Tous') return true;
@@ -78,7 +109,10 @@ export default function HomePage() {
       } else {
         await clientService.removeFavorite(hotelId);
       }
-    } catch {
+    } catch (err) {
+      showError(t('Favorites.toggle_error_title'), err, {
+        default: t(newState ? 'Favorites.add_error' : 'Favorites.remove_error'),
+      });
       setFavoriteIds((prev) => {
         const next = new Set(prev);
         if (newState) next.delete(hotelId); else next.add(hotelId);
@@ -93,6 +127,8 @@ export default function HomePage() {
         categories={categories.length > 0 ? categories : undefined}
         defaultCategory="Tous"
         onCategoryChange={setSelectedCategory}
+        searchValue={search}
+        onSearchChange={setSearch}
       />
 
       {loading ? (
@@ -143,6 +179,7 @@ export default function HomePage() {
                     <HotelCard
                       key={`${hotel.id}-${isFav}`}
                       imageUri={photo}
+                      availability={hotel.disponibilite}
                       name={hotel.nom}
                       price={prix ? `${prix.toLocaleString('fr-FR')}${symbole}/nuité` : ''}
                       rating={note}
@@ -156,7 +193,6 @@ export default function HomePage() {
                             location: ville,
                             rating: note.toString(),
                             imageUris: JSON.stringify([photo]),
-                            from: 'home',
                           },
                         })
                       }

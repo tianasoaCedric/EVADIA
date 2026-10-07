@@ -16,9 +16,10 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import ErrorBanner from "../../components/atoms/ErrorBanner";
+import { getErrorMessage } from "../../lib/parseError";
 import { useAuth } from "../../context/AuthContext";
 
-const oceanBg = require("../../assets/ocean.jpg");
+const oceanBg = require("../../assets/ocean-bg.jpg");
 const evadiaLogo = require("../../assets/evadia.png");
 const googleIcon = require("../../assets/google-icon.png");
 
@@ -48,11 +49,12 @@ export default function RegisterScreen() {
       await register({ nom, prenom, email, password, password_confirmation: password });
       // AuthContext met à jour state → _layout.tsx redirige automatiquement
     } catch (err: any) {
-      const errors = err?.response?.data?.errors;
-      const msg = errors
-        ? Object.values(errors).flat().join("\n")
-        : err?.response?.data?.message || t('Register.error_generic');
-      setError(msg);
+      setError(
+        getErrorMessage(err, {
+          429: t('Register.error_too_many_attempts'),
+          default: t('Register.error_generic'),
+        })
+      );
     } finally {
       setLoading(false);
     }

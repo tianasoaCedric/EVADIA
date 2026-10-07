@@ -1,7 +1,6 @@
 import {
   Alert,
   Dimensions,
-  Image,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -10,21 +9,26 @@ import {
   BackHandler,
   Modal,
 } from 'react-native';
-import { useState, useEffect, useRef } from 'react';
-import { useLocalSearchParams, router } from 'expo-router';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useLocalSearchParams, useNavigation, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { clientService } from '../../services/client';
+import { publicService } from '../../services/public';
+import { nightsBetween, startOfToday, toIsoDate } from '../../lib/dates';
 import { useDevise } from '../../context/DeviseContext';
+import { AppImage } from '../../components/atoms/AppImage';
+import { getErrorMessage, showError } from '../../lib/parseError';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const IMAGE_HEIGHT = Math.round(screenHeight * 0.42);
 
 export default function ProprieterDetailScreen() {
   const { t } = useTranslation();
-  const { symbole } = useDevise();
+  const { symbole, devise } = useDevise();
   const params = useLocalSearchParams();
+  const navigation = useNavigation();
   const roomId = params.id ? Number(params.id) : null;
   const roomName = (params.name as string) || t('ProprieterDetail.default_room_name');
   const roomPrice = (params.price as string) || '225.000Ariary/nuit';
@@ -96,13 +100,57 @@ export default function ProprieterDetailScreen() {
   // Parser le prix numérique pour le calcul dynamique
   const numericPricePerNight = parseInt(rawPriceText.replace(/[^0-9]/g, ''), 10) || 225000;
 
-  // États pour les dates de réservation
-  const [checkInDate, setCheckInDate] = useState<Date>(new Date(2026, 0, 1));
-  const [checkOutDate, setCheckOutDate] = useState<Date>(new Date(2026, 0, 3));
+  // ── Dates du séjour : même logique que le calendrier du site (frontend Reservation.tsx) ──
+  // Un séjour occupe les nuits [arrivée, départ[ : le jour du départ n'est pas occupé.
+  const [checkInDate, setCheckInDate] = useState<Date | null>(null);
+  const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [activePickerType, setActivePickerType] = useState<'in' | 'out'>('in');
-  const [calendarMonth, setCalendarMonth] = useState(0); // 0 = Janvier
-  const [calendarYear, setCalendarYear] = useState(2026);
+  const [calendarMonth, setCalendarMonth] = useState(() => new Date().getMonth());
+  const [calendarYear, setCalendarYear] = useState(() => new Date().getFullYear());
+  // Nuits plus disponibles (complètes, fermées, hôtel en pause), en date locale AAAA-MM-JJ
+  const [bookedDates, setBookedDates] = useState<string[]>([]);
+
+  const loadBookedDates = useCallback(() => {
+    if (!roomId) return;
+    // Sans ces dates, le serveur refusera quand même une nuit complète (409) : pas d'alerte ici
+    publicService.getBookedDates(roomId).then(setBookedDates).catch(() => setBookedDates([]));
+  }, [roomId]);
+
+  // Nouvelle chambre (l'écran reste monté entre deux chambres) : on repart de zéro
+  useEffect(() => {
+    setCheckInDate(null);
+    setCheckOutDate(null);
+    setIsBooking(false);
+    setBookedDates([]);
+    setCalendarMonth(new Date().getMonth());
+    setCalendarYear(new Date().getFullYear());
+    loadBookedDates();
+  }, [roomId, loadBookedDates]);
+
+  const bookedSet = useMemo(() => new Set(bookedDates), [bookedDates]);
+  const today = startOfToday();
+  const isDatePast = (date: Date) => date < today;
+  const isDateBooked = (date: Date) => bookedSet.has(toIsoDate(date));
+
+  // Arrivée choisie, départ en attente : le séjour ne peut pas enjamber une nuit
+  // indisponible, mais on peut partir le matin d'une nuit indisponible.
+  const choosingCheckOut = !!checkInDate && !checkOutDate;
+  const checkOutLimit = useMemo(() => {
+    if (!checkInDate || checkOutDate) return null;
+    const from = toIsoDate(checkInDate);
+    return [...bookedSet].filter((d) => d > from).sort()[0] ?? null;
+  }, [bookedSet, checkInDate, checkOutDate]);
+
+  const isValidCheckOut = (date: Date) =>
+    choosingCheckOut && date > checkInDate! && (checkOutLimit === null || toIsoDate(date) <= checkOutLimit);
+
+  const isDateUnavailable = (date: Date) => isDatePast(date) || (isDateBooked(date) && !isValidCheckOut(date));
+
+  const isSameDay = (a: Date | null, b: Date) => !!a && a.toDateString() === b.toDateString();
+  const isSelectedDay = (date: Date) => isSameDay(checkInDate, date) || isSameDay(checkOutDate, date);
+  const isDateInRange = (date: Date) =>
+    !!checkInDate && !!checkOutDate && date > checkInDate && date < checkOutDate;
+  const isBeyondLimit = (date: Date) => choosingCheckOut && !!checkOutLimit && toIsoDate(date) > checkOutLimit;
 
   const MONTH_NAMES = [
     t('ProprieterDetail.month_january'), t('ProprieterDetail.month_february'), t('ProprieterDetail.month_march'),
@@ -120,42 +168,53 @@ export default function ProprieterDetailScreen() {
     return day === 0 ? 6 : day - 1; // Ajuster pour Lundi = 0
   };
 
-  const openDatePicker = (type: 'in' | 'out') => {
-    setActivePickerType(type);
-    const dateToUse = type === 'in' ? checkInDate : checkOutDate;
-    setCalendarMonth(dateToUse.getMonth());
-    setCalendarYear(dateToUse.getFullYear());
+  // Le calendrier s'ouvre sur le mois de l'arrivée choisie, sinon sur le mois courant
+  const openDatePicker = () => {
+    const ref = checkInDate ?? new Date();
+    setCalendarMonth(ref.getMonth());
+    setCalendarYear(ref.getFullYear());
     setShowDatePicker(true);
   };
 
-  const selectDay = (day: number) => {
-    const selected = new Date(calendarYear, calendarMonth, day);
-    if (activePickerType === 'in') {
-      setCheckInDate(selected);
-      if (selected >= checkOutDate) {
-        const nextDay = new Date(selected);
-        nextDay.setDate(selected.getDate() + 1);
-        setCheckOutDate(nextDay);
-      }
-    } else {
-      if (selected <= checkInDate) {
-        const prevDay = new Date(selected);
-        prevDay.setDate(selected.getDate() - 1);
-        setCheckInDate(prevDay);
-      }
-      setCheckOutDate(selected);
+  const handleDayPress = (date: Date) => {
+    if (isDateUnavailable(date)) return;
+
+    if (choosingCheckOut && isValidCheckOut(date)) {
+      setCheckOutDate(date);
+      setShowDatePicker(false);
+      return;
     }
-    setShowDatePicker(false);
+
+    // Nouvelle arrivée (ou départ impossible : le séjour enjamberait une nuit indisponible)
+    if (isDateBooked(date)) return;
+    setCheckInDate(date);
+    setCheckOutDate(null);
   };
 
-  const formatDate = (date: Date) => {
+  const isCurrentMonth = calendarYear === today.getFullYear() && calendarMonth === today.getMonth();
+
+  // Semaines du mois affiché (lundi → dimanche), cases vides (null) avant le 1er et après le dernier jour
+  const calendarWeeks = (() => {
+    const cells: (number | null)[] = [
+      ...Array<null>(getFirstDayOfMonth(calendarMonth, calendarYear)).fill(null),
+      ...Array.from({ length: getDaysInMonth(calendarMonth, calendarYear) }, (_, i) => i + 1),
+    ];
+    while (cells.length % 7 !== 0) cells.push(null);
+    const weeks: (number | null)[][] = [];
+    for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
+    return weeks;
+  })();
+
+  const formatDate = (date: Date | null) => {
+    if (!date) return '—';
     const d = date.getDate().toString().padStart(2, '0');
     const m = (date.getMonth() + 1).toString().padStart(2, '0');
     const y = date.getFullYear();
     return `${d}/${m}/${y}`;
   };
 
-  const formatDateRangeShort = (inDate: Date, outDate: Date) => {
+  const formatDateRangeShort = (inDate: Date | null, outDate: Date | null) => {
+    if (!inDate || !outDate) return t('ProprieterDetail.select_dates');
     const inDay = inDate.getDate();
     const outDay = outDate.getDate();
     const inMonthName = MONTH_NAMES[inDate.getMonth()].substring(0, 4) + '.';
@@ -167,8 +226,7 @@ export default function ProprieterDetailScreen() {
   };
 
   // Calculs de séjour dynamiques
-  const diffTime = Math.abs(checkOutDate.getTime() - checkInDate.getTime());
-  const nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+  const nights = checkInDate && checkOutDate ? nightsBetween(checkInDate, checkOutDate) : 0;
   const stayCost = numericPricePerNight * nights;
   const discountCost = Math.round(stayCost * 0.20); // Réduction de 20%
   const totalCost = stayCost - discountCost;
@@ -215,14 +273,11 @@ export default function ProprieterDetailScreen() {
               style={{ width: screenWidth, height: IMAGE_HEIGHT }}
             >
               {imageUris.map((uri, idx) => (
-                <Image
+                <AppImage
                   key={`room-img-${idx}`}
-                  source={{ uri }}
-                  style={{
-                    width: screenWidth,
-                    height: IMAGE_HEIGHT,
-                    resizeMode: 'cover',
-                  }}
+                  source={uri}
+                  priority={idx === 0 ? 'high' : 'normal'}
+                  style={{ width: screenWidth, height: IMAGE_HEIGHT }}
                 />
               ))}
             </ScrollView>
@@ -233,8 +288,10 @@ export default function ProprieterDetailScreen() {
               onPress={() => {
                 if (isBooking) {
                   setIsBooking(false);
+                } else if (router.canGoBack()) {
+                  router.back();
                 } else {
-                  router.replace('/hotel-detail');
+                  router.replace('/(app)/home');
                 }
               }}
               style={{
@@ -525,7 +582,7 @@ export default function ProprieterDetailScreen() {
                   <Text style={{ fontSize: 13, color: '#6b7280', fontFamily: 'Outfit_500Medium' }}>{t('ProprieterDetail.check_in')}</Text>
                   <TouchableOpacity
                     activeOpacity={0.7}
-                    onPress={() => openDatePicker('in')}
+                    onPress={openDatePicker}
                     style={{ flexDirection: 'row', alignItems: 'center' }}
                   >
                     <Ionicons name="calendar-outline" size={20} color="#01BDA5" style={{ marginRight: 8 }} />
@@ -538,7 +595,7 @@ export default function ProprieterDetailScreen() {
                   <Text style={{ fontSize: 13, color: '#6b7280', fontFamily: 'Outfit_500Medium' }}>{t('ProprieterDetail.check_out')}</Text>
                   <TouchableOpacity
                     activeOpacity={0.7}
-                    onPress={() => openDatePicker('out')}
+                    onPress={openDatePicker}
                     style={{ flexDirection: 'row', alignItems: 'center' }}
                   >
                     <Ionicons name="calendar-outline" size={20} color="#01BDA5" style={{ marginRight: 8 }} />
@@ -636,6 +693,8 @@ export default function ProprieterDetailScreen() {
               activeOpacity={0.9}
               onPress={() => {
                 setIsBooking(true);
+                // Pas encore de dates : on ouvre directement le calendrier
+                if (!checkInDate || !checkOutDate) openDatePicker();
               }}
               style={{
                 backgroundColor: '#01BDA5',
@@ -685,21 +744,47 @@ export default function ProprieterDetailScreen() {
                   Alert.alert(t('ProprieterDetail.error_title'), t('ProprieterDetail.room_not_found'));
                   return;
                 }
+                if (!checkInDate || !checkOutDate) {
+                  openDatePicker();
+                  return;
+                }
                 setSubmitting(true);
                 try {
-                  const toISO = (d: Date) => d.toISOString().split('T')[0];
                   await clientService.createReservation({
                     propriete_id: roomId,
-                    date_debut: toISO(checkInDate),
-                    date_fin: toISO(checkOutDate),
+                    date_debut: toIsoDate(checkInDate),
+                    date_fin: toIsoDate(checkOutDate),
                     nb_adultes: persons,
+                    devise,
                   });
                   Alert.alert(t('ProprieterDetail.reservation_confirmed'), t('ProprieterDetail.reservation_confirmed_message'), [
-                    { text: t('Contact.ok'), onPress: () => router.replace('/(app)/home') },
+                    {
+                      text: t('Contact.ok'),
+                      onPress: () => {
+                        // Réservation faite : on repart d'Accueil avec un historique vide,
+                        // pour que le retour ne ramène pas sur l'écran de réservation.
+                        setIsBooking(false);
+                        navigation.reset({ index: 0, routes: [{ name: 'home' as never }] });
+                      },
+                    },
                   ]);
                 } catch (err: any) {
-                  const msg = err?.data?.message ?? err?.message ?? t('Common.error_generic');
-                  Alert.alert(t('ProprieterDetail.reservation_error_title'), msg);
+                  showError(t('ProprieterDetail.reservation_error_title'), err, {
+                    404: t('ProprieterDetail.room_unavailable'),
+                    // 409 : chambre complète, hôtel en pause ou suspendu — le serveur précise la cause et les dates
+                    409: (serverMessage) => serverMessage ?? t('ProprieterDetail.dates_unavailable'),
+                    // 422 : erreurs de validation (dates…) traduites, sinon offre / code promo refusé
+                    422: (serverMessage) =>
+                      err?.response?.data?.errors
+                        ? getErrorMessage(err)
+                        : serverMessage ?? t('ProprieterDetail.offer_invalid'),
+                  });
+                  // Nuit prise entre-temps par un autre client : rafraîchir les dates en rouge
+                  // et faire choisir de nouvelles dates.
+                  if (err?.response?.status === 409) {
+                    loadBookedDates();
+                    setCheckOutDate(null);
+                  }
                 } finally {
                   setSubmitting(false);
                 }
@@ -763,6 +848,7 @@ export default function ProprieterDetailScreen() {
                 }}
               >
                 <TouchableOpacity
+                  disabled={isCurrentMonth}
                   onPress={() => {
                     if (calendarMonth === 0) {
                       setCalendarMonth(11);
@@ -771,7 +857,7 @@ export default function ProprieterDetailScreen() {
                       setCalendarMonth(calendarMonth - 1);
                     }
                   }}
-                  style={{ padding: 6 }}
+                  style={{ padding: 6, opacity: isCurrentMonth ? 0.25 : 1 }}
                 >
                   <Ionicons name="chevron-back" size={24} color="#1f2937" />
                 </TouchableOpacity>
@@ -813,61 +899,111 @@ export default function ProprieterDetailScreen() {
                 ))}
               </View>
 
-              {/* Grid des jours */}
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                {/* Espaces vides pour le premier jour du mois */}
-                {Array.from({ length: getFirstDayOfMonth(calendarMonth, calendarYear) }).map((_, idx) => (
-                  <View key={`empty-${idx}`} style={{ width: `${100 / 7}%`, height: 40 }} />
-                ))}
-
-                {/* Jours du mois */}
-                {Array.from({ length: getDaysInMonth(calendarMonth, calendarYear) }).map((_, idx) => {
-                  const dayNum = idx + 1;
-                  const currentGridDate = new Date(calendarYear, calendarMonth, dayNum);
-                  const isSelected = activePickerType === 'in'
-                    ? checkInDate.getDate() === dayNum && checkInDate.getMonth() === calendarMonth && checkInDate.getFullYear() === calendarYear
-                    : checkOutDate.getDate() === dayNum && checkOutDate.getMonth() === calendarMonth && checkOutDate.getFullYear() === calendarYear;
-
-                  const isPast = currentGridDate < new Date(new Date().setHours(0, 0, 0, 0));
-                  const isDisabled = activePickerType === 'out' && currentGridDate <= checkInDate;
+              {/* Grille : une ligne par semaine, 7 cases en flex: 1 (alignées sur L M M J V S D).
+                  Des largeurs en % avec flexWrap passaient à la ligne à cause des arrondis,
+                  ce qui vidait la colonne du dimanche. */}
+              {calendarWeeks.map((week, weekIdx) => (
+              <View key={`week-${weekIdx}`} style={{ flexDirection: 'row' }}>
+                {week.map((dayNum, idx) => {
+                  if (dayNum === null) {
+                    return <View key={`empty-${weekIdx}-${idx}`} style={{ flex: 1, height: 40 }} />;
+                  }
+                  const date = new Date(calendarYear, calendarMonth, dayNum);
+                  const past = isDatePast(date);
+                  const selected = !past && isSelectedDay(date);
+                  const booked = !past && !selected && isDateBooked(date);
+                  // Nuit indisponible, mais départ possible ce matin-là (rouge, cliquable)
+                  const bookedCheckOut = booked && isValidCheckOut(date);
+                  const inRange = !past && !selected && !booked && isDateInRange(date);
+                  // Au-delà de la première nuit indisponible : pas un départ, mais une nouvelle arrivée possible
+                  const beyond = !past && !selected && !booked && isBeyondLimit(date);
+                  const unavailable = isDateUnavailable(date);
 
                   return (
                     <TouchableOpacity
                       key={`day-${dayNum}`}
-                      onPress={() => !isPast && !isDisabled && selectDay(dayNum)}
-                      disabled={isPast || isDisabled}
-                      style={{
-                        width: `${100 / 7}%`,
-                        height: 40,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        borderRadius: 20,
-                        backgroundColor: isSelected ? '#01BDA5' : 'transparent',
-                      }}
+                      onPress={() => handleDayPress(date)}
+                      disabled={unavailable}
+                      accessibilityLabel={
+                        booked ? `${dayNum} — ${t(bookedCheckOut ? 'ProprieterDetail.checkout_possible' : 'ProprieterDetail.legend_unavailable')}` : undefined
+                      }
+                      style={{ flex: 1, height: 40, padding: 2 }}
                     >
-                      <Text
+                      <View
                         style={{
-                          fontSize: 13,
-                          fontFamily: isSelected ? 'Outfit_700Bold' : 'Outfit_500Medium',
-                          color: isSelected
-                            ? '#fff'
-                            : (isPast || isDisabled)
-                              ? '#d1d5db'
-                              : '#374151',
+                          flex: 1,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          borderRadius: 18,
+                          backgroundColor: selected
+                            ? '#01BDA5'
+                            : booked
+                              ? '#fef2f2'
+                              : inRange
+                                ? 'rgba(1, 189, 165, 0.12)'
+                                : 'transparent',
+                          borderWidth: bookedCheckOut ? 1 : 0,
+                          borderColor: '#fecaca',
                         }}
                       >
-                        {dayNum}
-                      </Text>
+                        <Text
+                          style={{
+                            fontSize: 13,
+                            fontFamily: selected ? 'Outfit_700Bold' : 'Outfit_500Medium',
+                            color: selected
+                              ? '#fff'
+                              : past || beyond
+                                ? '#d1d5db'
+                                : booked
+                                  ? bookedCheckOut ? '#ef4444' : '#f87171'
+                                  : '#374151',
+                            textDecorationLine: booked && !bookedCheckOut ? 'line-through' : 'none',
+                          }}
+                        >
+                          {dayNum}
+                        </Text>
+                      </View>
                     </TouchableOpacity>
                   );
                 })}
               </View>
+              ))}
 
-              {/* Bouton Annuler */}
+              {/* Consigne + légende */}
+              <Text style={{ marginTop: 14, fontSize: 13, fontFamily: 'Outfit_500Medium', color: '#4b5563', textAlign: 'center' }}>
+                {choosingCheckOut ? t('ProprieterDetail.pick_check_out') : t('ProprieterDetail.pick_check_in')}
+              </Text>
+              {bookedDates.length > 0 && (
+                <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 16, marginTop: 10 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: '#fee2e2', borderWidth: 1, borderColor: '#fecaca' }} />
+                    <Text style={{ fontSize: 11, fontFamily: 'Outfit_500Medium', color: '#9ca3af' }}>{t('ProprieterDetail.legend_unavailable')}</Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: '#01BDA5' }} />
+                    <Text style={{ fontSize: 11, fontFamily: 'Outfit_500Medium', color: '#9ca3af' }}>{t('ProprieterDetail.legend_selected')}</Text>
+                  </View>
+                </View>
+              )}
+
+              {/* Dates choisies */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#f9fafb', borderRadius: 14, paddingVertical: 8, marginTop: 14 }}>
+                <View style={{ flex: 1, alignItems: 'center' }}>
+                  <Text style={{ fontSize: 10, fontFamily: 'Outfit_500Medium', color: '#9ca3af' }}>{t('ProprieterDetail.check_in').toUpperCase()}</Text>
+                  <Text style={{ fontSize: 13, fontFamily: 'Outfit_600SemiBold', color: '#1f2937' }}>{formatDate(checkInDate)}</Text>
+                </View>
+                <Text style={{ color: '#d1d5db' }}>→</Text>
+                <View style={{ flex: 1, alignItems: 'center' }}>
+                  <Text style={{ fontSize: 10, fontFamily: 'Outfit_500Medium', color: '#9ca3af' }}>{t('ProprieterDetail.check_out').toUpperCase()}</Text>
+                  <Text style={{ fontSize: 13, fontFamily: 'Outfit_600SemiBold', color: '#1f2937' }}>{formatDate(checkOutDate)}</Text>
+                </View>
+              </View>
+
+              {/* Fermer (les dates déjà choisies sont conservées) */}
               <TouchableOpacity
                 onPress={() => setShowDatePicker(false)}
                 style={{
-                  marginTop: 20,
+                  marginTop: 14,
                   alignItems: 'center',
                   paddingVertical: 10,
                   backgroundColor: '#f3f4f6',
@@ -875,7 +1011,7 @@ export default function ProprieterDetailScreen() {
                 }}
               >
                 <Text style={{ fontSize: 14, fontFamily: 'Outfit_700Bold', color: '#4b5563' }}>
-                  {t('Common.cancel')}
+                  {t('Common.close')}
                 </Text>
               </TouchableOpacity>
             </View>

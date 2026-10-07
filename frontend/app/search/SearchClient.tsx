@@ -272,7 +272,7 @@ export default function SearchClient({ searchQuery }: SearchClientProps) {
                       ville={h.ville ?? undefined}
                       adresse={h.adresse ?? undefined}
                       hotelId={h.id}
-                      availability="Disponible"
+                      disponibilite={h.disponibilite}
                       price={h.prix_min_mga ?? 0}
                       prixMga={h.prix_min_mga ?? undefined}
                       prixEur={h.prix_min_eur ?? undefined}

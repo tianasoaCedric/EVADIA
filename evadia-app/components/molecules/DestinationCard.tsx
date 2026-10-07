@@ -1,4 +1,5 @@
-import { View, Text, Image, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, Animated } from 'react-native';
+import { AppImage } from '../atoms/AppImage';
 import { useRef } from 'react';
 
 interface DestinationCardProps {
@@ -48,13 +49,11 @@ export const DestinationCard = ({ name, imageUri, onPress }: DestinationCardProp
         }}
       >
         {/* Image de la destination */}
-        <Image
-          source={{ uri: imageUri }}
-          style={{
-            width: '100%',
-            height: '100%',
-            resizeMode: 'cover',
-          }}
+        <AppImage
+          variant="sm"
+          source={imageUri}
+          recyclingKey={imageUri}
+          style={{ width: '100%', height: '100%' }}
         />
 
         {/* Nom de la destination en bas à gauche */}

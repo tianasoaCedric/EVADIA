@@ -39,12 +39,12 @@ class DestinationController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $validated['image_url'] = $request->file('image')->store('destinations', 's3');
+            $validated['image_url'] = Media::storeImage($request->file('image'), 'destinations');
         }
 
         if ($request->hasFile('couverture')) {
             $validated['couverture'] = array_map(
-                fn ($file) => $file->store('destinations/couverture', 's3'),
+                fn ($file) => Media::storeImage($file, 'destinations/couverture'),
                 $request->file('couverture')
             );
         }
@@ -78,12 +78,12 @@ class DestinationController extends Controller
             if ($destination->image_url) {
                 Media::delete($destination->image_url);
             }
-            $validated['image_url'] = $request->file('image')->store('destinations', 's3');
+            $validated['image_url'] = Media::storeImage($request->file('image'), 'destinations');
         }
 
         if ($request->hasFile('couverture')) {
             $nouvelles = array_map(
-                fn ($file) => $file->store('destinations/couverture', 's3'),
+                fn ($file) => Media::storeImage($file, 'destinations/couverture'),
                 $request->file('couverture')
             );
             $validated['couverture'] = array_merge($destination->couverture ?? [], $nouvelles);

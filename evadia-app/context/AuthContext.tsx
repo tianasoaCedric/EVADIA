@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
-import { mobileAuthApi, TOKEN_KEY, setAuthToken } from "../lib/api";
+import { mobileAuthApi, TOKEN_KEY, setAuthToken, setOnUnauthorized } from "../lib/api";
+import { getErrorMessage, errorStatus } from "../lib/parseError";
 
 export type User = {
   id: number;
@@ -31,12 +32,25 @@ type AuthContextType = {
   register: (data: RegisterData) => Promise<void>;
   loginWithToken: () => Promise<void>;
   logout: () => Promise<void>;
+  /** Raison de la dernière déconnexion forcée (session expirée, compte désactivé…), affichée sur l'écran de connexion. */
+  notice: string | null;
+  clearNotice: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>({ status: "loading" });
+  const [notice, setNotice] = useState<string | null>(null);
+
+  // 401 sur n'importe quel appel : lib/api a déjà effacé le token.
+  useEffect(() => {
+    setOnUnauthorized((error) => {
+      setNotice(getErrorMessage(error));
+      setState({ status: "unauthenticated" });
+    });
+    return () => setOnUnauthorized(null);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -49,8 +63,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setAuthToken(token);
         const res = await mobileAuthApi.get("/auth/me");
         setState({ status: "authenticated", user: res.data.user ?? res.data, token });
-      } catch {
-        await SecureStore.deleteItemAsync(TOKEN_KEY);
+      } catch (err) {
+        // 401 : token invalide, déjà effacé par lib/api. Sinon (réseau, serveur),
+        // on garde le token pour que la session revienne au prochain lancement.
+        if (errorStatus(err) !== 401) setNotice(getErrorMessage(err));
+        setAuthToken(null);
         setState({ status: "unauthenticated" });
       }
     })();
@@ -62,6 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { user, token } = res.data;
       setAuthToken(token);
       await SecureStore.setItemAsync(TOKEN_KEY, token);
+      setNotice(null);
       setState({ status: "authenticated", user, token });
     } catch (err) {
       setState({ status: "unauthenticated" });
@@ -76,6 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { user, token } = res.data;
       setAuthToken(token);
       await SecureStore.setItemAsync(TOKEN_KEY, token);
+      setNotice(null);
       setState({ status: "authenticated", user, token });
     } catch (err) {
       setState({ status: "unauthenticated" });
@@ -86,6 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginWithToken = async () => {
     const res = await mobileAuthApi.get("/auth/me");
     const token = await SecureStore.getItemAsync(TOKEN_KEY);
+    setNotice(null);
     setState({ status: "authenticated", user: res.data.user ?? res.data, token: token! });
   };
 
@@ -99,7 +119,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ state, login, register, loginWithToken, logout }}>
+    <AuthContext.Provider
+      value={{ state, login, register, loginWithToken, logout, notice, clearNotice: () => setNotice(null) }}
+    >
       {children}
     </AuthContext.Provider>
   );

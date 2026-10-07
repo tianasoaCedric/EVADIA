@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\AbonnementPause;
 use App\Models\Disponibilite;
 use App\Models\Propriete;
 use App\Models\Reservation;
@@ -75,5 +76,70 @@ class DisponibiliteService
         sort($indisponibles);
 
         return $indisponibles;
+    }
+
+    public const HOTEL_DISPONIBLE = 'disponible';
+    public const HOTEL_COMPLET = 'complet';
+    public const HOTEL_EN_PAUSE = 'en_pause';
+
+    /**
+     * Disponibilité de plusieurs hôtels pour la nuit de ce soir (listes, cartes hôtel).
+     * Mêmes règles que la réservation : un hôtel est disponible si au moins une de ses
+     * chambres n'est ni fermée ce soir ni occupée sur toutes ses unités ; « en pause » s'il
+     * est en pause d'abonnement cette nuit. Requêtes groupées : leur nombre ne dépend pas
+     * du nombre d'hôtels.
+     *
+     * @param  int[]  $hotelIds
+     * @return array<int, string> hotel_id => HOTEL_* (hôtels sans chambre absents)
+     */
+    public function statutsHotelsCeSoir(array $hotelIds): array
+    {
+        if ($hotelIds === []) {
+            return [];
+        }
+
+        $ceSoir = today();
+        $demain = $ceSoir->copy()->addDay();
+
+        $enPause = AbonnementPause::active()
+            ->whereIn('hotel_id', $hotelIds)
+            ->where('date_debut', '<', $demain->toDateString())
+            ->where('date_reprise', '>', $ceSoir->toDateString())
+            ->pluck('hotel_id')
+            ->flip();
+
+        $proprietes = Propriete::whereIn('hotel_id', $hotelIds)->get(['id', 'hotel_id', 'nombre_unites']);
+        $proprieteIds = $proprietes->pluck('id');
+
+        $fermees = Disponibilite::whereIn('propriete_id', $proprieteIds)
+            ->where('est_disponible', false)
+            ->whereDate('date', $ceSoir)
+            ->pluck('propriete_id')
+            ->flip();
+
+        $occupees = Reservation::whereIn('propriete_id', $proprieteIds)
+            ->whereIn('statut', self::STATUTS_OCCUPANTS)
+            ->where('date_debut', '<=', $ceSoir->toDateString())
+            ->where('date_fin', '>', $ceSoir->toDateString())
+            ->groupBy('propriete_id')
+            ->selectRaw('propriete_id, COUNT(*) AS nb')
+            ->pluck('nb', 'propriete_id');
+
+        $statuts = [];
+        foreach ($proprietes->groupBy('hotel_id') as $hotelId => $chambres) {
+            if ($enPause->has($hotelId)) {
+                $statuts[$hotelId] = self::HOTEL_EN_PAUSE;
+                continue;
+            }
+
+            $uneLibre = $chambres->contains(fn(Propriete $p) =>
+                ! $fermees->has($p->id)
+                && (int) ($occupees[$p->id] ?? 0) < max(1, (int) $p->nombre_unites)
+            );
+
+            $statuts[$hotelId] = $uneLibre ? self::HOTEL_DISPONIBLE : self::HOTEL_COMPLET;
+        }
+
+        return $statuts;
     }
 }

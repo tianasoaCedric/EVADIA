@@ -28,7 +28,9 @@ import "../lib/i18n";
 import { loadPersistedLanguage } from "../lib/i18n";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import { DeviseProvider } from "../context/DeviseContext";
+import { RealtimeProvider } from "../context/RealtimeContext";
 import { usePushNotifications } from "../hooks/usePushNotifications";
+import IntroAnimation from "../components/IntroAnimation";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -42,6 +44,7 @@ function RootNavigator() {
   const { state } = useAuth();
   const segments = useSegments();
   const isNavigating = useRef(false);
+  const [showIntro, setShowIntro] = useState(true);
 
   usePushNotifications(state.status === "authenticated");
 
@@ -63,14 +66,24 @@ function RootNavigator() {
     }
   }, [state.status, segments]);
 
-  if (state.status === "loading") {
-    return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <ActivityIndicator size="large" color="#01BDA5" />
-      </View>
-    );
-  }
+  return (
+    <>
+      {state.status === "loading" ? (
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <ActivityIndicator size="large" color="#01BDA5" />
+        </View>
+      ) : (
+        <AppStack />
+      )}
+      {/* Intro posée par-dessus la navigation : l'app se charge en dessous */}
+      {showIntro && (
+        <IntroAnimation ready={state.status !== "loading"} onDone={() => setShowIntro(false)} />
+      )}
+    </>
+  );
+}
 
+function AppStack() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(auth)" />
@@ -126,11 +139,13 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <DeviseProvider>
-        <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-          <RootNavigator />
-        </View>
-      </DeviseProvider>
+      <RealtimeProvider>
+        <DeviseProvider>
+          <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+            <RootNavigator />
+          </View>
+        </DeviseProvider>
+      </RealtimeProvider>
     </AuthProvider>
   );
 }

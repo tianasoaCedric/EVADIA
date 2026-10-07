@@ -106,7 +106,10 @@
     "per_night": "/ night",
     "reviews_count": "{count} reviews",
     "add_favorite": "Add to favorites",
-    "remove_favorite": "Remove from favorites"
+    "remove_favorite": "Remove from favorites",
+    "available_tonight": "Available tonight",
+    "fully_booked_tonight": "Fully booked tonight",
+    "temporarily_closed": "Temporarily closed"
   },
   "RoomCard": {
     "available": "Available",

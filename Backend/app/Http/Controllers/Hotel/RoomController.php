@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Hotel;
 
+use App\Support\Media;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Hotel\Traits\BelongsToHotel;
 use App\Models\Equipement;
@@ -91,7 +92,7 @@ class RoomController extends Controller
             // Photos
             if ($request->hasFile('photos')) {
                 foreach ($request->file('photos') as $i => $photo) {
-                    $path = $photo->store("proprietes/{$propriete->id}", 's3');
+                    $path = Media::storeImage($photo, "proprietes/{$propriete->id}");
                     Photo::create([
                         'entite_type' => 'propriete',
                         'entite_id' => $propriete->id,

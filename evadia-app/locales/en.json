@@ -4,7 +4,10 @@
     "cancel": "Cancel",
     "ok": "OK",
     "search": "Search",
-    "error_generic": "Something went wrong."
+    "error_generic": "An error occurred.",
+    "confirm": "Confirm",
+    "loading": "Loading...",
+    "close": "Close"
   },
   "Profile": {
     "title": "Profile",
@@ -24,14 +27,6 @@
     "version": "Version",
     "logout": "Log Out"
   },
-  "Common": {
-    "search": "Search",
-    "retry": "Retry",
-    "cancel": "Cancel",
-    "confirm": "Confirm",
-    "loading": "Loading...",
-    "error_generic": "An error occurred."
-  },
   "Login": {
     "back": "Back",
     "tagline": "Find the perfect hotel for you!",
@@ -45,11 +40,12 @@
     "or": "or",
     "no_account_short": "Don't have an account? ",
     "error_missing_fields": "Please enter your email and password.",
-    "error_invalid_credentials": "Incorrect credentials.",
+    "error_invalid_credentials": "Incorrect email or password.",
     "error_not_client": "This account is not a client account.",
     "error_google_failed": "Google login failed. Please try again.",
     "error_no_token": "Token not received. Please try again.",
-    "error_generic": "An error occurred. Please try again."
+    "error_generic": "An error occurred. Please try again.",
+    "error_too_many_attempts": "Too many login attempts. Please wait a minute and try again."
   },
   "Register": {
     "tagline": "Find the perfect hotel for you!",
@@ -64,7 +60,8 @@
     "login": "Log in",
     "error_missing_fields": "Please fill in all fields.",
     "error_password_min": "Password must be at least 8 characters long.",
-    "error_generic": "An error occurred."
+    "error_generic": "An error occurred.",
+    "error_too_many_attempts": "Too many sign-up attempts. Please wait a minute and try again."
   },
   "Contact": {
     "title": "Contact us!",
@@ -102,16 +99,22 @@
   "Favorites": {
     "title": "Your Favorites",
     "empty": "No favorites yet",
-    "load_error": "Unable to load favorites."
+    "load_error": "Unable to load favorites.",
+    "no_results": "No favorite found for \"{{query}}\"",
+    "toggle_error_title": "Favorites",
+    "add_error": "Unable to add this hotel to your favorites.",
+    "remove_error": "Unable to remove this hotel from your favorites."
   },
   "Destination": {
     "title": "Find your destination",
-    "no_results": "No destination found for \"{{query}}\""
+    "no_results": "No destination found for \"{{query}}\"",
+    "load_error": "Unable to load destinations."
   },
   "DestinationDetail": {
     "default_title": "Destination",
     "no_hotels": "No hotels found",
-    "price_on_request": "Price on request"
+    "price_on_request": "Price on request",
+    "load_error": "Unable to load hotels for this destination."
   },
   "HotelDetail": {
     "default_hotel_name": "Hotel",
@@ -128,7 +131,8 @@
     "equip_parking": "Parking",
     "equip_ac": "Air conditioning",
     "equip_restaurant": "Restaurant",
-    "equip_security": "24h Security"
+    "equip_security": "24h Security",
+    "not_found": "This hotel no longer exists or is no longer available."
   },
   "ProprieterDetail": {
     "default_room_name": "Luxury Room",
@@ -176,7 +180,16 @@
     "month_september": "September",
     "month_october": "October",
     "month_november": "November",
-    "month_december": "December"
+    "month_december": "December",
+    "room_unavailable": "This room no longer exists or is no longer offered.",
+    "dates_unavailable": "These dates are no longer available. Please choose other dates.",
+    "offer_invalid": "This offer no longer applies to your booking.",
+    "select_dates": "Choose your dates",
+    "pick_check_in": "Choose your check-in date",
+    "pick_check_out": "Choose your check-out date",
+    "legend_unavailable": "Unavailable",
+    "legend_selected": "Selected",
+    "checkout_possible": "Unavailable this night — check-out possible that day"
   },
   "Offers": {
     "title": "Exclusive Offers",
@@ -195,7 +208,8 @@
     "timeAgoJustNow": "just now",
     "timeAgoMinutes": "{{count}} min ago",
     "timeAgoHours": "{{count}} h ago",
-    "timeAgoDays": "{{count}} d ago"
+    "timeAgoDays": "{{count}} d ago",
+    "mark_all_error": "Unable to mark notifications as read."
   },
   "Header": {
     "category_luxury_hotel": "Luxury Hotel",
@@ -211,7 +225,9 @@
     "reserve": "Book Now"
   },
   "HotelCard": {
-    "availability": "Availability"
+    "availability_disponible": "Available tonight",
+    "availability_complet": "Fully booked tonight",
+    "availability_en_pause": "Temporarily closed"
   },
   "Reservations": {
     "title": "Your reservations",
@@ -238,6 +254,33 @@
     "messages_empty": "No messages yet. Send the first one!",
     "messages_placeholder": "Write a message...",
     "messages_closed": "This conversation is closed.",
-    "messages_error_title": "Send error"
+    "messages_error_title": "Send error",
+    "not_found": "This booking could not be found.",
+    "cancel_not_allowed": "This booking can no longer be cancelled.",
+    "messages_load_error": "Unable to load messages.",
+    "payment_error_title": "Payment method",
+    "payment_error": "Unable to save your payment choice."
+  },
+  "Errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Unable to reach the server. Check your internet connection.",
+    "timeout": "The server is taking too long to respond. Please try again shortly.",
+    "server": "The service is temporarily unavailable. Please try again later.",
+    "session_expired": "Your session has expired. Please sign in again.",
+    "account_disabled": "Your account has been disabled. Please contact the Evadia team.",
+    "forbidden": "You don't have access to this action.",
+    "not_found": "The requested item could not be found.",
+    "conflict": "This action is no longer possible.",
+    "invalid": "Some information is invalid.",
+    "too_many_requests": "Too many attempts. Please wait a minute and try again.",
+    "email_taken": "This email address is already in use.",
+    "value_taken": "This value is already in use.",
+    "email_invalid": "The email address is not valid.",
+    "password_min": "The password must be at least {{min}} characters.",
+    "too_short": "This field must be at least {{min}} characters.",
+    "too_long": "One of the fields is too long.",
+    "password_mismatch": "Passwords do not match.",
+    "field_required": "Please fill in all required fields.",
+    "invalid_dates": "The selected dates are not valid."
   }
 }

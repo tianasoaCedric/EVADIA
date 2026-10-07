@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Support\Media;
 use App\Http\Controllers\Controller;
 use App\Models\TypesHotel;
 use Illuminate\Http\Request;
@@ -37,11 +38,11 @@ class TypeHebergementController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('types-hebergement', 's3');
+            $validated['image'] = Media::storeImage($request->file('image'), 'types-hebergement');
         }
 
         if ($request->hasFile('image_background')) {
-            $validated['image_background'] = $request->file('image_background')->store('types-hebergement/background', 's3');
+            $validated['image_background'] = Media::storeImage($request->file('image_background'), 'types-hebergement/background');
         }
 
         TypesHotel::create($validated);
@@ -66,16 +67,16 @@ class TypeHebergementController extends Controller
 
         if ($request->hasFile('image')) {
             if ($typesHebergement->image) {
-                Storage::disk('s3')->delete($typesHebergement->image);
+                Media::delete($typesHebergement->image);
             }
-            $validated['image'] = $request->file('image')->store('types-hebergement', 's3');
+            $validated['image'] = Media::storeImage($request->file('image'), 'types-hebergement');
         }
 
         if ($request->hasFile('image_background')) {
             if ($typesHebergement->image_background) {
-                Storage::disk('s3')->delete($typesHebergement->image_background);
+                Media::delete($typesHebergement->image_background);
             }
-            $validated['image_background'] = $request->file('image_background')->store('types-hebergement/background', 's3');
+            $validated['image_background'] = Media::storeImage($request->file('image_background'), 'types-hebergement/background');
         }
 
         $typesHebergement->update($validated);
@@ -87,11 +88,11 @@ class TypeHebergementController extends Controller
     public function destroy(TypesHotel $typesHebergement)
     {
         if ($typesHebergement->image) {
-            Storage::disk('s3')->delete($typesHebergement->image);
+            Media::delete($typesHebergement->image);
         }
 
         if ($typesHebergement->image_background) {
-            Storage::disk('s3')->delete($typesHebergement->image_background);
+            Media::delete($typesHebergement->image_background);
         }
 
         $typesHebergement->delete();

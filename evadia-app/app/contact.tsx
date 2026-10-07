@@ -1,10 +1,12 @@
-import { View, Text, ScrollView, Image, TouchableOpacity, TextInput, Dimensions, Platform, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Dimensions, Platform, ActivityIndicator, Alert } from 'react-native';
+import { AppImage } from '../components/atoms/AppImage';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
+import { errorStatus, showError } from '../lib/parseError';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const IMAGE_HEIGHT = Math.round(screenHeight * 0.35);
@@ -27,8 +29,15 @@ export default function ContactScreen() {
       Alert.alert(t('Contact.success_title'), t('Contact.success_message'), [
         { text: t('Contact.ok'), onPress: () => router.back() },
       ]);
-    } catch {
-      Alert.alert(t('Contact.error_title'), t('Contact.error_message'));
+    } catch (err) {
+      // 5xx : l'envoi du mail a échoué côté serveur → message de contact dédié.
+      // 422 (email invalide, message trop long), 429, réseau → message précis.
+      const status = errorStatus(err);
+      if (status !== undefined && status >= 500) {
+        Alert.alert(t('Contact.error_title'), t('Contact.error_message'));
+      } else {
+        showError(t('Contact.error_title'), err, { default: t('Contact.error_message') });
+      }
     } finally {
       setLoading(false);
     }
@@ -55,9 +64,10 @@ export default function ContactScreen() {
             position: 'relative',
           }}
         >
-          <Image
-            source={{ uri: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=800' }}
-            style={{ width: '100%', height: '100%', resizeMode: 'cover' }}
+          <AppImage
+            source="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=800"
+            priority="high"
+            style={{ width: '100%', height: '100%' }}
           />
 
           {/* Bouton retour ← en haut à gauche */}

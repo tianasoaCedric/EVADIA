@@ -5,8 +5,10 @@ FROM php:8.2-cli AS base
 RUN apt-get update && apt-get install -y \
     git curl zip unzip \
     libpq-dev libzip-dev libpng-dev libonig-dev \
+    libjpeg62-turbo-dev libwebp-dev \
     libssl-dev libcurl4-openssl-dev \
-    && docker-php-ext-install pdo pdo_pgsql zip mbstring gd pcntl \
+    && docker-php-ext-configure gd --with-jpeg --with-webp \
+    && docker-php-ext-install pdo pdo_pgsql zip mbstring gd exif pcntl \
     && pecl install swoole --configureoptions 'enable-sockets="no" enable-openssl="yes" enable-http2="no" enable-mysqlnd="no"' \
     && docker-php-ext-enable swoole \
     && apt-get clean && rm -rf /var/lib/apt/lists/*

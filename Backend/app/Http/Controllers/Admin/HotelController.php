@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Support\Media;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreHotelRequest;
 use App\Http\Requests\Admin\UpdateHotelRequest;
@@ -95,7 +96,7 @@ class HotelController extends Controller
             // 5. Upload photos
             if ($request->hasFile('photos')) {
                 foreach ($request->file('photos') as $index => $photo) {
-                    $path = $photo->store("hotels/{$hotel->id}", 's3');
+                    $path = Media::storeImage($photo, "hotels/{$hotel->id}");
                     if (! $path) {
                         throw new \RuntimeException("Échec de l'upload de la photo #{$index}. Vérifiez la configuration du stockage.");
                     }

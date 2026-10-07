@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Hotel;
 
+use App\Support\Media;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Hotel\Traits\BelongsToHotel;
 use App\Models\Offre;
@@ -25,11 +26,11 @@ class OffrePhotoController extends Controller
         // Supprime l'ancienne photo si elle existe
         $old = Photo::forOffre($offre->id)->first();
         if ($old) {
-            Storage::disk('s3')->delete($old->url_photo);
+            Media::delete($old->url_photo);
             $old->delete();
         }
 
-        $path = $request->file('photo')->store("offres/{$offre->id}", 's3');
+        $path = Media::storeImage($request->file('photo'), "offres/{$offre->id}");
 
         Photo::create([
             'entite_type'  => 'offre',
@@ -49,7 +50,7 @@ class OffrePhotoController extends Controller
         $offre = Offre::where('id', $offreId)->where('hotel_id', $hotel->id)->firstOrFail();
 
         $photo = Photo::forOffre($offre->id)->where('id', $photoId)->firstOrFail();
-        Storage::disk('s3')->delete($photo->url_photo);
+        Media::delete($photo->url_photo);
         $photo->delete();
 
         return back()->with('success', 'Photo supprimée.');

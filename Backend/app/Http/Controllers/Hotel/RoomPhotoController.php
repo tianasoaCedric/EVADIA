@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Hotel;
 
+use App\Support\Media;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Hotel\Traits\BelongsToHotel;
 use App\Models\Photo;
@@ -25,7 +26,7 @@ class RoomPhotoController extends Controller
 
         $maxOrdre = $propriete->photos()->max('ordre') ?? 0;
         foreach ($request->file('photos') as $i => $photo) {
-            $path = $photo->store("proprietes/{$propriete->id}", 's3');
+            $path = Media::storeImage($photo, "proprietes/{$propriete->id}");
             Photo::create([
                 'entite_type' => 'propriete',
                 'entite_id' => $propriete->id,
@@ -46,7 +47,7 @@ class RoomPhotoController extends Controller
         $propriete = $this->scopePropriete($proprieteId);
         $photo = Photo::forPropriete($propriete->id)->where('id', $photoId)->firstOrFail();
 
-        Storage::disk('s3')->delete($photo->url_photo);
+        Media::delete($photo->url_photo);
         $photo->delete();
         Photo::assurerPrincipale('propriete', $propriete->id);
 

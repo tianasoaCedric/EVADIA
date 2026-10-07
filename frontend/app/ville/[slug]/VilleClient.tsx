@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useMemo } from 'react'
+import type { HotelDisponibilite } from '@/lib/types'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { ChevronLeft, ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRightIcon } from 'lucide-react'
@@ -29,6 +30,8 @@ export interface ApiHotel {
   prix_min_eur?: number | null
   note_moyenne: number | null
   nb_avis: number
+  /** Ce soir ; null si l'hôtel n'a aucune chambre */
+  disponibilite?: HotelDisponibilite | null
 }
 
 const FALLBACK_VILLE_IMAGE = '/photos/Background DESTINATION.webp'
@@ -194,7 +197,7 @@ export default function VilleClient({
                       ville={hotel.ville ?? undefined}
                       adresse={hotel.adresse ?? undefined}
                       hotelId={hotel.id}
-                      availability="Disponible"
+                      disponibilite={hotel.disponibilite}
                       price={hotel.prix_min ?? 0}
                       prixMga={hotel.prix_min_mga ?? undefined}
                       prixEur={hotel.prix_min_eur ?? undefined}
@@ -260,7 +263,7 @@ export default function VilleClient({
                     ville={hotel.ville ?? undefined}
                     adresse={hotel.adresse ?? undefined}
                     hotelId={hotel.id}
-                    availability="Disponible"
+                    disponibilite={hotel.disponibilite}
                     price={hotel.prix_min ?? 0}
                     prixMga={hotel.prix_min_mga ?? undefined}
                     prixEur={hotel.prix_min_eur ?? undefined}

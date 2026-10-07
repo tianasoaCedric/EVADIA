@@ -160,7 +160,7 @@ export default function DestinationClient({ destinations, selectionHotels }: Des
                       ville={hotel.adresse?.ville}
                       adresse={hotel.adresse?.adresse_ligne1}
                       hotelId={hotel.id}
-                      availability="Disponible"
+                      disponibilite={hotel.disponibilite}
                       price={hotel.prix_min ?? 0}
                       prixMga={hotel.prix_min_mga}
                       prixEur={hotel.prix_min_eur}

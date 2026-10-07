@@ -2,10 +2,122 @@
 
 namespace App\Support;
 
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class Media
 {
+    /**
+     * Versions réduites (WebP) générées à côté de chaque image : "<chemin>.<nom>.webp".
+     * Les apps les demandent à la place de l'original (souvent 1 à 3 Mo) et
+     * retombent sur l'original si la version n'existe pas.
+     *
+     * @var array<string, int> nom => largeur max en px
+     */
+    public const VARIANTS = ['sm' => 640, 'md' => 1280];
+
+    private const VARIANT_QUALITY = 75;
+
+    /** Stocke une image uploadée sur S3 et génère ses versions réduites. Retourne le chemin de l'original. */
+    public static function storeImage(UploadedFile $file, string $dir): string
+    {
+        $path = $file->store($dir, 's3');
+        self::makeVariants($path, (string) file_get_contents($file->getRealPath()));
+
+        return $path;
+    }
+
+    public static function variantPath(string $path, string $variant): string
+    {
+        return "{$path}.{$variant}.webp";
+    }
+
+    public static function isVariant(string $path): bool
+    {
+        return (bool) preg_match('/\.(' . implode('|', array_keys(self::VARIANTS)) . ')\.webp$/', $path);
+    }
+
+    /**
+     * Génère les versions réduites d'une image déjà stockée. Ne lève jamais d'exception :
+     * en cas d'échec (format non supporté, GD absent…), les apps afficheront l'original.
+     *
+     * @param  string|null  $contents  Contenu de l'original s'il est déjà en mémoire (évite un téléchargement S3).
+     */
+    public static function makeVariants(string $path, ?string $contents = null): bool
+    {
+        if (! function_exists('imagewebp')) {
+            Log::warning('Media: GD sans support WebP, versions réduites non générées.');
+
+            return false;
+        }
+
+        try {
+            $disk = Storage::disk('s3');
+            $contents ??= $disk->get($path);
+            $source = $contents ? @imagecreatefromstring($contents) : false;
+            if (! $source) {
+                return false;
+            }
+
+            $source = self::applyExifOrientation($source, $contents);
+            $width = imagesx($source);
+            $height = imagesy($source);
+
+            foreach (self::VARIANTS as $variant => $maxWidth) {
+                $targetWidth = min($maxWidth, $width);
+                $targetHeight = (int) round($height * $targetWidth / $width);
+
+                $resized = imagecreatetruecolor($targetWidth, $targetHeight);
+                imagealphablending($resized, false);
+                imagesavealpha($resized, true);
+                imagecopyresampled($resized, $source, 0, 0, 0, 0, $targetWidth, $targetHeight, $width, $height);
+
+                ob_start();
+                imagewebp($resized, null, self::VARIANT_QUALITY);
+                $webp = (string) ob_get_clean();
+                imagedestroy($resized);
+
+                $disk->put(self::variantPath($path, $variant), $webp, [
+                    'ContentType' => 'image/webp',
+                    'CacheControl' => 'public, max-age=31536000, immutable',
+                ]);
+            }
+
+            imagedestroy($source);
+
+            return true;
+        } catch (\Throwable $e) {
+            Log::warning("Media: versions réduites non générées pour {$path}", ['error' => $e->getMessage()]);
+
+            return false;
+        }
+    }
+
+    /** Les photos de téléphone sont souvent stockées « couchées » avec une orientation EXIF que GD ignore. */
+    private static function applyExifOrientation(\GdImage $image, string $contents): \GdImage
+    {
+        if (! function_exists('exif_read_data') || ! str_starts_with($contents, "\xFF\xD8")) {
+            return $image;
+        }
+
+        $exif = @exif_read_data('data://image/jpeg;base64,' . base64_encode($contents));
+        $angle = match ($exif['Orientation'] ?? 1) {
+            3 => 180,
+            6 => -90,
+            8 => 90,
+            default => 0,
+        };
+
+        if ($angle === 0) {
+            return $image;
+        }
+
+        $rotated = imagerotate($image, $angle, 0);
+        imagedestroy($image);
+
+        return $rotated;
+    }
     /**
      * Build a public URL for a stored media path without ever instantiating
      * the S3 client (which throws when AWS config is incomplete, e.g. a fresh
@@ -64,7 +176,15 @@ class Media
             return;
         }
 
-        Storage::disk('s3')->delete($paths);
+        $withVariants = [];
+        foreach ($paths as $path) {
+            $withVariants[] = $path;
+            foreach (array_keys(self::VARIANTS) as $variant) {
+                $withVariants[] = self::variantPath($path, $variant);
+            }
+        }
+
+        Storage::disk('s3')->delete($withVariants);
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Client;
 
 use App\Http\Controllers\Controller;
 use App\Models\Hotel;
+use App\Services\DisponibiliteService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +20,7 @@ class HotelController extends Controller
         security: [['bearerAuth' => []]],
         parameters: [
             new OA\Parameter(name: 'page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', default: 1)),
-            new OA\Parameter(name: 'search', in: 'query', required: false, description: 'Recherche par nom', schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'search', in: 'query', required: false, description: 'Recherche par nom ou ville', schema: new OA\Schema(type: 'string')),
             new OA\Parameter(name: 'destination_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
             new OA\Parameter(name: 'etoiles_min', in: 'query', required: false, schema: new OA\Schema(type: 'integer', minimum: 1, maximum: 5)),
             new OA\Parameter(name: 'date_debut', in: 'query', required: false, description: 'Date d\'arrivée', schema: new OA\Schema(type: 'string', format: 'date')),
@@ -46,6 +47,7 @@ class HotelController extends Controller
                             ]),
                             new OA\Property(property: 'prix_min', type: 'number', format: 'float', nullable: true, example: 89.00),
                             new OA\Property(property: 'note_moyenne', type: 'number', format: 'float', nullable: true, example: 4.2),
+                            new OA\Property(property: 'disponibilite', type: 'string', enum: ['disponible', 'complet', 'en_pause'], nullable: true, description: 'Disponibilité pour la nuit de ce soir (null si aucune chambre)'),
                         ])),
                         new OA\Property(property: 'current_page', type: 'integer'),
                         new OA\Property(property: 'last_page', type: 'integer'),
@@ -55,13 +57,17 @@ class HotelController extends Controller
             ),
         ]
     )]
-    public function index(Request $request): JsonResponse
+    public function index(Request $request, DisponibiliteService $disponibilites): JsonResponse
     {
         $query = Hotel::with(['photos' => fn($q) => $q->where('est_principale', true), 'adresse', 'currentStatut', 'types'])
             ->whereHas('currentStatut', fn($q) => $q->where('statut', 'actif'));
 
         if ($search = $request->input('search')) {
-            $query->where('nom', 'ilike', "%{$search}%");
+            $like = "%{$search}%";
+            $query->where(fn($q) => $q
+                ->where('nom', 'ilike', $like)
+                ->orWhereHas('adresse', fn($aq) => $aq->where('ville', 'ilike', $like))
+            );
         }
 
         if ($destinationId = $request->input('destination_id')) {
@@ -99,7 +105,8 @@ class HotelController extends Controller
                 ->where(fn($q2) => $q2->whereNull('date_fin')->orWhere('date_fin', '>=', now()))
             );
             $hotels = $query->paginate(12);
-            $hotels->getCollection()->transform(fn($h) => $this->formatHotel($h));
+            $statuts = $disponibilites->statutsHotelsCeSoir($hotels->getCollection()->pluck('id')->all());
+            $hotels->getCollection()->transform(fn($h) => $this->formatHotel($h, $statuts[$h->id] ?? null));
             return response()->json($hotels);
         }
 
@@ -117,7 +124,8 @@ class HotelController extends Controller
                 ->orderByDesc('nb_reservations')
                 ->limit(10)
                 ->get();
-            return response()->json(['data' => $hotels->map(fn($h) => $this->formatHotel($h))]);
+            $statuts = $disponibilites->statutsHotelsCeSoir($hotels->pluck('id')->all());
+            return response()->json(['data' => $hotels->map(fn($h) => $this->formatHotel($h, $statuts[$h->id] ?? null))]);
         }
 
         $sort = $request->input('sort', 'nom');
@@ -128,12 +136,13 @@ class HotelController extends Controller
 
         $hotels = $query->paginate(12);
 
-        $hotels->getCollection()->transform(fn($h) => $this->formatHotel($h));
+        $statuts = $disponibilites->statutsHotelsCeSoir($hotels->getCollection()->pluck('id')->all());
+        $hotels->getCollection()->transform(fn($h) => $this->formatHotel($h, $statuts[$h->id] ?? null));
 
         return response()->json($hotels);
     }
 
-    private function formatHotel(Hotel $hotel): array
+    private function formatHotel(Hotel $hotel, ?string $disponibilite = null): array
     {
         $proprietes = $hotel->proprietes()
             ->whereHas('currentPrix')
@@ -165,6 +174,8 @@ class HotelController extends Controller
             'prix_min_eur'     => $prixMinEur,
             'note_moyenne'     => $noteMoyenne ? round($noteMoyenne, 1) : null,
             'types'            => $hotel->types->map(fn($t) => ['id' => $t->id, 'nom' => $t->nom])->values(),
+            // Ce soir : disponible | complet | en_pause (null : aucune chambre)
+            'disponibilite'    => $disponibilite,
         ];
     }
 

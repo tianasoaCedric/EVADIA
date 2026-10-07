@@ -9,6 +9,19 @@ import { useTranslations } from 'next-intl'
 import { useDevise } from '@/app/context/DeviseContext'
 import { useFavoris } from '@/app/context/FavorisContext'
 import { favoriService } from '@/lib/services/favori.service'
+import type { HotelDisponibilite } from '@/lib/types'
+
+const DISPONIBILITE_LABELS: Record<HotelDisponibilite, string> = {
+  disponible: 'available_tonight',
+  complet: 'fully_booked_tonight',
+  en_pause: 'temporarily_closed',
+}
+
+const DISPONIBILITE_CLASSES: Record<HotelDisponibilite, string> = {
+  disponible: 'text-green-600',
+  complet: 'text-red-500',
+  en_pause: 'text-orange-500',
+}
 
 interface CardHotelProps {
   imageUrl: string
@@ -16,7 +29,8 @@ interface CardHotelProps {
   name: string
   ville?: string
   adresse?: string
-  availability: string
+  /** Disponibilité de ce soir renvoyée par l'API (`disponibilite`) */
+  disponibilite?: HotelDisponibilite | null
   price: number
   prixMga?: number
   prixEur?: number
@@ -54,7 +68,7 @@ const CardHotel = ({
   name,
   ville,
   adresse,
-  availability,
+  disponibilite,
   price,
   prixMga,
   prixEur,
@@ -129,19 +143,6 @@ const CardHotel = ({
     }
   }
 
-  // Traduction de la disponibilité
-  const getTranslatedAvailability = (availabilityText: string): string => {
-    const lowerText = availabilityText.toLowerCase()
-    if (lowerText.includes('disponible')) return t('available')
-    if (lowerText.includes('complet')) return t('fully_booked')
-    if (lowerText.includes('places restantes')) {
-      const match = availabilityText.match(/(\d+)/)
-      const number = match ? match[1] : ''
-      return t('remaining_places', { count: number })
-    }
-    return availabilityText
-  }
-
   // Générer les étoiles
   const renderStars = () => {
     const fullStars = Math.floor(rating)
@@ -206,19 +207,14 @@ const CardHotel = ({
         </h3>
       )}
 
-      <div className="mb-1">
-        <span className={`
-          text-xs sm:text-sm font-medium
-          ${availability.toLowerCase().includes('disponible')
-            ? 'text-green-600'
-            : availability.toLowerCase().includes('complet')
-              ? 'text-red-500'
-              : 'text-orange-500'
-          }
-        `}>
-          {getTranslatedAvailability(availability)}
-        </span>
-      </div>
+      {/* Disponibilité de ce soir calculée par l'API ; rien si inconnue (hôtel sans chambre) */}
+      {disponibilite && (
+        <div className="mb-1">
+          <span className={`text-xs sm:text-sm font-medium ${DISPONIBILITE_CLASSES[disponibilite]}`}>
+            {t(DISPONIBILITE_LABELS[disponibilite])}
+          </span>
+        </div>
+      )}
 
       <div className="mb-1">
         <span className="text-lg sm:text-xl font-bold text-gray-900">

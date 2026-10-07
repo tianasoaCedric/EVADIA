@@ -1,4 +1,5 @@
-import { View, Text, ImageBackground, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions } from 'react-native';
+import { AppImage } from '../atoms/AppImage';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -38,11 +39,12 @@ export const OffersCard = ({
         elevation: 3,
       }}
     >
-      <ImageBackground
-        source={{ uri: imageUri }}
-        style={{ width: '100%', height: '100%' }}
-        resizeMode="cover"
-      >
+      <View style={{ width: '100%', height: '100%' }}>
+        <AppImage
+          source={imageUri}
+          recyclingKey={imageUri}
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+        />
         {/* Dégradé de la couleur principale en overlay du bas vers le haut */}
         <LinearGradient
           colors={['transparent', 'rgba(1, 189, 165, 0.1)', 'rgba(0, 56, 49, 0.75)']}
@@ -105,7 +107,7 @@ export const OffersCard = ({
             {description}
           </Text>
         </LinearGradient>
-      </ImageBackground>
+      </View>
     </TouchableOpacity>
   );
 };

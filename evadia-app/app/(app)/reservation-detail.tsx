@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
+  AppState,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -15,7 +16,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
+import { useRealtime } from '../../context/RealtimeContext';
 import { clientService, Reservation, ReservationMessage } from '../../services/client';
+import { loadErrorMessage, showError } from '../../lib/parseError';
+
+// Repli quand le WebSocket n'est pas disponible (même valeur que le site)
+const POLL_FALLBACK_INTERVAL_MS = 15000;
 
 function formatDate(dateStr?: string | null): string {
   if (!dateStr) return '—';
@@ -40,6 +46,7 @@ export default function ReservationDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const reservationId = Number(id);
   const currentUserId = state.status === 'authenticated' ? state.user.id : null;
+  const { echo } = useRealtime();
 
   const [reservation, setReservation] = useState<Reservation | null>(null);
   const [loading, setLoading] = useState(true);
@@ -50,6 +57,7 @@ export default function ReservationDetailScreen() {
   const [messages, setMessages] = useState<ReservationMessage[]>([]);
   const [chatFerme, setChatFerme] = useState(false);
   const [chatLoading, setChatLoading] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
   const [choosingPayment, setChoosingPayment] = useState(false);
@@ -62,7 +70,7 @@ export default function ReservationDetailScreen() {
       const data = await clientService.getReservation(reservationId);
       setReservation(data);
     } catch (e: any) {
-      setError(e?.message ?? t('Reservations.load_error'));
+      setError(loadErrorMessage(e, t('Reservations.load_error'), { 404: t('Reservations.not_found') }));
     } finally {
       setLoading(false);
     }
@@ -76,12 +84,13 @@ export default function ReservationDetailScreen() {
 
   const loadMessages = async () => {
     setChatLoading(true);
+    setChatError(null);
     try {
       const res = await clientService.getReservationMessages(reservationId);
       setMessages(res.data);
       setChatFerme(res.chat_ferme);
-    } catch {
-      // silencieux, l'utilisateur peut réessayer en rouvrant
+    } catch (e) {
+      setChatError(loadErrorMessage(e, t('Reservations.messages_load_error'), { 404: t('Reservations.not_found') }));
     } finally {
       setChatLoading(false);
     }
@@ -91,6 +100,51 @@ export default function ReservationDetailScreen() {
     setShowChat(true);
     loadMessages();
   };
+
+  // Rechargement discret (sans spinner) quand l'hôtel écrit : nouveaux messages,
+  // demande de paiement, clôture de la conversation.
+  const refreshMessages = useCallback(async () => {
+    try {
+      const res = await clientService.getReservationMessages(reservationId);
+      setMessages(res.data);
+      setChatFerme(res.chat_ferme);
+      setChatError(null);
+      setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
+    } catch {
+      // La conversation reste affichée ; le prochain événement ou le polling réessaiera.
+    }
+  }, [reservationId]);
+
+  // Temps réel via Reverb (comme le ChatboxWidget du site) quand le WebSocket est prêt ;
+  // sinon polling léger pour ne pas laisser la conversation figée.
+  useEffect(() => {
+    if (!showChat || !currentUserId) return;
+
+    if (echo) {
+      const channel = echo.private(`messages.${currentUserId}`);
+      const handler = (payload: { reservation_id?: number }) => {
+        if (payload.reservation_id === reservationId) refreshMessages();
+      };
+      channel.listen('.message.sent', handler);
+      // Pas de leave() : le canal est partagé, RealtimeProvider ferme la connexion.
+      return () => {
+        channel.stopListening('.message.sent', handler);
+      };
+    }
+
+    const interval = setInterval(refreshMessages, POLL_FALLBACK_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [showChat, echo, currentUserId, reservationId, refreshMessages]);
+
+  // Retour au premier plan : le WebSocket a pu être coupé en arrière-plan,
+  // on rattrape les messages arrivés entre-temps.
+  useEffect(() => {
+    if (!showChat) return;
+    const sub = AppState.addEventListener('change', (next) => {
+      if (next === 'active') refreshMessages();
+    });
+    return () => sub.remove();
+  }, [showChat, refreshMessages]);
 
   const handleSend = async () => {
     const contenu = draft.trim();
@@ -102,7 +156,9 @@ export default function ReservationDetailScreen() {
       setDraft('');
       setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
     } catch (e: any) {
-      Alert.alert(t('Reservations.messages_error_title'), e?.data?.message ?? e?.message ?? t('Common.error_generic'));
+      // 403 : l'hôtel a clôturé la conversation entre-temps
+      if (e?.response?.status === 403) setChatFerme(true);
+      showError(t('Reservations.messages_error_title'), e, { 403: t('Reservations.messages_closed') });
     } finally {
       setSending(false);
     }
@@ -116,7 +172,12 @@ export default function ReservationDetailScreen() {
       setMessages((prev) => [...prev, message]);
       setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
     } catch (e: any) {
-      Alert.alert(t('Reservations.messages_error_title'), e?.data?.message ?? e?.message ?? t('Common.error_generic'));
+      if (e?.response?.status === 403) setChatFerme(true);
+      showError(t('Reservations.payment_error_title'), e, {
+        403: t('Reservations.messages_closed'),
+        422: t('Reservations.payment_error'),
+        default: t('Reservations.payment_error'),
+      });
     } finally {
       setChoosingPayment(false);
     }
@@ -134,7 +195,12 @@ export default function ReservationDetailScreen() {
             await clientService.cancelReservation(reservationId);
             await load();
           } catch (e: any) {
-            Alert.alert(t('Reservations.cancel_error_title'), e?.data?.message ?? e?.message ?? t('Common.error_generic'));
+            showError(t('Reservations.cancel_error_title'), e, {
+              404: t('Reservations.not_found'),
+              409: t('Reservations.cancel_not_allowed'),
+            });
+            // 409 : le statut a changé côté hôtel (acceptée, terminée…) → on l'affiche à jour
+            if (e?.response?.status === 409) load();
           } finally {
             setCancelling(false);
           }
@@ -201,6 +267,19 @@ export default function ReservationDetailScreen() {
           {chatLoading ? (
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
               <ActivityIndicator size="large" color="#01BDA5" />
+            </View>
+          ) : chatError ? (
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 }}>
+              <Ionicons name="cloud-offline-outline" size={52} color="#e5e7eb" />
+              <Text style={{ color: '#9ca3af', marginTop: 12, fontFamily: 'Outfit_600SemiBold', textAlign: 'center' }}>
+                {chatError}
+              </Text>
+              <TouchableOpacity
+                onPress={loadMessages}
+                style={{ marginTop: 16, backgroundColor: '#01BDA5', paddingHorizontal: 24, paddingVertical: 10, borderRadius: 100 }}
+              >
+                <Text style={{ color: '#fff', fontFamily: 'Outfit_700Bold' }}>{t('Common.retry')}</Text>
+              </TouchableOpacity>
             </View>
           ) : messages.length === 0 ? (
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 }}>

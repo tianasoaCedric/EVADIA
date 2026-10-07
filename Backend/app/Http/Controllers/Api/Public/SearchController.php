@@ -9,6 +9,7 @@ use App\Models\LieuDecouverte;
 use App\Models\TypesHotel;
 use App\Models\Ville;
 use App\Models\VilleDecouverte;
+use App\Services\DisponibiliteService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -22,7 +23,7 @@ class SearchController extends Controller
      * GET /api/search?q=antananarivo
      * GET /api/search?q=antan&suggest=1   (mode autocomplete, résultats limités)
      */
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(Request $request, DisponibiliteService $disponibilites): JsonResponse
     {
         $q       = trim($request->string('q'));
         $suggest = $request->boolean('suggest');
@@ -137,6 +138,11 @@ class SearchController extends Controller
 
             return compact('hotels', 'destinations', 'villes', 'types', 'decouverte_villes', 'decouverte_lieux');
         });
+
+        // Disponibilité de ce soir ajoutée après le cache : elle change au fil des réservations.
+        $hotels = collect($result['hotels']);
+        $statuts = $disponibilites->statutsHotelsCeSoir($hotels->pluck('id')->all());
+        $result['hotels'] = $hotels->map(fn($h) => [...$h, 'disponibilite' => $statuts[$h['id']] ?? null])->values();
 
         return response()->json($result);
     }

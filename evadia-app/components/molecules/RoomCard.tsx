@@ -1,4 +1,5 @@
-import { View, Text, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions } from 'react-native';
+import { AppImage } from '../atoms/AppImage';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -38,14 +39,11 @@ export const RoomCard = ({
       }}
     >
       {/* Thumbnail de la chambre sur la gauche */}
-      <Image
-        source={{ uri: imageUri }}
-        style={{
-          width: 106,
-          height: 106,
-          borderRadius: 20,
-          resizeMode: 'cover',
-        }}
+      <AppImage
+        variant="sm"
+        source={imageUri}
+        recyclingKey={imageUri}
+        style={{ width: 106, height: 106, borderRadius: 20 }}
       />
 
       {/* Colonne d'infos et d'actions sur la droite */}
