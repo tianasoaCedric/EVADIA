@@ -189,7 +189,7 @@ export default function FavoriteClient() {
             <HeroSection
                 title={t('hero_title')}
                 subtitle={t('hero_subtitle')}
-                backgroundImage="/photos/fav.jpg"
+                backgroundImage="/photos/fav.webp"
                 showDownload={false}
                 showScrollIndicator={true}
             />
