@@ -27,6 +27,17 @@ class FrontendCache
         self::revaliderNext();
     }
 
+    /**
+     * Après une réservation créée ou changeant de statut : classement des
+     * destinations populaires. La revalidation Next part après la réponse HTTP.
+     */
+    public static function purgerVillesPopulaires(): void
+    {
+        Cache::forget('villes:popular');
+
+        dispatch(fn () => self::revaliderNext())->afterResponse();
+    }
+
     /** Après un changement de visibilité d'un hôtel (suspension, réactivation). */
     public static function purgerHotels(): void
     {

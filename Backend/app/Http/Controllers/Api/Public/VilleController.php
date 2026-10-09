@@ -14,12 +14,40 @@ use Illuminate\Support\Facades\Storage;
 class VilleController extends Controller
 {
     /**
+     * Ordre des destinations populaires tant qu'aucune réservation ne les départage.
+     * Noms tels qu'en base (VillesSeeder).
+     */
+    private const VILLES_POPULAIRES_PAR_DEFAUT = [
+        'Antananarivo',
+        'Morondava',
+        'Sainte-Marie',
+        'Nosy Be',
+        'Antsirabe',
+        'Andasibe',
+        'Ampefy',
+        'Mahajanga',
+        'Mantasoa',
+        'Toliara',
+        'Ambanja',
+        'Nosy Komba',
+        'Nosy Saba',
+    ];
+
+    /**
      * Villes avec le plus de réservations (destinations populaires homepage).
+     * À égalité (ex. aucune réservation), l'ordre par défaut s'applique, puis le nom.
+     * Cache vidé à chaque réservation créée ou changeant de statut (Reservation::booted).
      * GET /api/villes/popular
      */
     public function popular(): JsonResponse
     {
         $villes = Cache::remember('villes:popular', 3600, function () {
+            $rangDefaut = 'CASE LOWER(villes.nom)';
+            foreach (self::VILLES_POPULAIRES_PAR_DEFAUT as $i => $nom) {
+                $rangDefaut .= ' WHEN ' . DB::getPdo()->quote(mb_strtolower($nom)) . ' THEN ' . $i;
+            }
+            $rangDefaut .= ' ELSE ' . count(self::VILLES_POPULAIRES_PAR_DEFAUT) . ' END';
+
             return \App\Models\Ville::query()
                 ->select('villes.id', 'villes.nom', 'villes.image')
                 ->addSelect(DB::raw('(
@@ -29,15 +57,17 @@ class VilleController extends Controller
                     INNER JOIN hotels h ON p.hotel_id = h.id
                     INNER JOIN adresses a ON a.hotel_id = h.id
                     WHERE LOWER(a.ville) = LOWER(villes.nom)
-                    AND r.statut IN (\'confirmee\', \'terminee\')
+                    AND r.statut IN (\'en_attente\', \'acceptee\', \'confirmee\', \'terminee\')
                 ) as nb_reservations'))
                 ->orderByDesc('nb_reservations')
+                ->orderByRaw($rangDefaut)
+                ->orderBy('villes.nom')
                 ->limit(10)
                 ->get()
                 ->map(fn($v) => [
                     'id'    => $v->id,
                     'nom'   => $v->nom,
-                    'image' => $v->image ? Storage::disk('s3')->url($v->image) : null,
+                    'image' => $v->image ? \App\Support\Media::url($v->image) : null,
                 ]);
         });
 

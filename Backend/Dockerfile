@@ -46,6 +46,10 @@ FROM base
 
 COPY --from=build --chown=www-data:www-data /var/www /var/www
 
+# Redimensionner une photo de téléphone (12–24 Mpx) la décompresse entièrement
+# en mémoire (~4 octets/pixel) : 128M (défaut) fait planter l'upload (Media.php).
+RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/zz-evadia.ini
+
 EXPOSE 8000
 
 CMD ["sh", "-c", "php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan octane:start --server=swoole --host=0.0.0.0 --port=8000 --workers=auto"]

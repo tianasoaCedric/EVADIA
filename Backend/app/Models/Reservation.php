@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\DB;
 
 class Reservation extends Model
 {
@@ -42,6 +43,18 @@ class Reservation extends Model
         'date_reponse',
         'raison_refus',
     ];
+
+    protected static function booted(): void
+    {
+        // Le nombre de réservations par ville classe les destinations populaires.
+        static::saved(function (Reservation $reservation) {
+            if ($reservation->wasRecentlyCreated || $reservation->wasChanged('statut')) {
+                DB::afterCommit(fn () => \App\Support\FrontendCache::purgerVillesPopulaires());
+            }
+        });
+
+        static::deleted(fn () => DB::afterCommit(fn () => \App\Support\FrontendCache::purgerVillesPopulaires()));
+    }
 
     protected function casts(): array
     {
