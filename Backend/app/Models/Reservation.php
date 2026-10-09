@@ -1,0 +1,151 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\DB;
+
+class Reservation extends Model
+{
+    use HasFactory;
+
+    protected $table = 'reservations';
+    public $timestamps = false;
+
+    protected $fillable = [
+        'code_reservation',
+        'client_id',
+        'propriete_id',
+        'date_debut',
+        'date_fin',
+        'nb_adultes',
+        'nb_enfants',
+        'nb_bebes',
+        'prix_total',
+        'devise_prix_total',
+        'montant_acompte',
+        'statut_paiement_acompte',
+        'date_paiement_acompte',
+        'statut',
+        'date_reservation',
+        'demande_speciale',
+        'annulee_par',
+        'raison_annulation',
+        'code_promo_utilise',
+        'offre_id',
+        'prix_avant_reduction',
+        'montant_reduction',
+        'repondue_par',
+        'date_reponse',
+        'raison_refus',
+    ];
+
+    protected static function booted(): void
+    {
+        // Le nombre de réservations par ville classe les destinations populaires.
+        static::saved(function (Reservation $reservation) {
+            if ($reservation->wasRecentlyCreated || $reservation->wasChanged('statut')) {
+                DB::afterCommit(fn () => \App\Support\FrontendCache::purgerVillesPopulaires());
+            }
+        });
+
+        static::deleted(fn () => DB::afterCommit(fn () => \App\Support\FrontendCache::purgerVillesPopulaires()));
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'date_debut'          => 'date',
+            'date_fin'            => 'date',
+            'prix_total'          => 'decimal:2',
+            'prix_avant_reduction' => 'decimal:2',
+            'montant_reduction'   => 'decimal:2',
+            'montant_acompte'     => 'decimal:2',
+            'nb_adultes'          => 'integer',
+            'nb_enfants'          => 'integer',
+            'nb_bebes'            => 'integer',
+            'date_reservation'    => 'datetime',
+            'date_reponse'        => 'datetime',
+            'date_paiement_acompte' => 'datetime',
+        ];
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'client_id');
+    }
+
+    public function propriete(): BelongsTo
+    {
+        return $this->belongsTo(Propriete::class);
+    }
+
+    /** Offre appliquée (code promo ou réservation depuis la page de l'offre) */
+    public function offre(): BelongsTo
+    {
+        return $this->belongsTo(Offre::class);
+    }
+
+    public function annuleePar(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'annulee_par');
+    }
+
+    public function repondueParUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'repondue_par');
+    }
+
+    public function facture(): HasOne
+    {
+        return $this->hasOne(Facture::class);
+    }
+
+    public function avis(): HasOne
+    {
+        return $this->hasOne(Avis::class);
+    }
+
+    public function services(): HasMany
+    {
+        return $this->hasMany(ReservationService::class);
+    }
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    public function messages(): HasMany
+    {
+        return $this->hasMany(Message::class);
+    }
+
+    public function acompteRequis(): bool
+    {
+        return $this->statut_paiement_acompte !== 'non_requis';
+    }
+
+    public function soldeRestant(): float
+    {
+        if (!$this->acompteRequis()) {
+            return (float) $this->prix_total;
+        }
+
+        return max(0, (float) $this->prix_total - (float) $this->montant_acompte);
+    }
+
+    // Generate unique reservation code
+    public static function generateCode(): string
+    {
+        do {
+            $code = 'EV-' . strtoupper(substr(uniqid(), -8));
+        } while (static::where('code_reservation', $code)->exists());
+
+        return $code;
+    }
+}

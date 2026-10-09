@@ -1,0 +1,64 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Support\Media;
+use App\Http\Controllers\Controller;
+use App\Models\Hotel;
+use App\Models\Photo;
+use App\Traits\LogsAdminAction;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+
+class HotelPhotoController extends Controller
+{
+    use LogsAdminAction;
+
+    public function store(Request $request, Hotel $hotel)
+    {
+        $request->validate([
+            'photos' => 'required|array|min:1',
+            'photos.*' => 'image|max:5120',
+        ]);
+
+        $maxOrdre = $hotel->photos()->max('ordre') ?? -1;
+        $hasPrincipale = $hotel->photos()->where('est_principale', true)->exists();
+
+        foreach ($request->file('photos') as $index => $photo) {
+            $path = Media::storeImage($photo, "hotels/{$hotel->id}");
+            if (! $path) {
+                return back()->with('error', "Échec de l'upload. Vérifiez la configuration du stockage.");
+            }
+            Photo::create([
+                'entite_type' => 'hotel',
+                'entite_id' => $hotel->id,
+                'url_photo' => $path,
+                'ordre' => $maxOrdre + $index + 1,
+                'est_principale' => ! $hasPrincipale && $index === 0,
+                'uploaded_by' => auth()->id(),
+                'date_upload' => now(),
+            ]);
+        }
+
+        $this->logAction('hotel_photos_added', "Photos ajoutées à l'hôtel {$hotel->nom}");
+
+        return back()->with('success', 'Photos ajoutées avec succès.');
+    }
+
+    public function destroy(Hotel $hotel, $photoId)
+    {
+        $photo = Photo::forHotel($hotel->id)->where('id', $photoId)->firstOrFail();
+
+        // Delete from S3
+        $s3Path = str_starts_with($photo->url_photo, 'http')
+            ? ltrim(parse_url($photo->url_photo, PHP_URL_PATH), '/')
+            : $photo->url_photo;
+        Media::delete($s3Path);
+
+        $photo->delete();
+
+        $this->logAction('hotel_photo_deleted', "Photo supprimée de l'hôtel {$hotel->nom}");
+
+        return back()->with('success', 'Photo supprimée avec succès.');
+    }
+}

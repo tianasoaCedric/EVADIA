@@ -6,12 +6,33 @@ use Illuminate\Foundation\Configuration\Middleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        commands: __DIR__.'/../routes/console.php',
+        channels: __DIR__.'/../routes/channels.php',
+        web: __DIR__ . '/../routes/web.php',
+        api: __DIR__ . '/../routes/api.php',
+        commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->prepend(\Illuminate\Http\Middleware\HandleCors::class);
+
+        // Compte désactivé => déconnecté à la requête suivante (sessions et tokens)
+        $middleware->appendToGroup('web', \App\Http\Middleware\EnsureUserIsActive::class);
+        $middleware->appendToGroup('api', \App\Http\Middleware\EnsureUserIsActive::class);
+
+        $middleware->alias([
+            'role' => \App\Http\Middleware\CheckRole::class,
+            'level' => \App\Http\Middleware\CheckRoleLevel::class,
+            'password.change' => \App\Http\Middleware\ForcePasswordChange::class,
+            'mobile.validate' => \App\Http\Middleware\ValidateMobileRequest::class,
+            'broadcasting.ability' => \App\Http\Middleware\RequireBroadcastingAbility::class,
+        ]);
+
+        $middleware->redirectGuestsTo(fn ($request) => match(true) {
+            str_starts_with($request->path(), 'api/') => null,
+            str_starts_with($request->path(), 'hotel-admin') => '/hotel-admin/login',
+            default => '/',
+        });
+        $middleware->redirectUsersTo('/admin/dashboard');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

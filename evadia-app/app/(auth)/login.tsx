@@ -1,0 +1,332 @@
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import {
+  ActivityIndicator,
+  Animated,
+  Image,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import * as WebBrowser from "expo-web-browser";
+import * as SecureStore from "expo-secure-store";
+import ErrorBanner from "../../components/atoms/ErrorBanner";
+import { Divider } from "../../components/atoms/Divider";
+import { useAuth } from "../../context/AuthContext";
+import { API_BASE_URL, TOKEN_KEY } from "../../lib/api";
+import { errorStatus, getErrorMessage } from "../../lib/parseError";
+
+const oceanBg = require("../../assets/ocean-bg.jpg");
+const evadiaLogo = require("../../assets/evadia.png");
+const googleIcon = require("../../assets/google-icon.png");
+
+export default function LoginPage() {
+  const { t } = useTranslation();
+  const { login, loginWithToken, notice, clearNotice } = useAuth();
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  // Erreur de la tentative en cours, sinon raison d'une déconnexion forcée (session expirée…)
+  const shownError = error || notice || "";
+
+  const handleLogin = async () => {
+    setError("");
+    clearNotice();
+    if (!email || !password) {
+      setError(t('Login.error_missing_fields'));
+      return;
+    }
+    setLoading(true);
+    try {
+      await login(email, password);
+      // AuthContext met à jour state → _layout.tsx redirige automatiquement
+    } catch (err: any) {
+      const serverMessage: string = err?.response?.data?.message ?? "";
+      if (errorStatus(err) === 422 && /identifiants/i.test(serverMessage)) {
+        setError(t('Login.error_invalid_credentials'));
+      } else {
+        setError(
+          getErrorMessage(err, {
+            403: t('Login.error_not_client'),
+            429: t('Login.error_too_many_attempts'),
+          })
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError("");
+    clearNotice();
+    setLoading(true);
+    try {
+      // Ouvre le navigateur système sur la page Google OAuth du backend
+      const result = await WebBrowser.openAuthSessionAsync(
+        `${API_BASE_URL}/api/auth/google?platform=mobile`,
+        "evadia://auth/callback"
+      );
+
+      if (result.type !== "success") {
+        // L'utilisateur a fermé le browser sans se connecter
+        return;
+      }
+
+      // Extrait le token depuis l'URL de retour evadia://auth/callback?token=...
+      const url = result.url;
+      const tokenMatch = url.match(/[?&]token=([^&]+)/);
+      const errorMatch = url.match(/[?&]error=([^&]+)/);
+
+      if (errorMatch) {
+        const code = errorMatch[1];
+        setError(
+          code === "not_client"
+            ? t('Login.error_not_client')
+            : t('Login.error_google_failed')
+        );
+        return;
+      }
+
+      if (!tokenMatch) {
+        setError(t('Login.error_no_token'));
+        return;
+      }
+
+      const token = decodeURIComponent(tokenMatch[1]);
+      await SecureStore.setItemAsync(TOKEN_KEY, token);
+      await loginWithToken();
+      // AuthContext met à jour state → _layout.tsx redirige vers /(app)/home
+    } catch (err) {
+      setError(getErrorMessage(err, { default: t('Login.error_google_failed') }));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const animate = (to: boolean) => {
+    Animated.timing(fadeAnim, { toValue: 0, duration: 150, useNativeDriver: true }).start(() => {
+      setShowEmailForm(to);
+      setError("");
+      Animated.timing(fadeAnim, { toValue: 1, duration: 250, useNativeDriver: true }).start();
+    });
+  };
+
+  return (
+    <ImageBackground source={oceanBg} className="flex-1" imageStyle={{ resizeMode: "cover" }}>
+      <View className="absolute inset-0 bg-black/25" />
+
+      <SafeAreaView className="flex-1">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          className="flex-1"
+        >
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <Animated.View style={{ opacity: fadeAnim, flex: 1, width: "100%" }}>
+              {showEmailForm ? (
+                /* ── FORMULAIRE EMAIL ── */
+                <View className="flex-1 justify-center items-center px-6 pt-6 pb-20">
+                  <TouchableOpacity
+                    onPress={() => animate(false)}
+                    className="absolute top-4 left-6 flex-row items-center gap-1.5"
+                    style={{ zIndex: 10 }}
+                  >
+                    <Ionicons name="arrow-back" size={24} color="#fff" />
+                    <Text className="text-white text-base font-semibold">{t('Login.back')}</Text>
+                  </TouchableOpacity>
+
+                  <View className="items-center mb-8 mt-4">
+                    <Image source={evadiaLogo} className="w-60 h-32" resizeMode="contain" />
+                    <Text
+                      className="text-white/90 text-center text-base font-semibold"
+                      style={{ marginTop: -10 }}
+                    >
+                      {t('Login.tagline')}
+                    </Text>
+                  </View>
+
+                  <Text className="text-3xl font-bold text-center text-white mb-6">{t('Login.title')}</Text>
+
+                  {shownError ? <ErrorBanner message={shownError} /> : null}
+
+                  <View style={{ width: 353, gap: 12, marginTop: 12 }}>
+                    {/* Email */}
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        paddingHorizontal: 20,
+                        gap: 14,
+                        height: 46,
+                        backgroundColor: "rgba(245,245,245,0.18)",
+                        borderRadius: 50,
+                      }}
+                    >
+                      <Ionicons name="mail-outline" size={20} color="rgba(255,255,255,0.8)" />
+                      <TextInput
+                        placeholder={t('Login.email_placeholder')}
+                        placeholderTextColor="rgba(255,255,255,0.6)"
+                        value={email}
+                        onChangeText={setEmail}
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                        style={{ flex: 1, fontSize: 13, color: "#fff", paddingVertical: 0 }}
+                      />
+                    </View>
+
+                    {/* Password */}
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        paddingHorizontal: 20,
+                        gap: 14,
+                        height: 46,
+                        backgroundColor: "rgba(245,245,245,0.18)",
+                        borderRadius: 50,
+                      }}
+                    >
+                      <Ionicons name="shield-outline" size={20} color="rgba(255,255,255,0.8)" />
+                      <TextInput
+                        placeholder={t('Login.password_placeholder')}
+                        placeholderTextColor="rgba(255,255,255,0.6)"
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry={!showPassword}
+                        style={{ flex: 1, fontSize: 13, color: "#fff", paddingVertical: 0 }}
+                      />
+                      <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                        <Ionicons
+                          name={showPassword ? "eye-off-outline" : "eye-outline"}
+                          size={18}
+                          color="rgba(255,255,255,0.8)"
+                        />
+                      </TouchableOpacity>
+                    </View>
+
+                    {/* Bouton connexion */}
+                    <TouchableOpacity
+                      activeOpacity={0.85}
+                      onPress={handleLogin}
+                      disabled={loading}
+                      style={{
+                        backgroundColor: "#01BDA5",
+                        borderRadius: 25,
+                        height: 38,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        opacity: loading ? 0.7 : 1,
+                      }}
+                    >
+                      {loading ? (
+                        <ActivityIndicator color="#fff" size="small" />
+                      ) : (
+                        <Text style={{ fontSize: 14, fontFamily: "Outfit_600SemiBold", color: "#fff" }}>
+                          {t('Login.login_button')}
+                        </Text>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+
+                  <View className="flex-row justify-center mt-6">
+                    <Text className="text-white/80">{t('Login.no_account')}</Text>
+                    <TouchableOpacity onPress={() => router.push("/(auth)/register")}>
+                      <Text className="text-white font-semibold">{t('Login.signup')}</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ) : (
+                /* ── CHOIX (CARTE BLANCHE) ── */
+                <View className="flex-1 justify-between">
+                  <View className="items-center mt-10 flex-1 justify-center">
+                    <Image source={evadiaLogo} className="w-60 h-32" resizeMode="contain" />
+                    <Text
+                      className="text-white/90 text-center text-base font-semibold"
+                      style={{ marginTop: -10 }}
+                    >
+                      {t('Login.tagline')}
+                    </Text>
+                  </View>
+
+                  <View
+                    style={{
+                      width: 385,
+                      borderRadius: 30,
+                      backgroundColor: "#fff",
+                      paddingTop: 32,
+                      paddingBottom: 24,
+                      paddingHorizontal: 16,
+                      alignItems: "center",
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 10 },
+                      shadowOpacity: 0.2,
+                      shadowRadius: 15,
+                      elevation: 10,
+                      alignSelf: "center",
+                      marginBottom: Platform.OS === "ios" ? 35 : 45,
+                    }}
+                  >
+                    <View style={{ width: 353, alignItems: "center" }}>
+                      {shownError ? (
+                        <View style={{ width: "100%", marginBottom: 14 }}>
+                          <ErrorBanner message={shownError} />
+                        </View>
+                      ) : null}
+                      <TouchableOpacity
+                        style={{
+                          backgroundColor: "#01BDA5",
+                          borderRadius: 25,
+                          height: 38,
+                          width: "100%",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                        activeOpacity={0.85}
+                        onPress={() => animate(true)}
+                      >
+                        <Text style={{ fontSize: 14, fontFamily: "Outfit_600SemiBold", color: "#fff" }}>
+                          {t('Login.continue_with_email')}
+                        </Text>
+                      </TouchableOpacity>
+
+                      <View style={{ width: "100%" }}>
+                        <Divider text={t('Login.or')} />
+                      </View>
+
+                      <TouchableOpacity onPress={handleGoogleLogin} className="items-center justify-center">
+                        <Image source={googleIcon} className="w-16 h-16" resizeMode="contain" />
+                      </TouchableOpacity>
+                    </View>
+
+                    <View className="flex-row justify-center mt-6">
+                      <Text className="text-gray-600 text-sm">{t('Login.no_account_short')}</Text>
+                      <TouchableOpacity onPress={() => router.push("/(auth)/register")}>
+                        <Text className="text-gray-800 font-bold text-sm">{t('Login.signup')}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              )}
+            </Animated.View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </ImageBackground>
+  );
+}

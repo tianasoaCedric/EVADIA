@@ -1,0 +1,5 @@
+# Terminal 1 - Surveillance des traductions
+npm run translate:watch
+
+# Terminal 2 - Application Next.js
+npm run dev

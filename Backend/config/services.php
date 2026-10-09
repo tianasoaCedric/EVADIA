@@ -35,4 +35,16 @@ return [
         ],
     ],
 
+    'google' => [
+        'client_id'     => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect'      => env('GOOGLE_REDIRECT_URI'),
+    ],
+
+    // Front Next.js joint en interne (réseau Docker) pour vider son cache
+    'frontend' => [
+        'internal_url'      => env('FRONTEND_INTERNAL_URL'),
+        'revalidate_secret' => env('REVALIDATE_SECRET'),
+    ],
+
 ];

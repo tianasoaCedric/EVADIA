@@ -1,0 +1,463 @@
+@extends('layouts.admin')
+@section('title', 'Nouvel hôtel - EVADIA Admin')
+@section('page_title', 'Créer un hôtel')
+
+@section('content')
+    <div class="max-w-3xl mx-auto mb-6">
+        <a href="{{ route('admin.hotels.index') }}" class="text-sm text-evadia-600 hover:text-evadia-700 font-medium">←
+            Retour à la liste</a>
+    </div>
+
+    <div x-data="hotelForm()" class="max-w-3xl mx-auto">
+
+        <!-- Step Indicator -->
+        <div class="flex items-center justify-center gap-2 mb-8">
+            <template x-for="(label, i) in ['Infos générales', 'Adresse', 'Photos', 'Administrateur', 'Abonnement']" :key="i">
+                <div class="flex items-center gap-2">
+                    <button @click="step = i + 1" type="button"
+                        :class="step === i + 1 ? 'bg-evadia-600 text-white shadow-sm' : (step > i + 1 ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400')"
+                        class="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all">
+                        <span x-show="step <= i + 1" x-text="i + 1"></span>
+                        <svg x-show="step > i + 1" x-cloak class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                            stroke-width="2.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                    </button>
+                    <span :class="step === i + 1 ? 'text-gray-900 font-semibold' : 'text-gray-400'"
+                        class="text-sm hidden sm:block transition-colors" x-text="label"></span>
+                    <div x-show="i < 4" class="w-8 h-px mx-1"
+                        :class="step > i + 1 ? 'bg-emerald-400' : 'bg-gray-200'"></div>
+                </div>
+            </template>
+        </div>
+
+        <form method="POST" action="{{ route('admin.hotels.store') }}" enctype="multipart/form-data">
+            @csrf
+
+            <!-- Step 1: General -->
+            <div x-show="step === 1" class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 overflow-hidden">
+                <div class="border-b border-gray-100 bg-gray-50/60 px-6 py-4">
+                    <h3 class="text-sm font-semibold text-gray-800">Informations générales</h3>
+                </div>
+                <div class="p-6 space-y-5">
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Nom de l'hôtel <span class="text-red-400 text-xs">*</span></label>
+                        <input type="text" name="nom" value="{{ old('nom') }}" required
+                            class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
+                        @error('nom') <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
+                        <textarea name="description" rows="3"
+                            class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">{{ old('description') }}</textarea>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Email contact</label>
+                            <input type="email" name="email_contact" value="{{ old('email_contact') }}"
+                                class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Téléphone</label>
+                            <input type="tel" name="telephone" value="{{ old('telephone') }}"
+                                class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Site web</label>
+                            <input type="url" name="site_web" value="{{ old('site_web') }}"
+                                class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Étoiles</label>
+                            <select name="etoiles"
+                                class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
+                                <option value="">—</option>
+                                @for($i = 1; $i <= 5; $i++)
+                                    <option value="{{ $i }}" {{ old('etoiles') == $i ? 'selected' : '' }}>{{ $i }} ★</option>
+                                @endfor
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Types d'hôtel <span class="text-red-400 text-xs">*</span></label>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach($types as $type)
+                                <label
+                                    class="flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 cursor-pointer hover:border-evadia-300 has-[:checked]:border-evadia-500 has-[:checked]:bg-evadia-50 transition-all">
+                                    <input type="checkbox" name="types[]" value="{{ $type->id }}" {{ in_array($type->id, old('types', [])) ? 'checked' : '' }}
+                                        class="h-3.5 w-3.5 rounded border-gray-300 text-evadia-600 focus:ring-evadia-500">
+                                    <span class="text-sm text-gray-700">{{ $type->nom }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                        @error('types') <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p> @enderror
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Step 2: Address -->
+            <div x-show="step === 2" x-cloak class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 overflow-hidden">
+                <div class="border-b border-gray-100 bg-gray-50/60 px-6 py-4">
+                    <h3 class="text-sm font-semibold text-gray-800">Adresse</h3>
+                </div>
+                <div class="p-6 space-y-5">
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Adresse ligne 1 <span class="text-red-400 text-xs">*</span></label>
+                        <input type="text" name="adresse_ligne1" value="{{ old('adresse_ligne1') }}" required
+                            class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Adresse ligne 2</label>
+                        <input type="text" name="adresse_ligne2" value="{{ old('adresse_ligne2') }}"
+                            class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Code postal <span class="text-red-400 text-xs">*</span></label>
+                            <input type="text" name="code_postal" value="{{ old('code_postal') }}" required
+                                class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
+                        </div>
+                        <div x-data="villeSearch('{{ old('ville') }}', null)" class="relative">
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Ville <span class="text-red-400 text-xs">*</span></label>
+                            <input type="text"
+                                x-model="query"
+                                @input.debounce.300ms="search()"
+                                @focus="search()"
+                                @keydown.escape="open = false"
+                                @keydown.arrow-down.prevent="highlight = Math.min(highlight + 1, results.length - 1)"
+                                @keydown.arrow-up.prevent="highlight = Math.max(highlight - 1, 0)"
+                                @keydown.enter.prevent="select(results[highlight])"
+                                autocomplete="off"
+                                required
+                                placeholder="Rechercher une ville…"
+                                class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
+                            <input type="hidden" name="ville" x-bind:value="selected">
+                            <ul x-show="open && results.length > 0" x-cloak @click.outside="open = false"
+                                class="absolute z-50 mt-1 w-full max-h-56 overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg text-sm">
+                                <template x-for="(ville, i) in results" :key="ville.id">
+                                    <li @click="select(ville)" @mouseenter="highlight = i"
+                                        :class="highlight === i ? 'bg-evadia-50 text-evadia-700' : 'text-gray-700'"
+                                        class="cursor-pointer px-4 py-2.5 hover:bg-evadia-50 hover:text-evadia-700"
+                                        x-text="ville.nom"></li>
+                                </template>
+                            </ul>
+                            <p x-show="open && query.length >= 2 && results.length === 0" x-cloak
+                                class="mt-1 text-xs text-gray-400">Aucune ville trouvée</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Pays <span class="text-red-400 text-xs">*</span></label>
+                            <input type="text" name="pays" value="{{ old('pays') }}" required
+                                class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Destination <span class="text-red-400 text-xs">*</span></label>
+                        <select name="destination_id" id="destination_id_create" required
+                            @change="document.dispatchEvent(new CustomEvent('destination-changed', { detail: { id: $event.target.value } }))"
+                            class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
+                            <option value="">Sélectionner une destination</option>
+                            @foreach($destinations as $dest)
+                                <option value="{{ $dest->id }}" {{ old('destination_id') == $dest->id ? 'selected' : '' }}>
+                                    {{ $dest->nom }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Step 3: Photos -->
+            <div x-show="step === 3" x-cloak class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 overflow-hidden">
+                <div class="border-b border-gray-100 bg-gray-50/60 px-6 py-4">
+                    <h3 class="text-sm font-semibold text-gray-800">Photos</h3>
+                </div>
+                <div class="p-6 space-y-4">
+
+                    <input type="file" name="photos[]" multiple accept="image/*" class="hidden" id="photoInput"
+                        @change="previewPhotos($event)">
+                    <label for="photoInput"
+                        class="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 px-6 py-10 text-center hover:border-evadia-400 hover:bg-evadia-50/30 transition-colors">
+                        <svg class="h-10 w-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H5.25a2.25 2.25 0 00-2.25 2.25v12A2.25 2.25 0 005.25 21z" />
+                        </svg>
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Cliquez pour sélectionner des photos</p>
+                            <p class="text-xs text-gray-400 mt-0.5">PNG, JPG, WebP — Max 5 Mo par fichier</p>
+                        </div>
+                    </label>
+
+                    <div class="grid grid-cols-4 gap-3" x-show="previews.length > 0">
+                        <template x-for="(preview, i) in previews" :key="i">
+                            <div class="relative rounded-xl overflow-hidden h-24 ring-1 ring-gray-200">
+                                <img :src="preview" class="h-full w-full object-cover">
+                            </div>
+                        </template>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Step 4: Admin -->
+            <div x-show="step === 4" x-cloak class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 overflow-hidden">
+                <div class="border-b border-gray-100 bg-gray-50/60 px-6 py-4">
+                    <h3 class="text-sm font-semibold text-gray-800">Administrateur de l'hôtel</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">Un compte sera créé avec le mot de passe temporaire <strong>0000</strong>.</p>
+                </div>
+                <div class="p-6 space-y-5">
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Prénom <span class="text-red-400 text-xs">*</span></label>
+                            <input type="text" name="admin_prenom" value="{{ old('admin_prenom') }}" required
+                                class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
+                            @error('admin_prenom') <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Nom <span class="text-red-400 text-xs">*</span></label>
+                            <input type="text" name="admin_nom" value="{{ old('admin_nom') }}" required
+                                class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
+                            @error('admin_nom') <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p> @enderror
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Email <span class="text-red-400 text-xs">*</span></label>
+                        <input type="email" name="admin_email" value="{{ old('admin_email') }}" required
+                            class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
+                        @error('admin_email') <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Téléphone</label>
+                        <input type="tel" name="admin_telephone" value="{{ old('admin_telephone') }}"
+                            class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-evadia-500 focus:ring-2 focus:ring-evadia-500/20 focus:outline-none">
+                    </div>
+
+                    <div class="flex items-start gap-3 rounded-xl bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-blue-800">
+                        <svg class="h-5 w-5 text-blue-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                        </svg>
+                        <p>Un email contenant les identifiants de connexion sera automatiquement envoyé à l'administrateur.</p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Step 5: Abonnement -->
+            <div x-show="step === 5" x-cloak class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 overflow-hidden">
+                <div class="border-b border-gray-100 bg-gray-50/60 px-6 py-4">
+                    <h3 class="text-sm font-semibold text-gray-800">Abonnement</h3>
+                </div>
+                <div class="p-6 space-y-6"
+                    x-data="{ plan: '{{ old('type_abonnement', $plans->first()->code ?? '') }}' }">
+
+                    @php
+                        $planData = $plans->map(fn($p) => [
+                            'code' => $p->code, 'nom' => $p->nom, 'label' => $p->label,
+                            'prix' => number_format($p->prix, 0, ',', ' '), 'devise' => $p->devise,
+                        ])->keyBy('code');
+                    @endphp
+
+                    <p class="text-sm text-gray-500">Cliquez sur un plan pour le sélectionner.</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        @foreach($plans as $plan)
+                            <label class="relative cursor-pointer rounded-xl border-2 p-5 transition-all flex flex-col gap-3"
+                                :class="plan === '{{ $plan->code }}'
+                                    ? 'border-evadia-500 bg-evadia-50/60 ring-4 ring-evadia-500/15 shadow-md -translate-y-0.5'
+                                    : 'border-gray-200 hover:border-gray-300 opacity-70 hover:opacity-100'">
+                                <input type="radio" name="type_abonnement" value="{{ $plan->code }}"
+                                    x-model="plan" class="sr-only">
+
+                                <span x-show="plan === '{{ $plan->code }}'" x-cloak
+                                    class="absolute -top-2.5 left-4 inline-flex items-center gap-1 rounded-full bg-evadia-600 px-2 py-0.5 text-[10px] font-bold text-white shadow">
+                                    <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+                                    SÉLECTIONNÉ
+                                </span>
+
+                                <div class="flex items-start justify-between">
+                                    <span class="inline-flex items-center rounded-full {{ $plan->badge_bg }} {{ $plan->badge_text }} px-2.5 py-0.5 text-[11px] font-bold">
+                                        {{ $plan->label }}
+                                    </span>
+                                </div>
+
+                                <div>
+                                    <p class="text-base font-bold text-gray-900">{{ $plan->nom }}</p>
+                                    <p class="text-xs text-gray-500 mt-0.5">{{ $plan->description }}</p>
+                                </div>
+
+                                <div class="pt-2 border-t border-gray-100">
+                                    <span class="text-lg font-bold text-gray-900">{{ number_format($plan->prix, 0, ',', ' ') }}</span>
+                                    <span class="text-xs text-gray-500 ml-1">{{ $plan->devise }} / mois</span>
+                                </div>
+
+                                <ul class="space-y-1.5">
+                                    @foreach($plan->features as $feature)
+                                        <li class="flex items-start gap-2 text-xs {{ $feature['inclus'] ? 'text-gray-700' : 'text-gray-400' }}">
+                                            @if($feature['inclus'])
+                                                <svg class="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+                                                </svg>
+                                            @else
+                                                <svg class="h-3.5 w-3.5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                                </svg>
+                                            @endif
+                                            {{ $feature['texte'] }}
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </label>
+                        @endforeach
+                    </div>
+                    @error('type_abonnement') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
+
+                    <!-- Récapitulatif du plan choisi -->
+                    <div x-data="{ plans: {{ Illuminate\Support\Js::from($planData) }} }">
+                        <template x-if="plan">
+                            <div class="flex items-center gap-4 rounded-xl bg-emerald-50 border border-emerald-200 px-5 py-4">
+                                <svg class="h-8 w-8 text-emerald-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <div>
+                                    <p class="text-xs uppercase tracking-wide text-emerald-700 font-semibold">Plan sélectionné</p>
+                                    <p class="text-sm text-gray-900 mt-0.5">
+                                        <strong class="text-base" x-text="plans[plan]?.nom"></strong>
+                                        <span class="text-gray-500">(<span x-text="plans[plan]?.label"></span>)</span>
+                                        —
+                                        <strong><span x-text="plans[plan]?.prix"></span> <span x-text="plans[plan]?.devise"></span></strong>
+                                        <span class="text-gray-500">/ mois</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </template>
+                        <template x-if="!plan">
+                            <div class="rounded-xl bg-red-50 border border-red-200 px-5 py-4 text-sm text-red-700">
+                                Aucun plan sélectionné — cliquez sur une carte ci-dessus.
+                            </div>
+                        </template>
+                    </div>
+
+                    {{-- Période calculée automatiquement : 1 mois à partir d'aujourd'hui --}}
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+                            <p class="text-xs font-medium text-gray-500">Début</p>
+                            <p class="mt-0.5 text-sm font-semibold text-gray-900">{{ now()->translatedFormat('d F Y') }}</p>
+                            <p class="text-xs text-gray-400">aujourd'hui</p>
+                        </div>
+                        <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+                            <p class="text-xs font-medium text-gray-500">Fin (échéance)</p>
+                            <p class="mt-0.5 text-sm font-semibold text-gray-900">{{ now()->addMonthNoOverflow()->translatedFormat('d F Y') }}</p>
+                            <p class="text-xs text-gray-400">1 mois</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 rounded-xl bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-blue-800">
+                        <svg class="h-5 w-5 text-blue-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                        </svg>
+                        <p>Les dates sont calculées automatiquement : l'abonnement court 1 mois à partir d'aujourd'hui. Le premier paiement est dû aujourd'hui ; chaque renouvellement prolonge d'un mois.</p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex items-center justify-between mt-6">
+                <button type="button" x-show="step > 1" @click="step--"
+                    class="rounded-xl border border-gray-200 px-6 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                    ← Précédent
+                </button>
+                <div x-show="step <= 1"></div>
+                <button type="button" x-show="step < 5" @click="step++"
+                    class="rounded-xl bg-evadia-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-evadia-700 active:scale-95 transition-all">
+                    Suivant →
+                </button>
+                <button type="submit" x-show="step === 5" x-cloak
+                    class="rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 active:scale-95 transition-all">
+                    Créer l'hôtel
+                </button>
+            </div>
+        </form>
+    </div>
+@endsection
+
+@push('scripts')
+    <script>
+        function villeSearch(initialValue, destinationId) {
+            return {
+                query:       initialValue ?? '',
+                selected:    initialValue ?? '',
+                results:     [],
+                open:        false,
+                highlight:   0,
+                destId:      destinationId,
+
+                init() {
+                    document.addEventListener('destination-changed', (e) => {
+                        this.destId = e.detail.id || null;
+                        if (this.query.length >= 2) this.search();
+                    });
+                },
+
+                async search() {
+                    if (this.query.length < 2) { this.open = false; return; }
+                    const params = new URLSearchParams({ q: this.query });
+                    if (this.destId) params.append('destination_id', this.destId);
+                    const res  = await fetch(`/api/villes/search?${params}`);
+                    const json = await res.json();
+                    this.results   = json.data ?? [];
+                    this.highlight = 0;
+                    this.open      = this.results.length > 0;
+                },
+
+                select(ville) {
+                    if (!ville) return;
+                    this.query    = ville.nom;
+                    this.selected = ville.nom;
+                    this.open     = false;
+                },
+            };
+        }
+
+        function hotelForm() {
+            const errorFields = @json($errors->keys());
+            const step1 = ['nom','email_contact','telephone','site_web','etoiles','types'];
+            const step2 = ['adresse_ligne1','code_postal','ville','pays','destination_id'];
+            const step4 = ['admin_nom','admin_prenom','admin_email','admin_telephone'];
+            const step5 = ['type_abonnement'];
+            let initialStep = 1;
+            if (errorFields.some(f => step5.some(s => f.startsWith(s)))) initialStep = 5;
+            else if (errorFields.some(f => step4.some(s => f.startsWith(s)))) initialStep = 4;
+            else if (errorFields.some(f => step2.some(s => f.startsWith(s)))) initialStep = 2;
+            else if (errorFields.some(f => step1.some(s => f.startsWith(s)))) initialStep = 1;
+            return {
+                step: initialStep,
+                previews: [],
+                previewPhotos(event) {
+                    this.previews = [];
+                    for (const file of event.target.files) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => this.previews.push(e.target.result);
+                        reader.readAsDataURL(file);
+                    }
+                }
+            }
+        }
+    </script>
+@endpush
